@@ -202,9 +202,37 @@ public static class UIPrefabBuilder
         AddLocalizedText(cycleEquipmentButton.GetComponentInChildren<Text>(), "battle.button_cycle_equipment");
         var cycleEquipmentRect = cycleEquipmentButton.GetComponent<RectTransform>();
         cycleEquipmentRect.anchorMin = new Vector2(0.05f, 0.78f);
-        cycleEquipmentRect.anchorMax = new Vector2(0.45f, 0.87f);
+        cycleEquipmentRect.anchorMax = new Vector2(0.44f, 0.87f);
         cycleEquipmentRect.offsetMin = Vector2.zero;
         cycleEquipmentRect.offsetMax = Vector2.zero;
+
+        var cycleEquipmentUnitButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleEquipmentUnitButton", "Unit", delegate { });
+        var cycleEquipmentUnitRect = cycleEquipmentUnitButton.GetComponent<RectTransform>();
+        cycleEquipmentUnitRect.anchorMin = new Vector2(0.48f, 0.78f);
+        cycleEquipmentUnitRect.anchorMax = new Vector2(0.95f, 0.87f);
+        cycleEquipmentUnitRect.offsetMin = Vector2.zero;
+        cycleEquipmentUnitRect.offsetMax = Vector2.zero;
+
+        var cycleWeaponButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleWeaponButton", "Weapon", delegate { });
+        var cycleWeaponRect = cycleWeaponButton.GetComponent<RectTransform>();
+        cycleWeaponRect.anchorMin = new Vector2(0.05f, 0.67f);
+        cycleWeaponRect.anchorMax = new Vector2(0.3f, 0.76f);
+        cycleWeaponRect.offsetMin = Vector2.zero;
+        cycleWeaponRect.offsetMax = Vector2.zero;
+
+        var cycleArmorButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleArmorButton", "Armor", delegate { });
+        var cycleArmorRect = cycleArmorButton.GetComponent<RectTransform>();
+        cycleArmorRect.anchorMin = new Vector2(0.37f, 0.67f);
+        cycleArmorRect.anchorMax = new Vector2(0.62f, 0.76f);
+        cycleArmorRect.offsetMin = Vector2.zero;
+        cycleArmorRect.offsetMax = Vector2.zero;
+
+        var cycleAccessoryButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleAccessoryButton", "Accessory", delegate { });
+        var cycleAccessoryRect = cycleAccessoryButton.GetComponent<RectTransform>();
+        cycleAccessoryRect.anchorMin = new Vector2(0.69f, 0.67f);
+        cycleAccessoryRect.anchorMax = new Vector2(0.94f, 0.76f);
+        cycleAccessoryRect.offsetMin = Vector2.zero;
+        cycleAccessoryRect.offsetMax = Vector2.zero;
 
         var closeEquipmentButton = UIFactory.CreateButton(equipmentPanel.transform, "CloseEquipmentButton", "Close", delegate { });
         AddLocalizedText(closeEquipmentButton.GetComponentInChildren<Text>(), "battle.button_close_equipment");
@@ -214,7 +242,7 @@ public static class UIPrefabBuilder
         closeEquipmentRect.offsetMin = Vector2.zero;
         closeEquipmentRect.offsetMax = Vector2.zero;
 
-        var equipmentDetailRect = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.76f), Vector2.zero, Vector2.zero);
+        var equipmentDetailRect = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.63f), Vector2.zero, Vector2.zero);
         var equipmentDetailText = UIFactory.CreateText(equipmentDetailRect, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
         equipmentPanel.SetActive(false);
 
@@ -227,6 +255,10 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "equipmentButton", equipmentButton);
         BindSerializedProperty(page, "closeEquipmentButton", closeEquipmentButton);
         BindSerializedProperty(page, "cycleEquipmentPresetButton", cycleEquipmentButton);
+        BindSerializedProperty(page, "cycleEquipmentUnitButton", cycleEquipmentUnitButton);
+        BindSerializedProperty(page, "cycleWeaponButton", cycleWeaponButton);
+        BindSerializedProperty(page, "cycleArmorButton", cycleArmorButton);
+        BindSerializedProperty(page, "cycleAccessoryButton", cycleAccessoryButton);
         BindSerializedProperty(page, "equipmentPanel", equipmentPanel);
         BindSerializedProperty(page, "equipmentDetailText", equipmentDetailText);
         BindSerializedProperty(page, "statusText", statusText);

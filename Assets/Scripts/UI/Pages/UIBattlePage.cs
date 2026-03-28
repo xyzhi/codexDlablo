@@ -20,6 +20,10 @@ namespace Wuxing.UI
         [SerializeField] private Button equipmentButton;
         [SerializeField] private Button closeEquipmentButton;
         [SerializeField] private Button cycleEquipmentPresetButton;
+        [SerializeField] private Button cycleEquipmentUnitButton;
+        [SerializeField] private Button cycleWeaponButton;
+        [SerializeField] private Button cycleArmorButton;
+        [SerializeField] private Button cycleAccessoryButton;
         [SerializeField] private GameObject equipmentPanel;
         [SerializeField] private Text equipmentDetailText;
         [SerializeField] private Text statusText;
@@ -35,6 +39,7 @@ namespace Wuxing.UI
         private UIScrollFollowController battleLogFollowController;
         private bool isApplyingAutoScroll;
         private List<string> knownSkillNames;
+        private int selectedEquipmentUnitIndex;
 
         public override void OnOpen(object data)
         {
@@ -88,6 +93,26 @@ namespace Wuxing.UI
             {
                 cycleEquipmentPresetButton.onClick.AddListener(OnClickCycleEquipmentPreset);
             }
+
+            if (cycleEquipmentUnitButton != null)
+            {
+                cycleEquipmentUnitButton.onClick.AddListener(OnClickCycleEquipmentUnit);
+            }
+
+            if (cycleWeaponButton != null)
+            {
+                cycleWeaponButton.onClick.AddListener(OnClickCycleWeapon);
+            }
+
+            if (cycleArmorButton != null)
+            {
+                cycleArmorButton.onClick.AddListener(OnClickCycleArmor);
+            }
+
+            if (cycleAccessoryButton != null)
+            {
+                cycleAccessoryButton.onClick.AddListener(OnClickCycleAccessory);
+            }
         }
 
         private void OnDestroy()
@@ -136,6 +161,26 @@ namespace Wuxing.UI
             {
                 cycleEquipmentPresetButton.onClick.RemoveListener(OnClickCycleEquipmentPreset);
             }
+
+            if (cycleEquipmentUnitButton != null)
+            {
+                cycleEquipmentUnitButton.onClick.RemoveListener(OnClickCycleEquipmentUnit);
+            }
+
+            if (cycleWeaponButton != null)
+            {
+                cycleWeaponButton.onClick.RemoveListener(OnClickCycleWeapon);
+            }
+
+            if (cycleArmorButton != null)
+            {
+                cycleArmorButton.onClick.RemoveListener(OnClickCycleArmor);
+            }
+
+            if (cycleAccessoryButton != null)
+            {
+                cycleAccessoryButton.onClick.RemoveListener(OnClickCycleAccessory);
+            }
         }
 
         private void OnClickBack()
@@ -181,6 +226,34 @@ namespace Wuxing.UI
             RefreshPreview();
             RefreshEquipmentPanel();
             SetEquipmentPanelVisible(true);
+        }
+
+        private void OnClickCycleEquipmentUnit()
+        {
+            var unitCount = BattleManager.GetPlayerEquipmentUnitCount();
+            if (unitCount <= 0)
+            {
+                return;
+            }
+
+            selectedEquipmentUnitIndex = (selectedEquipmentUnitIndex + 1) % unitCount;
+            RefreshEquipmentPanel();
+            SetEquipmentPanelVisible(true);
+        }
+
+        private void OnClickCycleWeapon()
+        {
+            CycleSelectedEquipmentSlot("Weapon");
+        }
+
+        private void OnClickCycleArmor()
+        {
+            CycleSelectedEquipmentSlot("Armor");
+        }
+
+        private void OnClickCycleAccessory()
+        {
+            CycleSelectedEquipmentSlot("Accessory");
         }
 
         private IEnumerator PlayBattle()
@@ -538,7 +611,18 @@ namespace Wuxing.UI
                 return;
             }
 
-            equipmentDetailText.text = BattleManager.BuildDefaultEquipmentDetailText();
+            var unitCount = BattleManager.GetPlayerEquipmentUnitCount();
+            if (unitCount > 0)
+            {
+                selectedEquipmentUnitIndex = Mathf.Clamp(selectedEquipmentUnitIndex, 0, unitCount - 1);
+            }
+            else
+            {
+                selectedEquipmentUnitIndex = 0;
+            }
+
+            equipmentDetailText.text = BattleManager.BuildPlayerEquipmentEditorText(selectedEquipmentUnitIndex);
+            RefreshEquipmentEditorButtonTexts();
         }
 
         private string HighlightSkillNames(string content)
@@ -636,6 +720,75 @@ namespace Wuxing.UI
                 case BattleEventType.Action:
                 default:
                     return 0.08f;
+            }
+        }
+
+        private void CycleSelectedEquipmentSlot(string slot)
+        {
+            BattleManager.CyclePlayerEquipmentForUnitIndexSlot(selectedEquipmentUnitIndex, slot);
+            RefreshPreview();
+            RefreshEquipmentPanel();
+            SetEquipmentPanelVisible(true);
+        }
+
+        private void RefreshEquipmentEditorButtonTexts()
+        {
+            UpdateButtonText(cycleEquipmentUnitButton, BuildSelectedUnitButtonText());
+            UpdateButtonText(cycleWeaponButton, BuildSlotButtonText("Weapon"));
+            UpdateButtonText(cycleArmorButton, BuildSlotButtonText("Armor"));
+            UpdateButtonText(cycleAccessoryButton, BuildSlotButtonText("Accessory"));
+        }
+
+        private string BuildSelectedUnitButtonText()
+        {
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+
+            var unitName = BattleManager.GetPlayerEquipmentUnitName(selectedEquipmentUnitIndex);
+            return isEnglish ? "Unit: " + unitName : "角色: " + unitName;
+        }
+
+        private string BuildSlotButtonText(string slot)
+        {
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+
+            var slotName = GetSlotDisplayName(slot, isEnglish);
+            var equipmentName = BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slot);
+            return slotName + ": " + equipmentName;
+        }
+
+        private static string GetSlotDisplayName(string slot, bool isEnglish)
+        {
+            if (isEnglish)
+            {
+                return slot;
+            }
+
+            switch (slot)
+            {
+                case "Weapon":
+                    return "武器";
+                case "Armor":
+                    return "护甲";
+                case "Accessory":
+                    return "饰品";
+                default:
+                    return slot;
+            }
+        }
+
+        private static void UpdateButtonText(Button button, string text)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var label = button.GetComponentInChildren<Text>();
+            if (label != null)
+            {
+                label.text = text;
             }
         }
     }

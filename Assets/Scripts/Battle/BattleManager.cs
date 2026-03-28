@@ -24,13 +24,16 @@ namespace Wuxing.Battle
             { "E001", new[] { "EQ001", "EQ003" } },
             { "E004", new[] { "EQ002", "EQ004" } }
         };
+        private static readonly string[] EquipmentSlots = { "Weapon", "Armor", "Accessory" };
         private const float TestDamageMultiplier = 2.4f;
         private const int TestFlatDamageBonus = 8;
         private static int playerEquipmentPresetIndex;
+        private static readonly Dictionary<string, Dictionary<string, string>> PlayerEquipmentOverrides = new Dictionary<string, Dictionary<string, string>>();
 
         public static void CyclePlayerEquipmentPreset()
         {
             playerEquipmentPresetIndex = (playerEquipmentPresetIndex + 1) % 2;
+            PlayerEquipmentOverrides.Clear();
         }
 
         public static string GetCurrentPlayerEquipmentPresetName()
@@ -38,6 +41,111 @@ namespace Wuxing.Battle
             return playerEquipmentPresetIndex == 0
                 ? LocalizationManager.GetText("battle.equipment_preset_balanced")
                 : LocalizationManager.GetText("battle.equipment_preset_burst");
+        }
+
+        public static int GetPlayerEquipmentUnitCount()
+        {
+            var database = CharacterDatabaseLoader.Load();
+            if (database == null)
+            {
+                return 0;
+            }
+
+            var count = 0;
+            for (var i = 0; i < DefaultPlayerIds.Length; i++)
+            {
+                if (database.GetById(DefaultPlayerIds[i]) != null)
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
+        public static string GetPlayerEquipmentUnitName(int unitIndex)
+        {
+            var config = GetPlayerCharacterConfig(unitIndex);
+            return config != null ? config.Name : LocalizationManager.GetText("battle.summary_no_units");
+        }
+
+        public static string GetPlayerEquipmentName(int unitIndex, string slot)
+        {
+            var config = GetPlayerCharacterConfig(unitIndex);
+            if (config == null)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            string[] equipmentIds;
+            if (!GetCurrentPlayerEquipmentPreset().TryGetValue(config.Id, out equipmentIds))
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var equipmentId = GetEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
+            if (string.IsNullOrEmpty(equipmentId))
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var equipment = equipmentDatabase.GetById(equipmentId);
+            return equipment != null ? equipment.Name : LocalizationManager.GetText("battle.equipment_none");
+        }
+
+        public static void CyclePlayerEquipmentForUnitSlot(string unitId, string slot)
+        {
+            if (string.IsNullOrEmpty(unitId) || string.IsNullOrEmpty(slot))
+            {
+                return;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null)
+            {
+                return;
+            }
+
+            var candidates = equipmentDatabase.GetBySlot(slot);
+            if (candidates.Count == 0)
+            {
+                return;
+            }
+
+            var currentLoadout = GetCurrentPlayerEquipmentPreset();
+            string[] equipmentIds;
+            currentLoadout.TryGetValue(unitId, out equipmentIds);
+
+            var currentEquipmentId = GetEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
+            var currentIndex = -1;
+            for (var i = 0; i < candidates.Count; i++)
+            {
+                if (candidates[i] != null && candidates[i].Id == currentEquipmentId)
+                {
+                    currentIndex = i;
+                    break;
+                }
+            }
+
+            var nextEquipment = candidates[(currentIndex + 1 + candidates.Count) % candidates.Count];
+            SetPlayerEquipmentOverride(unitId, slot, nextEquipment != null ? nextEquipment.Id : string.Empty);
+        }
+
+        public static void CyclePlayerEquipmentForUnitIndexSlot(int unitIndex, string slot)
+        {
+            var config = GetPlayerCharacterConfig(unitIndex);
+            if (config == null)
+            {
+                return;
+            }
+
+            CyclePlayerEquipmentForUnitSlot(config.Id, slot);
         }
 
         public static BattlePlaybackResult RunSampleBattlePlayback()
@@ -206,6 +314,39 @@ namespace Wuxing.Battle
             return builder.ToString();
         }
 
+        public static string BuildPlayerEquipmentEditorText(int selectedUnitIndex)
+        {
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (characterDatabase == null || equipmentDatabase == null)
+            {
+                return LocalizationManager.GetText("battle.log_config_missing");
+            }
+
+            var playerTeam = BuildPlayerTeam(characterDatabase, equipmentDatabase);
+            if (playerTeam.Units.Count == 0)
+            {
+                return LocalizationManager.GetText("battle.summary_no_units");
+            }
+
+            var clampedIndex = Clamp(selectedUnitIndex, 0, playerTeam.Units.Count - 1);
+            var selectedUnit = playerTeam.Units[clampedIndex];
+            var builder = new StringBuilder();
+            builder.Append(GetEquipmentEditTargetLabel())
+                .Append(": ")
+                .Append(selectedUnit.Name)
+                .Append("\n\n")
+                .Append(FormatSingleUnitEquipmentDetail(selectedUnit, equipmentDatabase))
+                .Append("\n\n")
+                .Append(LocalizationManager.GetText("battle.player_team"))
+                .Append(" [")
+                .Append(GetCurrentPlayerEquipmentPresetName())
+                .Append(']')
+                .Append('\n')
+                .Append(FormatEquipmentDetailTeam(playerTeam, equipmentDatabase));
+            return builder.ToString();
+        }
+
         private static string FormatEquipmentDetailTeam(BattleTeamRuntime team, EquipmentDatabase equipmentDatabase)
         {
             if (team == null || team.Units.Count == 0)
@@ -240,6 +381,8 @@ namespace Wuxing.Battle
 
                     builder.Append('\n')
                         .Append("- ")
+                        .Append(GetEquipmentSlotLabel(equipment.Slot))
+                        .Append(": ")
                         .Append(equipment.Name)
                         .Append("  ")
                         .Append(FormatEquipmentBonus(equipment));
@@ -247,6 +390,43 @@ namespace Wuxing.Battle
             }
 
             return builder.ToString();
+        }
+
+        private static string FormatSingleUnitEquipmentDetail(BattleUnitRuntime unit, EquipmentDatabase equipmentDatabase)
+        {
+            if (unit == null)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var builder = new StringBuilder();
+            if (unit.EquippedItemIds == null || unit.EquippedItemIds.Count == 0)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            for (var i = 0; i < unit.EquippedItemIds.Count; i++)
+            {
+                var equipment = equipmentDatabase.GetById(unit.EquippedItemIds[i]);
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append('\n');
+                }
+
+                builder.Append("- ")
+                    .Append(GetEquipmentSlotLabel(equipment.Slot))
+                    .Append(": ")
+                    .Append(equipment.Name)
+                    .Append("  ")
+                    .Append(FormatEquipmentBonus(equipment));
+            }
+
+            return builder.Length > 0 ? builder.ToString() : LocalizationManager.GetText("battle.equipment_none");
         }
 
         private static string FormatEquipmentBonus(EquipmentConfig equipment)
@@ -279,18 +459,30 @@ namespace Wuxing.Battle
         private static BattleTeamRuntime BuildPlayerTeam(CharacterDatabase database, EquipmentDatabase equipmentDatabase)
         {
             var team = new BattleTeamRuntime();
+            var loadout = GetCurrentPlayerEquipmentPreset();
             for (var i = 0; i < DefaultPlayerIds.Length; i++)
             {
                 var config = database.GetById(DefaultPlayerIds[i]);
                 if (config != null)
                 {
                     var unit = BattleUnitRuntime.FromCharacter(config);
-                    ApplyDefaultEquipment(unit, equipmentDatabase, GetCurrentPlayerEquipmentPreset());
+                    ApplyDefaultEquipment(unit, equipmentDatabase, loadout);
                     team.Units.Add(unit);
                 }
             }
 
             return team;
+        }
+
+        private static CharacterConfig GetPlayerCharacterConfig(int unitIndex)
+        {
+            var database = CharacterDatabaseLoader.Load();
+            if (database == null || unitIndex < 0 || unitIndex >= DefaultPlayerIds.Length)
+            {
+                return null;
+            }
+
+            return database.GetById(DefaultPlayerIds[unitIndex]);
         }
 
         private static BattleTeamRuntime BuildEnemyTeam(EnemyDatabase database, EquipmentDatabase equipmentDatabase)
@@ -338,7 +530,116 @@ namespace Wuxing.Battle
 
         private static Dictionary<string, string[]> GetCurrentPlayerEquipmentPreset()
         {
-            return playerEquipmentPresetIndex == 0 ? PlayerEquipmentPresetA : PlayerEquipmentPresetB;
+            var basePreset = playerEquipmentPresetIndex == 0 ? PlayerEquipmentPresetA : PlayerEquipmentPresetB;
+            var mergedPreset = new Dictionary<string, string[]>();
+
+            foreach (var pair in basePreset)
+            {
+                var values = new string[pair.Value.Length];
+                for (var i = 0; i < pair.Value.Length; i++)
+                {
+                    values[i] = pair.Value[i];
+                }
+
+                mergedPreset[pair.Key] = values;
+            }
+
+            foreach (var overridePair in PlayerEquipmentOverrides)
+            {
+                string[] equipmentIds;
+                if (!mergedPreset.TryGetValue(overridePair.Key, out equipmentIds))
+                {
+                    equipmentIds = new string[EquipmentSlots.Length];
+                    mergedPreset[overridePair.Key] = equipmentIds;
+                }
+
+                for (var i = 0; i < EquipmentSlots.Length; i++)
+                {
+                    string overrideId;
+                    if (!overridePair.Value.TryGetValue(EquipmentSlots[i], out overrideId) || string.IsNullOrEmpty(overrideId))
+                    {
+                        continue;
+                    }
+
+                    equipmentIds[i] = overrideId;
+                }
+            }
+
+            return mergedPreset;
+        }
+
+        private static string GetEquipmentIdBySlot(string[] equipmentIds, string slot, EquipmentDatabase equipmentDatabase)
+        {
+            if (equipmentIds == null || equipmentDatabase == null)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < equipmentIds.Length; i++)
+            {
+                var equipment = equipmentDatabase.GetById(equipmentIds[i]);
+                if (equipment != null && equipment.Slot == slot)
+                {
+                    return equipment.Id;
+                }
+            }
+
+            return null;
+        }
+
+        private static void SetPlayerEquipmentOverride(string unitId, string slot, string equipmentId)
+        {
+            Dictionary<string, string> slotOverrides;
+            if (!PlayerEquipmentOverrides.TryGetValue(unitId, out slotOverrides))
+            {
+                slotOverrides = new Dictionary<string, string>();
+                PlayerEquipmentOverrides[unitId] = slotOverrides;
+            }
+
+            slotOverrides[slot] = equipmentId;
+        }
+
+        private static string GetEquipmentSlotLabel(string slot)
+        {
+            var language = LocalizationManager.Instance != null
+                ? LocalizationManager.Instance.CurrentLanguage
+                : GameLanguage.ChineseSimplified;
+
+            if (language == GameLanguage.English)
+            {
+                switch (slot)
+                {
+                    case "Weapon":
+                        return "Weapon";
+                    case "Armor":
+                        return "Armor";
+                    case "Accessory":
+                        return "Accessory";
+                    default:
+                        return slot;
+                }
+            }
+
+            switch (slot)
+            {
+                case "Weapon":
+                    return "武器";
+                case "Armor":
+                    return "护甲";
+                case "Accessory":
+                    return "饰品";
+                default:
+                    return slot;
+            }
+        }
+
+        private static string GetEquipmentEditTargetLabel()
+        {
+            var language = LocalizationManager.Instance != null
+                ? LocalizationManager.Instance.CurrentLanguage
+                : GameLanguage.ChineseSimplified;
+
+            return language == GameLanguage.English ? "Editing Unit" : "当前角色";
         }
 
         private static BattlePlaybackResult SimulatePlayback(BattleTeamRuntime playerTeam, BattleTeamRuntime enemyTeam, SkillDatabase skillDatabase)

@@ -25,5 +25,22 @@ namespace Wuxing.Config
 
             return null;
         }
+
+        public List<EquipmentConfig> GetBySlot(string slot)
+        {
+            var results = new List<EquipmentConfig>();
+            for (var i = 0; i < equipments.Count; i++)
+            {
+                var equipment = equipments[i];
+                if (equipment == null || !string.Equals(equipment.Slot, slot, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                results.Add(equipment);
+            }
+
+            return results;
+        }
     }
 }
