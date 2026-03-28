@@ -15,6 +15,7 @@ namespace Wuxing.Battle
         public int MaxMP;
         public int CurrentMP;
         public List<string> SkillIds = new List<string>();
+        public List<string> EquippedItemIds = new List<string>();
 
         public bool IsDead
         {
@@ -53,6 +54,22 @@ namespace Wuxing.Battle
                 CurrentMP = config.MP,
                 SkillIds = SplitSkills(config.Skills)
             };
+        }
+
+        public void ApplyEquipment(EquipmentConfig config)
+        {
+            if (config == null)
+            {
+                return;
+            }
+
+            MaxHP += config.HP;
+            CurrentHP += config.HP;
+            ATK += config.ATK;
+            DEF += config.DEF;
+            MaxMP += config.MP;
+            CurrentMP += config.MP;
+            EquippedItemIds.Add(config.Id);
         }
 
         private static List<string> SplitSkills(string rawSkills)

@@ -41,7 +41,7 @@ public static class UIPrefabBuilder
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1080f, 1920f);
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.matchWidthOrHeight = 1f;
 
         var pageLayer = UIFactory.CreateContainer(root.transform, "PageLayer", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
         var popupLayer = UIFactory.CreateContainer(root.transform, "PopupLayer", Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
@@ -59,17 +59,17 @@ public static class UIPrefabBuilder
         UIFactory.CreateLine(root.transform, "BottomLine", new Color(0.7f, 0.74f, 0.8f, 1f), new Vector2(0.08f, 0.1f), new Vector2(0.92f, 0.1f), 2f);
 
         var header = UIFactory.CreateContainer(root.transform, "Header", new Vector2(0.1f, 0.72f), new Vector2(0.9f, 0.88f), Vector2.zero, Vector2.zero);
-        var title = UIFactory.CreateText(header, "Title", "五行原型", 54, TextAnchor.MiddleCenter, Color.white);
+        var title = UIFactory.CreateText(header, "Title", "Wuxing Prototype", 54, TextAnchor.MiddleCenter, Color.white);
         AddLocalizedText(title, "menu.title");
 
-        var subTitle = UIFactory.CreateContainer(root.transform, "SubTitle", new Vector2(0.16f, 0.64f), new Vector2(0.84f, 0.72f), Vector2.zero, Vector2.zero);
-        var subTitleText = UIFactory.CreateText(subTitle, "SubTitleText", "第一阶段 / 第一步 / 文字与线框 UGUI", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.84f, 0.9f, 1f));
-        AddLocalizedText(subTitleText, "menu.subtitle");
+        var subtitle = UIFactory.CreateContainer(root.transform, "SubTitle", new Vector2(0.16f, 0.64f), new Vector2(0.84f, 0.72f), Vector2.zero, Vector2.zero);
+        var subtitleText = UIFactory.CreateText(subtitle, "SubTitleText", "Phase 1 / Step 1 / Text and line UGUI", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.84f, 0.9f, 1f));
+        AddLocalizedText(subtitleText, "menu.subtitle");
 
         var menuPanel = UIFactory.CreatePanel(root.transform, "MenuPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
         var menuRect = menuPanel.GetComponent<RectTransform>();
-        menuRect.anchorMin = new Vector2(0.16f, 0.22f);
-        menuRect.anchorMax = new Vector2(0.84f, 0.58f);
+        menuRect.anchorMin = new Vector2(0.16f, 0.18f);
+        menuRect.anchorMax = new Vector2(0.84f, 0.62f);
         menuRect.offsetMin = Vector2.zero;
         menuRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(menuPanel.transform, "MenuOutline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
@@ -78,24 +78,24 @@ public static class UIPrefabBuilder
         var layout = UIFactory.AddVerticalLayout(menu.gameObject, 18, TextAnchor.UpperCenter);
         layout.padding = new RectOffset(0, 0, 8, 8);
 
-        var startButton = UIFactory.CreateButton(menu, "StartButton", "进入战斗页", delegate { });
+        var startButton = UIFactory.CreateButton(menu, "StartButton", "Open Battle", delegate { });
         AddLocalizedText(startButton.GetComponentInChildren<Text>(), "menu.button_battle");
         UIFactory.AddLayoutElement(startButton.gameObject, 86f);
 
-        var popupButton = UIFactory.CreateButton(menu, "PopupButton", "打开确认弹窗", delegate { });
+        var popupButton = UIFactory.CreateButton(menu, "PopupButton", "Open Popup", delegate { });
         AddLocalizedText(popupButton.GetComponentInChildren<Text>(), "menu.button_popup");
         UIFactory.AddLayoutElement(popupButton.gameObject, 86f);
 
-        var toastButton = UIFactory.CreateButton(menu, "ToastButton", "显示提示", delegate { });
+        var toastButton = UIFactory.CreateButton(menu, "ToastButton", "Show Toast", delegate { });
         AddLocalizedText(toastButton.GetComponentInChildren<Text>(), "menu.button_toast");
         UIFactory.AddLayoutElement(toastButton.gameObject, 86f);
 
-        var languageButton = UIFactory.CreateButton(menu, "LanguageButton", "切换语言", delegate { });
+        var languageButton = UIFactory.CreateButton(menu, "LanguageButton", "Language", delegate { });
         AddLocalizedText(languageButton.GetComponentInChildren<Text>(), "menu.button_language");
         UIFactory.AddLayoutElement(languageButton.gameObject, 86f);
 
         var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.12f, 0.1f), new Vector2(0.88f, 0.18f), Vector2.zero, Vector2.zero);
-        var footerText = UIFactory.CreateText(footer, "FooterText", "这一版先只用文字、线条和矩形框，方便后续替换美术。", 22, TextAnchor.MiddleCenter, new Color(0.72f, 0.76f, 0.82f, 1f));
+        var footerText = UIFactory.CreateText(footer, "FooterText", "This version uses text, lines, and rectangles first so art can be replaced later.", 22, TextAnchor.MiddleCenter, new Color(0.72f, 0.76f, 0.82f, 1f));
         AddLocalizedText(footerText, "menu.footer");
 
         var page = root.AddComponent<UIMainMenuPage>();
@@ -103,7 +103,6 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "popupButton", popupButton);
         BindSerializedProperty(page, "toastButton", toastButton);
         BindSerializedProperty(page, "languageButton", languageButton);
-
         SavePrefab(root, PagesFolder + "/MainMenuPage.prefab");
     }
 
@@ -112,43 +111,131 @@ public static class UIPrefabBuilder
         var root = UIFactory.CreatePanel(null, "BattlePage", new Color(0.12f, 0.08f, 0.08f, 1f));
         UIFactory.AddOutlineBox(root.transform, "BattleFrame", new Color(0.86f, 0.78f, 0.72f, 0.8f), 2f);
 
-        var title = UIFactory.CreateContainer(root.transform, "Title", new Vector2(0.08f, 0.84f), new Vector2(0.92f, 0.94f), Vector2.zero, Vector2.zero);
-        var titleText = UIFactory.CreateText(title, "Label", "战斗页占位", 46, TextAnchor.MiddleCenter, Color.white);
+        var title = UIFactory.CreateContainer(root.transform, "Title", new Vector2(0.06f, 0.9f), new Vector2(0.94f, 0.97f), Vector2.zero, Vector2.zero);
+        var titleText = UIFactory.CreateText(title, "Label", "Battle", 42, TextAnchor.MiddleCenter, Color.white);
         AddLocalizedText(titleText, "battle.title");
 
-        var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.2f, 0.78f), new Vector2(0.8f, 0.84f), Vector2.zero, Vector2.zero);
-        var statusText = UIFactory.CreateText(status, "StatusText", "等待开始战斗", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.9f, 0.75f, 1f));
+        var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.12f, 0.85f), new Vector2(0.88f, 0.9f), Vector2.zero, Vector2.zero);
+        var statusText = UIFactory.CreateText(status, "StatusText", "Waiting", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.9f, 0.75f, 1f));
         AddLocalizedText(statusText, "battle.status_idle");
 
-        var playerBodyText = CreateInfoBox(root.transform, "PlayerTeam", new Vector2(0.08f, 0.44f), new Vector2(0.44f, 0.76f), "我方队伍", "角色甲  HP 120/120\n角色乙  HP 150/150", "battle.player_team", "battle.player_content");
-        var enemyBodyText = CreateInfoBox(root.transform, "EnemyTeam", new Vector2(0.56f, 0.44f), new Vector2(0.92f, 0.76f), "敌方队伍", "敌人甲  HP 100/100\n敌人乙  HP 90/90", "battle.enemy_team", "battle.enemy_content");
-        var logBodyText = CreateInfoBox(root.transform, "BattleLog", new Vector2(0.08f, 0.2f), new Vector2(0.92f, 0.38f), "战斗日志", "下一步这里会接真实战斗日志。", "battle.log_title", "battle.log_content");
+        var overlay = UIFactory.CreatePanel(root.transform, "CombatOverlay", new Color(0.18f, 0.12f, 0.12f, 0.94f));
+        var overlayRect = overlay.GetComponent<RectTransform>();
+        overlayRect.anchorMin = new Vector2(0.03f, 0.03f);
+        overlayRect.anchorMax = new Vector2(0.97f, 0.83f);
+        overlayRect.offsetMin = Vector2.zero;
+        overlayRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(overlay.transform, "OverlayOutline", new Color(0.9f, 0.82f, 0.74f, 0.7f), 1f);
 
-        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.14f, 0.06f), new Vector2(0.86f, 0.16f), Vector2.zero, Vector2.zero);
-        var layout = UIFactory.AddVerticalLayout(footer.gameObject, 12, TextAnchor.MiddleCenter);
-        layout.childForceExpandHeight = true;
-        layout.childForceExpandWidth = true;
+        var summaryBar = UIFactory.CreateContainer(overlay.transform, "SummaryBar", new Vector2(0.03f, 0.74f), new Vector2(0.97f, 0.96f), Vector2.zero, Vector2.zero);
+        var playerPanel = CreateTeamInfoPanel(summaryBar, "PlayerTeam", new Vector2(0f, 0f), new Vector2(0.48f, 1f), "Player", "Unit A  HP 120/120\nUnit B  HP 150/150", "battle.player_team", "battle.player_content");
+        var enemyPanel = CreateTeamInfoPanel(summaryBar, "EnemyTeam", new Vector2(0.52f, 0f), new Vector2(1f, 1f), "Enemy", "Enemy A  HP 100/100\nEnemy B  HP 90/90", "battle.enemy_team", "battle.enemy_content");
 
-        var startButton = UIFactory.CreateButton(footer, "StartButton", "开始战斗", delegate { });
+        var logPanel = UIFactory.CreatePanel(overlay.transform, "LogPanel", new Color(0.13f, 0.09f, 0.09f, 0.96f));
+        var logPanelRect = logPanel.GetComponent<RectTransform>();
+        logPanelRect.anchorMin = new Vector2(0.03f, 0.2f);
+        logPanelRect.anchorMax = new Vector2(0.97f, 0.71f);
+        logPanelRect.offsetMin = Vector2.zero;
+        logPanelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(logPanel.transform, "LogOutline", new Color(0.88f, 0.8f, 0.72f, 0.6f), 1f);
+
+        var logTitle = UIFactory.CreateContainer(logPanel.transform, "LogTitle", new Vector2(0.02f, 0.91f), new Vector2(0.98f, 0.985f), Vector2.zero, Vector2.zero);
+        var logTitleText = UIFactory.CreateText(logTitle, "LogTitleText", "Battle Log", 30, TextAnchor.MiddleLeft, Color.white);
+        AddLocalizedText(logTitleText, "battle.log_title");
+
+        var scrollRoot = UIFactory.CreateContainer(logPanel.transform, "LogScrollRoot", new Vector2(0.02f, 0.02f), new Vector2(0.98f, 0.89f), Vector2.zero, Vector2.zero);
+        var logScrollRect = UIFactory.CreateScrollRect(scrollRoot, "BattleLogScroll", new Color(0f, 0f, 0f, 0.12f));
+        UIFactory.Stretch(logScrollRect.GetComponent<RectTransform>());
+
+        var logBodyText = UIFactory.CreateText(logScrollRect.content, "BodyText", "Battle log preview.", 28, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        var logBodyRect = logBodyText.rectTransform;
+        logBodyRect.anchorMin = new Vector2(0f, 1f);
+        logBodyRect.anchorMax = new Vector2(1f, 1f);
+        logBodyRect.pivot = new Vector2(0.5f, 1f);
+        logBodyRect.offsetMin = new Vector2(18f, 0f);
+        logBodyRect.offsetMax = new Vector2(-18f, 0f);
+        logBodyText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        logBodyText.verticalOverflow = VerticalWrapMode.Overflow;
+        var fitter = logBodyText.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        AddLocalizedText(logBodyText, "battle.log_content");
+
+        var footer = UIFactory.CreateContainer(overlay.transform, "Footer", new Vector2(0.08f, 0.02f), new Vector2(0.92f, 0.18f), Vector2.zero, Vector2.zero);
+        var footerLayout = UIFactory.AddVerticalLayout(footer.gameObject, 6, TextAnchor.MiddleCenter);
+        footerLayout.childForceExpandHeight = true;
+        footerLayout.childForceExpandWidth = true;
+
+        var startButton = UIFactory.CreateButton(footer, "StartButton", "Start", delegate { });
         AddLocalizedText(startButton.GetComponentInChildren<Text>(), "battle.button_start");
-        UIFactory.AddLayoutElement(startButton.gameObject, 72f);
+        UIFactory.AddLayoutElement(startButton.gameObject, 38f);
 
-        var backButton = UIFactory.CreateButton(footer, "BackButton", "返回主菜单", delegate { });
+        var backButton = UIFactory.CreateButton(footer, "BackButton", "Back", delegate { });
         AddLocalizedText(backButton.GetComponentInChildren<Text>(), "battle.button_back");
-        UIFactory.AddLayoutElement(backButton.gameObject, 72f);
+        UIFactory.AddLayoutElement(backButton.gameObject, 38f);
 
-        var tipButton = UIFactory.CreateButton(footer, "TipButton", "显示提示", delegate { });
+        var tipButton = UIFactory.CreateButton(footer, "TipButton", "Tip", delegate { });
         AddLocalizedText(tipButton.GetComponentInChildren<Text>(), "battle.button_tip");
-        UIFactory.AddLayoutElement(tipButton.gameObject, 72f);
+        UIFactory.AddLayoutElement(tipButton.gameObject, 38f);
+
+        var closeLogButton = UIFactory.CreateButton(footer, "CloseLogButton", "Close Log", delegate { });
+        AddLocalizedText(closeLogButton.GetComponentInChildren<Text>(), "battle.button_close_log");
+        UIFactory.AddLayoutElement(closeLogButton.gameObject, 38f);
+
+        var equipmentButton = UIFactory.CreateButton(footer, "EquipmentButton", "Equipment", delegate { });
+        AddLocalizedText(equipmentButton.GetComponentInChildren<Text>(), "battle.button_equipment");
+        UIFactory.AddLayoutElement(equipmentButton.gameObject, 38f);
+
+        var equipmentPanel = UIFactory.CreatePanel(overlay.transform, "EquipmentPanel", new Color(0.1f, 0.07f, 0.07f, 0.98f));
+        var equipmentPanelRect = equipmentPanel.GetComponent<RectTransform>();
+        equipmentPanelRect.anchorMin = new Vector2(0.06f, 0.16f);
+        equipmentPanelRect.anchorMax = new Vector2(0.94f, 0.84f);
+        equipmentPanelRect.offsetMin = Vector2.zero;
+        equipmentPanelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(equipmentPanel.transform, "EquipmentOutline", new Color(0.9f, 0.82f, 0.74f, 0.75f), 1f);
+
+        var equipmentTitle = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentTitle", new Vector2(0.05f, 0.88f), new Vector2(0.75f, 0.97f), Vector2.zero, Vector2.zero);
+        var equipmentTitleText = UIFactory.CreateText(equipmentTitle, "EquipmentTitleText", "Equipment Detail", 30, TextAnchor.MiddleLeft, Color.white);
+        AddLocalizedText(equipmentTitleText, "battle.equipment_detail_title");
+
+        var cycleEquipmentButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleEquipmentButton", "Switch Preset", delegate { });
+        AddLocalizedText(cycleEquipmentButton.GetComponentInChildren<Text>(), "battle.button_cycle_equipment");
+        var cycleEquipmentRect = cycleEquipmentButton.GetComponent<RectTransform>();
+        cycleEquipmentRect.anchorMin = new Vector2(0.05f, 0.78f);
+        cycleEquipmentRect.anchorMax = new Vector2(0.45f, 0.87f);
+        cycleEquipmentRect.offsetMin = Vector2.zero;
+        cycleEquipmentRect.offsetMax = Vector2.zero;
+
+        var closeEquipmentButton = UIFactory.CreateButton(equipmentPanel.transform, "CloseEquipmentButton", "Close", delegate { });
+        AddLocalizedText(closeEquipmentButton.GetComponentInChildren<Text>(), "battle.button_close_equipment");
+        var closeEquipmentRect = closeEquipmentButton.GetComponent<RectTransform>();
+        closeEquipmentRect.anchorMin = new Vector2(0.72f, 0.88f);
+        closeEquipmentRect.anchorMax = new Vector2(0.95f, 0.97f);
+        closeEquipmentRect.offsetMin = Vector2.zero;
+        closeEquipmentRect.offsetMax = Vector2.zero;
+
+        var equipmentDetailRect = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.76f), Vector2.zero, Vector2.zero);
+        var equipmentDetailText = UIFactory.CreateText(equipmentDetailRect, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
+        equipmentPanel.SetActive(false);
 
         var page = root.AddComponent<UIBattlePage>();
+        BindSerializedProperty(page, "battleLogOverlay", overlay);
         BindSerializedProperty(page, "backButton", backButton);
         BindSerializedProperty(page, "tipButton", tipButton);
         BindSerializedProperty(page, "startBattleButton", startButton);
+        BindSerializedProperty(page, "closeLogButton", closeLogButton);
+        BindSerializedProperty(page, "equipmentButton", equipmentButton);
+        BindSerializedProperty(page, "closeEquipmentButton", closeEquipmentButton);
+        BindSerializedProperty(page, "cycleEquipmentPresetButton", cycleEquipmentButton);
+        BindSerializedProperty(page, "equipmentPanel", equipmentPanel);
+        BindSerializedProperty(page, "equipmentDetailText", equipmentDetailText);
         BindSerializedProperty(page, "statusText", statusText);
-        BindSerializedProperty(page, "playerTeamText", playerBodyText);
-        BindSerializedProperty(page, "enemyTeamText", enemyBodyText);
+        BindSerializedProperty(page, "playerTeamText", playerPanel.BodyText);
+        BindSerializedProperty(page, "enemyTeamText", enemyPanel.BodyText);
+        BindSerializedProperty(page, "playerEquipmentText", playerPanel.EquipmentText);
+        BindSerializedProperty(page, "enemyEquipmentText", enemyPanel.EquipmentText);
         BindSerializedProperty(page, "battleLogText", logBodyText);
+        BindSerializedProperty(page, "battleLogScrollRect", logScrollRect);
 
         SavePrefab(root, PagesFolder + "/BattlePage.prefab");
     }
@@ -164,19 +251,19 @@ public static class UIPrefabBuilder
         panelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
 
-        var title = UIFactory.CreateText(panel.transform, "Title", "确认", 40, TextAnchor.UpperCenter, Color.white);
+        var title = UIFactory.CreateText(panel.transform, "Title", "Confirm", 40, TextAnchor.UpperCenter, Color.white);
         title.rectTransform.anchorMin = new Vector2(0.08f, 0.72f);
         title.rectTransform.anchorMax = new Vector2(0.92f, 0.92f);
         title.rectTransform.offsetMin = Vector2.zero;
         title.rectTransform.offsetMax = Vector2.zero;
 
-        var message = UIFactory.CreateText(panel.transform, "Message", "消息", 28, TextAnchor.MiddleCenter, new Color(0.93f, 0.93f, 0.93f, 1f));
+        var message = UIFactory.CreateText(panel.transform, "Message", "Message", 28, TextAnchor.MiddleCenter, new Color(0.93f, 0.93f, 0.93f, 1f));
         message.rectTransform.anchorMin = new Vector2(0.08f, 0.32f);
         message.rectTransform.anchorMax = new Vector2(0.92f, 0.68f);
         message.rectTransform.offsetMin = Vector2.zero;
         message.rectTransform.offsetMax = Vector2.zero;
 
-        var confirmButton = UIFactory.CreateButton(panel.transform, "ConfirmButton", "确认", delegate { });
+        var confirmButton = UIFactory.CreateButton(panel.transform, "ConfirmButton", "Confirm", delegate { });
         AddLocalizedText(confirmButton.GetComponentInChildren<Text>(), "popup.confirm_button");
         var confirmRect = confirmButton.GetComponent<RectTransform>();
         confirmRect.anchorMin = new Vector2(0.1f, 0.08f);
@@ -184,7 +271,7 @@ public static class UIPrefabBuilder
         confirmRect.offsetMin = Vector2.zero;
         confirmRect.offsetMax = Vector2.zero;
 
-        var cancelButton = UIFactory.CreateButton(panel.transform, "CancelButton", "取消", delegate { });
+        var cancelButton = UIFactory.CreateButton(panel.transform, "CancelButton", "Cancel", delegate { });
         AddLocalizedText(cancelButton.GetComponentInChildren<Text>(), "popup.cancel_button");
         var cancelRect = cancelButton.GetComponent<RectTransform>();
         cancelRect.anchorMin = new Vector2(0.56f, 0.08f);
@@ -214,7 +301,7 @@ public static class UIPrefabBuilder
 
         var background = UIFactory.CreatePanel(root.transform, "Background", new Color(0f, 0f, 0f, 0.75f));
         UIFactory.AddOutlineBox(background.transform, "Outline", new Color(0.9f, 0.9f, 0.9f, 0.6f), 1f);
-        var message = UIFactory.CreateText(background.transform, "Message", "提示", 26, TextAnchor.MiddleCenter, Color.white);
+        var message = UIFactory.CreateText(background.transform, "Message", "Toast", 26, TextAnchor.MiddleCenter, Color.white);
 
         var toast = root.GetComponent<UIToastPopup>();
         BindSerializedProperty(toast, "messageText", message);
@@ -222,7 +309,15 @@ public static class UIPrefabBuilder
         SavePrefab(root, PopupsFolder + "/ToastPopup.prefab");
     }
 
-    private static Text CreateInfoBox(Transform parent, string objectName, Vector2 anchorMin, Vector2 anchorMax, string title, string content, string titleKey, string contentKey)
+    private static TeamInfoPanelRefs CreateTeamInfoPanel(
+        Transform parent,
+        string objectName,
+        Vector2 anchorMin,
+        Vector2 anchorMax,
+        string title,
+        string content,
+        string titleKey,
+        string contentKey)
     {
         var panel = UIFactory.CreatePanel(parent, objectName, new Color(0.16f, 0.11f, 0.11f, 0.92f));
         var panelRect = panel.GetComponent<RectTransform>();
@@ -233,14 +328,33 @@ public static class UIPrefabBuilder
 
         UIFactory.AddOutlineBox(panel.transform, objectName + "Outline", new Color(0.86f, 0.78f, 0.72f, 0.7f), 1f);
 
-        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.74f), new Vector2(0.96f, 0.94f), Vector2.zero, Vector2.zero);
-        var titleText = UIFactory.CreateText(titleRect, "TitleText", title, 28, TextAnchor.MiddleLeft, Color.white);
+        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.78f), new Vector2(0.96f, 0.94f), Vector2.zero, Vector2.zero);
+        var titleText = UIFactory.CreateText(titleRect, "TitleText", title, 26, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(titleText, titleKey);
 
-        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.72f), Vector2.zero, Vector2.zero);
-        var bodyText = UIFactory.CreateText(bodyRect, "BodyText", content, 24, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
+        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.04f, 0.42f), new Vector2(0.96f, 0.76f), Vector2.zero, Vector2.zero);
+        var bodyText = UIFactory.CreateText(bodyRect, "BodyText", content, 20, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
         AddLocalizedText(bodyText, contentKey);
-        return bodyText;
+
+        var equipmentTitleRect = UIFactory.CreateContainer(panel.transform, "EquipmentTitle", new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.4f), Vector2.zero, Vector2.zero);
+        var equipmentTitleText = UIFactory.CreateText(equipmentTitleRect, "EquipmentTitleText", "Equipment", 20, TextAnchor.MiddleLeft, new Color(0.95f, 0.86f, 0.74f, 1f));
+        AddLocalizedText(equipmentTitleText, "battle.equipment_title");
+
+        var equipmentBodyRect = UIFactory.CreateContainer(panel.transform, "EquipmentBody", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.26f), Vector2.zero, Vector2.zero);
+        var equipmentBodyText = UIFactory.CreateText(equipmentBodyRect, "EquipmentBodyText", "No equipment", 16, TextAnchor.UpperLeft, new Color(0.82f, 0.84f, 0.86f, 1f));
+        AddLocalizedText(equipmentBodyText, "battle.equipment_none");
+
+        return new TeamInfoPanelRefs
+        {
+            BodyText = bodyText,
+            EquipmentText = equipmentBodyText
+        };
+    }
+
+    private sealed class TeamInfoPanelRefs
+    {
+        public Text BodyText;
+        public Text EquipmentText;
     }
 
     private static LocalizedText AddLocalizedText(Text target, string key)

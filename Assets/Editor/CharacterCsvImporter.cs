@@ -12,6 +12,7 @@ public static class CharacterCsvImporter
     private const string CharacterCsvPath = "Docs/Character.csv";
     private const string EnemyCsvPath = "Docs/Enemy.csv";
     private const string SkillCsvPath = "Docs/Skill.csv";
+    private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
 
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
@@ -20,6 +21,7 @@ public static class CharacterCsvImporter
     private const string CharacterJsonPath = ConfigOutputFolder + "/CharacterDatabase.json";
     private const string EnemyJsonPath = ConfigOutputFolder + "/EnemyDatabase.json";
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
+    private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
 
     [MenuItem("工具/配置/导入全部CSV")]
@@ -30,9 +32,10 @@ public static class CharacterCsvImporter
             ImportCharacters();
             ImportEnemies();
             ImportSkills();
+            ImportEquipments();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能和语言表已完成导入。");
+            Debug.Log("角色、敌人、技能、装备和语言表已完成导入。");
         }
         catch (Exception exception)
         {
@@ -166,6 +169,45 @@ public static class CharacterCsvImporter
         database.skills = configs;
         WriteJson(SkillJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} skills to {SkillJsonPath}");
+    }
+
+    [MenuItem("工具/配置/仅导入装备表")]
+    public static void ImportEquipments()
+    {
+        var rows = ReadRequiredRows(EquipmentCsvPath, "Equipment CSV");
+        var configs = new List<EquipmentConfig>();
+
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 8)
+            {
+                throw new InvalidOperationException($"Invalid equipment row at line {i + 1}.");
+            }
+
+            configs.Add(new EquipmentConfig
+            {
+                Id = columns[0],
+                Name = columns[1],
+                Slot = columns[2],
+                HP = ParseInt(columns[3], nameof(EquipmentConfig.HP), i + 1),
+                ATK = ParseInt(columns[4], nameof(EquipmentConfig.ATK), i + 1),
+                DEF = ParseInt(columns[5], nameof(EquipmentConfig.DEF), i + 1),
+                MP = ParseInt(columns[6], nameof(EquipmentConfig.MP), i + 1),
+                Notes = columns[7]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new EquipmentDatabase();
+        database.equipments = configs;
+        WriteJson(EquipmentJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} equipments to {EquipmentJsonPath}");
     }
 
     [MenuItem("工具/配置/仅导入语言表")]

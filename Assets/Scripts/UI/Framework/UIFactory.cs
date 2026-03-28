@@ -160,6 +160,90 @@ namespace Wuxing.UI
             return element;
         }
 
+        public static ScrollRect CreateScrollRect(Transform parent, string name, Color backgroundColor)
+        {
+            var root = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(ScrollRect));
+            root.transform.SetParent(parent, false);
+
+            var rootRect = root.GetComponent<RectTransform>();
+            Stretch(rootRect);
+
+            var rootImage = root.GetComponent<Image>();
+            rootImage.color = backgroundColor;
+
+            var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+            viewport.transform.SetParent(root.transform, false);
+            var viewportRect = viewport.GetComponent<RectTransform>();
+            viewportRect.anchorMin = new Vector2(0f, 0f);
+            viewportRect.anchorMax = new Vector2(1f, 1f);
+            viewportRect.offsetMin = Vector2.zero;
+            viewportRect.offsetMax = new Vector2(-28f, 0f);
+            var viewportImage = viewport.GetComponent<Image>();
+            viewportImage.color = new Color(1f, 1f, 1f, 0.02f);
+            viewportImage.raycastTarget = true;
+            viewport.GetComponent<Mask>().showMaskGraphic = false;
+            viewport.AddComponent<UIScrollFollowController>();
+
+            var content = new GameObject("Content", typeof(RectTransform));
+            content.transform.SetParent(viewport.transform, false);
+            var contentRect = content.GetComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0f, 1f);
+            contentRect.anchorMax = new Vector2(1f, 1f);
+            contentRect.pivot = new Vector2(0.5f, 1f);
+            contentRect.offsetMin = new Vector2(0f, 0f);
+            contentRect.offsetMax = new Vector2(0f, 0f);
+
+            var scrollbarRoot = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+            scrollbarRoot.transform.SetParent(root.transform, false);
+            var scrollbarRect = scrollbarRoot.GetComponent<RectTransform>();
+            scrollbarRect.anchorMin = new Vector2(1f, 0f);
+            scrollbarRect.anchorMax = new Vector2(1f, 1f);
+            scrollbarRect.pivot = new Vector2(1f, 1f);
+            scrollbarRect.offsetMin = new Vector2(-18f, 10f);
+            scrollbarRect.offsetMax = new Vector2(-6f, -10f);
+
+            var scrollbarBackground = scrollbarRoot.GetComponent<Image>();
+            scrollbarBackground.color = new Color(0.35f, 0.22f, 0.22f, 0.9f);
+
+            var slidingArea = new GameObject("SlidingArea", typeof(RectTransform));
+            slidingArea.transform.SetParent(scrollbarRoot.transform, false);
+            var slidingAreaRect = slidingArea.GetComponent<RectTransform>();
+            slidingAreaRect.anchorMin = Vector2.zero;
+            slidingAreaRect.anchorMax = Vector2.one;
+            slidingAreaRect.offsetMin = new Vector2(1f, 1f);
+            slidingAreaRect.offsetMax = new Vector2(-1f, -1f);
+
+            var handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+            handle.transform.SetParent(slidingArea.transform, false);
+            var handleRect = handle.GetComponent<RectTransform>();
+            handleRect.anchorMin = Vector2.zero;
+            handleRect.anchorMax = Vector2.one;
+            handleRect.offsetMin = Vector2.zero;
+            handleRect.offsetMax = Vector2.zero;
+            var handleImage = handle.GetComponent<Image>();
+            handleImage.color = new Color(0.95f, 0.84f, 0.72f, 1f);
+
+            var scrollbar = scrollbarRoot.GetComponent<Scrollbar>();
+            scrollbar.direction = Scrollbar.Direction.BottomToTop;
+            scrollbar.targetGraphic = handleImage;
+            scrollbar.handleRect = handleRect;
+            scrollbar.numberOfSteps = 0;
+
+            var scrollRect = root.GetComponent<ScrollRect>();
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = contentRect;
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+            scrollRect.scrollSensitivity = 40f;
+            scrollRect.inertia = true;
+            scrollRect.verticalScrollbar = scrollbar;
+            scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
+            scrollRect.verticalScrollbarSpacing = 6f;
+
+            return scrollRect;
+        }
+
         public static void Stretch(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;

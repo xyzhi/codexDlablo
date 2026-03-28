@@ -7,6 +7,13 @@ namespace Wuxing.UI
 {
     public class UIConfirmPopup : UIPopup
     {
+        private static readonly Vector2 DefaultConfirmAnchorMin = new Vector2(0.1f, 0.08f);
+        private static readonly Vector2 DefaultConfirmAnchorMax = new Vector2(0.44f, 0.24f);
+        private static readonly Vector2 DefaultCancelAnchorMin = new Vector2(0.56f, 0.08f);
+        private static readonly Vector2 DefaultCancelAnchorMax = new Vector2(0.9f, 0.24f);
+        private static readonly Vector2 SingleConfirmAnchorMin = new Vector2(0.28f, 0.08f);
+        private static readonly Vector2 SingleConfirmAnchorMax = new Vector2(0.72f, 0.24f);
+
         [SerializeField] private Text titleText;
         [SerializeField] private Text messageText;
         [SerializeField] private Button confirmButton;
@@ -80,6 +87,7 @@ namespace Wuxing.UI
 
             _onConfirm = onConfirm;
             _onCancel = onCancel;
+            RefreshButtonLayout();
         }
 
         private void Confirm()
@@ -100,6 +108,37 @@ namespace Wuxing.UI
             }
 
             UIManager.Instance.CloseTopPopup();
+        }
+
+        private void RefreshButtonLayout()
+        {
+            if (confirmButton != null)
+            {
+                var confirmRect = confirmButton.GetComponent<RectTransform>();
+                if (confirmRect != null)
+                {
+                    confirmRect.anchorMin = _onCancel == null ? SingleConfirmAnchorMin : DefaultConfirmAnchorMin;
+                    confirmRect.anchorMax = _onCancel == null ? SingleConfirmAnchorMax : DefaultConfirmAnchorMax;
+                    confirmRect.offsetMin = Vector2.zero;
+                    confirmRect.offsetMax = Vector2.zero;
+                }
+            }
+
+            if (cancelButton != null)
+            {
+                cancelButton.gameObject.SetActive(_onCancel != null);
+                if (_onCancel != null)
+                {
+                    var cancelRect = cancelButton.GetComponent<RectTransform>();
+                    if (cancelRect != null)
+                    {
+                        cancelRect.anchorMin = DefaultCancelAnchorMin;
+                        cancelRect.anchorMax = DefaultCancelAnchorMax;
+                        cancelRect.offsetMin = Vector2.zero;
+                        cancelRect.offsetMax = Vector2.zero;
+                    }
+                }
+            }
         }
     }
 }
