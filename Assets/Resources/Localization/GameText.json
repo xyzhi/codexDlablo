@@ -1,0 +1,149 @@
+{
+    "entries": [
+        {
+            "key": "menu.title",
+            "zhHans": "五行原型",
+            "en": "Wuxing Prototype"
+        },
+        {
+            "key": "menu.subtitle",
+            "zhHans": "第一阶段 / 第一步 / 文字与线框 UGUI",
+            "en": "Phase 1 / Step 1 / Text and line UGUI"
+        },
+        {
+            "key": "menu.button_battle",
+            "zhHans": "进入战斗页",
+            "en": "Open Battle Page"
+        },
+        {
+            "key": "menu.button_popup",
+            "zhHans": "打开确认弹窗",
+            "en": "Open Confirm Popup"
+        },
+        {
+            "key": "menu.button_toast",
+            "zhHans": "显示提示",
+            "en": "Show Toast"
+        },
+        {
+            "key": "menu.button_language",
+            "zhHans": "切换语言",
+            "en": "Switch Language"
+        },
+        {
+            "key": "menu.footer",
+            "zhHans": "这一版先只用文字、线条和矩形框，方便后续替换美术。",
+            "en": "This version uses text"
+        },
+        {
+            "key": "battle.title",
+            "zhHans": "战斗页占位",
+            "en": "Battle Page Placeholder"
+        },
+        {
+            "key": "battle.player_team",
+            "zhHans": "我方队伍",
+            "en": "Player Team"
+        },
+        {
+            "key": "battle.player_content",
+            "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150",
+            "en": "Unit A  HP 120/120\nUnit B  HP 150/150"
+        },
+        {
+            "key": "battle.enemy_team",
+            "zhHans": "敌方队伍",
+            "en": "Enemy Team"
+        },
+        {
+            "key": "battle.enemy_content",
+            "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90",
+            "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90"
+        },
+        {
+            "key": "battle.log_title",
+            "zhHans": "战斗日志",
+            "en": "Battle Log"
+        },
+        {
+            "key": "battle.log_content",
+            "zhHans": "下一步这里会接真实战斗日志。",
+            "en": "This area will show real battle logs in the next step."
+        },
+        {
+            "key": "battle.status_idle",
+            "zhHans": "等待开始战斗",
+            "en": "Waiting to start battle"
+        },
+        {
+            "key": "battle.status_victory",
+            "zhHans": "战斗胜利",
+            "en": "Battle Victory"
+        },
+        {
+            "key": "battle.status_defeat",
+            "zhHans": "战斗失败",
+            "en": "Battle Defeat"
+        },
+        {
+            "key": "battle.button_start",
+            "zhHans": "开始战斗",
+            "en": "Start Battle"
+        },
+        {
+            "key": "battle.button_back",
+            "zhHans": "返回主菜单",
+            "en": "Back To Main Menu"
+        },
+        {
+            "key": "battle.button_tip",
+            "zhHans": "显示提示",
+            "en": "Show Tip"
+        },
+        {
+            "key": "popup.confirm.title",
+            "zhHans": "确认",
+            "en": "Confirm"
+        },
+        {
+            "key": "popup.confirm.message",
+            "zhHans": "这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。",
+            "en": "This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later."
+        },
+        {
+            "key": "popup.confirm_button",
+            "zhHans": "确认",
+            "en": "Confirm"
+        },
+        {
+            "key": "popup.cancel_button",
+            "zhHans": "取消",
+            "en": "Cancel"
+        },
+        {
+            "key": "toast.framework_ready",
+            "zhHans": "UI 框架已经就绪。",
+            "en": "UI framework is ready."
+        },
+        {
+            "key": "toast.confirmed",
+            "zhHans": "你点击了确认。",
+            "en": "Confirm clicked."
+        },
+        {
+            "key": "toast.cancelled",
+            "zhHans": "你取消了操作。",
+            "en": "Cancelled."
+        },
+        {
+            "key": "toast.battle_next",
+            "zhHans": "下一步会接入真正的战斗系统。",
+            "en": "The real battle system will be connected next."
+        },
+        {
+            "key": "toast.language_changed",
+            "zhHans": "语言已切换。",
+            "en": "Language switched."
+        }
+    ]
+}

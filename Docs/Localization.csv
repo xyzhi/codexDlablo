@@ -1,0 +1,34 @@
+Key,ZhHans,En
+menu.title,五行原型,Wuxing Prototype
+menu.subtitle,第一阶段 / 第一步 / 文字与线框 UGUI,Phase 1 / Step 1 / Text and line UGUI
+menu.button_battle,进入战斗页,Open Battle Page
+menu.button_popup,打开确认弹窗,Open Confirm Popup
+menu.button_toast,显示提示,Show Toast
+menu.button_language,切换语言,Switch Language
+menu.footer,这一版先只用文字、线条和矩形框，方便后续替换美术。,This version uses text, lines, and rectangles first so art can be replaced later.
+battle.title,战斗页占位,Battle Page Placeholder
+battle.player_team,我方队伍,Player Team
+battle.player_content,"角色甲  HP 120/120
+角色乙  HP 150/150","Unit A  HP 120/120
+Unit B  HP 150/150"
+battle.enemy_team,敌方队伍,Enemy Team
+battle.enemy_content,"敌人甲  HP 100/100
+敌人乙  HP 90/90","Enemy A  HP 100/100
+Enemy B  HP 90/90"
+battle.log_title,战斗日志,Battle Log
+battle.log_content,下一步这里会接真实战斗日志。,This area will show real battle logs in the next step.
+battle.status_idle,等待开始战斗,Waiting to start battle
+battle.status_victory,战斗胜利,Battle Victory
+battle.status_defeat,战斗失败,Battle Defeat
+battle.button_start,开始战斗,Start Battle
+battle.button_back,返回主菜单,Back To Main Menu
+battle.button_tip,显示提示,Show Tip
+popup.confirm.title,确认,Confirm
+popup.confirm.message,这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。,This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later.
+popup.confirm_button,确认,Confirm
+popup.cancel_button,取消,Cancel
+toast.framework_ready,UI 框架已经就绪。,UI framework is ready.
+toast.confirmed,你点击了确认。,Confirm clicked.
+toast.cancelled,你取消了操作。,Cancelled.
+toast.battle_next,下一步会接入真正的战斗系统。,The real battle system will be connected next.
+toast.language_changed,语言已切换。,Language switched.
