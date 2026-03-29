@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Battle;
 using Wuxing.Config;
+using Wuxing.Game;
 using Wuxing.Localization;
 
 namespace Wuxing.UI
@@ -14,9 +15,8 @@ namespace Wuxing.UI
     {
         [SerializeField] private GameObject battleLogOverlay;
         [SerializeField] private Button backButton;
-        [SerializeField] private Button tipButton;
         [SerializeField] private Button startBattleButton;
-        [SerializeField] private Button closeLogButton;
+        [SerializeField] private Button restartButton;
         [SerializeField] private Button equipmentButton;
         [SerializeField] private Button closeEquipmentButton;
         [SerializeField] private Button cycleEquipmentPresetButton;
@@ -24,8 +24,12 @@ namespace Wuxing.UI
         [SerializeField] private Button cycleWeaponButton;
         [SerializeField] private Button cycleArmorButton;
         [SerializeField] private Button cycleAccessoryButton;
+        [SerializeField] private Button autoOffenseButton;
+        [SerializeField] private Button autoDefenseButton;
+        [SerializeField] private Button resetEquipmentButton;
         [SerializeField] private GameObject equipmentPanel;
         [SerializeField] private Text equipmentDetailText;
+        [SerializeField] private Text stageInfoText;
         [SerializeField] private Text statusText;
         [SerializeField] private Text playerTeamText;
         [SerializeField] private Text enemyTeamText;
@@ -43,7 +47,18 @@ namespace Wuxing.UI
 
         public override void OnOpen(object data)
         {
-            RefreshPreview();
+            GameProgressManager.StartRun();
+            ResetCurrentBattleState();
+        }
+
+        private void OnEnable()
+        {
+            LocalizationManager.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnDisable()
+        {
+            LocalizationManager.LanguageChanged -= OnLanguageChanged;
         }
 
         private void Awake()
@@ -64,19 +79,14 @@ namespace Wuxing.UI
                 backButton.onClick.AddListener(OnClickBack);
             }
 
-            if (tipButton != null)
-            {
-                tipButton.onClick.AddListener(OnClickTip);
-            }
-
             if (startBattleButton != null)
             {
                 startBattleButton.onClick.AddListener(OnClickStartBattle);
             }
 
-            if (closeLogButton != null)
+            if (restartButton != null)
             {
-                closeLogButton.onClick.AddListener(OnClickCloseLog);
+                restartButton.onClick.AddListener(OnClickRestart);
             }
 
             if (equipmentButton != null)
@@ -113,6 +123,21 @@ namespace Wuxing.UI
             {
                 cycleAccessoryButton.onClick.AddListener(OnClickCycleAccessory);
             }
+
+            if (autoOffenseButton != null)
+            {
+                autoOffenseButton.onClick.AddListener(OnClickAutoOffense);
+            }
+
+            if (autoDefenseButton != null)
+            {
+                autoDefenseButton.onClick.AddListener(OnClickAutoDefense);
+            }
+
+            if (resetEquipmentButton != null)
+            {
+                resetEquipmentButton.onClick.AddListener(OnClickResetEquipment);
+            }
         }
 
         private void OnDestroy()
@@ -132,19 +157,14 @@ namespace Wuxing.UI
                 backButton.onClick.RemoveListener(OnClickBack);
             }
 
-            if (tipButton != null)
-            {
-                tipButton.onClick.RemoveListener(OnClickTip);
-            }
-
             if (startBattleButton != null)
             {
                 startBattleButton.onClick.RemoveListener(OnClickStartBattle);
             }
 
-            if (closeLogButton != null)
+            if (restartButton != null)
             {
-                closeLogButton.onClick.RemoveListener(OnClickCloseLog);
+                restartButton.onClick.RemoveListener(OnClickRestart);
             }
 
             if (equipmentButton != null)
@@ -181,16 +201,26 @@ namespace Wuxing.UI
             {
                 cycleAccessoryButton.onClick.RemoveListener(OnClickCycleAccessory);
             }
+
+            if (autoOffenseButton != null)
+            {
+                autoOffenseButton.onClick.RemoveListener(OnClickAutoOffense);
+            }
+
+            if (autoDefenseButton != null)
+            {
+                autoDefenseButton.onClick.RemoveListener(OnClickAutoDefense);
+            }
+
+            if (resetEquipmentButton != null)
+            {
+                resetEquipmentButton.onClick.RemoveListener(OnClickResetEquipment);
+            }
         }
 
         private void OnClickBack()
         {
-            UIManager.Instance.ShowPage("MainMenu");
-        }
-
-        private void OnClickTip()
-        {
-            UIManager.Instance.ShowToastByKey("toast.battle_next");
+            UIManager.Instance.ShowPage("Map");
         }
 
         private void OnClickStartBattle()
@@ -204,9 +234,10 @@ namespace Wuxing.UI
             battlePlaybackCoroutine = StartCoroutine(PlayBattle());
         }
 
-        private void OnClickCloseLog()
+        private void OnClickRestart()
         {
-            SetLogOverlayVisible(false);
+            GameProgressManager.ResetRun();
+            UIManager.Instance.ShowPage("MainMenu");
         }
 
         private void OnClickEquipment()
@@ -256,6 +287,30 @@ namespace Wuxing.UI
             CycleSelectedEquipmentSlot("Accessory");
         }
 
+        private void OnClickAutoOffense()
+        {
+            BattleManager.AutoEquipPlayerUnitOffense(selectedEquipmentUnitIndex);
+            RefreshPreview();
+            RefreshEquipmentPanel();
+            SetEquipmentPanelVisible(true);
+        }
+
+        private void OnClickAutoDefense()
+        {
+            BattleManager.AutoEquipPlayerUnitDefense(selectedEquipmentUnitIndex);
+            RefreshPreview();
+            RefreshEquipmentPanel();
+            SetEquipmentPanelVisible(true);
+        }
+
+        private void OnClickResetEquipment()
+        {
+            BattleManager.ResetPlayerEquipmentOverrides();
+            RefreshPreview();
+            RefreshEquipmentPanel();
+            SetEquipmentPanelVisible(true);
+        }
+
         private IEnumerator PlayBattle()
         {
             SetButtonsInteractable(false);
@@ -278,6 +333,17 @@ namespace Wuxing.UI
             SetButtonsInteractable(true);
             ShowBattleResultPopup(playback);
             battlePlaybackCoroutine = null;
+        }
+
+        private void ResetCurrentBattleState()
+        {
+            if (battlePlaybackCoroutine != null)
+            {
+                StopCoroutine(battlePlaybackCoroutine);
+                battlePlaybackCoroutine = null;
+            }
+
+            RefreshPreview();
         }
 
         private void ApplyBattleEvent(BattleEvent battleEvent)
@@ -323,34 +389,41 @@ namespace Wuxing.UI
 
         private void RefreshPreview()
         {
-            ApplyStatus(LocalizationManager.GetText("battle.status_idle"));
+            ApplyStageInfo();
+            ApplyStatus(BattleManager.BuildBattlePreparationStatus());
+
+            var previewPlayback = BattleManager.RunSampleBattlePlayback();
+            var previewEvent = previewPlayback.Events.Count > 0 ? previewPlayback.Events[0] : null;
 
             if (playerTeamText != null)
             {
-                playerTeamText.text = LocalizationManager.GetText("battle.player_content");
+                playerTeamText.text = previewEvent != null && !string.IsNullOrEmpty(previewEvent.PlayerTeamSummary)
+                    ? previewEvent.PlayerTeamSummary
+                    : LocalizationManager.GetText("battle.player_content");
             }
 
             if (enemyTeamText != null)
             {
-                enemyTeamText.text = LocalizationManager.GetText("battle.enemy_content");
+                enemyTeamText.text = previewEvent != null && !string.IsNullOrEmpty(previewEvent.EnemyTeamSummary)
+                    ? previewEvent.EnemyTeamSummary
+                    : LocalizationManager.GetText("battle.enemy_content");
             }
 
-            var previewPlayback = BattleManager.RunSampleBattlePlayback();
             if (playerEquipmentText != null)
             {
-                playerEquipmentText.text = previewPlayback.Events.Count > 0
-                    ? previewPlayback.Events[0].PlayerEquipmentSummary
+                playerEquipmentText.text = previewEvent != null
+                    ? previewEvent.PlayerEquipmentSummary
                     : LocalizationManager.GetText("battle.equipment_none");
             }
 
             if (enemyEquipmentText != null)
             {
-                enemyEquipmentText.text = previewPlayback.Events.Count > 0
-                    ? previewPlayback.Events[0].EnemyEquipmentSummary
+                enemyEquipmentText.text = previewEvent != null
+                    ? previewEvent.EnemyEquipmentSummary
                     : LocalizationManager.GetText("battle.equipment_none");
             }
 
-            ApplyBattleLog(LocalizationManager.GetText("battle.log_content"));
+            ApplyBattleLog(BattleManager.BuildBattlePreparationSummary());
             ResetLogFollow();
             RefreshEquipmentPanel();
             SetEquipmentPanelVisible(false);
@@ -364,6 +437,22 @@ namespace Wuxing.UI
             {
                 statusText.text = status;
             }
+        }
+
+        private void ApplyStageInfo()
+        {
+            if (stageInfoText == null)
+            {
+                return;
+            }
+
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            var stage = GameProgressManager.GetCurrentStage();
+            var region = GameProgressManager.GetStageTheme(isEnglish, stage);
+            stageInfoText.text = isEnglish
+                ? "Stage " + stage + " / " + region
+                : "第 " + stage + " 关 / " + region;
         }
 
         private void ApplyBattleLog(string content)
@@ -596,12 +685,59 @@ namespace Wuxing.UI
                 ? LocalizationManager.GetText("battle.status_victory")
                 : LocalizationManager.GetText("battle.status_defeat");
 
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            var stageText = isEnglish
+                ? "Stage " + GameProgressManager.GetCurrentStage()
+                : "第 " + GameProgressManager.GetCurrentStage() + " 关";
             var message =
+                stageText + "\n" +
                 LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n" +
+                GameProgressManager.BuildPostBattleNextStep(isEnglish, playback.IsVictory) + "\n\n" +
                 LocalizationManager.GetText("battle.player_team") + "\n" + playback.FinalPlayerTeamSummary + "\n\n" +
                 LocalizationManager.GetText("battle.enemy_team") + "\n" + playback.FinalEnemyTeamSummary;
+            var confirmLabel = isEnglish ? (playback.IsVictory ? "Next Stage" : "Retry") : (playback.IsVictory ? "下一关" : "重试");
+            var cancelLabel = isEnglish ? "Close" : "关闭";
+            GameProgressManager.RecordBattleResult(playback.IsVictory, GameProgressManager.GetCurrentStage(), playback.TotalRounds);
 
-            popup.Setup(title, message, false, delegate { }, null);
+            popup.Setup(
+                title,
+                message,
+                false,
+                delegate
+                {
+                    if (playback.IsVictory)
+                    {
+                        var advanceResult = GameProgressManager.AdvanceAfterVictory();
+                        if (advanceResult == RunAdvanceResult.LifespanEnded)
+                        {
+                            UIManager.Instance.ShowToast(isEnglish
+                                ? "Lifespan exhausted. The run has ended."
+                                : "阳寿已尽，本轮结束。", 2f);
+                            UIManager.Instance.ShowPage("MainMenu");
+                            return;
+                        }
+
+                        if (advanceResult == RunAdvanceResult.ChapterComplete)
+                        {
+                            UIManager.Instance.ShowToast(isEnglish
+                                ? "This route is complete."
+                                : "本轮路线已完成。", 2f);
+                            UIManager.Instance.ShowPage("MainMenu");
+                            return;
+                        }
+
+                        UIManager.Instance.ShowPage("Map");
+                    }
+                    else
+                    {
+                        GameProgressManager.RetryCurrentStage();
+                        UIManager.Instance.ShowPage("Battle");
+                    }
+                },
+                delegate { },
+                confirmLabel,
+                cancelLabel);
         }
 
         private void RefreshEquipmentPanel()
@@ -703,9 +839,20 @@ namespace Wuxing.UI
                 startBattleButton.interactable = interactable;
             }
 
-            if (tipButton != null)
+            if (restartButton != null)
             {
-                tipButton.interactable = interactable;
+                restartButton.interactable = interactable;
+            }
+        }
+
+        private void OnLanguageChanged()
+        {
+            RefreshPreview();
+
+            if (equipmentPanel != null && equipmentPanel.activeSelf)
+            {
+                RefreshEquipmentPanel();
+                SetEquipmentPanelVisible(true);
             }
         }
 
@@ -737,15 +884,15 @@ namespace Wuxing.UI
             UpdateButtonText(cycleWeaponButton, BuildSlotButtonText("Weapon"));
             UpdateButtonText(cycleArmorButton, BuildSlotButtonText("Armor"));
             UpdateButtonText(cycleAccessoryButton, BuildSlotButtonText("Accessory"));
+            UpdateButtonText(autoOffenseButton, BuildAutoOffenseButtonText());
+            UpdateButtonText(autoDefenseButton, BuildAutoDefenseButtonText());
+            UpdateButtonText(resetEquipmentButton, BuildResetButtonText());
         }
 
         private string BuildSelectedUnitButtonText()
         {
-            var isEnglish = LocalizationManager.Instance != null
-                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
-
             var unitName = BattleManager.GetPlayerEquipmentUnitName(selectedEquipmentUnitIndex);
-            return isEnglish ? "Unit: " + unitName : "角色: " + unitName;
+            return LocalizationManager.GetText("battle.editor_unit_prefix") + unitName;
         }
 
         private string BuildSlotButtonText(string slot)
@@ -753,29 +900,39 @@ namespace Wuxing.UI
             var isEnglish = LocalizationManager.Instance != null
                 && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
 
-            var slotName = GetSlotDisplayName(slot, isEnglish);
+            var slotName = GetSlotDisplayName(slot);
             var equipmentName = BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slot);
             return slotName + ": " + equipmentName;
         }
 
-        private static string GetSlotDisplayName(string slot, bool isEnglish)
+        private static string GetSlotDisplayName(string slot)
         {
-            if (isEnglish)
-            {
-                return slot;
-            }
-
             switch (slot)
             {
                 case "Weapon":
-                    return "武器";
+                    return LocalizationManager.GetText("battle.slot_weapon");
                 case "Armor":
-                    return "护甲";
+                    return LocalizationManager.GetText("battle.slot_armor");
                 case "Accessory":
-                    return "饰品";
+                    return LocalizationManager.GetText("battle.slot_accessory");
                 default:
                     return slot;
             }
+        }
+
+        private string BuildResetButtonText()
+        {
+            return LocalizationManager.GetText("battle.button_reset_loadout");
+        }
+
+        private string BuildAutoOffenseButtonText()
+        {
+            return LocalizationManager.GetText("battle.button_auto_offense");
+        }
+
+        private string BuildAutoDefenseButtonText()
+        {
+            return LocalizationManager.GetText("battle.button_auto_defense");
         }
 
         private static void UpdateButtonText(Button button, string text)
@@ -793,3 +950,7 @@ namespace Wuxing.UI
         }
     }
 }
+
+
+
+

@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Wuxing.Config
 {
@@ -19,3 +19,4 @@ namespace Wuxing.Config
         }
     }
 }
+

@@ -1,4 +1,4 @@
-namespace Wuxing.Battle
+﻿namespace Wuxing.Battle
 {
     public class BattleEvent
     {
@@ -12,3 +12,4 @@ namespace Wuxing.Battle
         public bool? IsVictory;
     }
 }
+

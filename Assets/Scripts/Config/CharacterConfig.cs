@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 
 namespace Wuxing.Config
@@ -20,3 +20,4 @@ namespace Wuxing.Config
         public string GrowthNotes;
     }
 }
+

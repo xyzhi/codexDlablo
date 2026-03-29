@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Wuxing.Config
@@ -44,3 +44,4 @@ namespace Wuxing.Config
         }
     }
 }
+

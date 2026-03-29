@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Wuxing.Localization
 {
@@ -16,3 +16,4 @@ namespace Wuxing.Localization
         public LocalizationEntry[] entries;
     }
 }
+

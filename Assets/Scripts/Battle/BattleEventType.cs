@@ -1,4 +1,4 @@
-namespace Wuxing.Battle
+﻿namespace Wuxing.Battle
 {
     public enum BattleEventType
     {
@@ -7,3 +7,4 @@ namespace Wuxing.Battle
         BattleEnd = 2
     }
 }
+

@@ -1,4 +1,4 @@
-namespace Wuxing.Localization
+﻿namespace Wuxing.Localization
 {
     public enum GameLanguage
     {
@@ -6,3 +6,4 @@ namespace Wuxing.Localization
         English = 1
     }
 }
+

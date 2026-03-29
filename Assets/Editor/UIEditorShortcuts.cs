@@ -1,4 +1,4 @@
-using UnityEditor;
+﻿using UnityEditor;
 
 public static class UIEditorShortcuts
 {
@@ -8,3 +8,4 @@ public static class UIEditorShortcuts
         UIPrefabBuilder.BuildPrefabs();
     }
 }
+

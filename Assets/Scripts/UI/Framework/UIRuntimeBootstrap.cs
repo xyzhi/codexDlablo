@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Wuxing.UI
 {
@@ -17,3 +17,4 @@ namespace Wuxing.UI
         }
     }
 }
+

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +11,6 @@ public static class UIPrefabBuilder
     private const string PagesFolder = RootFolder + "/Pages";
     private const string PopupsFolder = RootFolder + "/Popups";
 
-    [MenuItem("工具/UI/生成UI预设")]
     public static void BuildPrefabs()
     {
         EnsureFolder("Assets/Resources");
@@ -22,6 +21,7 @@ public static class UIPrefabBuilder
 
         BuildCanvasRootPrefab();
         BuildMainMenuPrefab();
+        BuildMapPagePrefab();
         BuildBattlePagePrefab();
         BuildConfirmPopupPrefab();
         BuildToastPopupPrefab();
@@ -66,10 +66,13 @@ public static class UIPrefabBuilder
         var subtitleText = UIFactory.CreateText(subtitle, "SubTitleText", "Phase 1 / Step 1 / Text and line UGUI", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.84f, 0.9f, 1f));
         AddLocalizedText(subtitleText, "menu.subtitle");
 
+        var progress = UIFactory.CreateContainer(root.transform, "Progress", new Vector2(0.16f, 0.58f), new Vector2(0.84f, 0.64f), Vector2.zero, Vector2.zero);
+        var progressText = UIFactory.CreateText(progress, "ProgressText", "Current Stage 1 / Highest Cleared 0", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.86f, 0.72f, 1f));
+
         var menuPanel = UIFactory.CreatePanel(root.transform, "MenuPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
         var menuRect = menuPanel.GetComponent<RectTransform>();
         menuRect.anchorMin = new Vector2(0.16f, 0.18f);
-        menuRect.anchorMax = new Vector2(0.84f, 0.62f);
+        menuRect.anchorMax = new Vector2(0.84f, 0.56f);
         menuRect.offsetMin = Vector2.zero;
         menuRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(menuPanel.transform, "MenuOutline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
@@ -103,7 +106,82 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "popupButton", popupButton);
         BindSerializedProperty(page, "toastButton", toastButton);
         BindSerializedProperty(page, "languageButton", languageButton);
+        BindSerializedProperty(page, "progressText", progressText);
         SavePrefab(root, PagesFolder + "/MainMenuPage.prefab");
+    }
+
+    private static void BuildMapPagePrefab()
+    {
+        var root = UIFactory.CreatePanel(null, "MapPage", new Color(0.08f, 0.09f, 0.11f, 1f));
+        UIFactory.AddOutlineBox(root.transform, "MapFrame", new Color(0.84f, 0.8f, 0.68f, 0.8f), 2f);
+
+        var title = UIFactory.CreateContainer(root.transform, "Title", new Vector2(0.08f, 0.91f), new Vector2(0.92f, 0.97f), Vector2.zero, Vector2.zero);
+        var titleText = UIFactory.CreateText(title, "TitleText", "Map Route", 42, TextAnchor.MiddleCenter, Color.white);
+
+        var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.08f, 0.86f), new Vector2(0.92f, 0.91f), Vector2.zero, Vector2.zero);
+        var statusText = UIFactory.CreateText(status, "StatusText", "Current Node", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.88f, 0.74f, 1f));
+
+        var region = UIFactory.CreateContainer(root.transform, "Region", new Vector2(0.08f, 0.81f), new Vector2(0.92f, 0.85f), Vector2.zero, Vector2.zero);
+        var regionText = UIFactory.CreateText(region, "RegionText", "Region", 24, TextAnchor.MiddleCenter, new Color(0.8f, 0.9f, 0.95f, 1f));
+
+        var longevityPanel = UIFactory.CreatePanel(root.transform, "LongevityPanel", new Color(0.14f, 0.11f, 0.11f, 0.92f));
+        var longevityRect = longevityPanel.GetComponent<RectTransform>();
+        longevityRect.anchorMin = new Vector2(0.08f, 0.72f);
+        longevityRect.anchorMax = new Vector2(0.92f, 0.79f);
+        longevityRect.offsetMin = Vector2.zero;
+        longevityRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(longevityPanel.transform, "LongevityOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
+        var longevityText = UIFactory.CreateText(longevityPanel.transform, "LongevityText", "Lifespan", 28, TextAnchor.MiddleCenter, new Color(0.95f, 0.92f, 0.8f, 1f));
+        longevityText.rectTransform.offsetMin = new Vector2(18f, 6f);
+        longevityText.rectTransform.offsetMax = new Vector2(-18f, -6f);
+
+        var objectivePanel = UIFactory.CreatePanel(root.transform, "ObjectivePanel", new Color(0.13f, 0.13f, 0.16f, 0.94f));
+        var objectiveRect = objectivePanel.GetComponent<RectTransform>();
+        objectiveRect.anchorMin = new Vector2(0.08f, 0.58f);
+        objectiveRect.anchorMax = new Vector2(0.92f, 0.7f);
+        objectiveRect.offsetMin = Vector2.zero;
+        objectiveRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(objectivePanel.transform, "ObjectiveOutline", new Color(0.82f, 0.84f, 0.9f, 0.55f), 1f);
+        var objectiveText = UIFactory.CreateText(objectivePanel.transform, "ObjectiveText", "Objective", 24, TextAnchor.UpperLeft, Color.white);
+        objectiveText.rectTransform.offsetMin = new Vector2(18f, 12f);
+        objectiveText.rectTransform.offsetMax = new Vector2(-18f, -12f);
+
+        var routePanel = UIFactory.CreatePanel(root.transform, "RoutePanel", new Color(0.11f, 0.09f, 0.09f, 0.96f));
+        var routeRect = routePanel.GetComponent<RectTransform>();
+        routeRect.anchorMin = new Vector2(0.08f, 0.2f);
+        routeRect.anchorMax = new Vector2(0.92f, 0.55f);
+        routeRect.offsetMin = Vector2.zero;
+        routeRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(routePanel.transform, "RouteOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
+        var routeText = UIFactory.CreateText(routePanel.transform, "RouteText", "Route", 25, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        routeText.rectTransform.offsetMin = new Vector2(18f, 14f);
+        routeText.rectTransform.offsetMax = new Vector2(-18f, -14f);
+
+        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.12f, 0.05f), new Vector2(0.88f, 0.17f), Vector2.zero, Vector2.zero);
+        var footerLayout = UIFactory.AddVerticalLayout(footer.gameObject, 6, TextAnchor.MiddleCenter);
+        footerLayout.childForceExpandHeight = true;
+        footerLayout.childForceExpandWidth = true;
+
+        var advanceButton = UIFactory.CreateButton(footer, "AdvanceButton", "Enter Node", delegate { });
+        UIFactory.AddLayoutElement(advanceButton.gameObject, 38f);
+
+        var resetButton = UIFactory.CreateButton(footer, "ResetButton", "Reset Run", delegate { });
+        UIFactory.AddLayoutElement(resetButton.gameObject, 38f);
+
+        var backButton = UIFactory.CreateButton(footer, "BackButton", "Back To Menu", delegate { });
+        UIFactory.AddLayoutElement(backButton.gameObject, 38f);
+
+        var page = root.AddComponent<UIMapPage>();
+        BindSerializedProperty(page, "titleText", titleText);
+        BindSerializedProperty(page, "statusText", statusText);
+        BindSerializedProperty(page, "regionText", regionText);
+        BindSerializedProperty(page, "longevityText", longevityText);
+        BindSerializedProperty(page, "objectiveText", objectiveText);
+        BindSerializedProperty(page, "routeText", routeText);
+        BindSerializedProperty(page, "advanceButton", advanceButton);
+        BindSerializedProperty(page, "resetButton", resetButton);
+        BindSerializedProperty(page, "backButton", backButton);
+        SavePrefab(root, PagesFolder + "/MapPage.prefab");
     }
 
     private static void BuildBattlePagePrefab()
@@ -118,6 +196,9 @@ public static class UIPrefabBuilder
         var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.12f, 0.85f), new Vector2(0.88f, 0.9f), Vector2.zero, Vector2.zero);
         var statusText = UIFactory.CreateText(status, "StatusText", "Waiting", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.9f, 0.75f, 1f));
         AddLocalizedText(statusText, "battle.status_idle");
+
+        var stageInfo = UIFactory.CreateContainer(root.transform, "StageInfo", new Vector2(0.2f, 0.81f), new Vector2(0.8f, 0.85f), Vector2.zero, Vector2.zero);
+        var stageInfoText = UIFactory.CreateText(stageInfo, "StageInfoText", "Stage 1", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.88f, 0.96f, 1f));
 
         var overlay = UIFactory.CreatePanel(root.transform, "CombatOverlay", new Color(0.18f, 0.12f, 0.12f, 0.94f));
         var overlayRect = overlay.GetComponent<RectTransform>();
@@ -170,35 +251,38 @@ public static class UIPrefabBuilder
         AddLocalizedText(startButton.GetComponentInChildren<Text>(), "battle.button_start");
         UIFactory.AddLayoutElement(startButton.gameObject, 38f);
 
+        var restartButton = UIFactory.CreateButton(footer, "RestartButton", "Restart", delegate { });
+        AddLocalizedText(restartButton.GetComponentInChildren<Text>(), "battle.button_restart");
+        UIFactory.AddLayoutElement(restartButton.gameObject, 38f);
+
         var backButton = UIFactory.CreateButton(footer, "BackButton", "Back", delegate { });
         AddLocalizedText(backButton.GetComponentInChildren<Text>(), "battle.button_back");
         UIFactory.AddLayoutElement(backButton.gameObject, 38f);
-
-        var tipButton = UIFactory.CreateButton(footer, "TipButton", "Tip", delegate { });
-        AddLocalizedText(tipButton.GetComponentInChildren<Text>(), "battle.button_tip");
-        UIFactory.AddLayoutElement(tipButton.gameObject, 38f);
-
-        var closeLogButton = UIFactory.CreateButton(footer, "CloseLogButton", "Close Log", delegate { });
-        AddLocalizedText(closeLogButton.GetComponentInChildren<Text>(), "battle.button_close_log");
-        UIFactory.AddLayoutElement(closeLogButton.gameObject, 38f);
 
         var equipmentButton = UIFactory.CreateButton(footer, "EquipmentButton", "Equipment", delegate { });
         AddLocalizedText(equipmentButton.GetComponentInChildren<Text>(), "battle.button_equipment");
         UIFactory.AddLayoutElement(equipmentButton.gameObject, 38f);
 
-        var equipmentPanel = UIFactory.CreatePanel(overlay.transform, "EquipmentPanel", new Color(0.1f, 0.07f, 0.07f, 0.98f));
+        var equipmentPanel = UIFactory.CreatePanel(overlay.transform, "EquipmentPanel", new Color(0f, 0f, 0f, 0.55f));
         var equipmentPanelRect = equipmentPanel.GetComponent<RectTransform>();
-        equipmentPanelRect.anchorMin = new Vector2(0.06f, 0.16f);
-        equipmentPanelRect.anchorMax = new Vector2(0.94f, 0.84f);
+        equipmentPanelRect.anchorMin = Vector2.zero;
+        equipmentPanelRect.anchorMax = Vector2.one;
         equipmentPanelRect.offsetMin = Vector2.zero;
         equipmentPanelRect.offsetMax = Vector2.zero;
-        UIFactory.AddOutlineBox(equipmentPanel.transform, "EquipmentOutline", new Color(0.9f, 0.82f, 0.74f, 0.75f), 1f);
+        
+        var equipmentContent = UIFactory.CreatePanel(equipmentPanel.transform, "EquipmentContent", new Color(0.1f, 0.07f, 0.07f, 0.98f));
+        var equipmentContentRect = equipmentContent.GetComponent<RectTransform>();
+        equipmentContentRect.anchorMin = new Vector2(0.06f, 0.16f);
+        equipmentContentRect.anchorMax = new Vector2(0.94f, 0.84f);
+        equipmentContentRect.offsetMin = Vector2.zero;
+        equipmentContentRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(equipmentContent.transform, "EquipmentOutline", new Color(0.9f, 0.82f, 0.74f, 0.75f), 1f);
 
-        var equipmentTitle = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentTitle", new Vector2(0.05f, 0.88f), new Vector2(0.75f, 0.97f), Vector2.zero, Vector2.zero);
+        var equipmentTitle = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentTitle", new Vector2(0.05f, 0.88f), new Vector2(0.75f, 0.97f), Vector2.zero, Vector2.zero);
         var equipmentTitleText = UIFactory.CreateText(equipmentTitle, "EquipmentTitleText", "Equipment Detail", 30, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(equipmentTitleText, "battle.equipment_detail_title");
 
-        var cycleEquipmentButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleEquipmentButton", "Switch Preset", delegate { });
+        var cycleEquipmentButton = UIFactory.CreateButton(equipmentContent.transform, "CycleEquipmentButton", "Switch Preset", delegate { });
         AddLocalizedText(cycleEquipmentButton.GetComponentInChildren<Text>(), "battle.button_cycle_equipment");
         var cycleEquipmentRect = cycleEquipmentButton.GetComponent<RectTransform>();
         cycleEquipmentRect.anchorMin = new Vector2(0.05f, 0.78f);
@@ -206,35 +290,56 @@ public static class UIPrefabBuilder
         cycleEquipmentRect.offsetMin = Vector2.zero;
         cycleEquipmentRect.offsetMax = Vector2.zero;
 
-        var cycleEquipmentUnitButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleEquipmentUnitButton", "Unit", delegate { });
+        var cycleEquipmentUnitButton = UIFactory.CreateButton(equipmentContent.transform, "CycleEquipmentUnitButton", "Unit", delegate { });
         var cycleEquipmentUnitRect = cycleEquipmentUnitButton.GetComponent<RectTransform>();
         cycleEquipmentUnitRect.anchorMin = new Vector2(0.48f, 0.78f);
         cycleEquipmentUnitRect.anchorMax = new Vector2(0.95f, 0.87f);
         cycleEquipmentUnitRect.offsetMin = Vector2.zero;
         cycleEquipmentUnitRect.offsetMax = Vector2.zero;
 
-        var cycleWeaponButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleWeaponButton", "Weapon", delegate { });
+        var cycleWeaponButton = UIFactory.CreateButton(equipmentContent.transform, "CycleWeaponButton", "Weapon", delegate { });
         var cycleWeaponRect = cycleWeaponButton.GetComponent<RectTransform>();
         cycleWeaponRect.anchorMin = new Vector2(0.05f, 0.67f);
         cycleWeaponRect.anchorMax = new Vector2(0.3f, 0.76f);
         cycleWeaponRect.offsetMin = Vector2.zero;
         cycleWeaponRect.offsetMax = Vector2.zero;
 
-        var cycleArmorButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleArmorButton", "Armor", delegate { });
+        var cycleArmorButton = UIFactory.CreateButton(equipmentContent.transform, "CycleArmorButton", "Armor", delegate { });
         var cycleArmorRect = cycleArmorButton.GetComponent<RectTransform>();
         cycleArmorRect.anchorMin = new Vector2(0.37f, 0.67f);
         cycleArmorRect.anchorMax = new Vector2(0.62f, 0.76f);
         cycleArmorRect.offsetMin = Vector2.zero;
         cycleArmorRect.offsetMax = Vector2.zero;
 
-        var cycleAccessoryButton = UIFactory.CreateButton(equipmentPanel.transform, "CycleAccessoryButton", "Accessory", delegate { });
+        var cycleAccessoryButton = UIFactory.CreateButton(equipmentContent.transform, "CycleAccessoryButton", "Accessory", delegate { });
         var cycleAccessoryRect = cycleAccessoryButton.GetComponent<RectTransform>();
         cycleAccessoryRect.anchorMin = new Vector2(0.69f, 0.67f);
         cycleAccessoryRect.anchorMax = new Vector2(0.94f, 0.76f);
         cycleAccessoryRect.offsetMin = Vector2.zero;
         cycleAccessoryRect.offsetMax = Vector2.zero;
 
-        var closeEquipmentButton = UIFactory.CreateButton(equipmentPanel.transform, "CloseEquipmentButton", "Close", delegate { });
+        var autoOffenseButton = UIFactory.CreateButton(equipmentContent.transform, "AutoOffenseButton", "Auto Offense", delegate { });
+        var autoOffenseRect = autoOffenseButton.GetComponent<RectTransform>();
+        autoOffenseRect.anchorMin = new Vector2(0.05f, 0.56f);
+        autoOffenseRect.anchorMax = new Vector2(0.47f, 0.65f);
+        autoOffenseRect.offsetMin = Vector2.zero;
+        autoOffenseRect.offsetMax = Vector2.zero;
+
+        var autoDefenseButton = UIFactory.CreateButton(equipmentContent.transform, "AutoDefenseButton", "Auto Defense", delegate { });
+        var autoDefenseRect = autoDefenseButton.GetComponent<RectTransform>();
+        autoDefenseRect.anchorMin = new Vector2(0.53f, 0.56f);
+        autoDefenseRect.anchorMax = new Vector2(0.95f, 0.65f);
+        autoDefenseRect.offsetMin = Vector2.zero;
+        autoDefenseRect.offsetMax = Vector2.zero;
+
+        var resetEquipmentButton = UIFactory.CreateButton(equipmentContent.transform, "ResetEquipmentButton", "Reset", delegate { });
+        var resetEquipmentRect = resetEquipmentButton.GetComponent<RectTransform>();
+        resetEquipmentRect.anchorMin = new Vector2(0.05f, 0.45f);
+        resetEquipmentRect.anchorMax = new Vector2(0.95f, 0.54f);
+        resetEquipmentRect.offsetMin = Vector2.zero;
+        resetEquipmentRect.offsetMax = Vector2.zero;
+
+        var closeEquipmentButton = UIFactory.CreateButton(equipmentContent.transform, "CloseEquipmentButton", "Close", delegate { });
         AddLocalizedText(closeEquipmentButton.GetComponentInChildren<Text>(), "battle.button_close_equipment");
         var closeEquipmentRect = closeEquipmentButton.GetComponent<RectTransform>();
         closeEquipmentRect.anchorMin = new Vector2(0.72f, 0.88f);
@@ -242,16 +347,15 @@ public static class UIPrefabBuilder
         closeEquipmentRect.offsetMin = Vector2.zero;
         closeEquipmentRect.offsetMax = Vector2.zero;
 
-        var equipmentDetailRect = UIFactory.CreateContainer(equipmentPanel.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.63f), Vector2.zero, Vector2.zero);
+        var equipmentDetailRect = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.41f), Vector2.zero, Vector2.zero);
         var equipmentDetailText = UIFactory.CreateText(equipmentDetailRect, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
         equipmentPanel.SetActive(false);
 
         var page = root.AddComponent<UIBattlePage>();
         BindSerializedProperty(page, "battleLogOverlay", overlay);
         BindSerializedProperty(page, "backButton", backButton);
-        BindSerializedProperty(page, "tipButton", tipButton);
         BindSerializedProperty(page, "startBattleButton", startButton);
-        BindSerializedProperty(page, "closeLogButton", closeLogButton);
+        BindSerializedProperty(page, "restartButton", restartButton);
         BindSerializedProperty(page, "equipmentButton", equipmentButton);
         BindSerializedProperty(page, "closeEquipmentButton", closeEquipmentButton);
         BindSerializedProperty(page, "cycleEquipmentPresetButton", cycleEquipmentButton);
@@ -259,8 +363,12 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "cycleWeaponButton", cycleWeaponButton);
         BindSerializedProperty(page, "cycleArmorButton", cycleArmorButton);
         BindSerializedProperty(page, "cycleAccessoryButton", cycleAccessoryButton);
+        BindSerializedProperty(page, "autoOffenseButton", autoOffenseButton);
+        BindSerializedProperty(page, "autoDefenseButton", autoDefenseButton);
+        BindSerializedProperty(page, "resetEquipmentButton", resetEquipmentButton);
         BindSerializedProperty(page, "equipmentPanel", equipmentPanel);
         BindSerializedProperty(page, "equipmentDetailText", equipmentDetailText);
+        BindSerializedProperty(page, "stageInfoText", stageInfoText);
         BindSerializedProperty(page, "statusText", statusText);
         BindSerializedProperty(page, "playerTeamText", playerPanel.BodyText);
         BindSerializedProperty(page, "enemyTeamText", enemyPanel.BodyText);
@@ -433,3 +541,6 @@ public static class UIPrefabBuilder
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
     }
 }
+
+
+

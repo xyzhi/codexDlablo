@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Wuxing.Config;
 
 namespace Wuxing.Battle
@@ -93,3 +93,4 @@ namespace Wuxing.Battle
         }
     }
 }
+

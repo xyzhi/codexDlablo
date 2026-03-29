@@ -1,64 +1,524 @@
-{
-  "entries": [
-    { "key": "menu.title", "zhHans": "五行原型", "en": "Wuxing Prototype" },
-    { "key": "menu.subtitle", "zhHans": "第一阶段 / 第一步 / 文字与线框 UGUI", "en": "Phase 1 / Step 1 / Text and line UGUI" },
-    { "key": "menu.button_battle", "zhHans": "进入战斗页", "en": "Open Battle Page" },
-    { "key": "menu.button_popup", "zhHans": "打开确认弹窗", "en": "Open Confirm Popup" },
-    { "key": "menu.button_toast", "zhHans": "显示提示", "en": "Show Toast" },
-    { "key": "menu.button_language", "zhHans": "切换语言", "en": "Switch Language" },
-    { "key": "menu.button_rebuild_ui", "zhHans": "重建UI预设", "en": "Rebuild UI Prefabs" },
-    { "key": "menu.footer", "zhHans": "这一版先只用文字、线条和矩形框，方便后续替换美术。", "en": "This version uses text lines and rectangles first so art can be replaced later." },
-    { "key": "battle.summary_no_data", "zhHans": "无数据", "en": "No data" },
-    { "key": "battle.summary_no_units", "zhHans": "无单位", "en": "No units" },
-    { "key": "battle.summary_dead", "zhHans": "阵亡", "en": "KO" },
-    { "key": "battle.log_config_missing", "zhHans": "战斗配置缺失，请先导入全部 CSV。", "en": "Battle config missing. Import all CSV files first." },
-    { "key": "battle.title", "zhHans": "战斗页占位", "en": "Battle Page Placeholder" },
-    { "key": "battle.player_team", "zhHans": "我方队伍", "en": "Player Team" },
-    { "key": "battle.player_content", "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150", "en": "Unit A  HP 120/120\nUnit B  HP 150/150" },
-    { "key": "battle.enemy_team", "zhHans": "敌方队伍", "en": "Enemy Team" },
-    { "key": "battle.enemy_content", "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90", "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90" },
-    { "key": "battle.equipment_title", "zhHans": "装备", "en": "Equipment" },
-    { "key": "battle.equipment_none", "zhHans": "无装备", "en": "None" },
-    { "key": "battle.equipment_detail_title", "zhHans": "装备详情", "en": "Equipment Detail" },
-    { "key": "battle.equipment_preset_balanced", "zhHans": "均衡", "en": "Balanced" },
-    { "key": "battle.equipment_preset_burst", "zhHans": "爆发", "en": "Burst" },
-    { "key": "battle.log_title", "zhHans": "战斗日志", "en": "Battle Log" },
-    { "key": "battle.log_content", "zhHans": "下一步这里会接真实战斗日志。", "en": "This area will show real battle logs in the next step." },
-    { "key": "battle.log_round", "zhHans": "回合", "en": "Round" },
-    { "key": "battle.log_enemy_defeated", "zhHans": "敌方全灭", "en": "Enemy team defeated." },
-    { "key": "battle.log_player_defeated", "zhHans": "我方全灭", "en": "Player team defeated." },
-    { "key": "battle.log_round_limit", "zhHans": "达到回合上限", "en": "Battle reached round limit." },
-    { "key": "battle.log_casts", "zhHans": "施放", "en": "casts" },
-    { "key": "battle.log_heals", "zhHans": "治疗了", "en": "heals" },
-    { "key": "battle.log_takes", "zhHans": "受到", "en": "takes" },
-    { "key": "battle.log_damage", "zhHans": "伤害", "en": "damage" },
-    { "key": "battle.log_steadies", "zhHans": "稳住了身形", "en": "steadies" },
-    { "key": "battle.log_attacks", "zhHans": "攻击", "en": "attacks" },
-    { "key": "battle.log_on", "zhHans": "目标", "en": "on" },
-    { "key": "battle.log_for", "zhHans": "造成", "en": "for" },
-    { "key": "battle.log_fallen", "zhHans": "已阵亡。", "en": "has fallen." },
-    { "key": "battle.log_finished", "zhHans": "战斗结束", "en": "Battle finished" },
-    { "key": "battle.status_idle", "zhHans": "等待开始战斗", "en": "Waiting to start battle" },
-    { "key": "battle.status_victory", "zhHans": "战斗胜利", "en": "Battle Victory" },
-    { "key": "battle.status_defeat", "zhHans": "战斗失败", "en": "Battle Defeat" },
-    { "key": "battle.result_rounds", "zhHans": "总回合数", "en": "Total Rounds" },
-    { "key": "battle.button_start", "zhHans": "开始战斗", "en": "Start Battle" },
-    { "key": "battle.button_back", "zhHans": "返回主菜单", "en": "Back To Main Menu" },
-    { "key": "battle.button_tip", "zhHans": "显示提示", "en": "Show Tip" },
-    { "key": "battle.button_close_log", "zhHans": "关闭日志", "en": "Close Log" },
-    { "key": "battle.button_equipment", "zhHans": "查看装备", "en": "Equipment" },
-    { "key": "battle.button_cycle_equipment", "zhHans": "切换方案", "en": "Switch Preset" },
-    { "key": "battle.button_close_equipment", "zhHans": "关闭装备", "en": "Close" },
-    { "key": "popup.confirm.title", "zhHans": "确认", "en": "Confirm" },
-    { "key": "popup.confirm.message", "zhHans": "这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。", "en": "This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later." },
-    { "key": "popup.confirm_button", "zhHans": "确认", "en": "Confirm" },
-    { "key": "popup.cancel_button", "zhHans": "取消", "en": "Cancel" },
-    { "key": "toast.framework_ready", "zhHans": "UI 框架已经就绪。", "en": "UI framework is ready." },
-    { "key": "toast.confirmed", "zhHans": "你点击了确认。", "en": "Confirm clicked." },
-    { "key": "toast.cancelled", "zhHans": "你取消了操作。", "en": "Cancelled." },
-    { "key": "toast.battle_next", "zhHans": "下一步会接入真正的战斗系统。", "en": "The real battle system will be connected next." },
-    { "key": "toast.language_changed", "zhHans": "语言已切换。", "en": "Language switched." },
-    { "key": "toast.ui_prefabs_rebuilt", "zhHans": "UI预设已重建。", "en": "UI prefabs rebuilt." },
-    { "key": "toast.editor_only", "zhHans": "该功能仅在Unity编辑器中可用。", "en": "This feature is only available in the Unity Editor." }
-  ]
+﻿{
+    "entries": [
+        {
+            "key": "menu.title",
+            "zhHans": "五行原型",
+            "en": "Wuxing Prototype"
+        },
+        {
+            "key": "menu.subtitle",
+            "zhHans": "第一阶段 / 第一步 / 文字与线框 UGUI",
+            "en": "Phase 1 / Step 1 / Text and line UGUI"
+        },
+        {
+            "key": "menu.button_battle",
+            "zhHans": "进入战斗页",
+            "en": "Open Battle Page"
+        },
+        {
+            "key": "menu.button_popup",
+            "zhHans": "打开确认弹窗",
+            "en": "Open Confirm Popup"
+        },
+        {
+            "key": "menu.button_toast",
+            "zhHans": "显示提示",
+            "en": "Show Toast"
+        },
+        {
+            "key": "menu.button_language",
+            "zhHans": "切换语言",
+            "en": "Switch Language"
+        },
+        {
+            "key": "menu.button_rebuild_ui",
+            "zhHans": "重建UI预设",
+            "en": "Rebuild UI Prefabs"
+        },
+        {
+            "key": "menu.footer",
+            "zhHans": "这一版先只用文字、线条和矩形框，方便后续替换美术。",
+            "en": "This version uses text lines and rectangles first so art can be replaced later."
+        },
+        {
+            "key": "battle.summary_no_data",
+            "zhHans": "无数据",
+            "en": "No data"
+        },
+        {
+            "key": "battle.summary_no_units",
+            "zhHans": "无单位",
+            "en": "No units"
+        },
+        {
+            "key": "battle.summary_dead",
+            "zhHans": "阵亡",
+            "en": "KO"
+        },
+        {
+            "key": "battle.log_config_missing",
+            "zhHans": "战斗配置缺失，请先导入全部 CSV。",
+            "en": "Battle config missing. Import all CSV files first."
+        },
+        {
+            "key": "battle.title",
+            "zhHans": "战斗页占位",
+            "en": "Battle Page Placeholder"
+        },
+        {
+            "key": "battle.player_team",
+            "zhHans": "我方队伍",
+            "en": "Player Team"
+        },
+        {
+            "key": "battle.player_content",
+            "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150",
+            "en": "Unit A  HP 120/120\nUnit B  HP 150/150"
+        },
+        {
+            "key": "battle.enemy_team",
+            "zhHans": "敌方队伍",
+            "en": "Enemy Team"
+        },
+        {
+            "key": "battle.enemy_content",
+            "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90",
+            "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90"
+        },
+        {
+            "key": "battle.equipment_title",
+            "zhHans": "装备",
+            "en": "Equipment"
+        },
+        {
+            "key": "battle.equipment_none",
+            "zhHans": "无装备",
+            "en": "None"
+        },
+        {
+            "key": "battle.equipment_detail_title",
+            "zhHans": "装备详情",
+            "en": "Equipment Detail"
+        },
+        {
+            "key": "battle.equipment_preset_balanced",
+            "zhHans": "均衡",
+            "en": "Balanced"
+        },
+        {
+            "key": "battle.equipment_preset_burst",
+            "zhHans": "爆发",
+            "en": "Burst"
+        },
+        {
+            "key": "battle.log_title",
+            "zhHans": "战斗日志",
+            "en": "Battle Log"
+        },
+        {
+            "key": "battle.log_content",
+            "zhHans": "下一步这里会接真实战斗日志。",
+            "en": "This area will show real battle logs in the next step."
+        },
+        {
+            "key": "battle.log_round",
+            "zhHans": "回合",
+            "en": "Round"
+        },
+        {
+            "key": "battle.log_enemy_defeated",
+            "zhHans": "敌方全灭",
+            "en": "Enemy team defeated."
+        },
+        {
+            "key": "battle.log_player_defeated",
+            "zhHans": "我方全灭",
+            "en": "Player team defeated."
+        },
+        {
+            "key": "battle.log_round_limit",
+            "zhHans": "达到回合上限",
+            "en": "Battle reached round limit."
+        },
+        {
+            "key": "battle.log_casts",
+            "zhHans": "施放",
+            "en": "casts"
+        },
+        {
+            "key": "battle.log_heals",
+            "zhHans": "治疗了",
+            "en": "heals"
+        },
+        {
+            "key": "battle.log_takes",
+            "zhHans": "受到",
+            "en": "takes"
+        },
+        {
+            "key": "battle.log_damage",
+            "zhHans": "伤害",
+            "en": "damage"
+        },
+        {
+            "key": "battle.log_steadies",
+            "zhHans": "稳住了身形",
+            "en": "steadies"
+        },
+        {
+            "key": "battle.log_attacks",
+            "zhHans": "攻击",
+            "en": "attacks"
+        },
+        {
+            "key": "battle.log_on",
+            "zhHans": "目标",
+            "en": "on"
+        },
+        {
+            "key": "battle.log_for",
+            "zhHans": "造成",
+            "en": "for"
+        },
+        {
+            "key": "battle.log_fallen",
+            "zhHans": "已阵亡。",
+            "en": "has fallen."
+        },
+        {
+            "key": "battle.log_finished",
+            "zhHans": "战斗结束",
+            "en": "Battle finished"
+        },
+        {
+            "key": "battle.status_idle",
+            "zhHans": "等待开始战斗",
+            "en": "Waiting to start battle"
+        },
+        {
+            "key": "battle.status_victory",
+            "zhHans": "战斗胜利",
+            "en": "Battle Victory"
+        },
+        {
+            "key": "battle.status_defeat",
+            "zhHans": "战斗失败",
+            "en": "Battle Defeat"
+        },
+        {
+            "key": "battle.result_rounds",
+            "zhHans": "总回合数",
+            "en": "Total Rounds"
+        },
+        {
+            "key": "battle.button_start",
+            "zhHans": "开始战斗",
+            "en": "Start Battle"
+        },
+        {
+            "key": "battle.button_restart",
+            "zhHans": "重开",
+            "en": "Restart"
+        },
+        {
+            "key": "battle.button_back",
+            "zhHans": "返回主菜单",
+            "en": "Back To Main Menu"
+        },
+        {
+            "key": "battle.button_tip",
+            "zhHans": "显示提示",
+            "en": "Show Tip"
+        },
+        {
+            "key": "battle.button_close_log",
+            "zhHans": "关闭日志",
+            "en": "Close Log"
+        },
+        {
+            "key": "battle.button_equipment",
+            "zhHans": "查看装备",
+            "en": "Equipment"
+        },
+        {
+            "key": "battle.button_cycle_equipment",
+            "zhHans": "切换方案",
+            "en": "Switch Preset"
+        },
+        {
+            "key": "battle.button_close_equipment",
+            "zhHans": "关闭装备",
+            "en": "Close"
+        },
+        {
+            "key": "popup.confirm.title",
+            "zhHans": "确认",
+            "en": "Confirm"
+        },
+        {
+            "key": "popup.confirm.message",
+            "zhHans": "这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。",
+            "en": "This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later."
+        },
+        {
+            "key": "popup.confirm_button",
+            "zhHans": "确认",
+            "en": "Confirm"
+        },
+        {
+            "key": "popup.cancel_button",
+            "zhHans": "取消",
+            "en": "Cancel"
+        },
+        {
+            "key": "toast.framework_ready",
+            "zhHans": "UI 框架已经就绪。",
+            "en": "UI framework is ready."
+        },
+        {
+            "key": "toast.confirmed",
+            "zhHans": "你点击了确认。",
+            "en": "Confirm clicked."
+        },
+        {
+            "key": "toast.cancelled",
+            "zhHans": "你取消了操作。",
+            "en": "Cancelled."
+        },
+        {
+            "key": "toast.battle_next",
+            "zhHans": "下一步会接入真正的战斗系统。",
+            "en": "The real battle system will be connected next."
+        },
+        {
+            "key": "toast.language_changed",
+            "zhHans": "语言已切换。",
+            "en": "Language switched."
+        },
+        {
+            "key": "toast.ui_prefabs_rebuilt",
+            "zhHans": "UI预设已重建。",
+            "en": "UI prefabs rebuilt."
+        },
+        {
+            "key": "toast.editor_only",
+            "zhHans": "该功能仅在Unity编辑器中可用。",
+            "en": "This feature is only available in the Unity Editor."
+        },
+        {
+            "key": "common.separator_names",
+            "zhHans": "、",
+            "en": ", "
+        },
+        {
+            "key": "map.title",
+            "zhHans": "地图路线",
+            "en": "Map Route"
+        },
+        {
+            "key": "map.status_prefix",
+            "zhHans": "当前节点：",
+            "en": "Current Node: "
+        },
+        {
+            "key": "map.region_prefix",
+            "zhHans": "区域：",
+            "en": "Region: "
+        },
+        {
+            "key": "map.button_enter",
+            "zhHans": "进入节点",
+            "en": "Enter Node"
+        },
+        {
+            "key": "map.button_pass_month",
+            "zhHans": "推进一月",
+            "en": "Pass One Month"
+        },
+        {
+            "key": "map.button_reset_run",
+            "zhHans": "重置本轮",
+            "en": "Reset Run"
+        },
+        {
+            "key": "map.button_back_menu",
+            "zhHans": "返回主菜单",
+            "en": "Back To Menu"
+        },
+        {
+            "key": "map.toast_lifespan_ended",
+            "zhHans": "阳寿已尽，本轮结束。",
+            "en": "Lifespan exhausted. The run has ended."
+        },
+        {
+            "key": "map.toast_route_complete",
+            "zhHans": "本轮路线完成，返回主菜单。",
+            "en": "Route complete. Returning to main menu."
+        },
+        {
+            "key": "map.toast_month_passed",
+            "zhHans": "又逝一月。",
+            "en": "One month passes."
+        },
+        {
+            "key": "battle.slot_weapon",
+            "zhHans": "武器",
+            "en": "Weapon"
+        },
+        {
+            "key": "battle.slot_armor",
+            "zhHans": "护甲",
+            "en": "Armor"
+        },
+        {
+            "key": "battle.slot_accessory",
+            "zhHans": "饰品",
+            "en": "Accessory"
+        },
+        {
+            "key": "battle.editor_target",
+            "zhHans": "当前角色",
+            "en": "Editing Unit"
+        },
+        {
+            "key": "battle.editor_stats",
+            "zhHans": "当前属性",
+            "en": "Stats"
+        },
+        {
+            "key": "battle.editor_skills",
+            "zhHans": "当前技能",
+            "en": "Skills"
+        },
+        {
+            "key": "battle.editor_team_totals",
+            "zhHans": "队伍总属性",
+            "en": "Team Totals"
+        },
+        {
+            "key": "battle.editor_preview",
+            "zhHans": "战斗预览",
+            "en": "Battle Preview"
+        },
+        {
+            "key": "battle.editor_unit_prefix",
+            "zhHans": "角色: ",
+            "en": "Unit: "
+        },
+        {
+            "key": "battle.preview_victory",
+            "zhHans": "预计胜利",
+            "en": "Victory"
+        },
+        {
+            "key": "battle.preview_defeat",
+            "zhHans": "预计失败",
+            "en": "Defeat"
+        },
+        {
+            "key": "battle.preview_rounds",
+            "zhHans": "回合数",
+            "en": "Rounds"
+        },
+        {
+            "key": "battle.button_reset_loadout",
+            "zhHans": "重置装备",
+            "en": "Reset Loadout"
+        },
+        {
+            "key": "battle.button_auto_offense",
+            "zhHans": "自动输出",
+            "en": "Auto Offense"
+        },
+        {
+            "key": "battle.button_auto_defense",
+            "zhHans": "自动生存",
+            "en": "Auto Defense"
+        },
+        {
+            "key": "battle.prep_status_prefix",
+            "zhHans": "正在准备第 ",
+            "en": "Preparing Stage "
+        },
+        {
+            "key": "battle.prep_status_suffix",
+            "zhHans": " 关",
+            "en": ""
+        },
+        {
+            "key": "battle.prep_briefing_prefix",
+            "zhHans": "第 ",
+            "en": "Stage "
+        },
+        {
+            "key": "battle.prep_briefing_suffix",
+            "zhHans": " 关简报",
+            "en": " Briefing"
+        },
+        {
+            "key": "battle.prep_objective",
+            "zhHans": "目标：击败全部敌人。",
+            "en": "Objective: Defeat all enemies."
+        },
+        {
+            "key": "battle.prep_enemies",
+            "zhHans": "敌人：",
+            "en": "Enemies: "
+        },
+        {
+            "key": "battle.prep_threat",
+            "zhHans": "威胁：",
+            "en": "Threat: "
+        },
+        {
+            "key": "battle.prep_preview",
+            "zhHans": "预估：",
+            "en": "Preview: "
+        },
+        {
+            "key": "battle.prep_likely_victory",
+            "zhHans": "较大概率胜利",
+            "en": "Likely Victory"
+        },
+        {
+            "key": "battle.prep_likely_defeat",
+            "zhHans": "较大概率失败",
+            "en": "Likely Defeat"
+        },
+        {
+            "key": "battle.prep_rounds_prefix",
+            "zhHans": "，约 ",
+            "en": " in "
+        },
+        {
+            "key": "battle.prep_rounds_suffix",
+            "zhHans": " 回合。",
+            "en": " rounds."
+        },
+        {
+            "key": "battle.prep_tip",
+            "zhHans": "建议：如果预估不理想，先调整装备再开战。",
+            "en": "Tip: Adjust equipment before battle if the preview looks risky."
+        },
+        {
+            "key": "battle.threat_low",
+            "zhHans": "低",
+            "en": "Low"
+        },
+        {
+            "key": "battle.threat_medium",
+            "zhHans": "中",
+            "en": "Medium"
+        },
+        {
+            "key": "battle.threat_medium_high",
+            "zhHans": "中高",
+            "en": "Medium-High"
+        },
+        {
+            "key": "battle.threat_high",
+            "zhHans": "高",
+            "en": "High"
+        }
+    ]
 }

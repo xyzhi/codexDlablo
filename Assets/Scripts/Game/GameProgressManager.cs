@@ -1,0 +1,502 @@
+﻿using System;
+using UnityEngine;
+
+namespace Wuxing.Game
+{
+    public class GameProgressManager : MonoBehaviour
+    {
+        private const string CurrentStagePrefKey = "game.progress.current_stage";
+        private const string HighestClearedStagePrefKey = "game.progress.highest_cleared_stage";
+        private const string LastBattleStagePrefKey = "game.progress.last_battle_stage";
+        private const string LastBattleRoundsPrefKey = "game.progress.last_battle_rounds";
+        private const string LastBattleVictoryPrefKey = "game.progress.last_battle_victory";
+        private const string HasLastBattlePrefKey = "game.progress.has_last_battle";
+        private const string ElapsedMonthsPrefKey = "game.progress.elapsed_months";
+        private const int MaxStage = 8;
+        private const int LifetimeMonths = 360;
+
+        public static GameProgressManager Instance { get; private set; }
+
+        public static event Action ProgressChanged;
+
+        public int CurrentStage { get; private set; }
+        public int HighestClearedStage { get; private set; }
+        public bool HasLastBattle { get; private set; }
+        public int LastBattleStage { get; private set; }
+        public int LastBattleRounds { get; private set; }
+        public bool LastBattleVictory { get; private set; }
+        public int ElapsedMonths { get; private set; }
+
+        private void Awake()
+        {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            LoadProgress();
+        }
+
+        public static int GetCurrentStage()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.CurrentStage : 0;
+        }
+
+        public static int GetHighestClearedStage()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.HighestClearedStage : 0;
+        }
+
+        public static void StartRun()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            if (Instance.CurrentStage <= 0)
+            {
+                Instance.CurrentStage = 1;
+                Instance.ElapsedMonths = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+            }
+        }
+
+        public static RunAdvanceResult AdvanceAfterVictory()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return RunAdvanceResult.ContinueMap;
+            }
+
+            if (Instance.CurrentStage > Instance.HighestClearedStage)
+            {
+                Instance.HighestClearedStage = Instance.CurrentStage;
+            }
+
+            Instance.ElapsedMonths += 1;
+            if (Instance.ElapsedMonths >= LifetimeMonths)
+            {
+                Instance.CurrentStage = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return RunAdvanceResult.LifespanEnded;
+            }
+
+            if (Instance.CurrentStage >= MaxStage)
+            {
+                Instance.CurrentStage = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return RunAdvanceResult.ChapterComplete;
+            }
+
+            Instance.CurrentStage += 1;
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return RunAdvanceResult.ContinueMap;
+        }
+
+        public static void RetryCurrentStage()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            if (Instance.CurrentStage <= 0)
+            {
+                Instance.CurrentStage = 1;
+                Instance.SaveProgress();
+            }
+
+            ProgressChanged?.Invoke();
+        }
+
+        public static void ResetRun()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.CurrentStage = 0;
+            Instance.ElapsedMonths = 0;
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void RecordBattleResult(bool isVictory, int stage, int rounds)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.HasLastBattle = true;
+            Instance.LastBattleVictory = isVictory;
+            Instance.LastBattleStage = Mathf.Max(1, stage);
+            Instance.LastBattleRounds = Mathf.Max(0, rounds);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static bool HasActiveRun()
+        {
+            return GetCurrentStage() > 0;
+        }
+
+        public static int GetMaxStage()
+        {
+            return MaxStage;
+        }
+
+        public static int GetElapsedMonths()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.ElapsedMonths : 0;
+        }
+
+        public static int GetRemainingMonths()
+        {
+            return Mathf.Max(0, LifetimeMonths - GetElapsedMonths());
+        }
+
+        public static MapNodeType GetNodeType(int stage)
+        {
+            if (stage <= 0)
+            {
+                return MapNodeType.Battle;
+            }
+
+            switch (stage)
+            {
+                case 3:
+                case 6:
+                    return MapNodeType.Elite;
+                case 4:
+                case 7:
+                    return MapNodeType.Rest;
+                case 8:
+                    return MapNodeType.Boss;
+                default:
+                    return MapNodeType.Battle;
+            }
+        }
+
+        public static bool IsBattleNode(MapNodeType nodeType)
+        {
+            return nodeType == MapNodeType.Battle
+                || nodeType == MapNodeType.Elite
+                || nodeType == MapNodeType.Boss;
+        }
+
+        public static RunAdvanceResult AdvanceNonBattleNode(int months)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return RunAdvanceResult.ContinueMap;
+            }
+
+            if (Instance.CurrentStage <= 0)
+            {
+                Instance.CurrentStage = 1;
+            }
+
+            Instance.ElapsedMonths += Mathf.Max(1, months);
+            if (Instance.ElapsedMonths >= LifetimeMonths)
+            {
+                Instance.CurrentStage = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return RunAdvanceResult.LifespanEnded;
+            }
+
+            if (Instance.CurrentStage >= MaxStage)
+            {
+                Instance.CurrentStage = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return RunAdvanceResult.ChapterComplete;
+            }
+
+            Instance.CurrentStage += 1;
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return RunAdvanceResult.ContinueMap;
+        }
+
+        public static int GetLastBattleStage()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.LastBattleStage : 0;
+        }
+
+        public static int GetLastBattleRounds()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.LastBattleRounds : 0;
+        }
+
+        public static bool GetLastBattleVictory()
+        {
+            EnsureInstance();
+            return Instance != null && Instance.LastBattleVictory;
+        }
+
+        public static string GetStageTheme(bool english, int stage)
+        {
+            var resolvedStage = Mathf.Max(1, stage);
+            if (resolvedStage <= 2)
+            {
+                return english ? "Outer Hills" : "山门外围";
+            }
+
+            if (resolvedStage <= 4)
+            {
+                return english ? "Burning Trail" : "焚风古道";
+            }
+
+            if (resolvedStage <= 6)
+            {
+                return english ? "Deep Ruins" : "地宫遗迹";
+            }
+
+            return english ? "Ascension Path" : "登天阶";
+        }
+
+        public static string BuildCurrentObjective(bool english)
+        {
+            var currentStage = GetCurrentStage();
+            if (currentStage <= 0)
+            {
+                return english
+                    ? "Start a new run from Stage 1."
+                    : "从第 1 关开始新的一轮。";
+            }
+
+            return english
+                ? "Clear Stage " + currentStage + " and enter " + GetStageTheme(true, currentStage) + "."
+                : "通关第 " + currentStage + " 关，推进到" + GetStageTheme(false, currentStage) + "。";
+        }
+
+        public static string BuildLastBattleSummary(bool english)
+        {
+            if (GetLastBattleStage() <= 0)
+            {
+                return english ? "No battle record yet." : "还没有战斗记录。";
+            }
+
+            if (english)
+            {
+                return "Last battle: Stage " + GetLastBattleStage()
+                    + ", " + (GetLastBattleVictory() ? "Victory" : "Defeat")
+                    + ", " + GetLastBattleRounds() + " rounds.";
+            }
+
+            return "上一场：第 " + GetLastBattleStage()
+                + " 关，" + (GetLastBattleVictory() ? "胜利" : "失败")
+                + "，" + GetLastBattleRounds() + " 回合。";
+        }
+
+        public static string BuildPostBattleNextStep(bool english, bool lastBattleVictory)
+        {
+            if (lastBattleVictory)
+            {
+                var nextStage = Mathf.Max(1, GetCurrentStage() + 1);
+                return english
+                    ? "Next: challenge Stage " + nextStage + "."
+                    : "下一步：挑战第 " + nextStage + " 关。";
+            }
+
+            var retryStage = Mathf.Max(1, GetCurrentStage());
+            return english
+                ? "Next: adjust equipment and retry Stage " + retryStage + "."
+                : "下一步：调整装备后重试第 " + retryStage + " 关。";
+        }
+
+        public static string BuildProgressSummary(bool english)
+        {
+            EnsureInstance();
+            var currentStage = GetCurrentStage();
+            var highestCleared = GetHighestClearedStage();
+
+            if (english)
+            {
+                var builder =
+                    "Current Stage " + currentStage + " / Highest Cleared " + highestCleared +
+                    "\nRun State: " + (HasActiveRun() ? "In Progress" : "Idle") +
+                    "\nNext Step: " + (HasActiveRun() ? ("Continue Stage " + currentStage) : "Start From Stage 1");
+
+                if (Instance != null && Instance.HasLastBattle)
+                {
+                    builder += "\nLast Battle: Stage " + Instance.LastBattleStage
+                        + " / " + (Instance.LastBattleVictory ? "Victory" : "Defeat")
+                        + " / Rounds " + Instance.LastBattleRounds;
+                }
+
+                return builder;
+            }
+
+            var summary =
+                "当前关卡 " + currentStage + " / 最高通关 " + highestCleared +
+                "\n本轮状态：" + (HasActiveRun() ? "进行中" : "待开始") +
+                "\n下一步：" + (HasActiveRun() ? ("继续第 " + currentStage + " 关") : "从第 1 关开始");
+
+            if (Instance != null && Instance.HasLastBattle)
+            {
+                summary += "\n上一场：第 " + Instance.LastBattleStage
+                    + " 关 / " + (Instance.LastBattleVictory ? "胜利" : "失败")
+                    + " / " + Instance.LastBattleRounds + " 回合";
+            }
+
+            return summary;
+        }
+
+        public static string BuildLongevitySummary(bool english)
+        {
+            var remainingMonths = GetRemainingMonths();
+            var years = remainingMonths / 12;
+            var months = remainingMonths % 12;
+
+            if (english)
+            {
+                return "Lifespan: " + years + "y " + months + "m remaining";
+            }
+
+            if (remainingMonths <= 0)
+            {
+                return "阳寿：已尽";
+            }
+
+            if (months == 0)
+            {
+                return "阳寿：余" + ToChineseNumber(years) + "载整";
+            }
+
+            return "阳寿：余" + ToChineseNumber(years) + "载" + ToChineseNumber(months) + "月";
+        }
+
+        public static string BuildMapRouteSummary(bool english)
+        {
+            var builder = new System.Text.StringBuilder();
+            var currentStage = Mathf.Max(1, GetCurrentStage());
+            var maxStage = GetMaxStage();
+
+            for (var stage = 1; stage <= maxStage; stage++)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append('\n');
+                }
+
+                var state = stage < currentStage ? (english ? "[Done]" : "[已过]")
+                    : stage == currentStage ? (english ? "[Now]" : "[当前]")
+                    : (english ? "[Next]" : "[未至]");
+                builder.Append(state)
+                    .Append(' ')
+                    .Append(stage)
+                    .Append(". ")
+                    .Append(GetNodeTypeLabel(english, stage));
+            }
+
+            return builder.ToString();
+        }
+
+        public static string GetNodeTypeLabel(bool english, int stage)
+        {
+            switch (GetNodeType(stage))
+            {
+                case MapNodeType.Elite:
+                    return english ? "Elite" : "精英";
+                case MapNodeType.Rest:
+                    return english ? "Rest" : "休整";
+                case MapNodeType.Boss:
+                    return english ? "Boss" : "首领";
+                case MapNodeType.Battle:
+                default:
+                    return english ? "Battle" : "战斗";
+            }
+        }
+
+        private void LoadProgress()
+        {
+            CurrentStage = Mathf.Max(0, PlayerPrefs.GetInt(CurrentStagePrefKey, 0));
+            HighestClearedStage = Mathf.Max(0, PlayerPrefs.GetInt(HighestClearedStagePrefKey, 0));
+            HasLastBattle = PlayerPrefs.GetInt(HasLastBattlePrefKey, 0) == 1;
+            LastBattleStage = Mathf.Max(0, PlayerPrefs.GetInt(LastBattleStagePrefKey, 0));
+            LastBattleRounds = Mathf.Max(0, PlayerPrefs.GetInt(LastBattleRoundsPrefKey, 0));
+            LastBattleVictory = PlayerPrefs.GetInt(LastBattleVictoryPrefKey, 0) == 1;
+            ElapsedMonths = Mathf.Max(0, PlayerPrefs.GetInt(ElapsedMonthsPrefKey, 0));
+        }
+
+        private void SaveProgress()
+        {
+            PlayerPrefs.SetInt(CurrentStagePrefKey, CurrentStage);
+            PlayerPrefs.SetInt(HighestClearedStagePrefKey, HighestClearedStage);
+            PlayerPrefs.SetInt(HasLastBattlePrefKey, HasLastBattle ? 1 : 0);
+            PlayerPrefs.SetInt(LastBattleStagePrefKey, LastBattleStage);
+            PlayerPrefs.SetInt(LastBattleRoundsPrefKey, LastBattleRounds);
+            PlayerPrefs.SetInt(LastBattleVictoryPrefKey, LastBattleVictory ? 1 : 0);
+            PlayerPrefs.SetInt(ElapsedMonthsPrefKey, ElapsedMonths);
+            PlayerPrefs.Save();
+        }
+
+        private static string ToChineseNumber(int value)
+        {
+            var digits = new[] { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+            if (value < 10)
+            {
+                return digits[Mathf.Clamp(value, 0, 9)];
+            }
+
+            if (value < 20)
+            {
+                return value == 10 ? "十" : "十" + digits[value % 10];
+            }
+
+            if (value < 100)
+            {
+                var tens = value / 10;
+                var units = value % 10;
+                return units == 0
+                    ? digits[tens] + "十"
+                    : digits[tens] + "十" + digits[units];
+            }
+
+            return value.ToString();
+        }
+
+        private static void EnsureInstance()
+        {
+            if (Instance != null)
+            {
+                return;
+            }
+
+            var existing = FindObjectOfType<GameProgressManager>();
+            if (existing != null)
+            {
+                Instance = existing;
+                return;
+            }
+
+            var progressObject = new GameObject("GameProgressManager");
+            progressObject.AddComponent<GameProgressManager>();
+        }
+    }
+}
+
+

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -271,7 +271,7 @@ public static class CharacterCsvImporter
     {
         var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         var absolutePath = Path.Combine(projectRoot, assetRelativePath);
-        File.WriteAllText(absolutePath, json, new UTF8Encoding(false));
+        File.WriteAllText(absolutePath, json, new UTF8Encoding(true));
     }
 
     private static int ParseInt(string value, string fieldName, int lineNumber)
@@ -383,3 +383,6 @@ public static class CharacterCsvImporter
         }
     }
 }
+
+
+

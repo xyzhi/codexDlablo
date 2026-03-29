@@ -1,4 +1,4 @@
-ID,Name,Element,Category,TargetType,MPCost,Power,Duration,EffectType,Description,Notes
+﻿ID,Name,Element,Category,TargetType,MPCost,Power,Duration,EffectType,Description,Notes
 SK001,金刃术,金,主动,SingleEnemy,15,22,0,Damage,对单体敌人造成金属性伤害,基础单体技能
 SK002,火球术,火,主动,AllEnemies,20,16,0,Damage,对全体敌人造成火属性伤害,基础群体技能
 SK003,回春术,木,主动,SingleAlly,18,20,0,Heal,恢复单体友方生命值,基础治疗技能
@@ -9,3 +9,4 @@ SK007,地脉震,土,主动,AllEnemies,22,14,0,Damage,对全体敌人造成土属
 SK008,焚心诀,火,被动,Self,0,6,2,DotBoost,提升灼烧类技能伤害,被动占位
 SK009,凝水盾,水,主动,Self,16,15,2,Shield,为自身施加水盾并提升续航,水系防御技能
 SK010,破甲诀,金,主动,SingleEnemy,14,12,2,Debuff,降低目标防御力,金系破防技能
+

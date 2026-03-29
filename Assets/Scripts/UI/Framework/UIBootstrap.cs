@@ -1,4 +1,5 @@
-using UnityEngine;
+﻿using UnityEngine;
+using Wuxing.Game;
 using Wuxing.Localization;
 
 namespace Wuxing.UI
@@ -19,7 +20,14 @@ namespace Wuxing.UI
                 managerObject.AddComponent<UIManager>();
             }
 
+            if (GameProgressManager.Instance == null)
+            {
+                var progressObject = new GameObject("GameProgressManager");
+                progressObject.AddComponent<GameProgressManager>();
+            }
+
             UIManager.Instance.ShowPage("MainMenu");
         }
     }
 }
+

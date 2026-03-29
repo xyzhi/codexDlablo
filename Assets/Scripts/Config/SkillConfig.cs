@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 namespace Wuxing.Config
 {
@@ -18,3 +18,4 @@ namespace Wuxing.Config
         public string Notes;
     }
 }
+

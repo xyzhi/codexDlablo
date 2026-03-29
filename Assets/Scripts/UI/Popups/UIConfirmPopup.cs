@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Localization;
@@ -52,6 +52,18 @@ namespace Wuxing.UI
 
         public void Setup(string titleOrKey, string messageOrKey, bool localized, Action onConfirm, Action onCancel)
         {
+            Setup(titleOrKey, messageOrKey, localized, onConfirm, onCancel, null, null);
+        }
+
+        public void Setup(
+            string titleOrKey,
+            string messageOrKey,
+            bool localized,
+            Action onConfirm,
+            Action onCancel,
+            string confirmButtonLabel,
+            string cancelButtonLabel)
+        {
             if (localized)
             {
                 if (titleLocalizedText != null)
@@ -87,6 +99,7 @@ namespace Wuxing.UI
 
             _onConfirm = onConfirm;
             _onCancel = onCancel;
+            ApplyButtonLabels(confirmButtonLabel, cancelButtonLabel);
             RefreshButtonLayout();
         }
 
@@ -140,5 +153,42 @@ namespace Wuxing.UI
                 }
             }
         }
+
+        private void ApplyButtonLabels(string confirmButtonLabel, string cancelButtonLabel)
+        {
+            if (confirmButtonLabel == "Next Stage"
+                || confirmButtonLabel == "Retry"
+                || confirmButtonLabel == "下一关"
+                || confirmButtonLabel == "重试")
+            {
+                cancelButtonLabel = LocalizationManager.Instance != null
+                    && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "Close"
+                    : "关闭";
+            }
+
+            if (confirmButton != null)
+            {
+                var confirmText = confirmButton.GetComponentInChildren<Text>();
+                if (confirmText != null)
+                {
+                    confirmText.text = string.IsNullOrEmpty(confirmButtonLabel)
+                        ? LocalizationManager.GetText("popup.confirm_button")
+                        : confirmButtonLabel;
+                }
+            }
+
+            if (cancelButton != null)
+            {
+                var cancelText = cancelButton.GetComponentInChildren<Text>();
+                if (cancelText != null)
+                {
+                    cancelText.text = string.IsNullOrEmpty(cancelButtonLabel)
+                        ? LocalizationManager.GetText("popup.cancel_button")
+                        : cancelButtonLabel;
+                }
+            }
+        }
     }
 }
+

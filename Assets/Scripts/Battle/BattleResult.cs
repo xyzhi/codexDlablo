@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Wuxing.Battle
 {
@@ -12,3 +12,4 @@ namespace Wuxing.Battle
         public List<string> Logs = new List<string>();
     }
 }
+

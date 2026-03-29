@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Wuxing.Localization
@@ -66,3 +66,4 @@ namespace Wuxing.Localization
         }
     }
 }
+

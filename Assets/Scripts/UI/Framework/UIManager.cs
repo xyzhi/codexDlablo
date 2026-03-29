@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Wuxing.Localization;
@@ -114,7 +114,7 @@ namespace Wuxing.UI
             var canvasPrefab = Resources.Load<GameObject>("Prefabs/UI/CanvasRoot");
             if (canvasPrefab == null)
             {
-                Debug.LogError("CanvasRoot prefab not found at Resources/Prefabs/UI/CanvasRoot. Run Tools/UI/Build UI Prefabs.");
+                Debug.LogError("CanvasRoot prefab not found at Resources/Prefabs/UI/CanvasRoot. Run 工具/重建UI预设.");
                 return;
             }
 
@@ -136,6 +136,7 @@ namespace Wuxing.UI
         private void RegisterDefaults()
         {
             _pagePrefabPaths["MainMenu"] = "Prefabs/UI/Pages/MainMenuPage";
+            _pagePrefabPaths["Map"] = "Prefabs/UI/Pages/MapPage";
             _pagePrefabPaths["Battle"] = "Prefabs/UI/Pages/BattlePage";
             _popupPrefabPaths["Confirm"] = "Prefabs/UI/Popups/ConfirmPopup";
         }
@@ -179,3 +180,6 @@ namespace Wuxing.UI
         }
     }
 }
+
+
+

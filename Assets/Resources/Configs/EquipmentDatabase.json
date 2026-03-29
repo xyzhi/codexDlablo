@@ -1,64 +1,64 @@
-{
-  "equipments": [
-    {
-      "Id": "EQ001",
-      "Name": "青锋短剑",
-      "Slot": "Weapon",
-      "HP": 0,
-      "ATK": 8,
-      "DEF": 0,
-      "MP": 0,
-      "Notes": "轻型输出武器"
-    },
-    {
-      "Id": "EQ002",
-      "Name": "赤羽法杖",
-      "Slot": "Weapon",
-      "HP": 0,
-      "ATK": 10,
-      "DEF": 0,
-      "MP": 12,
-      "Notes": "偏法术输出"
-    },
-    {
-      "Id": "EQ003",
-      "Name": "玄甲战衣",
-      "Slot": "Armor",
-      "HP": 28,
-      "ATK": 0,
-      "DEF": 6,
-      "MP": 0,
-      "Notes": "提高站场能力"
-    },
-    {
-      "Id": "EQ004",
-      "Name": "灵木法袍",
-      "Slot": "Armor",
-      "HP": 18,
-      "ATK": 0,
-      "DEF": 4,
-      "MP": 10,
-      "Notes": "法系通用防具"
-    },
-    {
-      "Id": "EQ005",
-      "Name": "聚气玉佩",
-      "Slot": "Accessory",
-      "HP": 0,
-      "ATK": 4,
-      "DEF": 0,
-      "MP": 15,
-      "Notes": "提高技能循环"
-    },
-    {
-      "Id": "EQ006",
-      "Name": "镇岳护符",
-      "Slot": "Accessory",
-      "HP": 22,
-      "ATK": 0,
-      "DEF": 5,
-      "MP": 0,
-      "Notes": "提高容错"
-    }
-  ]
+﻿{
+    "equipments": [
+        {
+            "Id": "EQ001",
+            "Name": "青锋短剑",
+            "Slot": "Weapon",
+            "HP": 0,
+            "ATK": 8,
+            "DEF": 0,
+            "MP": 0,
+            "Notes": "轻型输出武器"
+        },
+        {
+            "Id": "EQ002",
+            "Name": "赤羽法杖",
+            "Slot": "Weapon",
+            "HP": 0,
+            "ATK": 10,
+            "DEF": 0,
+            "MP": 12,
+            "Notes": "偏法术输出"
+        },
+        {
+            "Id": "EQ003",
+            "Name": "玄甲战衣",
+            "Slot": "Armor",
+            "HP": 28,
+            "ATK": 0,
+            "DEF": 6,
+            "MP": 0,
+            "Notes": "提高站场能力"
+        },
+        {
+            "Id": "EQ004",
+            "Name": "灵木法袍",
+            "Slot": "Armor",
+            "HP": 18,
+            "ATK": 0,
+            "DEF": 4,
+            "MP": 10,
+            "Notes": "法系通用防具"
+        },
+        {
+            "Id": "EQ005",
+            "Name": "聚气玉佩",
+            "Slot": "Accessory",
+            "HP": 0,
+            "ATK": 4,
+            "DEF": 0,
+            "MP": 15,
+            "Notes": "提高技能循环"
+        },
+        {
+            "Id": "EQ006",
+            "Name": "镇岳护符",
+            "Slot": "Accessory",
+            "HP": 22,
+            "ATK": 0,
+            "DEF": 5,
+            "MP": 0,
+            "Notes": "提高容错"
+        }
+    ]
 }

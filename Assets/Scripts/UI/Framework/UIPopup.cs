@@ -1,6 +1,7 @@
-namespace Wuxing.UI
+﻿namespace Wuxing.UI
 {
     public abstract class UIPopup : UIPage
     {
     }
 }
+

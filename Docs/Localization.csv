@@ -1,4 +1,4 @@
-Key,ZhHans,En
+﻿Key,ZhHans,En
 menu.title,五行原型,Wuxing Prototype
 menu.subtitle,第一阶段 / 第一步 / 文字与线框 UGUI,Phase 1 / Step 1 / Text and line UGUI
 menu.button_battle,进入战斗页,Open Battle Page
@@ -46,6 +46,7 @@ battle.status_victory,战斗胜利,Battle Victory
 battle.status_defeat,战斗失败,Battle Defeat
 battle.result_rounds,总回合数,Total Rounds
 battle.button_start,开始战斗,Start Battle
+battle.button_restart,重开,Restart
 battle.button_back,返回主菜单,Back To Main Menu
 battle.button_tip,显示提示,Show Tip
 battle.button_close_log,关闭日志,Close Log
@@ -63,3 +64,49 @@ toast.battle_next,下一步会接入真正的战斗系统。,The real battle sys
 toast.language_changed,语言已切换。,Language switched.
 toast.ui_prefabs_rebuilt,UI预设已重建。,UI prefabs rebuilt.
 toast.editor_only,该功能仅在Unity编辑器中可用。,This feature is only available in the Unity Editor.
+common.separator_names,、,", "
+map.title,地图路线,Map Route
+map.status_prefix,当前节点：,Current Node: 
+map.region_prefix,区域：,Region: 
+map.button_enter,进入节点,Enter Node
+map.button_pass_month,推进一月,Pass One Month
+map.button_reset_run,重置本轮,Reset Run
+map.button_back_menu,返回主菜单,Back To Menu
+map.toast_lifespan_ended,阳寿已尽，本轮结束。,Lifespan exhausted. The run has ended.
+map.toast_route_complete,本轮路线完成，返回主菜单。,Route complete. Returning to main menu.
+map.toast_month_passed,又逝一月。,One month passes.
+battle.slot_weapon,武器,Weapon
+battle.slot_armor,护甲,Armor
+battle.slot_accessory,饰品,Accessory
+battle.editor_target,当前角色,Editing Unit
+battle.editor_stats,当前属性,Stats
+battle.editor_skills,当前技能,Skills
+battle.editor_team_totals,队伍总属性,Team Totals
+battle.editor_preview,战斗预览,Battle Preview
+battle.editor_unit_prefix,角色: ,Unit: 
+battle.preview_victory,预计胜利,Victory
+battle.preview_defeat,预计失败,Defeat
+battle.preview_rounds,回合数,Rounds
+battle.button_reset_loadout,重置装备,Reset Loadout
+battle.button_auto_offense,自动输出,Auto Offense
+battle.button_auto_defense,自动生存,Auto Defense
+battle.prep_status_prefix,正在准备第 ,Preparing Stage 
+battle.prep_status_suffix, 关,
+battle.prep_briefing_prefix,第 ,Stage 
+battle.prep_briefing_suffix, 关简报, Briefing
+battle.prep_objective,目标：击败全部敌人。,Objective: Defeat all enemies.
+battle.prep_enemies,敌人：,Enemies: 
+battle.prep_threat,威胁：,Threat: 
+battle.prep_preview,预估：,Preview: 
+battle.prep_likely_victory,较大概率胜利,Likely Victory
+battle.prep_likely_defeat,较大概率失败,Likely Defeat
+battle.prep_rounds_prefix,"，约 ", in 
+battle.prep_rounds_suffix, 回合。, rounds.
+battle.prep_tip,建议：如果预估不理想，先调整装备再开战。,Tip: Adjust equipment before battle if the preview looks risky.
+battle.threat_low,低,Low
+battle.threat_medium,中,Medium
+battle.threat_medium_high,中高,Medium-High
+battle.threat_high,高,High
+
+
+
