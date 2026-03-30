@@ -401,6 +401,11 @@
             "en": "Battle Preview"
         },
         {
+            "key": "battle.editor_owned_equipment",
+            "zhHans": "已拥有装备",
+            "en": "Owned Equipment"
+        },
+        {
             "key": "battle.editor_unit_prefix",
             "zhHans": "角色: ",
             "en": "Unit: "

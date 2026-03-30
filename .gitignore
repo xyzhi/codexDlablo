@@ -30,5 +30,6 @@ Assets/Plugins/Editor/JetBrains*
 *.aab
 *.unitypackage
 *.stacktrace
+*.log
 
 sysinfo.txt

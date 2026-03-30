@@ -105,7 +105,7 @@ namespace Wuxing.Battle
                 return LocalizationManager.GetText("battle.equipment_none");
             }
 
-            var equipmentId = GetEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
+            var equipmentId = GetOwnedEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
             if (string.IsNullOrEmpty(equipmentId))
             {
                 return LocalizationManager.GetText("battle.equipment_none");
@@ -129,7 +129,7 @@ namespace Wuxing.Battle
                 return;
             }
 
-            var candidates = equipmentDatabase.GetBySlot(slot);
+            var candidates = GetOwnedEquipmentCandidates(equipmentDatabase, slot);
             if (candidates.Count == 0)
             {
                 return;
@@ -139,7 +139,7 @@ namespace Wuxing.Battle
             string[] equipmentIds;
             currentLoadout.TryGetValue(unitId, out equipmentIds);
 
-            var currentEquipmentId = GetEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
+            var currentEquipmentId = GetOwnedEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
             var currentIndex = -1;
             for (var i = 0; i < candidates.Count; i++)
             {
@@ -164,6 +164,43 @@ namespace Wuxing.Battle
             }
 
             CyclePlayerEquipmentForUnitSlot(config.Id, slot);
+        }
+
+        public static void EquipOwnedItemForUnitIndex(int unitIndex, string equipmentId)
+        {
+            EnsureEquipmentSettingsLoaded();
+
+            var config = GetPlayerCharacterConfig(unitIndex);
+            if (config == null || string.IsNullOrEmpty(equipmentId) || !GameProgressManager.OwnsEquipment(equipmentId))
+            {
+                return;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null)
+            {
+                return;
+            }
+
+            var equipment = equipmentDatabase.GetById(equipmentId);
+            if (equipment == null || string.IsNullOrEmpty(equipment.Slot))
+            {
+                return;
+            }
+
+            SetPlayerEquipmentOverride(config.Id, equipment.Slot, equipment.Id);
+            SaveEquipmentSettings();
+        }
+
+        public static List<EquipmentConfig> GetOwnedEquipmentsForSlot(string slot)
+        {
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null || string.IsNullOrEmpty(slot))
+            {
+                return new List<EquipmentConfig>();
+            }
+
+            return GetOwnedEquipmentCandidates(equipmentDatabase, slot);
         }
 
         public static void AutoEquipPlayerUnitOffense(int unitIndex)
@@ -452,6 +489,10 @@ namespace Wuxing.Battle
                 .Append(": ")
                 .Append(BuildBattlePreviewSummary())
                 .Append("\n\n")
+                .Append(GetOwnedEquipmentLabel())
+                .Append(":\n")
+                .Append(FormatOwnedEquipmentList(equipmentDatabase))
+                .Append("\n\n")
                 .Append(LocalizationManager.GetText("battle.player_team"))
                 .Append(" [")
                 .Append(GetCurrentPlayerEquipmentPresetName())
@@ -626,6 +667,44 @@ namespace Wuxing.Battle
             return builder.ToString().Trim();
         }
 
+        private static string FormatOwnedEquipmentList(EquipmentDatabase equipmentDatabase)
+        {
+            if (equipmentDatabase == null)
+            {
+                return LocalizationManager.GetText("battle.summary_no_data");
+            }
+
+            var ownedIds = GameProgressManager.GetOwnedEquipmentIds();
+            if (ownedIds.Count == 0)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var builder = new StringBuilder();
+            for (var i = 0; i < ownedIds.Count; i++)
+            {
+                var equipment = equipmentDatabase.GetById(ownedIds[i]);
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                if (builder.Length > 0)
+                {
+                    builder.Append('\n');
+                }
+
+                builder.Append("- ")
+                    .Append(GetEquipmentSlotLabel(equipment.Slot))
+                    .Append(": ")
+                    .Append(equipment.Name)
+                    .Append("  ")
+                    .Append(FormatEquipmentBonus(equipment));
+            }
+
+            return builder.Length > 0 ? builder.ToString() : LocalizationManager.GetText("battle.equipment_none");
+        }
+
         private static void AppendBonus(StringBuilder builder, string statName, int value)
         {
             if (value == 0)
@@ -655,6 +734,7 @@ namespace Wuxing.Battle
                 {
                     var unit = BattleUnitRuntime.FromCharacter(config);
                     ApplyDefaultEquipment(unit, equipmentDatabase, loadout);
+                    ApplyCultivationScaling(unit);
                     ApplyEarlyStagePlayerSupport(unit, stage);
                     team.Units.Add(unit);
                 }
@@ -712,11 +792,33 @@ namespace Wuxing.Battle
             for (var i = 0; i < equipmentIds.Length; i++)
             {
                 var equipment = equipmentDatabase.GetById(equipmentIds[i]);
-                if (equipment != null)
+                if (equipment != null && GameProgressManager.OwnsEquipment(equipment.Id))
                 {
                     unit.ApplyEquipment(equipment);
                 }
             }
+        }
+
+        private static void ApplyCultivationScaling(BattleUnitRuntime unit)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+
+            var level = Mathf.Max(1, GameProgressManager.GetCultivationLevel());
+            var bonusLevels = Mathf.Max(0, level - 1);
+            if (bonusLevels <= 0)
+            {
+                return;
+            }
+
+            unit.MaxHP += bonusLevels * 12;
+            unit.CurrentHP += bonusLevels * 12;
+            unit.ATK += bonusLevels * 2;
+            unit.DEF += bonusLevels;
+            unit.MaxMP += bonusLevels * 3;
+            unit.CurrentMP += bonusLevels * 3;
         }
 
         private static void ApplyStageScaling(BattleUnitRuntime unit, int stage)
@@ -879,7 +981,9 @@ namespace Wuxing.Battle
                 for (var i = 0; i < EquipmentSlots.Length; i++)
                 {
                     string overrideId;
-                    if (!overridePair.Value.TryGetValue(EquipmentSlots[i], out overrideId) || string.IsNullOrEmpty(overrideId))
+                    if (!overridePair.Value.TryGetValue(EquipmentSlots[i], out overrideId)
+                        || string.IsNullOrEmpty(overrideId)
+                        || !GameProgressManager.OwnsEquipment(overrideId))
                     {
                         continue;
                     }
@@ -891,7 +995,7 @@ namespace Wuxing.Battle
             return mergedPreset;
         }
 
-        private static string GetEquipmentIdBySlot(string[] equipmentIds, string slot, EquipmentDatabase equipmentDatabase)
+        private static string GetOwnedEquipmentIdBySlot(string[] equipmentIds, string slot, EquipmentDatabase equipmentDatabase)
         {
             if (equipmentIds == null || equipmentDatabase == null)
             {
@@ -901,7 +1005,9 @@ namespace Wuxing.Battle
             for (var i = 0; i < equipmentIds.Length; i++)
             {
                 var equipment = equipmentDatabase.GetById(equipmentIds[i]);
-                if (equipment != null && equipment.Slot == slot)
+                if (equipment != null
+                    && equipment.Slot == slot
+                    && GameProgressManager.OwnsEquipment(equipment.Id))
                 {
                     return equipment.Id;
                 }
@@ -955,7 +1061,7 @@ namespace Wuxing.Battle
                 return null;
             }
 
-            var candidates = equipmentDatabase.GetBySlot(slot);
+            var candidates = GetOwnedEquipmentCandidates(equipmentDatabase, slot);
             EquipmentConfig bestEquipment = null;
             var bestScore = int.MinValue;
 
@@ -976,6 +1082,22 @@ namespace Wuxing.Battle
             }
 
             return bestEquipment;
+        }
+
+        private static List<EquipmentConfig> GetOwnedEquipmentCandidates(EquipmentDatabase equipmentDatabase, string slot)
+        {
+            var results = new List<EquipmentConfig>();
+            var ownedIds = GameProgressManager.GetOwnedEquipmentIds();
+            for (var i = 0; i < ownedIds.Count; i++)
+            {
+                var equipment = equipmentDatabase.GetById(ownedIds[i]);
+                if (equipment != null && equipment.Slot == slot)
+                {
+                    results.Add(equipment);
+                }
+            }
+
+            return results;
         }
 
         private static int CalculateEquipmentScore(EquipmentConfig equipment, bool offenseFocus)
@@ -1101,6 +1223,11 @@ namespace Wuxing.Battle
         private static string GetBattlePreviewLabel()
         {
             return LocalizationManager.GetText("battle.editor_preview");
+        }
+
+        private static string GetOwnedEquipmentLabel()
+        {
+            return LocalizationManager.GetText("battle.editor_owned_equipment");
         }
 
         private static string GetStageThreatLabel(int stage, bool english)
@@ -1452,6 +1579,7 @@ namespace Wuxing.Battle
         }
     }
 }
+
 
 
 

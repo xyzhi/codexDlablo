@@ -28,6 +28,8 @@ namespace Wuxing.UI
         [SerializeField] private Button autoDefenseButton;
         [SerializeField] private Button resetEquipmentButton;
         [SerializeField] private GameObject equipmentPanel;
+        [SerializeField] private Text equipmentSelectionTitleText;
+        [SerializeField] private RectTransform equipmentSelectionContent;
         [SerializeField] private Text equipmentDetailText;
         [SerializeField] private Text stageInfoText;
         [SerializeField] private Text statusText;
@@ -44,6 +46,13 @@ namespace Wuxing.UI
         private bool isApplyingAutoScroll;
         private List<string> knownSkillNames;
         private int selectedEquipmentUnitIndex;
+        private string selectingSlot;
+        private string preferredSelectionEquipmentId;
+        private bool equipmentLayoutCached;
+        private float selectionTopInset;
+        private float detailBottomInset;
+        private float sharedSelectionDetailHeight;
+        private readonly List<Button> equipmentSelectionButtons = new List<Button>();
 
         public override void OnOpen(object data)
         {
@@ -242,6 +251,7 @@ namespace Wuxing.UI
 
         private void OnClickEquipment()
         {
+            EnsureSelectionFocusFromPreferredEquipment();
             RefreshEquipmentPanel();
             SetEquipmentPanelVisible(true);
         }
@@ -274,17 +284,20 @@ namespace Wuxing.UI
 
         private void OnClickCycleWeapon()
         {
-            CycleSelectedEquipmentSlot("Weapon");
+            preferredSelectionEquipmentId = null;
+            OpenEquipmentSelection("Weapon");
         }
 
         private void OnClickCycleArmor()
         {
-            CycleSelectedEquipmentSlot("Armor");
+            preferredSelectionEquipmentId = null;
+            OpenEquipmentSelection("Armor");
         }
 
         private void OnClickCycleAccessory()
         {
-            CycleSelectedEquipmentSlot("Accessory");
+            preferredSelectionEquipmentId = null;
+            OpenEquipmentSelection("Accessory");
         }
 
         private void OnClickAutoOffense()
@@ -687,12 +700,24 @@ namespace Wuxing.UI
 
             var isEnglish = LocalizationManager.Instance != null
                 && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            BattleRewardResult reward = null;
+            if (playback.IsVictory)
+            {
+                reward = GameProgressManager.GrantBattleRewards(GameProgressManager.GetCurrentStage());
+                if (!string.IsNullOrEmpty(reward.DroppedEquipmentId))
+                {
+                    preferredSelectionEquipmentId = reward.DroppedEquipmentId;
+                    EnsureSelectionFocusFromPreferredEquipment();
+                }
+            }
+
             var stageText = isEnglish
                 ? "Stage " + GameProgressManager.GetCurrentStage()
                 : "第 " + GameProgressManager.GetCurrentStage() + " 关";
             var message =
                 stageText + "\n" +
                 LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n" +
+                BuildRewardSummary(reward, isEnglish) + "\n\n" +
                 GameProgressManager.BuildPostBattleNextStep(isEnglish, playback.IsVictory) + "\n\n" +
                 LocalizationManager.GetText("battle.player_team") + "\n" + playback.FinalPlayerTeamSummary + "\n\n" +
                 LocalizationManager.GetText("battle.enemy_team") + "\n" + playback.FinalEnemyTeamSummary;
@@ -740,12 +765,60 @@ namespace Wuxing.UI
                 cancelLabel);
         }
 
+        private static string BuildRewardSummary(BattleRewardResult reward, bool isEnglish)
+        {
+            if (reward == null)
+            {
+                return isEnglish
+                    ? "Rewards: none."
+                    : "战利品：无。";
+            }
+
+            var builder = new StringBuilder();
+            if (isEnglish)
+            {
+                builder.Append("Rewards\n")
+                    .Append("Exp +").Append(reward.ExpGained)
+                    .Append(" / Spirit Stones +").Append(reward.SpiritStonesGained);
+
+                if (reward.LevelsGained > 0)
+                {
+                    builder.Append("\nLevel Up +").Append(reward.LevelsGained);
+                }
+
+                if (!string.IsNullOrEmpty(reward.DroppedEquipmentName))
+                {
+                    builder.Append("\nEquipment Drop: ").Append(reward.DroppedEquipmentName);
+                }
+
+                return builder.ToString();
+            }
+
+            builder.Append("战利品\n")
+                .Append("经验 +").Append(reward.ExpGained)
+                .Append(" / 灵石 +").Append(reward.SpiritStonesGained);
+
+            if (reward.LevelsGained > 0)
+            {
+                builder.Append("\n修为提升 +").Append(reward.LevelsGained);
+            }
+
+            if (!string.IsNullOrEmpty(reward.DroppedEquipmentName))
+            {
+                builder.Append("\n装备掉落：").Append(reward.DroppedEquipmentName);
+            }
+
+            return builder.ToString();
+        }
+
         private void RefreshEquipmentPanel()
         {
             if (equipmentDetailText == null)
             {
                 return;
             }
+
+            EnsureSelectionFocusFromPreferredEquipment();
 
             var unitCount = BattleManager.GetPlayerEquipmentUnitCount();
             if (unitCount > 0)
@@ -759,6 +832,7 @@ namespace Wuxing.UI
 
             equipmentDetailText.text = BattleManager.BuildPlayerEquipmentEditorText(selectedEquipmentUnitIndex);
             RefreshEquipmentEditorButtonTexts();
+            RefreshEquipmentSelectionList();
         }
 
         private string HighlightSkillNames(string content)
@@ -878,6 +952,355 @@ namespace Wuxing.UI
             SetEquipmentPanelVisible(true);
         }
 
+        private void OpenEquipmentSelection(string slot)
+        {
+            selectingSlot = slot;
+            RefreshEquipmentSelectionList();
+            SetEquipmentPanelVisible(true);
+        }
+
+        private void EnsureSelectionFocusFromPreferredEquipment()
+        {
+            if (string.IsNullOrEmpty(preferredSelectionEquipmentId))
+            {
+                if (string.IsNullOrEmpty(selectingSlot))
+                {
+                    selectingSlot = "Weapon";
+                }
+
+                return;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null)
+            {
+                return;
+            }
+
+            var equipment = equipmentDatabase.GetById(preferredSelectionEquipmentId);
+            if (equipment != null && !string.IsNullOrEmpty(equipment.Slot))
+            {
+                selectingSlot = equipment.Slot;
+            }
+        }
+
+        private string ResolveSelectionSlot()
+        {
+            EnsureSelectionFocusFromPreferredEquipment();
+            return string.IsNullOrEmpty(selectingSlot) ? "Weapon" : selectingSlot;
+        }
+
+        private string BuildSelectionTitle(string slot, int count)
+        {
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            var suffix = isEnglish ? "Backpack" : "背包";
+            return GetSlotDisplayName(slot) + " " + suffix + " (" + count + ")";
+        }
+
+        private void SortEquipmentsForDisplay(List<EquipmentConfig> equipments)
+        {
+            if (equipments == null || equipments.Count <= 1)
+            {
+                return;
+            }
+
+            equipments.Sort(delegate(EquipmentConfig left, EquipmentConfig right)
+            {
+                var leftIsPreferred = left != null && left.Id == preferredSelectionEquipmentId;
+                var rightIsPreferred = right != null && right.Id == preferredSelectionEquipmentId;
+                if (leftIsPreferred != rightIsPreferred)
+                {
+                    return leftIsPreferred ? -1 : 1;
+                }
+
+                var leftScore = GetEquipmentDisplayScore(left);
+                var rightScore = GetEquipmentDisplayScore(right);
+                if (leftScore != rightScore)
+                {
+                    return rightScore.CompareTo(leftScore);
+                }
+
+                var leftName = left != null ? left.Name : string.Empty;
+                var rightName = right != null ? right.Name : string.Empty;
+                return string.Compare(leftName, rightName, System.StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        private string BuildEquipmentOptionLabel(EquipmentConfig equipment)
+        {
+            if (equipment == null)
+            {
+                return LocalizationManager.GetText("battle.equipment_none");
+            }
+
+            var builder = new StringBuilder();
+            if (equipment.Id == preferredSelectionEquipmentId)
+            {
+                builder.Append(LocalizationManager.Instance != null
+                        && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "[New] "
+                    : "[新] ");
+            }
+
+            builder.Append(equipment.Name);
+            var suffix = BuildEquipmentOptionSuffix(equipment);
+            if (!string.IsNullOrEmpty(suffix))
+            {
+                builder.Append("  ").Append(suffix);
+            }
+
+            return builder.ToString();
+        }
+
+        private static int GetEquipmentDisplayScore(EquipmentConfig equipment)
+        {
+            if (equipment == null)
+            {
+                return int.MinValue;
+            }
+
+            return equipment.HP + equipment.MP + equipment.ATK * 2 + equipment.DEF * 2;
+        }
+
+        private void RefreshEquipmentSelectionList()
+        {
+            if (equipmentSelectionContent == null || equipmentSelectionTitleText == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < equipmentSelectionButtons.Count; i++)
+            {
+                if (equipmentSelectionButtons[i] != null)
+                {
+                    equipmentSelectionButtons[i].gameObject.SetActive(false);
+                }
+            }
+
+            var slot = ResolveSelectionSlot();
+
+            var equipments = BattleManager.GetOwnedEquipmentsForSlot(slot);
+            SortEquipmentsForDisplay(equipments);
+            equipmentSelectionTitleText.text = BuildSelectionTitle(slot, equipments.Count);
+            RefreshEquipmentSelectionViewportLayout(equipments.Count + 1);
+
+            var equippedButton = GetOrCreateEquipmentSelectionButton(0);
+            equippedButton.gameObject.SetActive(true);
+            ConfigureEquipmentSelectionButtonRect(equippedButton.GetComponent<RectTransform>(), 0f);
+            equippedButton.onClick.RemoveAllListeners();
+            equippedButton.interactable = false;
+            var equippedLabel = equippedButton.GetComponentInChildren<Text>();
+            if (equippedLabel != null)
+            {
+                equippedLabel.fontSize = 20;
+                equippedLabel.alignment = TextAnchor.MiddleLeft;
+                equippedLabel.text = BuildCurrentEquippedLabel(slot);
+            }
+
+            if (equipments.Count == 0)
+            {
+                var emptyButton = GetOrCreateEquipmentSelectionButton(1);
+                emptyButton.gameObject.SetActive(true);
+                emptyButton.interactable = false;
+                ConfigureEquipmentSelectionButtonRect(emptyButton.GetComponent<RectTransform>(), 64f);
+                emptyButton.onClick.RemoveAllListeners();
+                var emptyLabel = emptyButton.GetComponentInChildren<Text>();
+                if (emptyLabel != null)
+                {
+                    emptyLabel.fontSize = 20;
+                    emptyLabel.alignment = TextAnchor.MiddleLeft;
+                    emptyLabel.text = BuildEmptyBackpackLabel();
+                }
+
+                equipmentSelectionContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 192f);
+                return;
+            }
+
+            var currentY = 64f;
+            for (var i = 0; i < equipments.Count; i++)
+            {
+                var equipment = equipments[i];
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                var button = GetOrCreateEquipmentSelectionButton(i + 1);
+                button.gameObject.SetActive(true);
+                button.interactable = true;
+                var rect = button.GetComponent<RectTransform>();
+                ConfigureEquipmentSelectionButtonRect(rect, currentY);
+                currentY += 64f;
+
+                var capturedEquipmentId = equipment.Id;
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(delegate
+                {
+                    BattleManager.EquipOwnedItemForUnitIndex(selectedEquipmentUnitIndex, capturedEquipmentId);
+                    preferredSelectionEquipmentId = capturedEquipmentId;
+                    RefreshPreview();
+                    RefreshEquipmentPanel();
+                    SetEquipmentPanelVisible(true);
+                });
+
+                var label = button.GetComponentInChildren<Text>();
+                if (label != null)
+                {
+                    label.fontSize = 20;
+                    label.alignment = TextAnchor.MiddleLeft;
+                    label.text = BuildEquipmentOptionLabel(equipment);
+                }
+
+            }
+
+            equipmentSelectionContent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, Mathf.Max(160f, currentY));
+        }
+
+        private string BuildCurrentEquippedLabel(string slot)
+        {
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            var prefix = isEnglish ? "Equipped: " : "当前穿戴：";
+            var equipmentName = BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slot);
+            return prefix + equipmentName;
+        }
+
+        private string BuildEmptyBackpackLabel()
+        {
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            return isEnglish ? "No other equipment in backpack." : "背包里暂时没有其他可选装备。";
+        }
+
+        private void RefreshEquipmentSelectionViewportLayout(int equipmentCount)
+        {
+            var selectionRoot = GetSelectionScrollRoot();
+            var detailRoot = GetEquipmentDetailScrollRoot();
+            if (selectionRoot == null || detailRoot == null)
+            {
+                return;
+            }
+
+            CacheEquipmentLayoutMetrics(selectionRoot, detailRoot);
+            if (!equipmentLayoutCached)
+            {
+                return;
+            }
+
+            var visibleCount = Mathf.Clamp(equipmentCount, 2, 7);
+            var targetSelectionHeight = Mathf.Clamp(visibleCount * 64f + 12f, 140f, sharedSelectionDetailHeight - 120f);
+            var targetDetailHeight = Mathf.Max(120f, sharedSelectionDetailHeight - targetSelectionHeight);
+
+            selectionRoot.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, selectionTopInset, targetSelectionHeight);
+            detailRoot.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Bottom, detailBottomInset, targetDetailHeight);
+        }
+
+        private void CacheEquipmentLayoutMetrics(RectTransform selectionRoot, RectTransform detailRoot)
+        {
+            if (equipmentLayoutCached || selectionRoot == null || detailRoot == null)
+            {
+                return;
+            }
+
+            var parent = selectionRoot.parent as RectTransform;
+            if (parent == null || detailRoot.parent != parent)
+            {
+                return;
+            }
+
+            var parentBounds = parent.rect;
+            var selectionBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(parent, selectionRoot);
+            var detailBounds = RectTransformUtility.CalculateRelativeRectTransformBounds(parent, detailRoot);
+
+            selectionTopInset = parentBounds.yMax - selectionBounds.max.y;
+            detailBottomInset = detailBounds.min.y - parentBounds.yMin;
+            sharedSelectionDetailHeight = selectionBounds.size.y + detailBounds.size.y;
+            equipmentLayoutCached = sharedSelectionDetailHeight > 0f;
+        }
+
+        private RectTransform GetSelectionScrollRoot()
+        {
+            if (equipmentSelectionContent == null
+                || equipmentSelectionContent.parent == null
+                || equipmentSelectionContent.parent.parent == null
+                || equipmentSelectionContent.parent.parent.parent == null)
+            {
+                return null;
+            }
+
+            return equipmentSelectionContent.parent.parent.parent as RectTransform;
+        }
+
+        private RectTransform GetEquipmentDetailScrollRoot()
+        {
+            if (equipmentDetailText == null
+                || equipmentDetailText.transform.parent == null
+                || equipmentDetailText.transform.parent.parent == null
+                || equipmentDetailText.transform.parent.parent.parent == null
+                || equipmentDetailText.transform.parent.parent.parent.parent == null)
+            {
+                return null;
+            }
+
+            return equipmentDetailText.transform.parent.parent.parent.parent as RectTransform;
+        }
+
+        private Button GetOrCreateEquipmentSelectionButton(int index)
+        {
+            while (equipmentSelectionButtons.Count <= index)
+            {
+                var button = UIFactory.CreateListButton(equipmentSelectionContent, "EquipOption_" + equipmentSelectionButtons.Count, "Option", delegate { });
+                equipmentSelectionButtons.Add(button);
+            }
+
+            return equipmentSelectionButtons[index];
+        }
+
+        private static void ConfigureEquipmentSelectionButtonRect(RectTransform rect, float topOffset)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.sizeDelta = new Vector2(0f, 56f);
+            rect.anchoredPosition = new Vector2(0f, -topOffset);
+        }
+
+        private static string BuildEquipmentOptionSuffix(EquipmentConfig equipment)
+        {
+            if (equipment == null)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            AppendEquipmentStat(builder, "HP", equipment.HP);
+            AppendEquipmentStat(builder, "ATK", equipment.ATK);
+            AppendEquipmentStat(builder, "DEF", equipment.DEF);
+            AppendEquipmentStat(builder, "MP", equipment.MP);
+            return builder.ToString();
+        }
+
+        private static void AppendEquipmentStat(StringBuilder builder, string statName, int value)
+        {
+            if (value == 0)
+            {
+                return;
+            }
+
+            if (builder.Length > 0)
+            {
+                builder.Append("  ");
+            }
+
+            builder.Append(statName).Append('+').Append(value);
+        }
+
         private void RefreshEquipmentEditorButtonTexts()
         {
             UpdateButtonText(cycleEquipmentUnitButton, BuildSelectedUnitButtonText());
@@ -897,9 +1320,6 @@ namespace Wuxing.UI
 
         private string BuildSlotButtonText(string slot)
         {
-            var isEnglish = LocalizationManager.Instance != null
-                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
-
             var slotName = GetSlotDisplayName(slot);
             var equipmentName = BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slot);
             return slotName + ": " + equipmentName;
@@ -950,6 +1370,7 @@ namespace Wuxing.UI
         }
     }
 }
+
 
 
 

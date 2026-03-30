@@ -13,6 +13,13 @@ namespace Wuxing.UI
         private static readonly Vector2 DefaultCancelAnchorMax = new Vector2(0.9f, 0.24f);
         private static readonly Vector2 SingleConfirmAnchorMin = new Vector2(0.28f, 0.08f);
         private static readonly Vector2 SingleConfirmAnchorMax = new Vector2(0.72f, 0.24f);
+        private const float MinPanelHeight = 420f;
+        private const float TopPadding = 48f;
+        private const float BottomPadding = 48f;
+        private const float TitleSpacing = 20f;
+        private const float ButtonAreaHeight = 120f;
+        private const float ButtonMessageSpacing = 28f;
+        private const float HorizontalPadding = 48f;
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text messageText;
@@ -101,6 +108,7 @@ namespace Wuxing.UI
             _onCancel = onCancel;
             ApplyButtonLabels(confirmButtonLabel, cancelButtonLabel);
             RefreshButtonLayout();
+            RefreshPopupLayout();
         }
 
         private void Confirm()
@@ -188,6 +196,110 @@ namespace Wuxing.UI
                         : cancelButtonLabel;
                 }
             }
+        }
+
+        private void RefreshPopupLayout()
+        {
+            var panelRect = GetPanelRect();
+            if (panelRect == null || titleText == null || messageText == null)
+            {
+                return;
+            }
+
+            Canvas.ForceUpdateCanvases();
+
+            var parentRect = panelRect.parent as RectTransform;
+            var parentHeight = parentRect != null ? parentRect.rect.height : Screen.height;
+            if (parentHeight <= 0f)
+            {
+                parentHeight = 1920f;
+            }
+
+            var messageWidth = GetMessageWidth(panelRect);
+            if (messageWidth > 0f)
+            {
+                messageText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, messageWidth);
+            }
+
+            Canvas.ForceUpdateCanvases();
+
+            var titleHeight = Mathf.Max(52f, titleText.preferredHeight);
+            var messageHeight = Mathf.Max(96f, messageText.preferredHeight);
+            var desiredHeight = TopPadding
+                + titleHeight
+                + TitleSpacing
+                + messageHeight
+                + ButtonMessageSpacing
+                + ButtonAreaHeight
+                + BottomPadding;
+
+            var maxHeight = parentHeight * 0.82f;
+            var clampedHeight = Mathf.Clamp(desiredHeight, MinPanelHeight, maxHeight);
+            ApplyPanelHeight(panelRect, clampedHeight, parentHeight);
+            ApplyChildLayout(panelRect, titleHeight, messageHeight);
+        }
+
+        private RectTransform GetPanelRect()
+        {
+            if (titleText == null)
+            {
+                return null;
+            }
+
+            return titleText.transform.parent as RectTransform;
+        }
+
+        private float GetMessageWidth(RectTransform panelRect)
+        {
+            var panelWidth = panelRect.rect.width;
+            if (panelWidth <= 0f)
+            {
+                var parentRect = panelRect.parent as RectTransform;
+                if (parentRect != null)
+                {
+                    panelWidth = parentRect.rect.width * (panelRect.anchorMax.x - panelRect.anchorMin.x);
+                }
+            }
+
+            return Mathf.Max(0f, panelWidth - 64f);
+        }
+
+        private void ApplyPanelHeight(RectTransform panelRect, float desiredHeight, float parentHeight)
+        {
+            panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, desiredHeight);
+        }
+
+        private void ApplyChildLayout(RectTransform panelRect, float titleHeight, float messageHeight)
+        {
+            if (panelRect == null || titleText == null || messageText == null)
+            {
+                return;
+            }
+
+            var titleRect = titleText.rectTransform;
+            var messageRect = messageText.rectTransform;
+
+            ConfigureTopStretchRect(titleRect, TopPadding, titleHeight);
+            ConfigureTopStretchRect(messageRect, TopPadding + titleHeight + TitleSpacing, messageHeight);
+
+            titleText.alignment = TextAnchor.UpperCenter;
+            messageText.alignment = TextAnchor.UpperCenter;
+            messageText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            messageText.verticalOverflow = VerticalWrapMode.Overflow;
+        }
+
+        private static void ConfigureTopStretchRect(RectTransform rect, float topOffset, float height)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0.5f, 1f);
+            rect.offsetMin = new Vector2(HorizontalPadding, -(topOffset + height));
+            rect.offsetMax = new Vector2(-HorizontalPadding, -topOffset);
         }
     }
 }

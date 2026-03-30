@@ -6,6 +6,8 @@ namespace Wuxing.UI
 {
     public static class UIFactory
     {
+        private static Font defaultFont;
+
         public static GameObject CreatePanel(Transform parent, string name, Color color)
         {
             var go = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -54,6 +56,7 @@ namespace Wuxing.UI
 
             var text = go.GetComponent<Text>();
             text.text = content;
+            text.font = GetDefaultFont();
             text.fontSize = fontSize;
             text.alignment = alignment;
             text.color = color;
@@ -80,6 +83,23 @@ namespace Wuxing.UI
             var text = CreateText(buttonObject.transform, "Label", label, 24, TextAnchor.MiddleCenter, Color.white);
             text.rectTransform.offsetMin = new Vector2(12f, 8f);
             text.rectTransform.offsetMax = new Vector2(-12f, -8f);
+
+            return button;
+        }
+
+        public static Button CreateListButton(Transform parent, string name, string label, UnityAction onClick)
+        {
+            var button = CreateButton(parent, name, label, onClick);
+            var labelText = button.GetComponentInChildren<Text>();
+            if (labelText != null)
+            {
+                labelText.alignment = TextAnchor.MiddleLeft;
+                labelText.fontSize = 20;
+                labelText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                labelText.verticalOverflow = VerticalWrapMode.Truncate;
+                labelText.rectTransform.offsetMin = new Vector2(18f, 6f);
+                labelText.rectTransform.offsetMax = new Vector2(-18f, -6f);
+            }
 
             return button;
         }
@@ -250,6 +270,16 @@ namespace Wuxing.UI
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+        }
+
+        private static Font GetDefaultFont()
+        {
+            if (defaultFont == null)
+            {
+                defaultFont = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            }
+
+            return defaultFont;
         }
     }
 }

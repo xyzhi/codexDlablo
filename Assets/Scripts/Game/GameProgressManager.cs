@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Wuxing.Config;
 
 namespace Wuxing.Game
 {
@@ -12,8 +14,17 @@ namespace Wuxing.Game
         private const string LastBattleVictoryPrefKey = "game.progress.last_battle_victory";
         private const string HasLastBattlePrefKey = "game.progress.has_last_battle";
         private const string ElapsedMonthsPrefKey = "game.progress.elapsed_months";
+        private const string CultivationLevelPrefKey = "game.progress.cultivation_level";
+        private const string CultivationExpPrefKey = "game.progress.cultivation_exp";
+        private const string SpiritStonesPrefKey = "game.progress.spirit_stones";
+        private const string OwnedEquipmentPrefKey = "game.progress.owned_equipment";
         private const int MaxStage = 8;
         private const int LifetimeMonths = 360;
+
+        private static readonly string[] BaseOwnedEquipmentIds =
+        {
+            "EQ001", "EQ002", "EQ003", "EQ004", "EQ005", "EQ006"
+        };
 
         public static GameProgressManager Instance { get; private set; }
 
@@ -26,6 +37,11 @@ namespace Wuxing.Game
         public int LastBattleRounds { get; private set; }
         public bool LastBattleVictory { get; private set; }
         public int ElapsedMonths { get; private set; }
+        public int CultivationLevel { get; private set; }
+        public int CultivationExp { get; private set; }
+        public int SpiritStones { get; private set; }
+
+        private readonly List<string> ownedEquipmentIds = new List<string>();
 
         private void Awake()
         {
@@ -64,6 +80,10 @@ namespace Wuxing.Game
             {
                 Instance.CurrentStage = 1;
                 Instance.ElapsedMonths = 0;
+                Instance.CultivationLevel = 1;
+                Instance.CultivationExp = 0;
+                Instance.SpiritStones = 0;
+                Instance.ResetOwnedEquipmentToBase();
                 Instance.SaveProgress();
                 ProgressChanged?.Invoke();
             }
@@ -132,8 +152,98 @@ namespace Wuxing.Game
 
             Instance.CurrentStage = 0;
             Instance.ElapsedMonths = 0;
+            Instance.CultivationLevel = 1;
+            Instance.CultivationExp = 0;
+            Instance.SpiritStones = 0;
+            Instance.ResetOwnedEquipmentToBase();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
+        }
+
+        public static BattleRewardResult GrantBattleRewards(int stage)
+        {
+            EnsureInstance();
+            var reward = new BattleRewardResult();
+            if (Instance == null)
+            {
+                return reward;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            reward.ExpGained = 18 + resolvedStage * 8;
+            reward.SpiritStonesGained = 12 + resolvedStage * 5;
+
+            Instance.CultivationExp += reward.ExpGained;
+            Instance.SpiritStones += reward.SpiritStonesGained;
+
+            while (Instance.CultivationExp >= Instance.GetRequiredExpInternal())
+            {
+                Instance.CultivationExp -= Instance.GetRequiredExpInternal();
+                Instance.CultivationLevel += 1;
+                reward.LevelsGained += 1;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase != null)
+            {
+                var drop = Instance.RollEquipmentDrop(equipmentDatabase, resolvedStage);
+                if (drop != null)
+                {
+                    Instance.ownedEquipmentIds.Add(drop.Id);
+                    reward.DroppedEquipmentId = drop.Id;
+                    reward.DroppedEquipmentName = drop.Name;
+                }
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return reward;
+        }
+
+        public static int GetCultivationLevel()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.CultivationLevel : 1;
+        }
+
+        public static int GetCultivationExp()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.CultivationExp : 0;
+        }
+
+        public static int GetSpiritStones()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.SpiritStones : 0;
+        }
+
+        public static int GetRequiredExpForNextLevel()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.GetRequiredExpInternal() : 60;
+        }
+
+        public static bool OwnsEquipment(string equipmentId)
+        {
+            EnsureInstance();
+            return Instance != null && Instance.ownedEquipmentIds.Exists(delegate(string id)
+            {
+                return string.Equals(id, equipmentId, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        public static List<string> GetOwnedEquipmentIds()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return new List<string>();
+            }
+
+            var results = new List<string>(Instance.ownedEquipmentIds);
+            results.Sort(StringComparer.OrdinalIgnoreCase);
+            return results;
         }
 
         public static void RecordBattleResult(bool isVictory, int stage, int rounds)
@@ -288,8 +398,49 @@ namespace Wuxing.Game
             }
 
             return english
-                ? "Clear Stage " + currentStage + " and enter " + GetStageTheme(true, currentStage) + "."
-                : "通关第 " + currentStage + " 关，推进到" + GetStageTheme(false, currentStage) + "。";
+                ? "Clear or farm Stage " + currentStage + " before moving on."
+                : "可反复挑战第 " + currentStage + " 关，刷成长后再推进。";
+        }
+
+        public static int GetNodeMonthCost(int stage)
+        {
+            return 1;
+        }
+
+        public static string BuildCurrentNodeDetail(bool english)
+        {
+            var currentStage = Mathf.Max(1, GetCurrentStage());
+            var nodeType = GetNodeType(currentStage);
+            var monthCost = GetNodeMonthCost(currentStage);
+
+            if (english)
+            {
+                switch (nodeType)
+                {
+                    case MapNodeType.Elite:
+                        return "Node Detail\nType: Elite Battle\nTime Cost: " + monthCost + " month\nReward: Better growth and higher loot chance.";
+                    case MapNodeType.Rest:
+                        return "Node Detail\nType: Rest Stop\nTime Cost: " + monthCost + " month\nReward: Safe advance and time pressure management.";
+                    case MapNodeType.Boss:
+                        return "Node Detail\nType: Boss Battle\nTime Cost: " + monthCost + " month\nReward: Finish the current route if victorious.";
+                    case MapNodeType.Battle:
+                    default:
+                        return "Node Detail\nType: Standard Battle\nTime Cost: " + monthCost + " month\nReward: Farm exp and equipment before advancing.";
+                }
+            }
+
+            switch (nodeType)
+            {
+                case MapNodeType.Elite:
+                    return "节点详情\n类型：精英战斗\n耗时：一月\n收益：成长更多，掉落也更好。";
+                case MapNodeType.Rest:
+                    return "节点详情\n类型：休整节点\n耗时：一月\n收益：稳定推进，缓和本轮节奏。";
+                case MapNodeType.Boss:
+                    return "节点详情\n类型：首领战斗\n耗时：一月\n收益：若能取胜，本轮路线直接完成。";
+                case MapNodeType.Battle:
+                default:
+                    return "节点详情\n类型：普通战斗\n耗时：一月\n收益：可刷经验与装备，再决定是否推进。";
+            }
         }
 
         public static string BuildLastBattleSummary(bool english)
@@ -317,8 +468,8 @@ namespace Wuxing.Game
             {
                 var nextStage = Mathf.Max(1, GetCurrentStage() + 1);
                 return english
-                    ? "Next: challenge Stage " + nextStage + "."
-                    : "下一步：挑战第 " + nextStage + " 关。";
+                    ? "Next: farm this stage again or challenge Stage " + nextStage + "."
+                    : "下一步：可以继续刷当前关，或挑战第 " + nextStage + " 关。";
             }
 
             var retryStage = Mathf.Max(1, GetCurrentStage());
@@ -338,7 +489,10 @@ namespace Wuxing.Game
                 var builder =
                     "Current Stage " + currentStage + " / Highest Cleared " + highestCleared +
                     "\nRun State: " + (HasActiveRun() ? "In Progress" : "Idle") +
-                    "\nNext Step: " + (HasActiveRun() ? ("Continue Stage " + currentStage) : "Start From Stage 1");
+                    "\nNext Step: " + (HasActiveRun() ? ("Continue Stage " + currentStage) : "Start From Stage 1") +
+                    "\nCultivation Lv." + GetCultivationLevel() +
+                    " / Exp " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
+                    "\nSpirit Stones: " + GetSpiritStones();
 
                 if (Instance != null && Instance.HasLastBattle)
                 {
@@ -353,7 +507,10 @@ namespace Wuxing.Game
             var summary =
                 "当前关卡 " + currentStage + " / 最高通关 " + highestCleared +
                 "\n本轮状态：" + (HasActiveRun() ? "进行中" : "待开始") +
-                "\n下一步：" + (HasActiveRun() ? ("继续第 " + currentStage + " 关") : "从第 1 关开始");
+                "\n下一步：" + (HasActiveRun() ? ("继续第 " + currentStage + " 关") : "从第 1 关开始") +
+                "\n修为等级 " + GetCultivationLevel() +
+                " / 经验 " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
+                "\n灵石：" + GetSpiritStones();
 
             if (Instance != null && Instance.HasLastBattle)
             {
@@ -440,6 +597,10 @@ namespace Wuxing.Game
             LastBattleRounds = Mathf.Max(0, PlayerPrefs.GetInt(LastBattleRoundsPrefKey, 0));
             LastBattleVictory = PlayerPrefs.GetInt(LastBattleVictoryPrefKey, 0) == 1;
             ElapsedMonths = Mathf.Max(0, PlayerPrefs.GetInt(ElapsedMonthsPrefKey, 0));
+            CultivationLevel = Mathf.Max(1, PlayerPrefs.GetInt(CultivationLevelPrefKey, 1));
+            CultivationExp = Mathf.Max(0, PlayerPrefs.GetInt(CultivationExpPrefKey, 0));
+            SpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(SpiritStonesPrefKey, 0));
+            LoadOwnedEquipment();
         }
 
         private void SaveProgress()
@@ -451,7 +612,105 @@ namespace Wuxing.Game
             PlayerPrefs.SetInt(LastBattleRoundsPrefKey, LastBattleRounds);
             PlayerPrefs.SetInt(LastBattleVictoryPrefKey, LastBattleVictory ? 1 : 0);
             PlayerPrefs.SetInt(ElapsedMonthsPrefKey, ElapsedMonths);
+            PlayerPrefs.SetInt(CultivationLevelPrefKey, CultivationLevel);
+            PlayerPrefs.SetInt(CultivationExpPrefKey, CultivationExp);
+            PlayerPrefs.SetInt(SpiritStonesPrefKey, SpiritStones);
+            PlayerPrefs.SetString(OwnedEquipmentPrefKey, SerializeOwnedEquipment());
             PlayerPrefs.Save();
+        }
+
+        private int GetRequiredExpInternal()
+        {
+            return 60 + Mathf.Max(0, CultivationLevel - 1) * 25;
+        }
+
+        private EquipmentConfig RollEquipmentDrop(EquipmentDatabase equipmentDatabase, int stage)
+        {
+            if (equipmentDatabase == null || equipmentDatabase.Equipments == null)
+            {
+                return null;
+            }
+
+            var candidates = new List<EquipmentConfig>();
+            for (var i = 0; i < equipmentDatabase.Equipments.Count; i++)
+            {
+                var equipment = equipmentDatabase.Equipments[i];
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                var score = equipment.HP + equipment.ATK * 2 + equipment.DEF * 2 + equipment.MP;
+                if (score < GetStageDropScoreFloor(stage))
+                {
+                    continue;
+                }
+
+                candidates.Add(equipment);
+            }
+
+            if (candidates.Count == 0)
+            {
+                return null;
+            }
+
+            var index = UnityEngine.Random.Range(0, candidates.Count);
+            return candidates[index];
+        }
+
+        private static int GetStageDropScoreFloor(int stage)
+        {
+            if (stage <= 1)
+            {
+                return 20;
+            }
+
+            if (stage <= 3)
+            {
+                return 24;
+            }
+
+            if (stage <= 5)
+            {
+                return 28;
+            }
+
+            return 30;
+        }
+
+        private void ResetOwnedEquipmentToBase()
+        {
+            ownedEquipmentIds.Clear();
+            for (var i = 0; i < BaseOwnedEquipmentIds.Length; i++)
+            {
+                ownedEquipmentIds.Add(BaseOwnedEquipmentIds[i]);
+            }
+        }
+
+        private void LoadOwnedEquipment()
+        {
+            ResetOwnedEquipmentToBase();
+            var raw = PlayerPrefs.GetString(OwnedEquipmentPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var parts = raw.Split('|');
+            for (var i = 0; i < parts.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(parts[i]))
+                {
+                    ownedEquipmentIds.Add(parts[i]);
+                }
+            }
+        }
+
+        private string SerializeOwnedEquipment()
+        {
+            var ordered = new List<string>(ownedEquipmentIds);
+            ordered.Sort(StringComparer.OrdinalIgnoreCase);
+            return string.Join("|", ordered.ToArray());
         }
 
         private static string ToChineseNumber(int value)
@@ -498,5 +757,4 @@ namespace Wuxing.Game
         }
     }
 }
-
 

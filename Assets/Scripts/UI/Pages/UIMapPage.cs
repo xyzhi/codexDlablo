@@ -12,6 +12,7 @@ namespace Wuxing.UI
         [SerializeField] private Text regionText;
         [SerializeField] private Text longevityText;
         [SerializeField] private Text objectiveText;
+        [SerializeField] private Text nodeDetailText;
         [SerializeField] private Text routeText;
         [SerializeField] private Button advanceButton;
         [SerializeField] private Button resetButton;
@@ -142,6 +143,11 @@ namespace Wuxing.UI
             if (objectiveText != null)
             {
                 objectiveText.text = GameProgressManager.BuildCurrentObjective(isEnglish);
+            }
+
+            if (nodeDetailText != null)
+            {
+                nodeDetailText.text = GameProgressManager.BuildCurrentNodeDetail(isEnglish);
             }
 
             if (routeText != null)

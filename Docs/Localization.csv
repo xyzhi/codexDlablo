@@ -83,6 +83,7 @@ battle.editor_stats,当前属性,Stats
 battle.editor_skills,当前技能,Skills
 battle.editor_team_totals,队伍总属性,Team Totals
 battle.editor_preview,战斗预览,Battle Preview
+battle.editor_owned_equipment,已拥有装备,Owned Equipment
 battle.editor_unit_prefix,角色: ,Unit: 
 battle.preview_victory,预计胜利,Victory
 battle.preview_defeat,预计失败,Defeat

@@ -59,6 +59,67 @@
             "DEF": 5,
             "MP": 0,
             "Notes": "提高容错"
+        },
+        {
+            "Id": "EQ007",
+            "Name": "裂风长刃",
+            "Slot": "Weapon",
+            "HP": 0,
+            "ATK": 16,
+            "DEF": 0,
+            "MP": 6,
+            "Notes": "高阶物理输出"
+        },
+        {
+            "Id": "EQ008",
+            "Name": "玄霜灵杖",
+            "Slot": "Weapon",
+            "HP": 0,
+            "ATK": 14,
+            "DEF": 0,
+            "MP": 22,
+            "Notes": "高阶法术循环"
+        },
+        {
+            "Id": "EQ009",
+            "Name": "玄岩重铠",
+            "Slot": "Armor",
+            "HP": 42,
+            "ATK": 0,
+            "DEF": 10,
+            "MP": 0,
+            "Notes": "高防御重装"
+        },
+        {
+            "Id": "EQ010",
+            "Name": "流云法衣",
+            "Slot": "Armor",
+            "HP": 24,
+            "ATK": 0,
+            "DEF": 6,
+            "MP": 18,
+            "Notes": "攻守兼备法袍"
+        },
+        {
+            "Id": "EQ011",
+            "Name": "噬炎戒",
+            "Slot": "Accessory",
+            "HP": 0,
+            "ATK": 10,
+            "DEF": 0,
+            "MP": 10,
+            "Notes": "强化爆发输出"
+        },
+        {
+            "Id": "EQ012",
+            "Name": "长生佩",
+            "Slot": "Accessory",
+            "HP": 36,
+            "ATK": 0,
+            "DEF": 6,
+            "MP": 8,
+            "Notes": "提高续航与容错"
         }
     ]
 }
+

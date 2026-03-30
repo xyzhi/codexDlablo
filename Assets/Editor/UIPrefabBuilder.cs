@@ -66,36 +66,44 @@ public static class UIPrefabBuilder
         var subtitleText = UIFactory.CreateText(subtitle, "SubTitleText", "Phase 1 / Step 1 / Text and line UGUI", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.84f, 0.9f, 1f));
         AddLocalizedText(subtitleText, "menu.subtitle");
 
-        var progress = UIFactory.CreateContainer(root.transform, "Progress", new Vector2(0.16f, 0.58f), new Vector2(0.84f, 0.64f), Vector2.zero, Vector2.zero);
-        var progressText = UIFactory.CreateText(progress, "ProgressText", "Current Stage 1 / Highest Cleared 0", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.86f, 0.72f, 1f));
+        var progressPanel = UIFactory.CreatePanel(root.transform, "ProgressPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
+        var progressPanelRect = progressPanel.GetComponent<RectTransform>();
+        progressPanelRect.anchorMin = new Vector2(0.16f, 0.47f);
+        progressPanelRect.anchorMax = new Vector2(0.84f, 0.63f);
+        progressPanelRect.offsetMin = Vector2.zero;
+        progressPanelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(progressPanel.transform, "ProgressOutline", new Color(0.82f, 0.84f, 0.9f, 0.55f), 1f);
+        var progressText = UIFactory.CreateText(progressPanel.transform, "ProgressText", "Current Stage 1 / Highest Cleared 0", 22, TextAnchor.UpperCenter, new Color(0.95f, 0.86f, 0.72f, 1f));
+        progressText.rectTransform.offsetMin = new Vector2(20f, 14f);
+        progressText.rectTransform.offsetMax = new Vector2(-20f, -14f);
 
         var menuPanel = UIFactory.CreatePanel(root.transform, "MenuPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
         var menuRect = menuPanel.GetComponent<RectTransform>();
-        menuRect.anchorMin = new Vector2(0.16f, 0.18f);
-        menuRect.anchorMax = new Vector2(0.84f, 0.56f);
+        menuRect.anchorMin = new Vector2(0.16f, 0.19f);
+        menuRect.anchorMax = new Vector2(0.84f, 0.46f);
         menuRect.offsetMin = Vector2.zero;
         menuRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(menuPanel.transform, "MenuOutline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
 
         var menu = UIFactory.CreateContainer(menuPanel.transform, "Menu", new Vector2(0.08f, 0.12f), new Vector2(0.92f, 0.88f), Vector2.zero, Vector2.zero);
-        var layout = UIFactory.AddVerticalLayout(menu.gameObject, 18, TextAnchor.UpperCenter);
+        var layout = UIFactory.AddVerticalLayout(menu.gameObject, 14, TextAnchor.UpperCenter);
         layout.padding = new RectOffset(0, 0, 8, 8);
 
         var startButton = UIFactory.CreateButton(menu, "StartButton", "Open Battle", delegate { });
         AddLocalizedText(startButton.GetComponentInChildren<Text>(), "menu.button_battle");
-        UIFactory.AddLayoutElement(startButton.gameObject, 86f);
+        UIFactory.AddLayoutElement(startButton.gameObject, 70f);
 
         var popupButton = UIFactory.CreateButton(menu, "PopupButton", "Open Popup", delegate { });
         AddLocalizedText(popupButton.GetComponentInChildren<Text>(), "menu.button_popup");
-        UIFactory.AddLayoutElement(popupButton.gameObject, 86f);
+        UIFactory.AddLayoutElement(popupButton.gameObject, 70f);
 
         var toastButton = UIFactory.CreateButton(menu, "ToastButton", "Show Toast", delegate { });
         AddLocalizedText(toastButton.GetComponentInChildren<Text>(), "menu.button_toast");
-        UIFactory.AddLayoutElement(toastButton.gameObject, 86f);
+        UIFactory.AddLayoutElement(toastButton.gameObject, 70f);
 
         var languageButton = UIFactory.CreateButton(menu, "LanguageButton", "Language", delegate { });
         AddLocalizedText(languageButton.GetComponentInChildren<Text>(), "menu.button_language");
-        UIFactory.AddLayoutElement(languageButton.gameObject, 86f);
+        UIFactory.AddLayoutElement(languageButton.gameObject, 70f);
 
         var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.12f, 0.1f), new Vector2(0.88f, 0.18f), Vector2.zero, Vector2.zero);
         var footerText = UIFactory.CreateText(footer, "FooterText", "This version uses text, lines, and rectangles first so art can be replaced later.", 22, TextAnchor.MiddleCenter, new Color(0.72f, 0.76f, 0.82f, 1f));
@@ -137,7 +145,7 @@ public static class UIPrefabBuilder
 
         var objectivePanel = UIFactory.CreatePanel(root.transform, "ObjectivePanel", new Color(0.13f, 0.13f, 0.16f, 0.94f));
         var objectiveRect = objectivePanel.GetComponent<RectTransform>();
-        objectiveRect.anchorMin = new Vector2(0.08f, 0.58f);
+        objectiveRect.anchorMin = new Vector2(0.08f, 0.61f);
         objectiveRect.anchorMax = new Vector2(0.92f, 0.7f);
         objectiveRect.offsetMin = Vector2.zero;
         objectiveRect.offsetMax = Vector2.zero;
@@ -146,10 +154,21 @@ public static class UIPrefabBuilder
         objectiveText.rectTransform.offsetMin = new Vector2(18f, 12f);
         objectiveText.rectTransform.offsetMax = new Vector2(-18f, -12f);
 
+        var detailPanel = UIFactory.CreatePanel(root.transform, "DetailPanel", new Color(0.12f, 0.1f, 0.1f, 0.95f));
+        var detailRect = detailPanel.GetComponent<RectTransform>();
+        detailRect.anchorMin = new Vector2(0.08f, 0.47f);
+        detailRect.anchorMax = new Vector2(0.92f, 0.58f);
+        detailRect.offsetMin = Vector2.zero;
+        detailRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(detailPanel.transform, "DetailOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
+        var detailText = UIFactory.CreateText(detailPanel.transform, "DetailText", "Node Detail", 22, TextAnchor.UpperLeft, new Color(0.94f, 0.92f, 0.88f, 1f));
+        detailText.rectTransform.offsetMin = new Vector2(18f, 12f);
+        detailText.rectTransform.offsetMax = new Vector2(-18f, -12f);
+
         var routePanel = UIFactory.CreatePanel(root.transform, "RoutePanel", new Color(0.11f, 0.09f, 0.09f, 0.96f));
         var routeRect = routePanel.GetComponent<RectTransform>();
         routeRect.anchorMin = new Vector2(0.08f, 0.2f);
-        routeRect.anchorMax = new Vector2(0.92f, 0.55f);
+        routeRect.anchorMax = new Vector2(0.92f, 0.44f);
         routeRect.offsetMin = Vector2.zero;
         routeRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(routePanel.transform, "RouteOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
@@ -177,6 +196,7 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "regionText", regionText);
         BindSerializedProperty(page, "longevityText", longevityText);
         BindSerializedProperty(page, "objectiveText", objectiveText);
+        BindSerializedProperty(page, "nodeDetailText", detailText);
         BindSerializedProperty(page, "routeText", routeText);
         BindSerializedProperty(page, "advanceButton", advanceButton);
         BindSerializedProperty(page, "resetButton", resetButton);
@@ -272,8 +292,8 @@ public static class UIPrefabBuilder
         
         var equipmentContent = UIFactory.CreatePanel(equipmentPanel.transform, "EquipmentContent", new Color(0.1f, 0.07f, 0.07f, 0.98f));
         var equipmentContentRect = equipmentContent.GetComponent<RectTransform>();
-        equipmentContentRect.anchorMin = new Vector2(0.06f, 0.16f);
-        equipmentContentRect.anchorMax = new Vector2(0.94f, 0.84f);
+        equipmentContentRect.anchorMin = new Vector2(0.05f, 0.1f);
+        equipmentContentRect.anchorMax = new Vector2(0.95f, 0.9f);
         equipmentContentRect.offsetMin = Vector2.zero;
         equipmentContentRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(equipmentContent.transform, "EquipmentOutline", new Color(0.9f, 0.82f, 0.74f, 0.75f), 1f);
@@ -282,60 +302,62 @@ public static class UIPrefabBuilder
         var equipmentTitleText = UIFactory.CreateText(equipmentTitle, "EquipmentTitleText", "Equipment Detail", 30, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(equipmentTitleText, "battle.equipment_detail_title");
 
-        var cycleEquipmentButton = UIFactory.CreateButton(equipmentContent.transform, "CycleEquipmentButton", "Switch Preset", delegate { });
+        var controlsRoot = UIFactory.CreateContainer(equipmentContent.transform, "ControlsRoot", new Vector2(0.05f, 0.55f), new Vector2(0.95f, 0.86f), Vector2.zero, Vector2.zero);
+
+        var cycleEquipmentButton = UIFactory.CreateButton(controlsRoot, "CycleEquipmentButton", "Switch Preset", delegate { });
         AddLocalizedText(cycleEquipmentButton.GetComponentInChildren<Text>(), "battle.button_cycle_equipment");
         var cycleEquipmentRect = cycleEquipmentButton.GetComponent<RectTransform>();
-        cycleEquipmentRect.anchorMin = new Vector2(0.05f, 0.78f);
-        cycleEquipmentRect.anchorMax = new Vector2(0.44f, 0.87f);
+        cycleEquipmentRect.anchorMin = new Vector2(0f, 0.76f);
+        cycleEquipmentRect.anchorMax = new Vector2(0.43f, 0.94f);
         cycleEquipmentRect.offsetMin = Vector2.zero;
         cycleEquipmentRect.offsetMax = Vector2.zero;
 
-        var cycleEquipmentUnitButton = UIFactory.CreateButton(equipmentContent.transform, "CycleEquipmentUnitButton", "Unit", delegate { });
+        var cycleEquipmentUnitButton = UIFactory.CreateButton(controlsRoot, "CycleEquipmentUnitButton", "Unit", delegate { });
         var cycleEquipmentUnitRect = cycleEquipmentUnitButton.GetComponent<RectTransform>();
-        cycleEquipmentUnitRect.anchorMin = new Vector2(0.48f, 0.78f);
-        cycleEquipmentUnitRect.anchorMax = new Vector2(0.95f, 0.87f);
+        cycleEquipmentUnitRect.anchorMin = new Vector2(0.47f, 0.76f);
+        cycleEquipmentUnitRect.anchorMax = new Vector2(1f, 0.94f);
         cycleEquipmentUnitRect.offsetMin = Vector2.zero;
         cycleEquipmentUnitRect.offsetMax = Vector2.zero;
 
-        var cycleWeaponButton = UIFactory.CreateButton(equipmentContent.transform, "CycleWeaponButton", "Weapon", delegate { });
+        var cycleWeaponButton = UIFactory.CreateButton(controlsRoot, "CycleWeaponButton", "Weapon", delegate { });
         var cycleWeaponRect = cycleWeaponButton.GetComponent<RectTransform>();
-        cycleWeaponRect.anchorMin = new Vector2(0.05f, 0.67f);
-        cycleWeaponRect.anchorMax = new Vector2(0.3f, 0.76f);
+        cycleWeaponRect.anchorMin = new Vector2(0f, 0.5f);
+        cycleWeaponRect.anchorMax = new Vector2(0.3f, 0.7f);
         cycleWeaponRect.offsetMin = Vector2.zero;
         cycleWeaponRect.offsetMax = Vector2.zero;
 
-        var cycleArmorButton = UIFactory.CreateButton(equipmentContent.transform, "CycleArmorButton", "Armor", delegate { });
+        var cycleArmorButton = UIFactory.CreateButton(controlsRoot, "CycleArmorButton", "Armor", delegate { });
         var cycleArmorRect = cycleArmorButton.GetComponent<RectTransform>();
-        cycleArmorRect.anchorMin = new Vector2(0.37f, 0.67f);
-        cycleArmorRect.anchorMax = new Vector2(0.62f, 0.76f);
+        cycleArmorRect.anchorMin = new Vector2(0.35f, 0.5f);
+        cycleArmorRect.anchorMax = new Vector2(0.65f, 0.7f);
         cycleArmorRect.offsetMin = Vector2.zero;
         cycleArmorRect.offsetMax = Vector2.zero;
 
-        var cycleAccessoryButton = UIFactory.CreateButton(equipmentContent.transform, "CycleAccessoryButton", "Accessory", delegate { });
+        var cycleAccessoryButton = UIFactory.CreateButton(controlsRoot, "CycleAccessoryButton", "Accessory", delegate { });
         var cycleAccessoryRect = cycleAccessoryButton.GetComponent<RectTransform>();
-        cycleAccessoryRect.anchorMin = new Vector2(0.69f, 0.67f);
-        cycleAccessoryRect.anchorMax = new Vector2(0.94f, 0.76f);
+        cycleAccessoryRect.anchorMin = new Vector2(0.7f, 0.5f);
+        cycleAccessoryRect.anchorMax = new Vector2(1f, 0.7f);
         cycleAccessoryRect.offsetMin = Vector2.zero;
         cycleAccessoryRect.offsetMax = Vector2.zero;
 
-        var autoOffenseButton = UIFactory.CreateButton(equipmentContent.transform, "AutoOffenseButton", "Auto Offense", delegate { });
+        var autoOffenseButton = UIFactory.CreateButton(controlsRoot, "AutoOffenseButton", "Auto Offense", delegate { });
         var autoOffenseRect = autoOffenseButton.GetComponent<RectTransform>();
-        autoOffenseRect.anchorMin = new Vector2(0.05f, 0.56f);
-        autoOffenseRect.anchorMax = new Vector2(0.47f, 0.65f);
+        autoOffenseRect.anchorMin = new Vector2(0f, 0.24f);
+        autoOffenseRect.anchorMax = new Vector2(0.47f, 0.44f);
         autoOffenseRect.offsetMin = Vector2.zero;
         autoOffenseRect.offsetMax = Vector2.zero;
 
-        var autoDefenseButton = UIFactory.CreateButton(equipmentContent.transform, "AutoDefenseButton", "Auto Defense", delegate { });
+        var autoDefenseButton = UIFactory.CreateButton(controlsRoot, "AutoDefenseButton", "Auto Defense", delegate { });
         var autoDefenseRect = autoDefenseButton.GetComponent<RectTransform>();
-        autoDefenseRect.anchorMin = new Vector2(0.53f, 0.56f);
-        autoDefenseRect.anchorMax = new Vector2(0.95f, 0.65f);
+        autoDefenseRect.anchorMin = new Vector2(0.53f, 0.24f);
+        autoDefenseRect.anchorMax = new Vector2(1f, 0.44f);
         autoDefenseRect.offsetMin = Vector2.zero;
         autoDefenseRect.offsetMax = Vector2.zero;
 
-        var resetEquipmentButton = UIFactory.CreateButton(equipmentContent.transform, "ResetEquipmentButton", "Reset", delegate { });
+        var resetEquipmentButton = UIFactory.CreateButton(controlsRoot, "ResetEquipmentButton", "Reset", delegate { });
         var resetEquipmentRect = resetEquipmentButton.GetComponent<RectTransform>();
-        resetEquipmentRect.anchorMin = new Vector2(0.05f, 0.45f);
-        resetEquipmentRect.anchorMax = new Vector2(0.95f, 0.54f);
+        resetEquipmentRect.anchorMin = new Vector2(0f, 0f);
+        resetEquipmentRect.anchorMax = new Vector2(1f, 0.18f);
         resetEquipmentRect.offsetMin = Vector2.zero;
         resetEquipmentRect.offsetMax = Vector2.zero;
 
@@ -347,8 +369,28 @@ public static class UIPrefabBuilder
         closeEquipmentRect.offsetMin = Vector2.zero;
         closeEquipmentRect.offsetMax = Vector2.zero;
 
-        var equipmentDetailRect = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentDetail", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.41f), Vector2.zero, Vector2.zero);
-        var equipmentDetailText = UIFactory.CreateText(equipmentDetailRect, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
+        var selectionTitle = UIFactory.CreateContainer(equipmentContent.transform, "SelectionTitle", new Vector2(0.05f, 0.48f), new Vector2(0.95f, 0.54f), Vector2.zero, Vector2.zero);
+        var selectionTitleText = UIFactory.CreateText(selectionTitle, "SelectionTitleText", "武器列表", 22, TextAnchor.MiddleLeft, new Color(0.95f, 0.86f, 0.74f, 1f));
+
+        var selectionScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "SelectionScrollRoot", new Vector2(0.05f, 0.28f), new Vector2(0.95f, 0.47f), Vector2.zero, Vector2.zero);
+        var selectionScrollRect = UIFactory.CreateScrollRect(selectionScrollRoot, "SelectionScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(selectionScrollRect.GetComponent<RectTransform>());
+
+        var equipmentScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentScrollRoot", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.25f), Vector2.zero, Vector2.zero);
+        var equipmentScrollRect = UIFactory.CreateScrollRect(equipmentScrollRoot, "EquipmentDetailScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(equipmentScrollRect.GetComponent<RectTransform>());
+        var equipmentDetailText = UIFactory.CreateText(equipmentScrollRect.content, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
+        var equipmentDetailTextRect = equipmentDetailText.rectTransform;
+        equipmentDetailTextRect.anchorMin = new Vector2(0f, 1f);
+        equipmentDetailTextRect.anchorMax = new Vector2(1f, 1f);
+        equipmentDetailTextRect.pivot = new Vector2(0.5f, 1f);
+        equipmentDetailTextRect.offsetMin = new Vector2(18f, 0f);
+        equipmentDetailTextRect.offsetMax = new Vector2(-18f, 0f);
+        equipmentDetailText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        equipmentDetailText.verticalOverflow = VerticalWrapMode.Overflow;
+        var equipmentDetailFitter = equipmentDetailText.gameObject.AddComponent<ContentSizeFitter>();
+        equipmentDetailFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        equipmentDetailFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         equipmentPanel.SetActive(false);
 
         var page = root.AddComponent<UIBattlePage>();
@@ -367,6 +409,8 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "autoDefenseButton", autoDefenseButton);
         BindSerializedProperty(page, "resetEquipmentButton", resetEquipmentButton);
         BindSerializedProperty(page, "equipmentPanel", equipmentPanel);
+        BindSerializedProperty(page, "equipmentSelectionTitleText", selectionTitleText);
+        BindSerializedProperty(page, "equipmentSelectionContent", selectionScrollRect.content);
         BindSerializedProperty(page, "equipmentDetailText", equipmentDetailText);
         BindSerializedProperty(page, "stageInfoText", stageInfoText);
         BindSerializedProperty(page, "statusText", statusText);
