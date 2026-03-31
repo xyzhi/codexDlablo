@@ -55,119 +55,126 @@ public static class UIPrefabBuilder
     private static void BuildStartPagePrefab()
     {
         var root = UIFactory.CreatePanel(null, "StartPage", new Color(0.05f, 0.07f, 0.11f, 1f));
-        UIFactory.AddOutlineBox(root.transform, "StartFrame", new Color(0.92f, 0.84f, 0.62f, 0.78f), 2f);
+        UIFactory.AddOutlineBox(root.transform, "StartFrame", new Color(0.92f, 0.84f, 0.62f, 0.34f), 2f);
 
-        var backdropTop = UIFactory.CreatePanel(root.transform, "BackdropTop", new Color(0.12f, 0.18f, 0.26f, 0.45f));
+        var backdropTop = UIFactory.CreatePanel(root.transform, "BackdropTop", new Color(0.09f, 0.15f, 0.24f, 0.48f));
         var backdropTopRect = backdropTop.GetComponent<RectTransform>();
-        backdropTopRect.anchorMin = new Vector2(0f, 0.62f);
+        backdropTopRect.anchorMin = new Vector2(0f, 0.5f);
         backdropTopRect.anchorMax = new Vector2(1f, 1f);
         backdropTopRect.offsetMin = Vector2.zero;
         backdropTopRect.offsetMax = Vector2.zero;
 
-        var backdropBottom = UIFactory.CreatePanel(root.transform, "BackdropBottom", new Color(0.24f, 0.11f, 0.08f, 0.5f));
+        var backdropBottom = UIFactory.CreatePanel(root.transform, "BackdropBottom", new Color(0.14f, 0.08f, 0.08f, 0.22f));
         var backdropBottomRect = backdropBottom.GetComponent<RectTransform>();
         backdropBottomRect.anchorMin = new Vector2(0f, 0f);
-        backdropBottomRect.anchorMax = new Vector2(1f, 0.3f);
+        backdropBottomRect.anchorMax = new Vector2(1f, 0.2f);
         backdropBottomRect.offsetMin = Vector2.zero;
         backdropBottomRect.offsetMax = Vector2.zero;
 
-        UIFactory.CreateLine(root.transform, "TopLine", new Color(1f, 0.86f, 0.58f, 0.85f), new Vector2(0.08f, 0.89f), new Vector2(0.92f, 0.89f), 3f);
-        UIFactory.CreateLine(root.transform, "BottomLine", new Color(0.7f, 0.84f, 0.92f, 0.65f), new Vector2(0.1f, 0.11f), new Vector2(0.9f, 0.11f), 2f);
-        UIFactory.CreateLine(root.transform, "LeftRune", new Color(0.96f, 0.81f, 0.52f, 0.65f), new Vector2(0.16f, 0.28f), new Vector2(0.16f, 0.82f), 2f);
-        UIFactory.CreateLine(root.transform, "RightRune", new Color(0.96f, 0.81f, 0.52f, 0.65f), new Vector2(0.84f, 0.28f), new Vector2(0.84f, 0.82f), 2f);
+        var topLine = UIFactory.CreateLine(root.transform, "TopLine", new Color(1f, 0.86f, 0.58f, 0.24f), new Vector2(0.2f, 0.89f), new Vector2(0.8f, 0.89f), 3f);
+        UIFactory.CreateLine(root.transform, "BottomLine", new Color(0.78f, 0.84f, 0.92f, 0.1f), new Vector2(0.24f, 0.11f), new Vector2(0.76f, 0.11f), 2f);
 
-        var titleBlock = UIFactory.CreateContainer(root.transform, "TitleBlock", new Vector2(0.14f, 0.54f), new Vector2(0.86f, 0.82f), Vector2.zero, Vector2.zero);
-        var kickerText = UIFactory.CreateText(titleBlock, "Kicker", "ROGUELIKE CULTIVATION", 22, TextAnchor.UpperCenter, new Color(0.78f, 0.88f, 0.94f, 1f));
-        kickerText.rectTransform.anchorMin = new Vector2(0f, 0.78f);
-        kickerText.rectTransform.anchorMax = new Vector2(1f, 1f);
-        kickerText.rectTransform.offsetMin = Vector2.zero;
-        kickerText.rectTransform.offsetMax = Vector2.zero;
-        AddLocalizedText(kickerText, "landing.kicker");
+        var sigilRoot = new GameObject("SigilRoot", typeof(RectTransform), typeof(CanvasGroup));
+        sigilRoot.transform.SetParent(root.transform, false);
+        var sigilRect = sigilRoot.GetComponent<RectTransform>();
+        sigilRect.anchorMin = new Vector2(0.5f, 0.6f);
+        sigilRect.anchorMax = new Vector2(0.5f, 0.6f);
+        sigilRect.pivot = new Vector2(0.5f, 0.5f);
+        sigilRect.anchoredPosition = Vector2.zero;
+        sigilRect.sizeDelta = new Vector2(500f, 500f);
+        var sigilCanvasGroup = sigilRoot.GetComponent<CanvasGroup>();
+        sigilCanvasGroup.alpha = 0.18f;
 
-        var titleText = UIFactory.CreateText(titleBlock, "Title", "五行行者", 76, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.84f, 1f));
-        titleText.rectTransform.anchorMin = new Vector2(0f, 0.38f);
-        titleText.rectTransform.anchorMax = new Vector2(1f, 0.82f);
+        var pentagonColor = new Color(0.95f, 0.86f, 0.68f, 0.26f);
+        var starColor = new Color(0.76f, 0.85f, 0.94f, 0.22f);
+
+        var p1 = new Vector2(0f, 182f);
+        var p2 = new Vector2(172f, 56f);
+        var p3 = new Vector2(106f, -152f);
+        var p4 = new Vector2(-106f, -152f);
+        var p5 = new Vector2(-172f, 56f);
+
+        CreateSegment(sigilRoot.transform, "PentagonA", p1, p2, pentagonColor, 2f);
+        CreateSegment(sigilRoot.transform, "PentagonB", p2, p3, pentagonColor, 2f);
+        CreateSegment(sigilRoot.transform, "PentagonC", p3, p4, pentagonColor, 2f);
+        CreateSegment(sigilRoot.transform, "PentagonD", p4, p5, pentagonColor, 2f);
+        CreateSegment(sigilRoot.transform, "PentagonE", p5, p1, pentagonColor, 2f);
+
+        CreateSegment(sigilRoot.transform, "StarA", p1, p3, starColor, 2f);
+        CreateSegment(sigilRoot.transform, "StarB", p3, p5, starColor, 2f);
+        CreateSegment(sigilRoot.transform, "StarC", p5, p2, starColor, 2f);
+        CreateSegment(sigilRoot.transform, "StarD", p2, p4, starColor, 2f);
+        CreateSegment(sigilRoot.transform, "StarE", p4, p1, starColor, 2f);
+
+        var orbitGlow = UIFactory.CreatePanel(sigilRoot.transform, "OrbitGlow", new Color(0.92f, 0.86f, 0.68f, 0.22f));
+        var orbitGlowRect = orbitGlow.GetComponent<RectTransform>();
+        orbitGlowRect.anchorMin = new Vector2(0.5f, 0.5f);
+        orbitGlowRect.anchorMax = new Vector2(0.5f, 0.5f);
+        orbitGlowRect.pivot = new Vector2(0.5f, 0.5f);
+        orbitGlowRect.anchoredPosition = new Vector2(0f, -120f);
+        orbitGlowRect.sizeDelta = new Vector2(20f, 20f);
+
+        var titleBlock = UIFactory.CreateContainer(root.transform, "TitleBlock", new Vector2(0.14f, 0.5f), new Vector2(0.86f, 0.71f), Vector2.zero, Vector2.zero);
+        var titleText = UIFactory.CreateText(titleBlock, "Title", "五行行者", 90, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.84f, 1f));
+        titleText.rectTransform.anchorMin = new Vector2(0f, 0.34f);
+        titleText.rectTransform.anchorMax = new Vector2(1f, 0.8f);
         titleText.rectTransform.offsetMin = Vector2.zero;
         titleText.rectTransform.offsetMax = Vector2.zero;
         AddLocalizedText(titleText, "landing.title");
 
-        var subtitleText = UIFactory.CreateText(titleBlock, "Subtitle", "以寿元为火，以五行为刃，在不断逼近的终局中夺一线登天之机。", 26, TextAnchor.LowerCenter, new Color(0.9f, 0.92f, 0.95f, 1f));
-        subtitleText.rectTransform.anchorMin = new Vector2(0.08f, 0f);
-        subtitleText.rectTransform.anchorMax = new Vector2(0.92f, 0.42f);
+        var subtitleText = UIFactory.CreateText(titleBlock, "Subtitle", "以寿元为火，以五行为刃。", 20, TextAnchor.LowerCenter, new Color(0.92f, 0.93f, 0.95f, 0.58f));
+        subtitleText.rectTransform.anchorMin = new Vector2(0.22f, 0.04f);
+        subtitleText.rectTransform.anchorMax = new Vector2(0.78f, 0.2f);
         subtitleText.rectTransform.offsetMin = Vector2.zero;
         subtitleText.rectTransform.offsetMax = Vector2.zero;
         AddLocalizedText(subtitleText, "landing.subtitle");
 
-        var featurePanel = UIFactory.CreatePanel(root.transform, "FeaturePanel", new Color(0.08f, 0.11f, 0.15f, 0.72f));
-        var featurePanelRect = featurePanel.GetComponent<RectTransform>();
-        featurePanelRect.anchorMin = new Vector2(0.12f, 0.28f);
-        featurePanelRect.anchorMax = new Vector2(0.88f, 0.48f);
-        featurePanelRect.offsetMin = Vector2.zero;
-        featurePanelRect.offsetMax = Vector2.zero;
-        UIFactory.AddOutlineBox(featurePanel.transform, "FeatureOutline", new Color(0.74f, 0.87f, 0.96f, 0.45f), 1f);
-
-        var featureLayoutRoot = UIFactory.CreateContainer(featurePanel.transform, "FeatureLayout", new Vector2(0.04f, 0.14f), new Vector2(0.96f, 0.86f), Vector2.zero, Vector2.zero);
-        var featureLayout = UIFactory.AddVerticalLayout(featureLayoutRoot.gameObject, 10, TextAnchor.MiddleCenter);
-        featureLayout.childForceExpandHeight = true;
-        featureLayout.padding = new RectOffset(0, 0, 4, 4);
-
-        var featureOne = UIFactory.CreateText(featureLayoutRoot, "FeatureOne", "五行灵根构筑，决定你这一局能走多远。", 24, TextAnchor.MiddleCenter, new Color(1f, 0.92f, 0.8f, 1f));
-        AddLocalizedText(featureOne, "landing.feature_1");
-        UIFactory.AddLayoutElement(featureOne.gameObject, 42f);
-
-        var featureTwo = UIFactory.CreateText(featureLayoutRoot, "FeatureTwo", "自动战斗，策略重心放在配装、路线与功法取舍。", 24, TextAnchor.MiddleCenter, new Color(0.84f, 0.93f, 0.98f, 1f));
-        AddLocalizedText(featureTwo, "landing.feature_2");
-        UIFactory.AddLayoutElement(featureTwo.gameObject, 42f);
-
-        var featureThree = UIFactory.CreateText(featureLayoutRoot, "FeatureThree", "寿元会随着推进不断流逝，每一步都在逼近终局。", 24, TextAnchor.MiddleCenter, new Color(0.98f, 0.86f, 0.74f, 1f));
-        AddLocalizedText(featureThree, "landing.feature_3");
-        UIFactory.AddLayoutElement(featureThree.gameObject, 42f);
-
-        var actionPanel = UIFactory.CreatePanel(root.transform, "ActionPanel", new Color(0.11f, 0.08f, 0.09f, 0.8f));
+        var actionPanel = UIFactory.CreatePanel(root.transform, "ActionPanel", new Color(0.08f, 0.09f, 0.12f, 0.54f));
         var actionPanelRect = actionPanel.GetComponent<RectTransform>();
-        actionPanelRect.anchorMin = new Vector2(0.2f, 0.12f);
-        actionPanelRect.anchorMax = new Vector2(0.8f, 0.25f);
+        actionPanelRect.anchorMin = new Vector2(0.25f, 0.19f);
+        actionPanelRect.anchorMax = new Vector2(0.75f, 0.32f);
         actionPanelRect.offsetMin = Vector2.zero;
         actionPanelRect.offsetMax = Vector2.zero;
-        UIFactory.AddOutlineBox(actionPanel.transform, "ActionOutline", new Color(1f, 0.87f, 0.6f, 0.55f), 1f);
+        UIFactory.AddOutlineBox(actionPanel.transform, "ActionOutline", new Color(1f, 0.86f, 0.62f, 0.08f), 1f);
 
         var enterButton = UIFactory.CreateButton(actionPanel.transform, "EnterButton", "开始游戏", delegate { });
         var enterButtonRect = enterButton.GetComponent<RectTransform>();
-        enterButtonRect.anchorMin = new Vector2(0.06f, 0.42f);
-        enterButtonRect.anchorMax = new Vector2(0.94f, 0.92f);
+        enterButtonRect.anchorMin = new Vector2(0.08f, 0.42f);
+        enterButtonRect.anchorMax = new Vector2(0.92f, 0.8f);
         enterButtonRect.offsetMin = Vector2.zero;
         enterButtonRect.offsetMax = Vector2.zero;
-        enterButton.GetComponent<Image>().color = new Color(0.42f, 0.18f, 0.1f, 0.96f);
+        enterButton.GetComponent<Image>().color = new Color(0.46f, 0.2f, 0.12f, 0.9f);
         AddLocalizedText(enterButton.GetComponentInChildren<Text>(), "landing.button_enter");
 
         var languageButton = UIFactory.CreateButton(actionPanel.transform, "LanguageButton", "切换语言", delegate { });
         var languageButtonRect = languageButton.GetComponent<RectTransform>();
-        languageButtonRect.anchorMin = new Vector2(0.06f, 0.08f);
-        languageButtonRect.anchorMax = new Vector2(0.5f, 0.32f);
+        languageButtonRect.anchorMin = new Vector2(0.08f, 0.1f);
+        languageButtonRect.anchorMax = new Vector2(0.34f, 0.24f);
         languageButtonRect.offsetMin = Vector2.zero;
-        languageButtonRect.offsetMax = new Vector2(-6f, 0f);
-        languageButton.GetComponent<Image>().color = new Color(0.13f, 0.19f, 0.24f, 0.96f);
+        languageButtonRect.offsetMax = Vector2.zero;
+        languageButton.GetComponent<Image>().color = new Color(0.14f, 0.2f, 0.26f, 0.72f);
         AddLocalizedText(languageButton.GetComponentInChildren<Text>(), "menu.button_language");
 
-        var languageStateText = UIFactory.CreateText(actionPanel.transform, "LanguageStateText", "当前语言：简体中文", 18, TextAnchor.MiddleRight, new Color(0.84f, 0.91f, 0.96f, 1f));
-        languageStateText.rectTransform.anchorMin = new Vector2(0.52f, 0.08f);
-        languageStateText.rectTransform.anchorMax = new Vector2(0.94f, 0.32f);
-        languageStateText.rectTransform.offsetMin = new Vector2(6f, 0f);
+        var languageStateText = UIFactory.CreateText(actionPanel.transform, "LanguageStateText", "当前语言：简体中文", 17, TextAnchor.MiddleRight, new Color(0.82f, 0.89f, 0.95f, 0.68f));
+        languageStateText.rectTransform.anchorMin = new Vector2(0.42f, 0.08f);
+        languageStateText.rectTransform.anchorMax = new Vector2(0.92f, 0.26f);
+        languageStateText.rectTransform.offsetMin = Vector2.zero;
         languageStateText.rectTransform.offsetMax = Vector2.zero;
-
-        var footerText = UIFactory.CreateText(root.transform, "FooterText", "进入主菜单后可继续推进地图、战斗与构筑。", 20, TextAnchor.MiddleCenter, new Color(0.74f, 0.79f, 0.84f, 1f));
-        footerText.rectTransform.anchorMin = new Vector2(0.16f, 0.04f);
-        footerText.rectTransform.anchorMax = new Vector2(0.84f, 0.09f);
-        footerText.rectTransform.offsetMin = Vector2.zero;
-        footerText.rectTransform.offsetMax = Vector2.zero;
-        AddLocalizedText(footerText, "landing.footer");
 
         var page = root.AddComponent<UIStartPage>();
         BindSerializedProperty(page, "enterButton", enterButton);
         BindSerializedProperty(page, "languageButton", languageButton);
         BindSerializedProperty(page, "languageStateText", languageStateText);
+        BindSerializedProperty(page, "titleBlock", titleBlock);
+        BindSerializedProperty(page, "actionPanel", actionPanelRect);
+        BindSerializedProperty(page, "enterButtonRect", enterButtonRect);
+        BindSerializedProperty(page, "orbitGlowRect", orbitGlowRect);
+        BindSerializedProperty(page, "subtitleGraphic", subtitleText);
+        BindSerializedProperty(page, "topLineGraphic", topLine);
+        BindSerializedProperty(page, "sigilCanvasGroup", sigilCanvasGroup);
         SavePrefab(root, PagesFolder + "/StartPage.prefab");
     }
+
     private static void BuildMainMenuPrefab()
     {
         var root = UIFactory.CreatePanel(null, "MainMenuPage", new Color(0.09f, 0.1f, 0.14f, 1f));
@@ -663,6 +670,35 @@ public static class UIPrefabBuilder
         };
     }
 
+
+
+    private static Image CreateSegment(Transform parent, string name, Vector2 start, Vector2 end, Color color, float thickness)
+    {
+        var lineObject = new GameObject(name, typeof(RectTransform), typeof(Image));
+        lineObject.transform.SetParent(parent, false);
+
+        var rect = lineObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+
+        var delta = end - start;
+        rect.sizeDelta = new Vector2(delta.magnitude, thickness);
+        rect.anchoredPosition = (start + end) * 0.5f;
+        rect.localEulerAngles = new Vector3(0f, 0f, Mathf.Atan2(delta.y, delta.x) * Mathf.Rad2Deg);
+
+        var image = lineObject.GetComponent<Image>();
+        image.color = color;
+        return image;
+    }
+    private static void SetNodeRect(RectTransform rect, Vector2 anchor, float size)
+    {
+        rect.anchorMin = anchor;
+        rect.anchorMax = anchor;
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(size, size);
+    }
     private sealed class TeamInfoPanelRefs
     {
         public Text BodyText;
@@ -713,6 +749,11 @@ public static class UIPrefabBuilder
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
     }
 }
+
+
+
+
+
 
 
 

@@ -2,7 +2,7 @@
 menu.title,五行行者,Wuxing Wanderer
 landing.kicker,单机修仙肉鸽,CULTIVATION ROGUELIKE
 landing.title,五行行者,Wuxing Wanderer
-landing.subtitle,以寿元为火，以五行为刃，在不断逼近的终局中夺一线登天之机。,Burn lifespan as fuel, wield the five elements as your blade, and force a path upward before the end closes in.
+landing.subtitle,以寿元为火，以五行为刃。,Burn lifespan as fuel, wield the five elements as your blade.
 landing.feature_1,五行灵根构筑，决定你这一局能走多远。,Build around elemental roots and decide how far this run can go.
 landing.feature_2,自动战斗，策略重心放在配装、路线与功法取舍。,Auto battles keep the focus on loadouts, routes, and cultivation choices.
 landing.feature_3,寿元会随着推进不断流逝，每一步都在逼近终局。,Lifespan drains as you advance, and every step pushes you closer to the end.
@@ -116,6 +116,7 @@ battle.threat_low,低,Low
 battle.threat_medium,中,Medium
 battle.threat_medium_high,中高,Medium-High
 battle.threat_high,高,High
+
 
 
 
