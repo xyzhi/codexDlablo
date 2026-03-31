@@ -748,22 +748,13 @@ namespace Wuxing.UI
                 return;
             }
 
-            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
-            if (popup == null)
-            {
-                return;
-            }
-
-            var title = playback.IsVictory
-                ? LocalizationManager.GetText("battle.status_victory")
-                : LocalizationManager.GetText("battle.status_defeat");
-
             var isEnglish = LocalizationManager.Instance != null
                 && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
             BattleRewardResult reward = null;
             if (playback.IsVictory)
             {
                 reward = GameProgressManager.GrantBattleRewards(GameProgressManager.GetCurrentStage());
+                GameProgressManager.PrepareSkillRewardOptions();
                 GameProgressManager.MarkCurrentStageCleared();
                 if (!string.IsNullOrEmpty(reward.DroppedEquipmentId))
                 {
@@ -772,70 +763,129 @@ namespace Wuxing.UI
                 }
             }
 
-            var stageText = isEnglish
-                ? "Stage " + GameProgressManager.GetCurrentStage()
-                : "第 " + GameProgressManager.GetCurrentStage() + " 关";
-            var message = playback.IsVictory
-                ? stageText + "\n"
-                    + LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n"
-                    + BuildRewardSummary(reward, isEnglish) + "\n\n"
-                    + LocalizationManager.GetText("battle.player_team") + "\n" + playback.FinalPlayerTeamSummary + "\n\n"
-                    + LocalizationManager.GetText("battle.enemy_team") + "\n" + playback.FinalEnemyTeamSummary
-                : (isEnglish
-                    ? "Game Over\n\nThis run has ended. Please start again or reset the run from the main menu."
-                    : "游戏结束\n\n本轮已经结束，请重新开始，或回到主界面后重置本轮。");
-            var confirmLabel = playback.IsVictory
-                ? (isEnglish ? "Next Stage" : "下一关")
-                : (isEnglish ? "Back To Main Menu" : "返回主界面");
-            var cancelLabel = playback.IsVictory ? (isEnglish ? "Return To Map" : "返回地图") : null;
-            System.Action cancelAction = null;
-            if (playback.IsVictory)
-            {
-                cancelAction = delegate
-                {
-                    UIManager.Instance.ShowPage("Map");
-                };
-            }
             GameProgressManager.RecordBattleResult(playback.IsVictory, GameProgressManager.GetCurrentStage(), playback.TotalRounds);
 
+            if (playback.IsVictory)
+            {
+                ShowVictoryRewardChoicePopup(playback, reward, isEnglish);
+                return;
+            }
+
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                return;
+            }
+
+            var message = isEnglish
+                ? "Game Over\n\nThis run has ended. Please start again or reset the run from the main menu."
+                : "游戏结束\n\n本轮已经结束，请重新开始，或回到主界面后重置本轮。";
+
             popup.Setup(
-                title,
+                LocalizationManager.GetText("battle.status_defeat"),
                 message,
                 false,
                 delegate
                 {
-                    if (playback.IsVictory)
-                    {
-                        var nextStage = GameProgressManager.GetCurrentStage() + 1;
-                        if (!GameProgressManager.CanTravelToStage(nextStage))
-                        {
-                            UIManager.Instance.ShowPage("Map");
-                            return;
-                        }
-
-                        var result = GameProgressManager.TravelToStage(nextStage);
-                        if (result == RunAdvanceResult.LifespanEnded)
-                        {
-                            UIManager.Instance.ShowToast(isEnglish
-                                ? "Lifespan exhausted. The run has ended."
-                                : "阳寿已尽，本轮结束。", UIMapPage.MapToastDuration);
-                            UIManager.Instance.ShowPage("MainMenu");
-                            return;
-                        }
-
-                        UIManager.Instance.ShowToast(isEnglish
-                            ? "Arrived at Stage " + nextStage + " · " + GameProgressManager.GetNodeTypeLabel(true, nextStage)
-                            : "已抵达第 " + nextStage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, nextStage), UIMapPage.MapToastDuration);
-                        UIManager.Instance.ShowPage("Battle");
-                        return;
-                    }
-
                     GameProgressManager.ResetRun();
                     UIManager.Instance.ShowPage("MainMenu");
                 },
-                cancelAction,
-                confirmLabel,
-                cancelLabel);
+                null,
+                isEnglish ? "Back To Main Menu" : "返回主界面",
+                null);
+        }
+
+        private void ShowVictoryRewardChoicePopup(BattlePlaybackResult playback, BattleRewardResult reward, bool isEnglish)
+        {
+            var options = GameProgressManager.GetPendingSkillRewardOptions();
+            if (options.Count == 0)
+            {
+                UIManager.Instance.ShowPage("Map");
+                return;
+            }
+
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                UIManager.Instance.ShowPage("Map");
+                return;
+            }
+            var labels = new List<string>();
+            var actions = new List<System.Action>();
+            for (var i = 0; i < options.Count && i < 3; i++)
+            {
+                var capturedIndex = i;
+                var option = options[i];
+                labels.Add(BuildSkillRewardChoiceLabel(option, isEnglish));
+                actions.Add(delegate
+                {
+                    var appliedOption = GameProgressManager.ApplyPendingSkillReward(capturedIndex);
+                    if (appliedOption != null)
+                    {
+                        UIManager.Instance.ShowToast(BuildSkillRewardToast(appliedOption, isEnglish), 1.8f);
+                    }
+
+                    UIManager.Instance.ShowPage("Map");
+                });
+            }
+
+            popup.SetupChoices(
+                BuildVictoryChoiceTitle(isEnglish),
+                BuildVictoryChoiceMessage(playback, reward, isEnglish),
+                labels,
+                actions);
+        }
+
+        private static string BuildVictoryChoiceTitle(bool isEnglish)
+        {
+            return isEnglish ? "Battle Victory" : "战斗胜利";
+        }
+
+        private static string BuildVictoryChoiceMessage(BattlePlaybackResult playback, BattleRewardResult reward, bool isEnglish)
+        {
+            var stageText = isEnglish
+                ? "Stage " + GameProgressManager.GetCurrentStage()
+                : "第 " + GameProgressManager.GetCurrentStage() + " 关";
+            return stageText + "\n"
+                + LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n"
+                + BuildRewardSummary(reward, isEnglish) + "\n\n"
+                + (isEnglish ? "Choose one reward. After choosing, return to the map." : "请选择一项功法机缘，选择后将直接返回地图。");
+        }
+
+        private static string BuildSkillRewardOptionText(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null)
+            {
+                return isEnglish ? "No reward option." : "没有可选奖励。";
+            }
+
+            return isEnglish
+                ? "Target: " + option.CharacterName + "\nSkill: " + option.SkillName + "\nElement: " + option.SkillElement + "\nEffect: " + option.SkillDescription
+                : "角色：" + option.CharacterName + "\n功法：" + option.SkillName + "\n五行：" + option.SkillElement + "\n效果：" + option.SkillDescription;
+        }
+
+        private static string BuildSkillRewardChoiceLabel(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null)
+            {
+                return isEnglish ? "Empty" : "空白奖励";
+            }
+
+            return isEnglish
+                ? "Reward\n" + option.SkillName + "\n\nTarget: " + option.CharacterName + "\nElement: " + option.SkillElement + "\n" + option.SkillDescription
+                : "功法机缘\n" + option.SkillName + "\n\n角色：" + option.CharacterName + "\n五行：" + option.SkillElement + "\n" + option.SkillDescription;
+        }
+
+        private static string BuildSkillRewardToast(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null)
+            {
+                return string.Empty;
+            }
+
+            return isEnglish
+                ? option.CharacterName + " learned " + option.SkillName + "."
+                : option.CharacterName + " 学会了 " + option.SkillName + "。";
         }
 
         private static string BuildRewardSummary(BattleRewardResult reward, bool isEnglish)

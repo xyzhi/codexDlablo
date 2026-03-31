@@ -733,6 +733,7 @@ namespace Wuxing.Battle
                 if (config != null)
                 {
                     var unit = BattleUnitRuntime.FromCharacter(config);
+                    ApplyRunLearnedSkills(unit);
                     ApplyDefaultEquipment(unit, equipmentDatabase, loadout);
                     ApplyCultivationScaling(unit);
                     ApplyEarlyStagePlayerSupport(unit, stage);
@@ -796,6 +797,26 @@ namespace Wuxing.Battle
                 {
                     unit.ApplyEquipment(equipment);
                 }
+            }
+        }
+
+        private static void ApplyRunLearnedSkills(BattleUnitRuntime unit)
+        {
+            if (unit == null || string.IsNullOrEmpty(unit.Id))
+            {
+                return;
+            }
+
+            var learnedSkills = GameProgressManager.GetLearnedSkillIds(unit.Id);
+            for (var i = 0; i < learnedSkills.Count; i++)
+            {
+                var skillId = learnedSkills[i];
+                if (string.IsNullOrEmpty(skillId) || unit.SkillIds.Contains(skillId))
+                {
+                    continue;
+                }
+
+                unit.SkillIds.Add(skillId);
             }
         }
 

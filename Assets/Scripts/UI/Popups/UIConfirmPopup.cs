@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Localization;
@@ -18,6 +19,7 @@ namespace Wuxing.UI
         private const float BottomPadding = 48f;
         private const float TitleSpacing = 20f;
         private const float ButtonAreaHeight = 120f;
+        private const float MultiChoiceButtonAreaHeight = 360f;
         private const float ButtonMessageSpacing = 28f;
         private const float HorizontalPadding = 48f;
 
@@ -28,48 +30,75 @@ namespace Wuxing.UI
         [SerializeField] private LocalizedText titleLocalizedText;
         [SerializeField] private LocalizedText messageLocalizedText;
 
-        private Action _onConfirm;
-        private Action _onCancel;
+        private Action onConfirm;
+        private Action onCancel;
+        private readonly List<Button> choiceButtons = new List<Button>();
+        private bool multiChoiceMode;
 
         private void Awake()
         {
             if (confirmButton != null)
             {
-                confirmButton.onClick.AddListener(Confirm);
+                choiceButtons.Add(confirmButton);
             }
 
             if (cancelButton != null)
             {
-                cancelButton.onClick.AddListener(Cancel);
+                choiceButtons.Add(cancelButton);
             }
         }
 
-        private void OnDestroy()
+        public void Setup(string titleOrKey, string messageOrKey, bool localized, Action confirmAction, Action cancelAction)
         {
-            if (confirmButton != null)
-            {
-                confirmButton.onClick.RemoveListener(Confirm);
-            }
-
-            if (cancelButton != null)
-            {
-                cancelButton.onClick.RemoveListener(Cancel);
-            }
-        }
-
-        public void Setup(string titleOrKey, string messageOrKey, bool localized, Action onConfirm, Action onCancel)
-        {
-            Setup(titleOrKey, messageOrKey, localized, onConfirm, onCancel, null, null);
+            Setup(titleOrKey, messageOrKey, localized, confirmAction, cancelAction, null, null);
         }
 
         public void Setup(
             string titleOrKey,
             string messageOrKey,
             bool localized,
-            Action onConfirm,
-            Action onCancel,
+            Action confirmAction,
+            Action cancelAction,
             string confirmButtonLabel,
             string cancelButtonLabel)
+        {
+            multiChoiceMode = false;
+            ApplyContent(titleOrKey, messageOrKey, localized);
+
+            onConfirm = confirmAction;
+            onCancel = cancelAction;
+            EnsureChoiceButtonCount(2);
+
+            ConfigureActionButton(confirmButton, string.IsNullOrEmpty(confirmButtonLabel) ? LocalizationManager.GetText("popup.confirm_button") : confirmButtonLabel, confirmAction, true);
+            ConfigureActionButton(cancelButton, string.IsNullOrEmpty(cancelButtonLabel) ? LocalizationManager.GetText("popup.cancel_button") : cancelButtonLabel, cancelAction, cancelAction != null);
+
+            ApplyDefaultButtonLayout();
+            RefreshPopupLayout();
+        }
+
+        public void SetupChoices(string title, string message, IList<string> choiceLabels, IList<Action> choiceActions)
+        {
+            multiChoiceMode = true;
+            ApplyContent(title, message, false);
+
+            onConfirm = null;
+            onCancel = null;
+
+            var count = choiceLabels != null ? Mathf.Clamp(choiceLabels.Count, 0, 3) : 0;
+            EnsureChoiceButtonCount(count);
+            for (var i = 0; i < choiceButtons.Count; i++)
+            {
+                var shouldShow = i < count;
+                var label = shouldShow ? choiceLabels[i] : string.Empty;
+                var action = shouldShow && choiceActions != null && i < choiceActions.Count ? choiceActions[i] : null;
+                ConfigureActionButton(choiceButtons[i], label, action, shouldShow);
+            }
+
+            ApplyMultiChoiceLayout(count);
+            RefreshPopupLayout();
+        }
+
+        private void ApplyContent(string titleOrKey, string messageOrKey, bool localized)
         {
             if (localized)
             {
@@ -103,43 +132,85 @@ namespace Wuxing.UI
                     messageText.text = messageOrKey;
                 }
             }
-
-            _onConfirm = onConfirm;
-            _onCancel = onCancel;
-            ApplyButtonLabels(confirmButtonLabel, cancelButtonLabel);
-            RefreshButtonLayout();
-            RefreshPopupLayout();
         }
 
-        private void Confirm()
+        private void EnsureChoiceButtonCount(int count)
         {
-            if (_onConfirm != null)
+            if (confirmButton == null)
             {
-                _onConfirm.Invoke();
+                return;
             }
 
-            UIManager.Instance.CloseTopPopup();
+            while (choiceButtons.Count < count)
+            {
+                var cloneObject = Instantiate(confirmButton.gameObject, confirmButton.transform.parent, false);
+                cloneObject.name = "ChoiceButton" + choiceButtons.Count;
+                var button = cloneObject.GetComponent<Button>();
+                if (button != null)
+                {
+                    choiceButtons.Add(button);
+                }
+            }
         }
 
-        private void Cancel()
+        private void ConfigureActionButton(Button button, string label, Action action, bool visible)
         {
-            if (_onCancel != null)
+            if (button == null)
             {
-                _onCancel.Invoke();
+                return;
             }
 
-            UIManager.Instance.CloseTopPopup();
+            button.gameObject.SetActive(visible);
+            button.onClick.RemoveAllListeners();
+            if (visible)
+            {
+                button.onClick.AddListener(delegate
+                {
+                    UIManager.Instance.CloseTopPopup();
+                    if (action != null)
+                    {
+                        action.Invoke();
+                    }
+                });
+            }
+
+            var buttonText = button.GetComponentInChildren<Text>();
+            if (buttonText != null)
+            {
+                buttonText.text = label;
+                buttonText.alignment = multiChoiceMode ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
+                buttonText.fontSize = multiChoiceMode ? 22 : 24;
+                buttonText.resizeTextForBestFit = multiChoiceMode;
+                buttonText.resizeTextMinSize = multiChoiceMode ? 18 : 24;
+                buttonText.resizeTextMaxSize = multiChoiceMode ? 26 : 24;
+                buttonText.lineSpacing = multiChoiceMode ? 1.15f : 1f;
+                buttonText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                buttonText.verticalOverflow = VerticalWrapMode.Overflow;
+                if (multiChoiceMode)
+                {
+                    buttonText.rectTransform.offsetMin = new Vector2(20f, 18f);
+                    buttonText.rectTransform.offsetMax = new Vector2(-20f, -18f);
+                }
+            }
+
+            var image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = multiChoiceMode
+                    ? new Color(0.18f, 0.2f, 0.28f, 0.98f)
+                    : new Color(0.16f, 0.18f, 0.24f, 0.95f);
+            }
         }
 
-        private void RefreshButtonLayout()
+        private void ApplyDefaultButtonLayout()
         {
             if (confirmButton != null)
             {
                 var confirmRect = confirmButton.GetComponent<RectTransform>();
                 if (confirmRect != null)
                 {
-                    confirmRect.anchorMin = _onCancel == null ? SingleConfirmAnchorMin : DefaultConfirmAnchorMin;
-                    confirmRect.anchorMax = _onCancel == null ? SingleConfirmAnchorMax : DefaultConfirmAnchorMax;
+                    confirmRect.anchorMin = onCancel == null ? SingleConfirmAnchorMin : DefaultConfirmAnchorMin;
+                    confirmRect.anchorMax = onCancel == null ? SingleConfirmAnchorMax : DefaultConfirmAnchorMax;
                     confirmRect.offsetMin = Vector2.zero;
                     confirmRect.offsetMax = Vector2.zero;
                 }
@@ -147,54 +218,55 @@ namespace Wuxing.UI
 
             if (cancelButton != null)
             {
-                cancelButton.gameObject.SetActive(_onCancel != null);
-                if (_onCancel != null)
+                var cancelRect = cancelButton.GetComponent<RectTransform>();
+                if (cancelRect != null)
                 {
-                    var cancelRect = cancelButton.GetComponent<RectTransform>();
-                    if (cancelRect != null)
-                    {
-                        cancelRect.anchorMin = DefaultCancelAnchorMin;
-                        cancelRect.anchorMax = DefaultCancelAnchorMax;
-                        cancelRect.offsetMin = Vector2.zero;
-                        cancelRect.offsetMax = Vector2.zero;
-                    }
+                    cancelRect.anchorMin = DefaultCancelAnchorMin;
+                    cancelRect.anchorMax = DefaultCancelAnchorMax;
+                    cancelRect.offsetMin = Vector2.zero;
+                    cancelRect.offsetMax = Vector2.zero;
+                }
+            }
+
+            for (var i = 2; i < choiceButtons.Count; i++)
+            {
+                if (choiceButtons[i] != null)
+                {
+                    choiceButtons[i].gameObject.SetActive(false);
                 }
             }
         }
 
-        private void ApplyButtonLabels(string confirmButtonLabel, string cancelButtonLabel)
+        private void ApplyMultiChoiceLayout(int count)
         {
-            if (confirmButtonLabel == "Next Stage"
-                || confirmButtonLabel == "Retry"
-                || confirmButtonLabel == "下一关"
-                || confirmButtonLabel == "重试")
-            {
-                cancelButtonLabel = LocalizationManager.Instance != null
-                    && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
-                    ? "Close"
-                    : "关闭";
-            }
+            var left = 0.05f;
+            var right = 0.95f;
+            var bottom = 0.08f;
+            var top = 0.43f;
+            var spacing = 0.02f;
+            var availableWidth = right - left;
+            var buttonWidth = count > 0 ? (availableWidth - spacing * Mathf.Max(0, count - 1)) / Mathf.Max(1, count) : availableWidth;
 
-            if (confirmButton != null)
+            for (var i = 0; i < count; i++)
             {
-                var confirmText = confirmButton.GetComponentInChildren<Text>();
-                if (confirmText != null)
+                var button = choiceButtons[i];
+                if (button == null)
                 {
-                    confirmText.text = string.IsNullOrEmpty(confirmButtonLabel)
-                        ? LocalizationManager.GetText("popup.confirm_button")
-                        : confirmButtonLabel;
+                    continue;
                 }
-            }
 
-            if (cancelButton != null)
-            {
-                var cancelText = cancelButton.GetComponentInChildren<Text>();
-                if (cancelText != null)
+                var rect = button.GetComponent<RectTransform>();
+                if (rect == null)
                 {
-                    cancelText.text = string.IsNullOrEmpty(cancelButtonLabel)
-                        ? LocalizationManager.GetText("popup.cancel_button")
-                        : cancelButtonLabel;
+                    continue;
                 }
+
+                var anchorMinX = left + i * (buttonWidth + spacing);
+                var anchorMaxX = anchorMinX + buttonWidth;
+                rect.anchorMin = new Vector2(anchorMinX, bottom);
+                rect.anchorMax = new Vector2(anchorMaxX, top);
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
             }
         }
 
@@ -225,18 +297,19 @@ namespace Wuxing.UI
 
             var titleHeight = Mathf.Max(52f, titleText.preferredHeight);
             var messageHeight = Mathf.Max(96f, messageText.preferredHeight);
+            var buttonHeight = multiChoiceMode ? MultiChoiceButtonAreaHeight : ButtonAreaHeight;
             var desiredHeight = TopPadding
                 + titleHeight
                 + TitleSpacing
                 + messageHeight
                 + ButtonMessageSpacing
-                + ButtonAreaHeight
+                + buttonHeight
                 + BottomPadding;
 
             var maxHeight = parentHeight * 0.82f;
             var clampedHeight = Mathf.Clamp(desiredHeight, MinPanelHeight, maxHeight);
-            ApplyPanelHeight(panelRect, clampedHeight, parentHeight);
-            ApplyChildLayout(panelRect, titleHeight, messageHeight);
+            panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, clampedHeight);
+            ApplyChildLayout(titleHeight, messageHeight);
         }
 
         private RectTransform GetPanelRect()
@@ -264,23 +337,15 @@ namespace Wuxing.UI
             return Mathf.Max(0f, panelWidth - 64f);
         }
 
-        private void ApplyPanelHeight(RectTransform panelRect, float desiredHeight, float parentHeight)
+        private void ApplyChildLayout(float titleHeight, float messageHeight)
         {
-            panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, desiredHeight);
-        }
-
-        private void ApplyChildLayout(RectTransform panelRect, float titleHeight, float messageHeight)
-        {
-            if (panelRect == null || titleText == null || messageText == null)
+            if (titleText == null || messageText == null)
             {
                 return;
             }
 
-            var titleRect = titleText.rectTransform;
-            var messageRect = messageText.rectTransform;
-
-            ConfigureTopStretchRect(titleRect, TopPadding, titleHeight);
-            ConfigureTopStretchRect(messageRect, TopPadding + titleHeight + TitleSpacing, messageHeight);
+            ConfigureTopStretchRect(titleText.rectTransform, TopPadding, titleHeight);
+            ConfigureTopStretchRect(messageText.rectTransform, TopPadding + titleHeight + TitleSpacing, messageHeight);
 
             titleText.alignment = TextAnchor.UpperCenter;
             messageText.alignment = TextAnchor.UpperCenter;
@@ -303,4 +368,3 @@ namespace Wuxing.UI
         }
     }
 }
-

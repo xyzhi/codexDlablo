@@ -18,12 +18,20 @@ namespace Wuxing.Game
         private const string CultivationExpPrefKey = "game.progress.cultivation_exp";
         private const string SpiritStonesPrefKey = "game.progress.spirit_stones";
         private const string OwnedEquipmentPrefKey = "game.progress.owned_equipment";
+        private const string LearnedSkillsPrefKey = "game.progress.learned_skills";
+        private const string PendingSkillRewardsPrefKey = "game.progress.pending_skill_rewards";
+        private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
         private const int MaxStage = 8;
         private const int LifetimeMonths = 360;
 
         private static readonly string[] BaseOwnedEquipmentIds =
         {
             "EQ001", "EQ002", "EQ003", "EQ004", "EQ005", "EQ006"
+        };
+
+        private static readonly string[] BasePlayerCharacterIds =
+        {
+            "C001", "C002"
         };
 
         public static GameProgressManager Instance { get; private set; }
@@ -42,6 +50,8 @@ namespace Wuxing.Game
         public int SpiritStones { get; private set; }
 
         private readonly List<string> ownedEquipmentIds = new List<string>();
+        private readonly List<CharacterRunData> characterRunData = new List<CharacterRunData>();
+        private readonly List<SkillRewardOption> pendingSkillRewards = new List<SkillRewardOption>();
 
         private void Awake()
         {
@@ -84,6 +94,8 @@ namespace Wuxing.Game
                 Instance.CultivationExp = 0;
                 Instance.SpiritStones = 0;
                 Instance.ResetOwnedEquipmentToBase();
+                Instance.characterRunData.Clear();
+                Instance.pendingSkillRewards.Clear();
                 Instance.SaveProgress();
                 ProgressChanged?.Invoke();
             }
@@ -155,6 +167,8 @@ namespace Wuxing.Game
             Instance.CultivationExp = 0;
             Instance.SpiritStones = 0;
             Instance.ResetOwnedEquipmentToBase();
+            Instance.characterRunData.Clear();
+            Instance.pendingSkillRewards.Clear();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
         }
@@ -243,6 +257,131 @@ namespace Wuxing.Game
             var results = new List<string>(Instance.ownedEquipmentIds);
             results.Sort(StringComparer.OrdinalIgnoreCase);
             return results;
+        }
+
+        public static List<string> GetLearnedSkillIds(string characterId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId))
+            {
+                return new List<string>();
+            }
+
+            return Instance.GetLearnedSkillIdsInternal(characterId);
+        }
+
+        public static void PrepareSkillRewardOptions()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.pendingSkillRewards.Clear();
+
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (characterDatabase == null || skillDatabase == null || skillDatabase.Skills == null)
+            {
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return;
+            }
+
+            var candidates = new List<SkillRewardOption>();
+            for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
+            {
+                var characterId = BasePlayerCharacterIds[i];
+                var character = characterDatabase.GetById(characterId);
+                if (character == null)
+                {
+                    continue;
+                }
+
+                var knownSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                CollectKnownSkillIds(character.InitialSkills, knownSkills);
+                var learnedSkills = Instance.GetLearnedSkillIdsInternal(characterId);
+                for (var j = 0; j < learnedSkills.Count; j++)
+                {
+                    knownSkills.Add(learnedSkills[j]);
+                }
+
+                for (var j = 0; j < skillDatabase.Skills.Count; j++)
+                {
+                    var skill = skillDatabase.Skills[j];
+                    if (skill == null || string.IsNullOrEmpty(skill.Id) || knownSkills.Contains(skill.Id) || IsPassiveSkillReward(skill))
+                    {
+                        continue;
+                    }
+
+                    candidates.Add(new SkillRewardOption
+                    {
+                        CharacterId = character.Id,
+                        CharacterName = character.Name,
+                        SkillId = skill.Id,
+                        SkillName = skill.Name,
+                        SkillElement = skill.Element,
+                        SkillDescription = skill.Description
+                    });
+                }
+            }
+
+            Shuffle(candidates);
+            for (var i = 0; i < candidates.Count && Instance.pendingSkillRewards.Count < 3; i++)
+            {
+                Instance.pendingSkillRewards.Add(candidates[i]);
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static List<SkillRewardOption> GetPendingSkillRewardOptions()
+        {
+            EnsureInstance();
+            return Instance != null ? new List<SkillRewardOption>(Instance.pendingSkillRewards) : new List<SkillRewardOption>();
+        }
+
+        public static bool HasPendingSkillRewardOptions()
+        {
+            EnsureInstance();
+            return Instance != null && Instance.pendingSkillRewards.Count > 0;
+        }
+
+        public static SkillRewardOption ApplyPendingSkillReward(int optionIndex)
+        {
+            EnsureInstance();
+            if (Instance == null || optionIndex < 0 || optionIndex >= Instance.pendingSkillRewards.Count)
+            {
+                return null;
+            }
+
+            var option = Instance.pendingSkillRewards[optionIndex];
+            if (option == null || string.IsNullOrEmpty(option.CharacterId) || string.IsNullOrEmpty(option.SkillId))
+            {
+                return null;
+            }
+
+            var entry = Instance.GetOrCreateCharacterRunData(option.CharacterId);
+            if (!entry.LearnedSkillIds.Exists(delegate(string skillId)
+            {
+                return string.Equals(skillId, option.SkillId, StringComparison.OrdinalIgnoreCase);
+            }))
+            {
+                entry.LearnedSkillIds.Add(option.SkillId);
+            }
+
+            Instance.pendingSkillRewards.Clear();
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return option;
+        }
+
+        public static RunData GetRunDataSnapshot()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.BuildRunDataSnapshot() : new RunData();
         }
 
         public static void RecordBattleResult(bool isVictory, int stage, int rounds)
@@ -708,6 +847,8 @@ namespace Wuxing.Game
             CultivationExp = Mathf.Max(0, PlayerPrefs.GetInt(CultivationExpPrefKey, 0));
             SpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(SpiritStonesPrefKey, 0));
             LoadOwnedEquipment();
+            LoadLearnedSkills();
+            LoadPendingSkillRewards();
         }
 
         private void SaveProgress()
@@ -723,6 +864,9 @@ namespace Wuxing.Game
             PlayerPrefs.SetInt(CultivationExpPrefKey, CultivationExp);
             PlayerPrefs.SetInt(SpiritStonesPrefKey, SpiritStones);
             PlayerPrefs.SetString(OwnedEquipmentPrefKey, SerializeOwnedEquipment());
+            PlayerPrefs.SetString(LearnedSkillsPrefKey, SerializeLearnedSkills());
+            PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
+            PlayerPrefs.SetString(RunDataSnapshotPrefKey, JsonUtility.ToJson(BuildRunDataSnapshot()));
             PlayerPrefs.Save();
         }
 
@@ -820,6 +964,151 @@ namespace Wuxing.Game
             return string.Join("|", ordered.ToArray());
         }
 
+        private void LoadLearnedSkills()
+        {
+            characterRunData.Clear();
+            var raw = PlayerPrefs.GetString(LearnedSkillsPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<CharacterRunDataListWrapper>(raw);
+            if (wrapper == null || wrapper.Entries == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Entries.Count; i++)
+            {
+                var entry = wrapper.Entries[i];
+                if (entry == null || string.IsNullOrEmpty(entry.CharacterId))
+                {
+                    continue;
+                }
+
+                if (entry.LearnedSkillIds == null)
+                {
+                    entry.LearnedSkillIds = new List<string>();
+                }
+
+                characterRunData.Add(entry);
+            }
+        }
+
+        private string SerializeLearnedSkills()
+        {
+            var wrapper = new CharacterRunDataListWrapper
+            {
+                Entries = characterRunData
+            };
+            return JsonUtility.ToJson(wrapper);
+        }
+
+        private void LoadPendingSkillRewards()
+        {
+            pendingSkillRewards.Clear();
+            var raw = PlayerPrefs.GetString(PendingSkillRewardsPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<SkillRewardOptionListWrapper>(raw);
+            if (wrapper == null || wrapper.Entries == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Entries.Count; i++)
+            {
+                var entry = wrapper.Entries[i];
+                if (entry == null || string.IsNullOrEmpty(entry.SkillId))
+                {
+                    continue;
+                }
+
+                pendingSkillRewards.Add(entry);
+            }
+        }
+
+        private string SerializePendingSkillRewards()
+        {
+            var wrapper = new SkillRewardOptionListWrapper
+            {
+                Entries = pendingSkillRewards
+            };
+            return JsonUtility.ToJson(wrapper);
+        }
+
+        private CharacterRunData GetOrCreateCharacterRunData(string characterId)
+        {
+            for (var i = 0; i < characterRunData.Count; i++)
+            {
+                if (string.Equals(characterRunData[i].CharacterId, characterId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return characterRunData[i];
+                }
+            }
+
+            var created = new CharacterRunData
+            {
+                CharacterId = characterId
+            };
+            characterRunData.Add(created);
+            return created;
+        }
+
+        private List<string> GetLearnedSkillIdsInternal(string characterId)
+        {
+            var entry = GetOrCreateCharacterRunData(characterId);
+            return new List<string>(entry.LearnedSkillIds);
+        }
+
+        private RunData BuildRunDataSnapshot()
+        {
+            var data = new RunData
+            {
+                CurrentStage = CurrentStage,
+                HighestClearedStage = HighestClearedStage,
+                ElapsedMonths = ElapsedMonths,
+                RemainingMonths = Mathf.Max(0, LifetimeMonths - ElapsedMonths),
+                CultivationLevel = CultivationLevel,
+                CultivationExp = CultivationExp,
+                SpiritStones = SpiritStones,
+                HasLastBattle = HasLastBattle,
+                LastBattleStage = LastBattleStage,
+                LastBattleRounds = LastBattleRounds,
+                LastBattleVictory = LastBattleVictory
+            };
+
+            data.OwnedEquipmentIds.AddRange(ownedEquipmentIds);
+            for (var i = 0; i < characterRunData.Count; i++)
+            {
+                var entry = characterRunData[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                data.Characters.Add(new CharacterRunData
+                {
+                    CharacterId = entry.CharacterId,
+                    LearnedSkillIds = new List<string>(entry.LearnedSkillIds)
+                });
+            }
+
+            for (var i = 0; i < pendingSkillRewards.Count; i++)
+            {
+                if (pendingSkillRewards[i] != null)
+                {
+                    data.PendingSkillRewards.Add(pendingSkillRewards[i]);
+                }
+            }
+
+            return data;
+        }
+
         private static string ToChineseNumber(int value)
         {
             var digits = new[] { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
@@ -845,6 +1134,51 @@ namespace Wuxing.Game
             return value.ToString();
         }
 
+        private static bool IsPassiveSkillReward(SkillConfig skill)
+        {
+            if (skill == null)
+            {
+                return true;
+            }
+
+            return string.Equals(skill.Category, "Passive", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(skill.Category, "被动", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(skill.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static void CollectKnownSkillIds(string rawSkills, HashSet<string> sink)
+        {
+            if (sink == null || string.IsNullOrEmpty(rawSkills))
+            {
+                return;
+            }
+
+            var parts = rawSkills.Split('|');
+            for (var i = 0; i < parts.Length; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(parts[i]))
+                {
+                    sink.Add(parts[i].Trim());
+                }
+            }
+        }
+
+        private static void Shuffle<T>(List<T> list)
+        {
+            if (list == null)
+            {
+                return;
+            }
+
+            for (var i = list.Count - 1; i > 0; i--)
+            {
+                var swapIndex = UnityEngine.Random.Range(0, i + 1);
+                var temp = list[i];
+                list[i] = list[swapIndex];
+                list[swapIndex] = temp;
+            }
+        }
+
         private static void EnsureInstance()
         {
             if (Instance != null)
@@ -861,6 +1195,18 @@ namespace Wuxing.Game
 
             var progressObject = new GameObject("GameProgressManager");
             progressObject.AddComponent<GameProgressManager>();
+        }
+
+        [Serializable]
+        private class CharacterRunDataListWrapper
+        {
+            public List<CharacterRunData> Entries = new List<CharacterRunData>();
+        }
+
+        [Serializable]
+        private class SkillRewardOptionListWrapper
+        {
+            public List<SkillRewardOption> Entries = new List<SkillRewardOption>();
         }
     }
 }

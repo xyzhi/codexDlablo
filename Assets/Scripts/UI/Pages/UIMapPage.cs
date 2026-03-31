@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -266,8 +266,8 @@ namespace Wuxing.UI
             if (statusText != null)
             {
                 statusText.text = isEnglish
-                    ? "Current Position: Stage " + currentStage + " · " + GameProgressManager.GetNodeTypeLabel(true, currentStage)
-                    : "当前驻足：第 " + currentStage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, currentStage);
+                    ? "Current Position: Stage " + currentStage + " 路 " + GameProgressManager.GetNodeTypeLabel(true, currentStage)
+                    : "当前位置：第 " + currentStage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, currentStage);
             }
 
             if (regionText != null)
@@ -505,7 +505,7 @@ namespace Wuxing.UI
                 .Append(isEnglish ? "Spirit Stones: " : "灵石：")
                 .Append(GameProgressManager.GetSpiritStones())
                 .Append('\n')
-                .Append(isEnglish ? "Owned Equipment: " : "已有装备：")
+                .Append(isEnglish ? "Owned Equipment: " : "已拥有装备：")
                 .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
                 .Append('\n')
                 .Append('\n')
@@ -517,14 +517,14 @@ namespace Wuxing.UI
         {
             var isEnglish = IsEnglish();
             return isEnglish
-                ? "Arrived at Stage " + stage + " · " + GameProgressManager.GetNodeTypeLabel(true, stage)
+                ? "Arrived at Stage " + stage + " 路 " + GameProgressManager.GetNodeTypeLabel(true, stage)
                 : "已抵达第 " + stage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, stage);
         }
 
         private string BuildNodeLabel(int stage)
         {
             var isEnglish = IsEnglish();
-            return (isEnglish ? "Stage " : "第") + stage + (isEnglish ? string.Empty : "关") + "\n"
+            return (isEnglish ? "Stage " : "第 ") + stage + (isEnglish ? string.Empty : "关") + "\n"
                 + GameProgressManager.GetNodeTypeLabel(isEnglish, stage);
         }
 
