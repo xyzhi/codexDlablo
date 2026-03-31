@@ -8,6 +8,7 @@ namespace Wuxing.Config
         public string Id;
         public string Name;
         public string Element;
+        public string Quality;
         public string Category;
         public string TargetType;
         public int MPCost;

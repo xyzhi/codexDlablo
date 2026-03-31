@@ -10,6 +10,10 @@ namespace Wuxing.Game
         public string SkillId;
         public string SkillName;
         public string SkillElement;
+        public string SkillQuality;
         public string SkillDescription;
+        public int CurrentLevel;
+        public int ResultLevel;
+        public bool IsUpgrade;
     }
 }

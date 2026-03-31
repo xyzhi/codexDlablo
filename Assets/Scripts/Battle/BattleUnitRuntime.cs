@@ -15,6 +15,7 @@ namespace Wuxing.Battle
         public int MaxMP;
         public int CurrentMP;
         public List<string> SkillIds = new List<string>();
+        public Dictionary<string, int> SkillLevels = new Dictionary<string, int>();
         public List<string> EquippedItemIds = new List<string>();
 
         public bool IsDead
@@ -35,7 +36,8 @@ namespace Wuxing.Battle
                 DEF = config.DEF,
                 MaxMP = config.MP,
                 CurrentMP = config.MP,
-                SkillIds = SplitSkills(config.InitialSkills)
+                SkillIds = SplitSkills(config.InitialSkills),
+                SkillLevels = CreateSkillLevelMap(config.InitialSkills)
             };
         }
 
@@ -52,7 +54,8 @@ namespace Wuxing.Battle
                 DEF = config.DEF,
                 MaxMP = config.MP,
                 CurrentMP = config.MP,
-                SkillIds = SplitSkills(config.Skills)
+                SkillIds = SplitSkills(config.Skills),
+                SkillLevels = CreateSkillLevelMap(config.Skills)
             };
         }
 
@@ -72,6 +75,36 @@ namespace Wuxing.Battle
             EquippedItemIds.Add(config.Id);
         }
 
+        public int GetSkillLevel(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                return 1;
+            }
+
+            int level;
+            return SkillLevels != null && SkillLevels.TryGetValue(skillId, out level) ? level : 1;
+        }
+
+        public void SetSkillLevel(string skillId, int level)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                return;
+            }
+
+            if (SkillLevels == null)
+            {
+                SkillLevels = new Dictionary<string, int>();
+            }
+
+            SkillLevels[skillId] = level < 1 ? 1 : level;
+            if (!SkillIds.Contains(skillId))
+            {
+                SkillIds.Add(skillId);
+            }
+        }
+
         private static List<string> SplitSkills(string rawSkills)
         {
             var result = new List<string>();
@@ -87,6 +120,18 @@ namespace Wuxing.Battle
                 {
                     result.Add(parts[i].Trim());
                 }
+            }
+
+            return result;
+        }
+
+        private static Dictionary<string, int> CreateSkillLevelMap(string rawSkills)
+        {
+            var result = new Dictionary<string, int>();
+            var skillIds = SplitSkills(rawSkills);
+            for (var i = 0; i < skillIds.Count; i++)
+            {
+                result[skillIds[i]] = 1;
             }
 
             return result;

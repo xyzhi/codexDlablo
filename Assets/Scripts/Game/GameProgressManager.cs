@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using Wuxing.Config;
 
@@ -36,7 +37,7 @@ namespace Wuxing.Game
 
         private static readonly string[] BasePlayerCharacterIds =
         {
-            "C001", "C002"
+            "C001"
         };
 
         public static GameProgressManager Instance { get; private set; }
@@ -319,6 +320,73 @@ namespace Wuxing.Game
             return Instance.GetLearnedSkillIdsInternal(characterId);
         }
 
+        public static int GetSkillLevel(string characterId, string skillId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId) || string.IsNullOrEmpty(skillId))
+            {
+                return 1;
+            }
+
+            return Instance.GetSkillLevelInternal(characterId, skillId);
+        }
+
+        public static string BuildLearnedSkillsOverview(bool english)
+        {
+            EnsureInstance();
+
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (characterDatabase == null || skillDatabase == null)
+            {
+                return english ? "Learned skills data is unavailable." : "当前无法读取已学功法数据。";
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(english ? "Current Run Skills" : "当前局功法总览");
+
+            for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
+            {
+                var characterId = BasePlayerCharacterIds[i];
+                var character = characterDatabase.GetById(characterId);
+                if (character == null)
+                {
+                    continue;
+                }
+
+                var learnedSkillIds = GetLearnedSkillIds(characterId);
+                var currentSkillNames = new List<string>();
+                var learnedSkillNames = new List<string>();
+                var knownSkillIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                AppendSkillNames(character.Id, character.InitialSkills, currentSkillNames, knownSkillIds, skillDatabase);
+                for (var j = 0; j < learnedSkillIds.Count; j++)
+                {
+                    learnedSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j]));
+                    if (knownSkillIds.Add(learnedSkillIds[j]))
+                    {
+                        currentSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j]));
+                    }
+                }
+
+                builder.Append("\n\n")
+                    .Append(english ? "Character: " : "角色：")
+                    .Append(character.Name)
+                    .Append('\n')
+                    .Append(english ? "Current Skills: " : "当前可用：")
+                    .Append(currentSkillNames.Count > 0
+                        ? string.Join(english ? ", " : "、", currentSkillNames.ToArray())
+                        : (english ? "None" : "无"))
+                    .Append('\n')
+                    .Append(english ? "New This Run: " : "本局新增：")
+                    .Append(learnedSkillNames.Count > 0
+                        ? string.Join(english ? ", " : "、", learnedSkillNames.ToArray())
+                        : (english ? "None" : "暂无"));
+            }
+
+            return builder.ToString();
+        }
+
         public static void PrepareSkillRewardOptions()
         {
             EnsureInstance();
@@ -338,7 +406,8 @@ namespace Wuxing.Game
                 return;
             }
 
-            var candidates = new List<SkillRewardOption>();
+            var weightedCandidates = new List<SkillRewardOption>();
+            var nodeType = GetNodeType(GetCurrentStage());
             for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
             {
                 var characterId = BasePlayerCharacterIds[i];
@@ -348,38 +417,51 @@ namespace Wuxing.Game
                     continue;
                 }
 
-                var knownSkills = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                CollectKnownSkillIds(character.InitialSkills, knownSkills);
-                var learnedSkills = Instance.GetLearnedSkillIdsInternal(characterId);
-                for (var j = 0; j < learnedSkills.Count; j++)
-                {
-                    knownSkills.Add(learnedSkills[j]);
-                }
-
                 for (var j = 0; j < skillDatabase.Skills.Count; j++)
                 {
                     var skill = skillDatabase.Skills[j];
-                    if (skill == null || string.IsNullOrEmpty(skill.Id) || knownSkills.Contains(skill.Id) || IsPassiveSkillReward(skill))
+                    if (skill == null || string.IsNullOrEmpty(skill.Id) || IsPassiveSkillReward(skill))
                     {
                         continue;
                     }
 
-                    candidates.Add(new SkillRewardOption
+                    var currentLevel = Instance.GetSkillLevelInternal(character.Id, skill.Id);
+                    var isUpgrade = Instance.CharacterHasSkillInternal(character, skill.Id);
+                    var option = new SkillRewardOption
                     {
                         CharacterId = character.Id,
                         CharacterName = character.Name,
                         SkillId = skill.Id,
                         SkillName = skill.Name,
                         SkillElement = skill.Element,
-                        SkillDescription = skill.Description
-                    });
+                        SkillQuality = skill.Quality,
+                        SkillDescription = skill.Description,
+                        CurrentLevel = currentLevel,
+                        ResultLevel = isUpgrade ? currentLevel + 1 : 1,
+                        IsUpgrade = isUpgrade
+                    };
+
+                    var weight = GetSkillRewardWeight(skill, nodeType, isUpgrade);
+                    for (var copy = 0; copy < weight; copy++)
+                    {
+                        weightedCandidates.Add(option);
+                    }
                 }
             }
 
-            Shuffle(candidates);
-            for (var i = 0; i < candidates.Count && Instance.pendingSkillRewards.Count < 3; i++)
+            Shuffle(weightedCandidates);
+            for (var i = 0; i < weightedCandidates.Count && Instance.pendingSkillRewards.Count < 3; i++)
             {
-                Instance.pendingSkillRewards.Add(candidates[i]);
+                var candidate = weightedCandidates[i];
+                if (candidate == null || Instance.pendingSkillRewards.Exists(existing =>
+                    existing != null
+                    && string.Equals(existing.CharacterId, candidate.CharacterId, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(existing.SkillId, candidate.SkillId, StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                Instance.pendingSkillRewards.Add(candidate);
             }
 
             Instance.SaveProgress();
@@ -413,13 +495,24 @@ namespace Wuxing.Game
             }
 
             var entry = Instance.GetOrCreateCharacterRunData(option.CharacterId);
-            if (!entry.LearnedSkillIds.Exists(delegate(string skillId)
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(option.CharacterId) : null;
+            var alreadyKnown = Instance.CharacterHasSkillInternal(character, option.SkillId);
+            var previousLevel = Instance.GetSkillLevelInternal(entry, character, option.SkillId);
+
+            if (!alreadyKnown && !entry.LearnedSkillIds.Exists(delegate(string skillId)
             {
                 return string.Equals(skillId, option.SkillId, StringComparison.OrdinalIgnoreCase);
             }))
             {
                 entry.LearnedSkillIds.Add(option.SkillId);
             }
+
+            var nextLevel = Mathf.Max(1, option.ResultLevel);
+            Instance.SetSkillLevelInternal(entry, option.SkillId, nextLevel);
+            option.CurrentLevel = previousLevel;
+            option.ResultLevel = nextLevel;
+            option.IsUpgrade = alreadyKnown;
 
             Instance.pendingSkillRewards.Clear();
             Instance.SaveProgress();
@@ -1058,6 +1151,11 @@ namespace Wuxing.Game
                     entry.LearnedSkillIds = new List<string>();
                 }
 
+                if (entry.SkillLevels == null)
+                {
+                    entry.SkillLevels = new List<SkillLevelData>();
+                }
+
                 characterRunData.Add(entry);
             }
         }
@@ -1113,13 +1211,18 @@ namespace Wuxing.Game
             {
                 if (string.Equals(characterRunData[i].CharacterId, characterId, StringComparison.OrdinalIgnoreCase))
                 {
+                    if (characterRunData[i].SkillLevels == null)
+                    {
+                        characterRunData[i].SkillLevels = new List<SkillLevelData>();
+                    }
                     return characterRunData[i];
                 }
             }
 
             var created = new CharacterRunData
             {
-                CharacterId = characterId
+                CharacterId = characterId,
+                SkillLevels = new List<SkillLevelData>()
             };
             characterRunData.Add(created);
             return created;
@@ -1129,6 +1232,83 @@ namespace Wuxing.Game
         {
             var entry = GetOrCreateCharacterRunData(characterId);
             return new List<string>(entry.LearnedSkillIds);
+        }
+
+        private int GetSkillLevelInternal(string characterId, string skillId)
+        {
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(characterId) : null;
+            return GetSkillLevelInternal(GetOrCreateCharacterRunData(characterId), character, skillId);
+        }
+
+        private int GetSkillLevelInternal(CharacterRunData entry, CharacterConfig character, string skillId)
+        {
+            if (entry != null && entry.SkillLevels != null)
+            {
+                for (var i = 0; i < entry.SkillLevels.Count; i++)
+                {
+                    var levelData = entry.SkillLevels[i];
+                    if (levelData != null && string.Equals(levelData.SkillId, skillId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Mathf.Max(1, levelData.Level);
+                    }
+                }
+            }
+
+            return CharacterHasInitialSkill(character, skillId) || (entry != null && entry.LearnedSkillIds.Exists(id =>
+                string.Equals(id, skillId, StringComparison.OrdinalIgnoreCase)))
+                ? 1
+                : 0;
+        }
+
+        private void SetSkillLevelInternal(CharacterRunData entry, string skillId, int level)
+        {
+            if (entry == null || string.IsNullOrEmpty(skillId))
+            {
+                return;
+            }
+
+            if (entry.SkillLevels == null)
+            {
+                entry.SkillLevels = new List<SkillLevelData>();
+            }
+
+            for (var i = 0; i < entry.SkillLevels.Count; i++)
+            {
+                var levelData = entry.SkillLevels[i];
+                if (levelData != null && string.Equals(levelData.SkillId, skillId, StringComparison.OrdinalIgnoreCase))
+                {
+                    levelData.Level = Mathf.Max(1, level);
+                    return;
+                }
+            }
+
+            entry.SkillLevels.Add(new SkillLevelData
+            {
+                SkillId = skillId,
+                Level = Mathf.Max(1, level)
+            });
+        }
+
+        private bool CharacterHasSkillInternal(CharacterConfig character, string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                return false;
+            }
+
+            if (CharacterHasInitialSkill(character, skillId))
+            {
+                return true;
+            }
+
+            if (character == null)
+            {
+                return false;
+            }
+
+            var entry = GetOrCreateCharacterRunData(character.Id);
+            return entry.LearnedSkillIds.Exists(id => string.Equals(id, skillId, StringComparison.OrdinalIgnoreCase));
         }
 
         private RunData BuildRunDataSnapshot()
@@ -1166,7 +1346,8 @@ namespace Wuxing.Game
                 data.Characters.Add(new CharacterRunData
                 {
                     CharacterId = entry.CharacterId,
-                    LearnedSkillIds = new List<string>(entry.LearnedSkillIds)
+                    LearnedSkillIds = new List<string>(entry.LearnedSkillIds),
+                    SkillLevels = entry.SkillLevels != null ? new List<SkillLevelData>(entry.SkillLevels) : new List<SkillLevelData>()
                 });
             }
 
@@ -1218,6 +1399,74 @@ namespace Wuxing.Game
                 || string.Equals(skill.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase);
         }
 
+        private static bool CharacterHasInitialSkill(CharacterConfig character, string skillId)
+        {
+            if (character == null || string.IsNullOrEmpty(character.InitialSkills) || string.IsNullOrEmpty(skillId))
+            {
+                return false;
+            }
+
+            var parts = character.InitialSkills.Split('|');
+            for (var i = 0; i < parts.Length; i++)
+            {
+                if (string.Equals(parts[i].Trim(), skillId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static int GetSkillRewardWeight(SkillConfig skill, MapNodeType nodeType, bool isUpgrade)
+        {
+            var quality = NormalizeSkillQuality(skill != null ? skill.Quality : string.Empty);
+            var weight = 1;
+
+            switch (nodeType)
+            {
+                case MapNodeType.Boss:
+                    weight = quality == "epic" ? 12 : quality == "rare" ? 7 : 2;
+                    break;
+                case MapNodeType.Elite:
+                    weight = quality == "epic" ? 5 : quality == "rare" ? 10 : 4;
+                    break;
+                default:
+                    weight = quality == "epic" ? 1 : quality == "rare" ? 5 : 12;
+                    break;
+            }
+
+            if (isUpgrade)
+            {
+                weight += 3;
+            }
+
+            return Mathf.Max(1, weight);
+        }
+
+        private static string NormalizeSkillQuality(string quality)
+        {
+            if (string.IsNullOrEmpty(quality))
+            {
+                return "common";
+            }
+
+            switch (quality.Trim().ToLowerInvariant())
+            {
+                case "绝品":
+                case "epic":
+                case "legendary":
+                    return "epic";
+                case "稀有":
+                case "rare":
+                    return "rare";
+                case "普通":
+                case "common":
+                default:
+                    return "common";
+            }
+        }
+
         private static void CollectKnownSkillIds(string rawSkills, HashSet<string> sink)
         {
             if (sink == null || string.IsNullOrEmpty(rawSkills))
@@ -1233,6 +1482,43 @@ namespace Wuxing.Game
                     sink.Add(parts[i].Trim());
                 }
             }
+        }
+
+        private static void AppendSkillNames(string characterId, string rawSkills, List<string> targetNames, HashSet<string> knownSkillIds, SkillDatabase skillDatabase)
+        {
+            if (targetNames == null || string.IsNullOrEmpty(rawSkills))
+            {
+                return;
+            }
+
+            var parts = rawSkills.Split('|');
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var skillId = parts[i].Trim();
+                if (string.IsNullOrEmpty(skillId))
+                {
+                    continue;
+                }
+
+                knownSkillIds?.Add(skillId);
+                targetNames.Add(GetSkillLabel(skillDatabase, characterId, skillId));
+            }
+        }
+
+        private static string GetSkillDisplayName(SkillDatabase skillDatabase, string skillId)
+        {
+            if (skillDatabase == null || string.IsNullOrEmpty(skillId))
+            {
+                return skillId ?? string.Empty;
+            }
+
+            var skill = skillDatabase.GetById(skillId);
+            return skill != null && !string.IsNullOrEmpty(skill.Name) ? skill.Name : skillId;
+        }
+
+        private static string GetSkillLabel(SkillDatabase skillDatabase, string characterId, string skillId)
+        {
+            return GetSkillDisplayName(skillDatabase, skillId) + " Lv." + GetSkillLevel(characterId, skillId);
         }
 
         private void ResetSpiritStones()

@@ -860,8 +860,8 @@ namespace Wuxing.UI
             }
 
             return isEnglish
-                ? "Target: " + option.CharacterName + "\nSkill: " + option.SkillName + "\nElement: " + option.SkillElement + "\nEffect: " + option.SkillDescription
-                : "角色：" + option.CharacterName + "\n功法：" + option.SkillName + "\n五行：" + option.SkillElement + "\n效果：" + option.SkillDescription;
+                ? "Target: " + option.CharacterName + "\nSkill: " + option.SkillName + " " + BuildQualityLabel(option, true) + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\nEffect: " + option.SkillDescription
+                : "角色：" + option.CharacterName + "\n功法：" + option.SkillName + " " + BuildQualityLabel(option, false) + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n效果：" + option.SkillDescription;
         }
 
         private static string BuildSkillRewardChoiceLabel(SkillRewardOption option, bool isEnglish)
@@ -872,8 +872,8 @@ namespace Wuxing.UI
             }
 
             return isEnglish
-                ? "Reward\n" + option.SkillName + "\n\nTarget: " + option.CharacterName + "\nElement: " + option.SkillElement + "\n" + option.SkillDescription
-                : "功法机缘\n" + option.SkillName + "\n\n角色：" + option.CharacterName + "\n五行：" + option.SkillElement + "\n" + option.SkillDescription;
+                ? "Reward\n" + option.SkillName + "  " + BuildQualityLabel(option, true) + "\n\nTarget: " + option.CharacterName + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\n" + option.SkillDescription
+                : "功法机缘\n" + option.SkillName + "  " + BuildQualityLabel(option, false) + "\n\n角色：" + option.CharacterName + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n" + option.SkillDescription;
         }
 
         private static string BuildSkillRewardToast(SkillRewardOption option, bool isEnglish)
@@ -884,8 +884,26 @@ namespace Wuxing.UI
             }
 
             return isEnglish
-                ? option.CharacterName + " learned " + option.SkillName + "."
-                : option.CharacterName + " 学会了 " + option.SkillName + "。";
+                ? option.CharacterName + (option.IsUpgrade ? " upgraded " : " learned ") + option.SkillName + " to Lv." + option.ResultLevel + "."
+                : option.CharacterName + (option.IsUpgrade ? " 将 " : " 学会了 ") + option.SkillName + (option.IsUpgrade ? " 提升至 Lv." + option.ResultLevel + "。" : "。");
+        }
+
+        private static string BuildQualityLabel(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null || string.IsNullOrEmpty(option.SkillQuality))
+            {
+                return isEnglish ? "[Common]" : "[普通]";
+            }
+
+            switch (option.SkillQuality)
+            {
+                case "绝品":
+                    return isEnglish ? "[Epic]" : "[绝品]";
+                case "稀有":
+                    return isEnglish ? "[Rare]" : "[稀有]";
+                default:
+                    return isEnglish ? "[Common]" : "[普通]";
+            }
         }
 
         private static string BuildRewardSummary(BattleRewardResult reward, bool isEnglish)

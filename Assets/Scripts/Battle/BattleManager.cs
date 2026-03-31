@@ -9,17 +9,15 @@ namespace Wuxing.Battle
 {
     public static class BattleManager
     {
-        private static readonly string[] DefaultPlayerIds = { "C001", "C002" };
+        private static readonly string[] DefaultPlayerIds = { "C001" };
         private static readonly string[] DefaultEnemyIds = { "E001", "E004" };
         private static readonly Dictionary<string, string[]> PlayerEquipmentPresetA = new Dictionary<string, string[]>
         {
-            { "C001", new[] { "EQ001", "EQ003", "EQ006" } },
-            { "C002", new[] { "EQ002", "EQ004", "EQ005" } }
+            { "C001", new[] { "EQ001", "EQ003", "EQ006" } }
         };
         private static readonly Dictionary<string, string[]> PlayerEquipmentPresetB = new Dictionary<string, string[]>
         {
-            { "C001", new[] { "EQ002", "EQ004", "EQ005" } },
-            { "C002", new[] { "EQ001", "EQ003", "EQ006" } }
+            { "C001", new[] { "EQ002", "EQ004", "EQ005" } }
         };
         private static readonly Dictionary<string, string[]> DefaultEnemyEquipmentIds = new Dictionary<string, string[]>
         {
@@ -626,7 +624,9 @@ namespace Wuxing.Battle
                     builder.Append(" / ");
                 }
 
-                builder.Append(skill.Name);
+                builder.Append(skill.Name)
+                    .Append(" Lv.")
+                    .Append(unit.GetSkillLevel(skill.Id));
             }
 
             return builder.Length > 0 ? builder.ToString() : LocalizationManager.GetText("battle.summary_no_data");
@@ -812,16 +812,22 @@ namespace Wuxing.Battle
                 return;
             }
 
+            for (var i = 0; i < unit.SkillIds.Count; i++)
+            {
+                var existingSkillId = unit.SkillIds[i];
+                unit.SetSkillLevel(existingSkillId, GameProgressManager.GetSkillLevel(unit.Id, existingSkillId));
+            }
+
             var learnedSkills = GameProgressManager.GetLearnedSkillIds(unit.Id);
             for (var i = 0; i < learnedSkills.Count; i++)
             {
                 var skillId = learnedSkills[i];
-                if (string.IsNullOrEmpty(skillId) || unit.SkillIds.Contains(skillId))
+                if (string.IsNullOrEmpty(skillId))
                 {
                     continue;
                 }
 
-                unit.SkillIds.Add(skillId);
+                unit.SetSkillLevel(skillId, GameProgressManager.GetSkillLevel(unit.Id, skillId));
             }
         }
 
@@ -1423,7 +1429,7 @@ namespace Wuxing.Battle
                     return;
                 }
 
-                var healValue = skill.Power;
+                var healValue = GetScaledSkillPower(actor, skill);
                 ally.CurrentHP = Clamp(ally.CurrentHP + healValue, 0, ally.MaxHP);
                 AddEvent(
                     events,
@@ -1471,7 +1477,7 @@ namespace Wuxing.Battle
 
             if (skill.EffectType == "Shield")
             {
-                var shieldGain = skill.Power;
+                var shieldGain = GetScaledSkillPower(actor, skill);
                 actor.CurrentHP = Clamp(actor.CurrentHP + shieldGain, 0, actor.MaxHP);
                 AddEvent(
                     events,
@@ -1521,8 +1527,20 @@ namespace Wuxing.Battle
 
         private static int CalculateSkillDamage(BattleUnitRuntime actor, BattleUnitRuntime target, SkillConfig skill)
         {
-            var rawDamage = actor.ATK + skill.Power - target.DEF;
+            var rawDamage = actor.ATK + GetScaledSkillPower(actor, skill) - target.DEF;
             return ScaleDamage(rawDamage);
+        }
+
+        private static int GetScaledSkillPower(BattleUnitRuntime actor, SkillConfig skill)
+        {
+            if (skill == null)
+            {
+                return 0;
+            }
+
+            var level = actor != null ? actor.GetSkillLevel(skill.Id) : 1;
+            var bonusMultiplier = 1f + Mathf.Max(0, level - 1) * 0.35f;
+            return Mathf.Max(1, Mathf.RoundToInt(skill.Power * bonusMultiplier));
         }
 
         private static int ScaleDamage(int rawDamage)

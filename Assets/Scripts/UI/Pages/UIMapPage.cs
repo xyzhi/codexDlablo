@@ -29,6 +29,7 @@ namespace Wuxing.UI
         [SerializeField] private Button enterButton;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button equipmentButton;
+        [SerializeField] private Button skillOverviewButton;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button backButton;
 
@@ -56,6 +57,7 @@ namespace Wuxing.UI
             if (enterButton != null) enterButton.onClick.AddListener(OnClickEnter);
             if (nextButton != null) nextButton.onClick.AddListener(OnClickNext);
             if (equipmentButton != null) equipmentButton.onClick.AddListener(OnClickEquipment);
+            if (skillOverviewButton != null) skillOverviewButton.onClick.AddListener(OnClickSkillOverview);
             if (resetButton != null) resetButton.onClick.AddListener(OnClickReset);
             if (backButton != null) backButton.onClick.AddListener(OnClickBack);
         }
@@ -78,6 +80,7 @@ namespace Wuxing.UI
             if (enterButton != null) enterButton.onClick.RemoveListener(OnClickEnter);
             if (nextButton != null) nextButton.onClick.RemoveListener(OnClickNext);
             if (equipmentButton != null) equipmentButton.onClick.RemoveListener(OnClickEquipment);
+            if (skillOverviewButton != null) skillOverviewButton.onClick.RemoveListener(OnClickSkillOverview);
             if (resetButton != null) resetButton.onClick.RemoveListener(OnClickReset);
             if (backButton != null) backButton.onClick.RemoveListener(OnClickBack);
         }
@@ -129,6 +132,27 @@ namespace Wuxing.UI
         {
             if (isMoving) return;
             UIManager.Instance.ShowPage("Battle", "equipment");
+        }
+
+        private void OnClickSkillOverview()
+        {
+            if (isMoving) return;
+
+            var isEnglish = IsEnglish();
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                return;
+            }
+
+            popup.Setup(
+                isEnglish ? "Run Skills" : "已学功法",
+                GameProgressManager.BuildLearnedSkillsOverview(isEnglish),
+                false,
+                null,
+                null,
+                isEnglish ? "Close" : "关闭",
+                null);
         }
 
         private void OnClickReset()
@@ -304,6 +328,7 @@ namespace Wuxing.UI
             SetButtonText(nextButton, isEnglish ? "Next" : "前进");
             SetButtonText(enterButton, isEnglish ? "Enter Node" : "进入节点");
             SetButtonText(equipmentButton, isEnglish ? "Equipment" : "查看装备");
+            SetButtonText(skillOverviewButton, isEnglish ? "Run Skills" : "已学功法");
             SetButtonText(resetButton, isEnglish ? "Reset Run" : "重置本轮");
             SetButtonText(backButton, LocalizationManager.GetText("map.button_back_menu"));
 
@@ -311,6 +336,7 @@ namespace Wuxing.UI
             if (nextButton != null) nextButton.interactable = canMoveNext;
             if (enterButton != null) enterButton.interactable = canEnterSelected;
             if (equipmentButton != null) equipmentButton.interactable = !isMoving;
+            if (skillOverviewButton != null) skillOverviewButton.interactable = !isMoving;
             if (resetButton != null) resetButton.interactable = !isMoving;
             if (backButton != null) backButton.interactable = !isMoving;
         }

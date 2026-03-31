@@ -338,22 +338,29 @@ public static class UIPrefabBuilder
         var equipmentButton = UIFactory.CreateButton(actionRow, "EquipmentButton", "Equipment", delegate { });
         var equipmentRect = equipmentButton.GetComponent<RectTransform>();
         equipmentRect.anchorMin = new Vector2(0f, 0f);
-        equipmentRect.anchorMax = new Vector2(0.31f, 1f);
+        equipmentRect.anchorMax = new Vector2(0.23f, 1f);
         equipmentRect.offsetMin = Vector2.zero;
-        equipmentRect.offsetMax = new Vector2(-8f, 0f);
+        equipmentRect.offsetMax = new Vector2(-6f, 0f);
+
+        var skillOverviewButton = UIFactory.CreateButton(actionRow, "SkillOverviewButton", "已学功法", delegate { });
+        var skillOverviewRect = skillOverviewButton.GetComponent<RectTransform>();
+        skillOverviewRect.anchorMin = new Vector2(0.26f, 0f);
+        skillOverviewRect.anchorMax = new Vector2(0.49f, 1f);
+        skillOverviewRect.offsetMin = Vector2.zero;
+        skillOverviewRect.offsetMax = new Vector2(-2f, 0f);
 
         var resetButton = UIFactory.CreateButton(actionRow, "ResetButton", "Reset Run", delegate { });
         var resetRect = resetButton.GetComponent<RectTransform>();
-        resetRect.anchorMin = new Vector2(0.345f, 0f);
-        resetRect.anchorMax = new Vector2(0.655f, 1f);
+        resetRect.anchorMin = new Vector2(0.51f, 0f);
+        resetRect.anchorMax = new Vector2(0.74f, 1f);
         resetRect.offsetMin = Vector2.zero;
-        resetRect.offsetMax = Vector2.zero;
+        resetRect.offsetMax = new Vector2(-2f, 0f);
 
         var backButton = UIFactory.CreateButton(actionRow, "BackButton", "Back To Menu", delegate { });
         var backRect = backButton.GetComponent<RectTransform>();
-        backRect.anchorMin = new Vector2(0.69f, 0f);
+        backRect.anchorMin = new Vector2(0.77f, 0f);
         backRect.anchorMax = new Vector2(1f, 1f);
-        backRect.offsetMin = new Vector2(8f, 0f);
+        backRect.offsetMin = new Vector2(4f, 0f);
         backRect.offsetMax = Vector2.zero;
 
         var page = root.AddComponent<UIMapPage>();
@@ -368,6 +375,7 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "enterButton", enterButton);
         BindSerializedProperty(page, "nextButton", nextButton);
         BindSerializedProperty(page, "equipmentButton", equipmentButton);
+        BindSerializedProperty(page, "skillOverviewButton", skillOverviewButton);
         BindSerializedProperty(page, "resetButton", resetButton);
         BindSerializedProperty(page, "backButton", backButton);
         SavePrefab(root, PagesFolder + "/MapPage.prefab");

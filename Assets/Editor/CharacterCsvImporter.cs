@@ -146,7 +146,7 @@ public static class CharacterCsvImporter
                 continue;
             }
 
-            if (columns.Count < 11)
+            if (columns.Count < 12)
             {
                 throw new InvalidOperationException($"Invalid skill row at line {i + 1}.");
             }
@@ -156,14 +156,15 @@ public static class CharacterCsvImporter
                 Id = columns[0],
                 Name = columns[1],
                 Element = columns[2],
-                Category = columns[3],
-                TargetType = columns[4],
-                MPCost = ParseInt(columns[5], nameof(SkillConfig.MPCost), i + 1),
-                Power = ParseInt(columns[6], nameof(SkillConfig.Power), i + 1),
-                Duration = ParseInt(columns[7], nameof(SkillConfig.Duration), i + 1),
-                EffectType = columns[8],
-                Description = columns[9],
-                Notes = columns[10]
+                Quality = columns[3],
+                Category = columns[4],
+                TargetType = columns[5],
+                MPCost = ParseInt(columns[6], nameof(SkillConfig.MPCost), i + 1),
+                Power = ParseInt(columns[7], nameof(SkillConfig.Power), i + 1),
+                Duration = ParseInt(columns[8], nameof(SkillConfig.Duration), i + 1),
+                EffectType = columns[9],
+                Description = columns[10],
+                Notes = columns[11]
             });
         }
 

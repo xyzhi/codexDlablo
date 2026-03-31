@@ -32,5 +32,13 @@ namespace Wuxing.Game
     {
         public string CharacterId;
         public List<string> LearnedSkillIds = new List<string>();
+        public List<SkillLevelData> SkillLevels = new List<SkillLevelData>();
+    }
+
+    [Serializable]
+    public class SkillLevelData
+    {
+        public string SkillId;
+        public int Level;
     }
 }
