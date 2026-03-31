@@ -2,8 +2,48 @@
     "entries": [
         {
             "key": "menu.title",
-            "zhHans": "五行原型",
-            "en": "Wuxing Prototype"
+            "zhHans": "五行行者",
+            "en": "Wuxing Wanderer"
+        },
+        {
+            "key": "landing.kicker",
+            "zhHans": "单机修仙肉鸽",
+            "en": "CULTIVATION ROGUELIKE"
+        },
+        {
+            "key": "landing.title",
+            "zhHans": "五行行者",
+            "en": "Wuxing Wanderer"
+        },
+        {
+            "key": "landing.subtitle",
+            "zhHans": "以寿元为火，以五行为刃，在不断逼近的终局中夺一线登天之机。",
+            "en": "Burn lifespan as fuel"
+        },
+        {
+            "key": "landing.feature_1",
+            "zhHans": "五行灵根构筑，决定你这一局能走多远。",
+            "en": "Build around elemental roots and decide how far this run can go."
+        },
+        {
+            "key": "landing.feature_2",
+            "zhHans": "自动战斗，策略重心放在配装、路线与功法取舍。",
+            "en": "Auto battles keep the focus on loadouts"
+        },
+        {
+            "key": "landing.feature_3",
+            "zhHans": "寿元会随着推进不断流逝，每一步都在逼近终局。",
+            "en": "Lifespan drains as you advance"
+        },
+        {
+            "key": "landing.button_enter",
+            "zhHans": "开始游戏",
+            "en": "Start Game"
+        },
+        {
+            "key": "landing.footer",
+            "zhHans": "进入主菜单后可继续推进地图、战斗与构筑。",
+            "en": "Enter the main menu to continue your route"
         },
         {
             "key": "menu.subtitle",

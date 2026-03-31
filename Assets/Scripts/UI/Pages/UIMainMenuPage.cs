@@ -10,7 +10,6 @@ namespace Wuxing.UI
         [SerializeField] private Button startButton;
         [SerializeField] private Button popupButton;
         [SerializeField] private Button toastButton;
-        [SerializeField] private Button languageButton;
         [SerializeField] private Text progressText;
 
         public override void OnOpen(object data)
@@ -50,10 +49,6 @@ namespace Wuxing.UI
                 toastButton.onClick.AddListener(OnClickToast);
             }
 
-            if (languageButton != null)
-            {
-                languageButton.onClick.AddListener(OnClickLanguage);
-            }
         }
 
         private void OnDestroy()
@@ -73,10 +68,6 @@ namespace Wuxing.UI
                 toastButton.onClick.RemoveListener(OnClickToast);
             }
 
-            if (languageButton != null)
-            {
-                languageButton.onClick.RemoveListener(OnClickLanguage);
-            }
         }
 
         private void OnClickStart()
@@ -128,14 +119,6 @@ namespace Wuxing.UI
         private void OnClickToast()
         {
             UIManager.Instance.ShowToast(GameProgressManager.BuildLastBattleSummary(IsEnglish()), 2.2f);
-        }
-
-        private void OnClickLanguage()
-        {
-            LocalizationManager.ToggleLanguage();
-            RefreshProgress();
-            RefreshButtons();
-            UIManager.Instance.ShowToastByKey("toast.language_changed");
         }
 
         private void RefreshProgress()

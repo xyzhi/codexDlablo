@@ -135,6 +135,7 @@ namespace Wuxing.UI
 
         private void RegisterDefaults()
         {
+            _pagePrefabPaths["Start"] = "Prefabs/UI/Pages/StartPage";
             _pagePrefabPaths["MainMenu"] = "Prefabs/UI/Pages/MainMenuPage";
             _pagePrefabPaths["Map"] = "Prefabs/UI/Pages/MapPage";
             _pagePrefabPaths["Battle"] = "Prefabs/UI/Pages/BattlePage";

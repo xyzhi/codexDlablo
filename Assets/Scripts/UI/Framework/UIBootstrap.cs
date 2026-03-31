@@ -26,7 +26,7 @@ namespace Wuxing.UI
                 progressObject.AddComponent<GameProgressManager>();
             }
 
-            UIManager.Instance.ShowPage("MainMenu");
+            UIManager.Instance.ShowPage("Start");
         }
     }
 }
