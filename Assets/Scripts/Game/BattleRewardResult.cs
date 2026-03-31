@@ -7,6 +7,8 @@ namespace Wuxing.Game
     {
         public int ExpGained;
         public int SpiritStonesGained;
+        public string SpiritStoneElement;
+        public string SpiritStoneName;
         public int LevelsGained;
         public string DroppedEquipmentId;
         public string DroppedEquipmentName;

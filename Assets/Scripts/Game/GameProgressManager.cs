@@ -17,6 +17,11 @@ namespace Wuxing.Game
         private const string CultivationLevelPrefKey = "game.progress.cultivation_level";
         private const string CultivationExpPrefKey = "game.progress.cultivation_exp";
         private const string SpiritStonesPrefKey = "game.progress.spirit_stones";
+        private const string MetalSpiritStonesPrefKey = "game.progress.spirit_stones_metal";
+        private const string WoodSpiritStonesPrefKey = "game.progress.spirit_stones_wood";
+        private const string WaterSpiritStonesPrefKey = "game.progress.spirit_stones_water";
+        private const string FireSpiritStonesPrefKey = "game.progress.spirit_stones_fire";
+        private const string EarthSpiritStonesPrefKey = "game.progress.spirit_stones_earth";
         private const string OwnedEquipmentPrefKey = "game.progress.owned_equipment";
         private const string LearnedSkillsPrefKey = "game.progress.learned_skills";
         private const string PendingSkillRewardsPrefKey = "game.progress.pending_skill_rewards";
@@ -48,6 +53,11 @@ namespace Wuxing.Game
         public int CultivationLevel { get; private set; }
         public int CultivationExp { get; private set; }
         public int SpiritStones { get; private set; }
+        public int MetalSpiritStones { get; private set; }
+        public int WoodSpiritStones { get; private set; }
+        public int WaterSpiritStones { get; private set; }
+        public int FireSpiritStones { get; private set; }
+        public int EarthSpiritStones { get; private set; }
 
         private readonly List<string> ownedEquipmentIds = new List<string>();
         private readonly List<CharacterRunData> characterRunData = new List<CharacterRunData>();
@@ -92,7 +102,7 @@ namespace Wuxing.Game
                 Instance.ElapsedMonths = 0;
                 Instance.CultivationLevel = 1;
                 Instance.CultivationExp = 0;
-                Instance.SpiritStones = 0;
+                Instance.ResetSpiritStones();
                 Instance.ResetOwnedEquipmentToBase();
                 Instance.characterRunData.Clear();
                 Instance.pendingSkillRewards.Clear();
@@ -165,7 +175,7 @@ namespace Wuxing.Game
             Instance.ElapsedMonths = 0;
             Instance.CultivationLevel = 1;
             Instance.CultivationExp = 0;
-            Instance.SpiritStones = 0;
+            Instance.ResetSpiritStones();
             Instance.ResetOwnedEquipmentToBase();
             Instance.characterRunData.Clear();
             Instance.pendingSkillRewards.Clear();
@@ -185,9 +195,11 @@ namespace Wuxing.Game
             var resolvedStage = Mathf.Max(1, stage);
             reward.ExpGained = 18 + resolvedStage * 8;
             reward.SpiritStonesGained = 12 + resolvedStage * 5;
+            reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
+            reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
             Instance.CultivationExp += reward.ExpGained;
-            Instance.SpiritStones += reward.SpiritStonesGained;
+            Instance.AddSpiritStones(reward.SpiritStoneElement, reward.SpiritStonesGained);
 
             while (Instance.CultivationExp >= Instance.GetRequiredExpInternal())
             {
@@ -228,7 +240,44 @@ namespace Wuxing.Game
         public static int GetSpiritStones()
         {
             EnsureInstance();
-            return Instance != null ? Instance.SpiritStones : 0;
+            return Instance != null ? Instance.GetTotalSpiritStones() : 0;
+        }
+
+        public static int GetSpiritStoneCount(string element)
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.GetSpiritStoneCountInternal(element) : 0;
+        }
+
+        public static string BuildSpiritStoneSummary(bool english, bool richText = false)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return english ? "Spirit Stones: 0" : "灵石：0";
+            }
+
+            var parts = new List<string>
+            {
+                Instance.BuildSpiritStoneEntry("Metal", english, richText),
+                Instance.BuildSpiritStoneEntry("Wood", english, richText),
+                Instance.BuildSpiritStoneEntry("Water", english, richText),
+                Instance.BuildSpiritStoneEntry("Fire", english, richText),
+                Instance.BuildSpiritStoneEntry("Earth", english, richText)
+            };
+
+            return (english ? "Spirit Stones: " : "灵石：") + string.Join("  ", parts.ToArray());
+        }
+
+        public static string BuildSpiritStoneGainText(BattleRewardResult reward, bool english, bool richText = false)
+        {
+            if (reward == null || reward.SpiritStonesGained <= 0)
+            {
+                return english ? "Spirit Stones +0" : "灵石 +0";
+            }
+
+            var content = GetSpiritStoneName(reward.SpiritStoneElement, english) + " +" + reward.SpiritStonesGained;
+            return richText ? WrapSpiritStoneColor(reward.SpiritStoneElement, content) : content;
         }
 
         public static int GetRequiredExpForNextLevel()
@@ -717,7 +766,7 @@ namespace Wuxing.Game
                     "\nNext Step: " + (HasActiveRun() ? ("Continue Stage " + currentStage) : "Start From Stage 1") +
                     "\nCultivation Lv." + GetCultivationLevel() +
                     " / Exp " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
-                    "\nSpirit Stones: " + GetSpiritStones();
+                    "\n" + BuildSpiritStoneSummary(true);
 
                 if (Instance != null && Instance.HasLastBattle)
                 {
@@ -735,7 +784,7 @@ namespace Wuxing.Game
                 "\n下一步：" + (HasActiveRun() ? ("继续第 " + currentStage + " 关") : "从第 1 关开始") +
                 "\n修为等级 " + GetCultivationLevel() +
                 " / 经验 " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
-                "\n灵石：" + GetSpiritStones();
+                "\n" + BuildSpiritStoneSummary(false);
 
             if (Instance != null && Instance.HasLastBattle)
             {
@@ -846,6 +895,17 @@ namespace Wuxing.Game
             CultivationLevel = Mathf.Max(1, PlayerPrefs.GetInt(CultivationLevelPrefKey, 1));
             CultivationExp = Mathf.Max(0, PlayerPrefs.GetInt(CultivationExpPrefKey, 0));
             SpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(SpiritStonesPrefKey, 0));
+            MetalSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(MetalSpiritStonesPrefKey, 0));
+            WoodSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(WoodSpiritStonesPrefKey, 0));
+            WaterSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(WaterSpiritStonesPrefKey, 0));
+            FireSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(FireSpiritStonesPrefKey, 0));
+            EarthSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(EarthSpiritStonesPrefKey, 0));
+            if (MetalSpiritStones + WoodSpiritStones + WaterSpiritStones + FireSpiritStones + EarthSpiritStones <= 0
+                && SpiritStones > 0)
+            {
+                MetalSpiritStones = SpiritStones;
+            }
+            SyncSpiritStoneTotal();
             LoadOwnedEquipment();
             LoadLearnedSkills();
             LoadPendingSkillRewards();
@@ -862,7 +922,13 @@ namespace Wuxing.Game
             PlayerPrefs.SetInt(ElapsedMonthsPrefKey, ElapsedMonths);
             PlayerPrefs.SetInt(CultivationLevelPrefKey, CultivationLevel);
             PlayerPrefs.SetInt(CultivationExpPrefKey, CultivationExp);
+            SyncSpiritStoneTotal();
             PlayerPrefs.SetInt(SpiritStonesPrefKey, SpiritStones);
+            PlayerPrefs.SetInt(MetalSpiritStonesPrefKey, MetalSpiritStones);
+            PlayerPrefs.SetInt(WoodSpiritStonesPrefKey, WoodSpiritStones);
+            PlayerPrefs.SetInt(WaterSpiritStonesPrefKey, WaterSpiritStones);
+            PlayerPrefs.SetInt(FireSpiritStonesPrefKey, FireSpiritStones);
+            PlayerPrefs.SetInt(EarthSpiritStonesPrefKey, EarthSpiritStones);
             PlayerPrefs.SetString(OwnedEquipmentPrefKey, SerializeOwnedEquipment());
             PlayerPrefs.SetString(LearnedSkillsPrefKey, SerializeLearnedSkills());
             PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
@@ -1067,6 +1133,7 @@ namespace Wuxing.Game
 
         private RunData BuildRunDataSnapshot()
         {
+            SyncSpiritStoneTotal();
             var data = new RunData
             {
                 CurrentStage = CurrentStage,
@@ -1076,6 +1143,11 @@ namespace Wuxing.Game
                 CultivationLevel = CultivationLevel,
                 CultivationExp = CultivationExp,
                 SpiritStones = SpiritStones,
+                MetalSpiritStones = MetalSpiritStones,
+                WoodSpiritStones = WoodSpiritStones,
+                WaterSpiritStones = WaterSpiritStones,
+                FireSpiritStones = FireSpiritStones,
+                EarthSpiritStones = EarthSpiritStones,
                 HasLastBattle = HasLastBattle,
                 LastBattleStage = LastBattleStage,
                 LastBattleRounds = LastBattleRounds,
@@ -1160,6 +1232,181 @@ namespace Wuxing.Game
                 {
                     sink.Add(parts[i].Trim());
                 }
+            }
+        }
+
+        private void ResetSpiritStones()
+        {
+            SpiritStones = 0;
+            MetalSpiritStones = 0;
+            WoodSpiritStones = 0;
+            WaterSpiritStones = 0;
+            FireSpiritStones = 0;
+            EarthSpiritStones = 0;
+        }
+
+        private void AddSpiritStones(string element, int amount)
+        {
+            var gain = Mathf.Max(0, amount);
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    MetalSpiritStones += gain;
+                    break;
+                case "wood":
+                    WoodSpiritStones += gain;
+                    break;
+                case "water":
+                    WaterSpiritStones += gain;
+                    break;
+                case "fire":
+                    FireSpiritStones += gain;
+                    break;
+                case "earth":
+                default:
+                    EarthSpiritStones += gain;
+                    break;
+            }
+
+            SyncSpiritStoneTotal();
+        }
+
+        private int GetTotalSpiritStones()
+        {
+            SyncSpiritStoneTotal();
+            return SpiritStones;
+        }
+
+        private int GetSpiritStoneCountInternal(string element)
+        {
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    return MetalSpiritStones;
+                case "wood":
+                    return WoodSpiritStones;
+                case "water":
+                    return WaterSpiritStones;
+                case "fire":
+                    return FireSpiritStones;
+                case "earth":
+                default:
+                    return EarthSpiritStones;
+            }
+        }
+
+        private void SyncSpiritStoneTotal()
+        {
+            SpiritStones = MetalSpiritStones + WoodSpiritStones + WaterSpiritStones + FireSpiritStones + EarthSpiritStones;
+        }
+
+        private string BuildSpiritStoneEntry(string element, bool english, bool richText)
+        {
+            var content = GetSpiritStoneShortName(element, english) + ":" + GetSpiritStoneCountInternal(element);
+            return richText ? WrapSpiritStoneColor(element, content) : content;
+        }
+
+        private static string GetSpiritStoneElementByStage(int stage)
+        {
+            switch ((Mathf.Max(1, stage) - 1) % 5)
+            {
+                case 0:
+                    return "Metal";
+                case 1:
+                    return "Wood";
+                case 2:
+                    return "Water";
+                case 3:
+                    return "Fire";
+                default:
+                    return "Earth";
+            }
+        }
+
+        public static string GetSpiritStoneName(string element, bool english)
+        {
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    return english ? "Metal Spirit Stone" : "金灵石";
+                case "wood":
+                    return english ? "Wood Spirit Stone" : "木灵石";
+                case "water":
+                    return english ? "Water Spirit Stone" : "水灵石";
+                case "fire":
+                    return english ? "Fire Spirit Stone" : "火灵石";
+                case "earth":
+                default:
+                    return english ? "Earth Spirit Stone" : "土灵石";
+            }
+        }
+
+        private static string GetSpiritStoneShortName(string element, bool english)
+        {
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    return english ? "Metal" : "金";
+                case "wood":
+                    return english ? "Wood" : "木";
+                case "water":
+                    return english ? "Water" : "水";
+                case "fire":
+                    return english ? "Fire" : "火";
+                case "earth":
+                default:
+                    return english ? "Earth" : "土";
+            }
+        }
+
+        private static string WrapSpiritStoneColor(string element, string content)
+        {
+            return "<color=" + GetSpiritStoneColorHex(element) + ">" + content + "</color>";
+        }
+
+        private static string GetSpiritStoneColorHex(string element)
+        {
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    return "#E5C36A";
+                case "wood":
+                    return "#5BC16A";
+                case "water":
+                    return "#59A7FF";
+                case "fire":
+                    return "#FF6B5D";
+                case "earth":
+                default:
+                    return "#E6D25A";
+            }
+        }
+
+        private static string NormalizeSpiritStoneElement(string element)
+        {
+            if (string.IsNullOrEmpty(element))
+            {
+                return "earth";
+            }
+
+            switch (element.Trim().ToLowerInvariant())
+            {
+                case "金":
+                case "metal":
+                    return "metal";
+                case "木":
+                case "wood":
+                    return "wood";
+                case "水":
+                case "water":
+                    return "water";
+                case "火":
+                case "fire":
+                    return "fire";
+                case "土":
+                case "earth":
+                default:
+                    return "earth";
             }
         }
 

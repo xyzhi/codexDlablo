@@ -1,4 +1,8 @@
 ﻿using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,14 +14,23 @@ public static class UIPrefabBuilder
     private const string RootFolder = "Assets/Resources/Prefabs/UI";
     private const string PagesFolder = RootFolder + "/Pages";
     private const string PopupsFolder = RootFolder + "/Popups";
+    private const string BuildStateFolder = "Library/Codex";
+    private const string BuildStatePath = BuildStateFolder + "/ui_prefab_build_hash.txt";
 
-    public static void BuildPrefabs()
+    public static void BuildPrefabs(bool forceRebuild = false)
     {
         EnsureFolder("Assets/Resources");
         EnsureFolder("Assets/Resources/Prefabs");
         EnsureFolder(RootFolder);
         EnsureFolder(PagesFolder);
         EnsureFolder(PopupsFolder);
+
+        var inputHash = ComputeBuildInputHash();
+        if (!forceRebuild && AreAllGeneratedPrefabsPresent() && string.Equals(ReadLastBuildHash(), inputHash, System.StringComparison.Ordinal))
+        {
+            Debug.Log("UI 相关代码未变化，跳过预设重建。");
+            return;
+        }
 
         BuildCanvasRootPrefab();
         BuildStartPagePrefab();
@@ -27,6 +40,7 @@ public static class UIPrefabBuilder
         BuildConfirmPopupPrefab();
         BuildToastPopupPrefab();
 
+        WriteLastBuildHash(inputHash);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("已生成 UI 预设到 Assets/Resources/Prefabs/UI");
@@ -722,6 +736,73 @@ public static class UIPrefabBuilder
 
         PrefabUtility.SaveAsPrefabAsset(root, path);
         Object.DestroyImmediate(root);
+    }
+
+    private static bool AreAllGeneratedPrefabsPresent()
+    {
+        return File.Exists(RootFolder + "/CanvasRoot.prefab")
+            && File.Exists(PagesFolder + "/MainMenuPage.prefab")
+            && File.Exists(PagesFolder + "/MapPage.prefab")
+            && File.Exists(PagesFolder + "/BattlePage.prefab")
+            && File.Exists(PopupsFolder + "/ConfirmPopup.prefab")
+            && File.Exists(PopupsFolder + "/ToastPopup.prefab");
+    }
+
+    private static string ComputeBuildInputHash()
+    {
+        var builder = new StringBuilder();
+        foreach (var path in GetTrackedInputFiles())
+        {
+            builder.Append(path).Append('\n');
+            builder.Append(File.ReadAllText(path)).Append('\n');
+        }
+
+        using (var sha = SHA256.Create())
+        {
+            var bytes = Encoding.UTF8.GetBytes(builder.ToString());
+            var hash = sha.ComputeHash(bytes);
+            return System.BitConverter.ToString(hash).Replace("-", string.Empty);
+        }
+    }
+
+    private static IEnumerable<string> GetTrackedInputFiles()
+    {
+        var files = new List<string>();
+        AddTrackedCsFiles(files, "Assets/Scripts/UI");
+        AddTrackedCsFiles(files, "Assets/Scripts/Localization");
+        files.Add("Assets/Editor/UIPrefabBuilder.cs");
+        files.Add("Assets/Editor/UIEditorShortcuts.cs");
+        files.Sort(System.StringComparer.OrdinalIgnoreCase);
+        return files.Distinct(System.StringComparer.OrdinalIgnoreCase);
+    }
+
+    private static void AddTrackedCsFiles(List<string> files, string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        var folderFiles = Directory.GetFiles(folder, "*.cs", SearchOption.AllDirectories);
+        for (var i = 0; i < folderFiles.Length; i++)
+        {
+            files.Add(folderFiles[i].Replace("\\", "/"));
+        }
+    }
+
+    private static string ReadLastBuildHash()
+    {
+        return File.Exists(BuildStatePath) ? File.ReadAllText(BuildStatePath).Trim() : string.Empty;
+    }
+
+    private static void WriteLastBuildHash(string hash)
+    {
+        if (!Directory.Exists(BuildStateFolder))
+        {
+            Directory.CreateDirectory(BuildStateFolder);
+        }
+
+        File.WriteAllText(BuildStatePath, hash ?? string.Empty);
     }
 
     private static void EnsureFolder(string path)

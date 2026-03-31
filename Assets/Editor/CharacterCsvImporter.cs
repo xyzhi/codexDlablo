@@ -13,6 +13,7 @@ public static class CharacterCsvImporter
     private const string EnemyCsvPath = "Docs/Enemy.csv";
     private const string SkillCsvPath = "Docs/Skill.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
+    private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
 
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
@@ -22,6 +23,7 @@ public static class CharacterCsvImporter
     private const string EnemyJsonPath = ConfigOutputFolder + "/EnemyDatabase.json";
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
     private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
+    private const string SpiritStoneJsonPath = ConfigOutputFolder + "/SpiritStoneDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
 
     [MenuItem("工具/配置/导入全部CSV")]
@@ -33,9 +35,10 @@ public static class CharacterCsvImporter
             ImportEnemies();
             ImportSkills();
             ImportEquipments();
+            ImportSpiritStones();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能、装备和语言表已完成导入。");
+            Debug.Log("角色、敌人、技能、装备、灵石和语言表已完成导入。");
         }
         catch (Exception exception)
         {
@@ -242,6 +245,42 @@ public static class CharacterCsvImporter
         table.entries = entries.ToArray();
         WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
         Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
+    }
+
+    [MenuItem("工具/配置/仅导入灵石表")]
+    public static void ImportSpiritStones()
+    {
+        var rows = ReadRequiredRows(SpiritStoneCsvPath, "SpiritStone CSV");
+        var configs = new List<SpiritStoneConfig>();
+
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 5)
+            {
+                throw new InvalidOperationException($"Invalid spirit stone row at line {i + 1}.");
+            }
+
+            configs.Add(new SpiritStoneConfig
+            {
+                Id = columns[0],
+                Name = columns[1],
+                Element = columns[2],
+                ColorHex = columns[3],
+                Notes = columns[4]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new SpiritStoneDatabase();
+        database.spiritStones = configs;
+        WriteJson(SpiritStoneJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
 
     private static List<List<string>> ReadRequiredRows(string relativePath, string displayName)

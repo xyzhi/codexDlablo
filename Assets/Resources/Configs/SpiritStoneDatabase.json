@@ -1,0 +1,39 @@
+﻿{
+    "spiritStones": [
+        {
+            "Id": "SS001",
+            "Name": "金灵石",
+            "Element": "金",
+            "ColorHex": "#E5C36A",
+            "Notes": "金系灵石;用于标识金属性资源"
+        },
+        {
+            "Id": "SS002",
+            "Name": "木灵石",
+            "Element": "木",
+            "ColorHex": "#5BC16A",
+            "Notes": "木系灵石;用于标识木属性资源"
+        },
+        {
+            "Id": "SS003",
+            "Name": "水灵石",
+            "Element": "水",
+            "ColorHex": "#59A7FF",
+            "Notes": "水系灵石;用于标识水属性资源"
+        },
+        {
+            "Id": "SS004",
+            "Name": "火灵石",
+            "Element": "火",
+            "ColorHex": "#FF6B5D",
+            "Notes": "火系灵石;用于标识火属性资源"
+        },
+        {
+            "Id": "SS005",
+            "Name": "土灵石",
+            "Element": "土",
+            "ColorHex": "#E6D25A",
+            "Notes": "土系灵石;用于标识土属性资源"
+        }
+    ]
+}

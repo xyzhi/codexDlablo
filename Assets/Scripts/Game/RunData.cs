@@ -13,6 +13,11 @@ namespace Wuxing.Game
         public int CultivationLevel;
         public int CultivationExp;
         public int SpiritStones;
+        public int MetalSpiritStones;
+        public int WoodSpiritStones;
+        public int WaterSpiritStones;
+        public int FireSpiritStones;
+        public int EarthSpiritStones;
         public bool HasLastBattle;
         public int LastBattleStage;
         public int LastBattleRounds;

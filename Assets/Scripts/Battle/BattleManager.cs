@@ -478,6 +478,11 @@ namespace Wuxing.Battle
                 .Append(GetEquipmentSkillsLabel())
                 .Append(": ")
                 .Append(FormatUnitSkills(selectedUnit))
+                .Append("\n")
+                .Append(LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "Learned Skills (included above): "
+                    : "已学功法（已包含在上方）: ")
+                .Append(FormatUnitSkills(selectedUnit))
                 .Append("\n\n")
                 .Append(FormatSingleUnitEquipmentDetail(selectedUnit, equipmentDatabase))
                 .Append("\n\n")
