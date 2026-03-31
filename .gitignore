@@ -33,3 +33,4 @@ Assets/Plugins/Editor/JetBrains*
 *.log
 
 sysinfo.txt
+*_BurstDebugInformation_DoNotShip/

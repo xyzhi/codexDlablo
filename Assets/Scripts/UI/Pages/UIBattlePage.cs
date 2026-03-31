@@ -13,6 +13,8 @@ namespace Wuxing.UI
 {
     public class UIBattlePage : UIPage
     {
+        private const float AutoStartDelaySeconds = UIMapPage.MapToastDuration;
+
         [SerializeField] private GameObject battleLogOverlay;
         [SerializeField] private Button backButton;
         [SerializeField] private Button startBattleButton;
@@ -53,11 +55,35 @@ namespace Wuxing.UI
         private float detailBottomInset;
         private float sharedSelectionDetailHeight;
         private readonly List<Button> equipmentSelectionButtons = new List<Button>();
+        private bool openedForEquipment;
 
         public override void OnOpen(object data)
         {
             GameProgressManager.StartRun();
+            openedForEquipment = data as string == "equipment";
             ResetCurrentBattleState();
+
+            if (openedForEquipment)
+            {
+                EnsureSelectionFocusFromPreferredEquipment();
+                RefreshEquipmentPanel();
+                SetEquipmentPanelVisible(true);
+                ApplyStatus(LocalizationManager.Instance != null
+                    && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "Adjust Equipment"
+                    : "调整装备");
+                SetBackButtonLabel(LocalizationManager.Instance != null
+                    && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "Back To Map"
+                    : "返回地图");
+                return;
+            }
+
+            SetBackButtonLabel(LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                ? "Flee"
+                : "逃跑");
+            StartCoroutine(AutoStartBattleNextFrame());
         }
 
         private void OnEnable()
@@ -229,6 +255,23 @@ namespace Wuxing.UI
 
         private void OnClickBack()
         {
+            if (openedForEquipment)
+            {
+                UIManager.Instance.ShowPage("Map");
+                return;
+            }
+
+            if (battlePlaybackCoroutine != null)
+            {
+                StopCoroutine(battlePlaybackCoroutine);
+                battlePlaybackCoroutine = null;
+            }
+
+            GameProgressManager.RetreatToPreviousStage();
+            UIManager.Instance.ShowToast(LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                ? "You fled the battle and fell back one stage."
+                : "你已逃离战斗，退回上一关。", 2f);
             UIManager.Instance.ShowPage("Map");
         }
 
@@ -258,6 +301,12 @@ namespace Wuxing.UI
 
         private void OnClickCloseEquipment()
         {
+            if (openedForEquipment)
+            {
+                UIManager.Instance.ShowPage("Map");
+                return;
+            }
+
             SetEquipmentPanelVisible(false);
         }
 
@@ -359,6 +408,15 @@ namespace Wuxing.UI
             RefreshPreview();
         }
 
+        private IEnumerator AutoStartBattleNextFrame()
+        {
+            yield return new WaitForSeconds(AutoStartDelaySeconds);
+            if (!openedForEquipment)
+            {
+                OnClickStartBattle();
+            }
+        }
+
         private void ApplyBattleEvent(BattleEvent battleEvent)
         {
             if (playerTeamText != null)
@@ -403,7 +461,9 @@ namespace Wuxing.UI
         private void RefreshPreview()
         {
             ApplyStageInfo();
-            ApplyStatus(BattleManager.BuildBattlePreparationStatus());
+            ApplyStatus(openedForEquipment
+                ? (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Adjust Equipment" : "调整装备")
+                : (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Battle In Progress" : "战斗进行中"));
 
             var previewPlayback = BattleManager.RunSampleBattlePlayback();
             var previewEvent = previewPlayback.Events.Count > 0 ? previewPlayback.Events[0] : null;
@@ -436,7 +496,7 @@ namespace Wuxing.UI
                     : LocalizationManager.GetText("battle.equipment_none");
             }
 
-            ApplyBattleLog(BattleManager.BuildBattlePreparationSummary());
+            ApplyBattleLog(string.Empty);
             ResetLogFollow();
             RefreshEquipmentPanel();
             SetEquipmentPanelVisible(false);
@@ -704,6 +764,7 @@ namespace Wuxing.UI
             if (playback.IsVictory)
             {
                 reward = GameProgressManager.GrantBattleRewards(GameProgressManager.GetCurrentStage());
+                GameProgressManager.MarkCurrentStageCleared();
                 if (!string.IsNullOrEmpty(reward.DroppedEquipmentId))
                 {
                     preferredSelectionEquipmentId = reward.DroppedEquipmentId;
@@ -714,15 +775,27 @@ namespace Wuxing.UI
             var stageText = isEnglish
                 ? "Stage " + GameProgressManager.GetCurrentStage()
                 : "第 " + GameProgressManager.GetCurrentStage() + " 关";
-            var message =
-                stageText + "\n" +
-                LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n" +
-                BuildRewardSummary(reward, isEnglish) + "\n\n" +
-                GameProgressManager.BuildPostBattleNextStep(isEnglish, playback.IsVictory) + "\n\n" +
-                LocalizationManager.GetText("battle.player_team") + "\n" + playback.FinalPlayerTeamSummary + "\n\n" +
-                LocalizationManager.GetText("battle.enemy_team") + "\n" + playback.FinalEnemyTeamSummary;
-            var confirmLabel = isEnglish ? (playback.IsVictory ? "Next Stage" : "Retry") : (playback.IsVictory ? "下一关" : "重试");
-            var cancelLabel = isEnglish ? "Close" : "关闭";
+            var message = playback.IsVictory
+                ? stageText + "\n"
+                    + LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n"
+                    + BuildRewardSummary(reward, isEnglish) + "\n\n"
+                    + LocalizationManager.GetText("battle.player_team") + "\n" + playback.FinalPlayerTeamSummary + "\n\n"
+                    + LocalizationManager.GetText("battle.enemy_team") + "\n" + playback.FinalEnemyTeamSummary
+                : (isEnglish
+                    ? "Game Over\n\nThis run has ended. Please start again or reset the run from the main menu."
+                    : "游戏结束\n\n本轮已经结束，请重新开始，或回到主界面后重置本轮。");
+            var confirmLabel = playback.IsVictory
+                ? (isEnglish ? "Next Stage" : "下一关")
+                : (isEnglish ? "Back To Main Menu" : "返回主界面");
+            var cancelLabel = playback.IsVictory ? (isEnglish ? "Return To Map" : "返回地图") : null;
+            System.Action cancelAction = null;
+            if (playback.IsVictory)
+            {
+                cancelAction = delegate
+                {
+                    UIManager.Instance.ShowPage("Map");
+                };
+            }
             GameProgressManager.RecordBattleResult(playback.IsVictory, GameProgressManager.GetCurrentStage(), playback.TotalRounds);
 
             popup.Setup(
@@ -733,34 +806,34 @@ namespace Wuxing.UI
                 {
                     if (playback.IsVictory)
                     {
-                        var advanceResult = GameProgressManager.AdvanceAfterVictory();
-                        if (advanceResult == RunAdvanceResult.LifespanEnded)
+                        var nextStage = GameProgressManager.GetCurrentStage() + 1;
+                        if (!GameProgressManager.CanTravelToStage(nextStage))
+                        {
+                            UIManager.Instance.ShowPage("Map");
+                            return;
+                        }
+
+                        var result = GameProgressManager.TravelToStage(nextStage);
+                        if (result == RunAdvanceResult.LifespanEnded)
                         {
                             UIManager.Instance.ShowToast(isEnglish
                                 ? "Lifespan exhausted. The run has ended."
-                                : "阳寿已尽，本轮结束。", 2f);
+                                : "阳寿已尽，本轮结束。", UIMapPage.MapToastDuration);
                             UIManager.Instance.ShowPage("MainMenu");
                             return;
                         }
 
-                        if (advanceResult == RunAdvanceResult.ChapterComplete)
-                        {
-                            UIManager.Instance.ShowToast(isEnglish
-                                ? "This route is complete."
-                                : "本轮路线已完成。", 2f);
-                            UIManager.Instance.ShowPage("MainMenu");
-                            return;
-                        }
-
-                        UIManager.Instance.ShowPage("Map");
-                    }
-                    else
-                    {
-                        GameProgressManager.RetryCurrentStage();
+                        UIManager.Instance.ShowToast(isEnglish
+                            ? "Arrived at Stage " + nextStage + " · " + GameProgressManager.GetNodeTypeLabel(true, nextStage)
+                            : "已抵达第 " + nextStage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, nextStage), UIMapPage.MapToastDuration);
                         UIManager.Instance.ShowPage("Battle");
+                        return;
                     }
+
+                    GameProgressManager.ResetRun();
+                    UIManager.Instance.ShowPage("MainMenu");
                 },
-                delegate { },
+                cancelAction,
                 confirmLabel,
                 cancelLabel);
         }
@@ -908,25 +981,37 @@ namespace Wuxing.UI
 
         private void SetButtonsInteractable(bool interactable)
         {
-            if (startBattleButton != null)
+            if (backButton != null)
             {
-                startBattleButton.interactable = interactable;
-            }
-
-            if (restartButton != null)
-            {
-                restartButton.interactable = interactable;
+                backButton.interactable = true;
             }
         }
 
         private void OnLanguageChanged()
         {
             RefreshPreview();
+            SetBackButtonLabel(openedForEquipment
+                ? (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Back To Map" : "返回地图")
+                : (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Flee" : "逃跑"));
 
             if (equipmentPanel != null && equipmentPanel.activeSelf)
             {
                 RefreshEquipmentPanel();
                 SetEquipmentPanelVisible(true);
+            }
+        }
+
+        private void SetBackButtonLabel(string text)
+        {
+            if (backButton == null)
+            {
+                return;
+            }
+
+            var label = backButton.GetComponentInChildren<Text>();
+            if (label != null)
+            {
+                label.text = text;
             }
         }
 

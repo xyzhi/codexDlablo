@@ -143,62 +143,98 @@ public static class UIPrefabBuilder
         longevityText.rectTransform.offsetMin = new Vector2(18f, 6f);
         longevityText.rectTransform.offsetMax = new Vector2(-18f, -6f);
 
-        var objectivePanel = UIFactory.CreatePanel(root.transform, "ObjectivePanel", new Color(0.13f, 0.13f, 0.16f, 0.94f));
-        var objectiveRect = objectivePanel.GetComponent<RectTransform>();
-        objectiveRect.anchorMin = new Vector2(0.08f, 0.61f);
-        objectiveRect.anchorMax = new Vector2(0.92f, 0.7f);
-        objectiveRect.offsetMin = Vector2.zero;
-        objectiveRect.offsetMax = Vector2.zero;
-        UIFactory.AddOutlineBox(objectivePanel.transform, "ObjectiveOutline", new Color(0.82f, 0.84f, 0.9f, 0.55f), 1f);
-        var objectiveText = UIFactory.CreateText(objectivePanel.transform, "ObjectiveText", "Objective", 24, TextAnchor.UpperLeft, Color.white);
-        objectiveText.rectTransform.offsetMin = new Vector2(18f, 12f);
-        objectiveText.rectTransform.offsetMax = new Vector2(-18f, -12f);
+        var graphPanel = UIFactory.CreatePanel(root.transform, "GraphPanel", new Color(0.12f, 0.1f, 0.1f, 0.95f));
+        var graphRect = graphPanel.GetComponent<RectTransform>();
+        graphRect.anchorMin = new Vector2(0.08f, 0.53f);
+        graphRect.anchorMax = new Vector2(0.92f, 0.71f);
+        graphRect.offsetMin = Vector2.zero;
+        graphRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(graphPanel.transform, "GraphOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
+
+        var graphRoot = UIFactory.CreateContainer(graphPanel.transform, "NodeGraphRoot", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.92f), Vector2.zero, Vector2.zero);
 
         var detailPanel = UIFactory.CreatePanel(root.transform, "DetailPanel", new Color(0.12f, 0.1f, 0.1f, 0.95f));
         var detailRect = detailPanel.GetComponent<RectTransform>();
-        detailRect.anchorMin = new Vector2(0.08f, 0.47f);
-        detailRect.anchorMax = new Vector2(0.92f, 0.58f);
+        detailRect.anchorMin = new Vector2(0.08f, 0.29f);
+        detailRect.anchorMax = new Vector2(0.48f, 0.49f);
         detailRect.offsetMin = Vector2.zero;
         detailRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(detailPanel.transform, "DetailOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
-        var detailText = UIFactory.CreateText(detailPanel.transform, "DetailText", "Node Detail", 22, TextAnchor.UpperLeft, new Color(0.94f, 0.92f, 0.88f, 1f));
-        detailText.rectTransform.offsetMin = new Vector2(18f, 12f);
-        detailText.rectTransform.offsetMax = new Vector2(-18f, -12f);
+        var detailText = UIFactory.CreateText(detailPanel.transform, "DetailText", "Node Detail", 20, TextAnchor.UpperLeft, new Color(0.94f, 0.92f, 0.88f, 1f));
+        detailText.rectTransform.offsetMin = new Vector2(18f, 14f);
+        detailText.rectTransform.offsetMax = new Vector2(-18f, -14f);
+        detailText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        detailText.verticalOverflow = VerticalWrapMode.Overflow;
 
         var routePanel = UIFactory.CreatePanel(root.transform, "RoutePanel", new Color(0.11f, 0.09f, 0.09f, 0.96f));
         var routeRect = routePanel.GetComponent<RectTransform>();
-        routeRect.anchorMin = new Vector2(0.08f, 0.2f);
-        routeRect.anchorMax = new Vector2(0.92f, 0.44f);
+        routeRect.anchorMin = new Vector2(0.52f, 0.29f);
+        routeRect.anchorMax = new Vector2(0.92f, 0.49f);
         routeRect.offsetMin = Vector2.zero;
         routeRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(routePanel.transform, "RouteOutline", new Color(0.88f, 0.8f, 0.72f, 0.55f), 1f);
-        var routeText = UIFactory.CreateText(routePanel.transform, "RouteText", "Route", 25, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        var routeText = UIFactory.CreateText(routePanel.transform, "RouteText", "Profile", 23, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
         routeText.rectTransform.offsetMin = new Vector2(18f, 14f);
         routeText.rectTransform.offsetMax = new Vector2(-18f, -14f);
 
-        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.12f, 0.05f), new Vector2(0.88f, 0.17f), Vector2.zero, Vector2.zero);
-        var footerLayout = UIFactory.AddVerticalLayout(footer.gameObject, 6, TextAnchor.MiddleCenter);
-        footerLayout.childForceExpandHeight = true;
-        footerLayout.childForceExpandWidth = true;
+        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.08f, 0.035f), new Vector2(0.92f, 0.125f), Vector2.zero, Vector2.zero);
 
-        var advanceButton = UIFactory.CreateButton(footer, "AdvanceButton", "Enter Node", delegate { });
-        UIFactory.AddLayoutElement(advanceButton.gameObject, 38f);
+        var navRow = UIFactory.CreateContainer(footer, "NavRow", new Vector2(0f, 0.56f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+        var previousButton = UIFactory.CreateButton(navRow, "PreviousButton", "Previous", delegate { });
+        var previousRect = previousButton.GetComponent<RectTransform>();
+        previousRect.anchorMin = new Vector2(0f, 0f);
+        previousRect.anchorMax = new Vector2(0.28f, 1f);
+        previousRect.offsetMin = Vector2.zero;
+        previousRect.offsetMax = new Vector2(-8f, 0f);
 
-        var resetButton = UIFactory.CreateButton(footer, "ResetButton", "Reset Run", delegate { });
-        UIFactory.AddLayoutElement(resetButton.gameObject, 38f);
+        var enterButton = UIFactory.CreateButton(navRow, "EnterButton", "Enter Node", delegate { });
+        var enterRect = enterButton.GetComponent<RectTransform>();
+        enterRect.anchorMin = new Vector2(0.3f, 0f);
+        enterRect.anchorMax = new Vector2(0.7f, 1f);
+        enterRect.offsetMin = Vector2.zero;
+        enterRect.offsetMax = Vector2.zero;
 
-        var backButton = UIFactory.CreateButton(footer, "BackButton", "Back To Menu", delegate { });
-        UIFactory.AddLayoutElement(backButton.gameObject, 38f);
+        var nextButton = UIFactory.CreateButton(navRow, "NextButton", "Next", delegate { });
+        var nextRect = nextButton.GetComponent<RectTransform>();
+        nextRect.anchorMin = new Vector2(0.72f, 0f);
+        nextRect.anchorMax = new Vector2(1f, 1f);
+        nextRect.offsetMin = new Vector2(8f, 0f);
+        nextRect.offsetMax = Vector2.zero;
+
+        var actionRow = UIFactory.CreateContainer(footer, "ActionRow", new Vector2(0f, 0f), new Vector2(1f, 0.38f), Vector2.zero, Vector2.zero);
+        var equipmentButton = UIFactory.CreateButton(actionRow, "EquipmentButton", "Equipment", delegate { });
+        var equipmentRect = equipmentButton.GetComponent<RectTransform>();
+        equipmentRect.anchorMin = new Vector2(0f, 0f);
+        equipmentRect.anchorMax = new Vector2(0.31f, 1f);
+        equipmentRect.offsetMin = Vector2.zero;
+        equipmentRect.offsetMax = new Vector2(-8f, 0f);
+
+        var resetButton = UIFactory.CreateButton(actionRow, "ResetButton", "Reset Run", delegate { });
+        var resetRect = resetButton.GetComponent<RectTransform>();
+        resetRect.anchorMin = new Vector2(0.345f, 0f);
+        resetRect.anchorMax = new Vector2(0.655f, 1f);
+        resetRect.offsetMin = Vector2.zero;
+        resetRect.offsetMax = Vector2.zero;
+
+        var backButton = UIFactory.CreateButton(actionRow, "BackButton", "Back To Menu", delegate { });
+        var backRect = backButton.GetComponent<RectTransform>();
+        backRect.anchorMin = new Vector2(0.69f, 0f);
+        backRect.anchorMax = new Vector2(1f, 1f);
+        backRect.offsetMin = new Vector2(8f, 0f);
+        backRect.offsetMax = Vector2.zero;
 
         var page = root.AddComponent<UIMapPage>();
         BindSerializedProperty(page, "titleText", titleText);
         BindSerializedProperty(page, "statusText", statusText);
         BindSerializedProperty(page, "regionText", regionText);
         BindSerializedProperty(page, "longevityText", longevityText);
-        BindSerializedProperty(page, "objectiveText", objectiveText);
+        BindSerializedProperty(page, "nodeGraphRoot", graphRoot);
         BindSerializedProperty(page, "nodeDetailText", detailText);
         BindSerializedProperty(page, "routeText", routeText);
-        BindSerializedProperty(page, "advanceButton", advanceButton);
+        BindSerializedProperty(page, "previousButton", previousButton);
+        BindSerializedProperty(page, "enterButton", enterButton);
+        BindSerializedProperty(page, "nextButton", nextButton);
+        BindSerializedProperty(page, "equipmentButton", equipmentButton);
         BindSerializedProperty(page, "resetButton", resetButton);
         BindSerializedProperty(page, "backButton", backButton);
         SavePrefab(root, PagesFolder + "/MapPage.prefab");
@@ -262,26 +298,9 @@ public static class UIPrefabBuilder
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         AddLocalizedText(logBodyText, "battle.log_content");
 
-        var footer = UIFactory.CreateContainer(overlay.transform, "Footer", new Vector2(0.08f, 0.02f), new Vector2(0.92f, 0.18f), Vector2.zero, Vector2.zero);
-        var footerLayout = UIFactory.AddVerticalLayout(footer.gameObject, 6, TextAnchor.MiddleCenter);
-        footerLayout.childForceExpandHeight = true;
-        footerLayout.childForceExpandWidth = true;
-
-        var startButton = UIFactory.CreateButton(footer, "StartButton", "Start", delegate { });
-        AddLocalizedText(startButton.GetComponentInChildren<Text>(), "battle.button_start");
-        UIFactory.AddLayoutElement(startButton.gameObject, 38f);
-
-        var restartButton = UIFactory.CreateButton(footer, "RestartButton", "Restart", delegate { });
-        AddLocalizedText(restartButton.GetComponentInChildren<Text>(), "battle.button_restart");
-        UIFactory.AddLayoutElement(restartButton.gameObject, 38f);
-
-        var backButton = UIFactory.CreateButton(footer, "BackButton", "Back", delegate { });
-        AddLocalizedText(backButton.GetComponentInChildren<Text>(), "battle.button_back");
-        UIFactory.AddLayoutElement(backButton.gameObject, 38f);
-
-        var equipmentButton = UIFactory.CreateButton(footer, "EquipmentButton", "Equipment", delegate { });
-        AddLocalizedText(equipmentButton.GetComponentInChildren<Text>(), "battle.button_equipment");
-        UIFactory.AddLayoutElement(equipmentButton.gameObject, 38f);
+        var footer = UIFactory.CreateContainer(overlay.transform, "Footer", new Vector2(0.24f, 0.03f), new Vector2(0.76f, 0.1f), Vector2.zero, Vector2.zero);
+        var backButton = UIFactory.CreateButton(footer, "BackButton", "Flee", delegate { });
+        UIFactory.Stretch(backButton.GetComponent<RectTransform>());
 
         var equipmentPanel = UIFactory.CreatePanel(overlay.transform, "EquipmentPanel", new Color(0f, 0f, 0f, 0.55f));
         var equipmentPanelRect = equipmentPanel.GetComponent<RectTransform>();
@@ -396,9 +415,6 @@ public static class UIPrefabBuilder
         var page = root.AddComponent<UIBattlePage>();
         BindSerializedProperty(page, "battleLogOverlay", overlay);
         BindSerializedProperty(page, "backButton", backButton);
-        BindSerializedProperty(page, "startBattleButton", startButton);
-        BindSerializedProperty(page, "restartButton", restartButton);
-        BindSerializedProperty(page, "equipmentButton", equipmentButton);
         BindSerializedProperty(page, "closeEquipmentButton", closeEquipmentButton);
         BindSerializedProperty(page, "cycleEquipmentPresetButton", cycleEquipmentButton);
         BindSerializedProperty(page, "cycleEquipmentUnitButton", cycleEquipmentUnitButton);
@@ -478,14 +494,14 @@ public static class UIPrefabBuilder
     {
         var root = new GameObject("ToastPopup", typeof(RectTransform), typeof(CanvasGroup), typeof(UIToastPopup));
         var rect = root.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.2f, 0.08f);
-        rect.anchorMax = new Vector2(0.8f, 0.16f);
+        rect.anchorMin = new Vector2(0.18f, 0.42f);
+        rect.anchorMax = new Vector2(0.82f, 0.58f);
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
 
-        var background = UIFactory.CreatePanel(root.transform, "Background", new Color(0f, 0f, 0f, 0.75f));
-        UIFactory.AddOutlineBox(background.transform, "Outline", new Color(0.9f, 0.9f, 0.9f, 0.6f), 1f);
-        var message = UIFactory.CreateText(background.transform, "Message", "Toast", 26, TextAnchor.MiddleCenter, Color.white);
+        var background = UIFactory.CreatePanel(root.transform, "Background", new Color(0.22f, 0.11f, 0.05f, 0.92f));
+        UIFactory.AddOutlineBox(background.transform, "Outline", new Color(1f, 0.88f, 0.52f, 0.85f), 2f);
+        var message = UIFactory.CreateText(background.transform, "Message", "Toast", 34, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.85f, 1f));
 
         var toast = root.GetComponent<UIToastPopup>();
         BindSerializedProperty(toast, "messageText", message);

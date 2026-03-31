@@ -97,29 +97,7 @@ namespace Wuxing.Game
                 return RunAdvanceResult.ContinueMap;
             }
 
-            if (Instance.CurrentStage > Instance.HighestClearedStage)
-            {
-                Instance.HighestClearedStage = Instance.CurrentStage;
-            }
-
-            Instance.ElapsedMonths += 1;
-            if (Instance.ElapsedMonths >= LifetimeMonths)
-            {
-                Instance.CurrentStage = 0;
-                Instance.SaveProgress();
-                ProgressChanged?.Invoke();
-                return RunAdvanceResult.LifespanEnded;
-            }
-
-            if (Instance.CurrentStage >= MaxStage)
-            {
-                Instance.CurrentStage = 0;
-                Instance.SaveProgress();
-                ProgressChanged?.Invoke();
-                return RunAdvanceResult.ChapterComplete;
-            }
-
-            Instance.CurrentStage += 1;
+            MarkCurrentStageCleared();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
             return RunAdvanceResult.ContinueMap;
@@ -139,6 +117,27 @@ namespace Wuxing.Game
                 Instance.SaveProgress();
             }
 
+            ProgressChanged?.Invoke();
+        }
+
+        public static void RetreatToPreviousStage()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            if (Instance.CurrentStage <= 1)
+            {
+                Instance.CurrentStage = 1;
+            }
+            else
+            {
+                Instance.CurrentStage -= 1;
+            }
+
+            Instance.SaveProgress();
             ProgressChanged?.Invoke();
         }
 
@@ -278,6 +277,24 @@ namespace Wuxing.Game
             return Instance != null ? Instance.ElapsedMonths : 0;
         }
 
+        public static int GetMaxReachableStage()
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return 1;
+            }
+
+            var currentStage = Instance.CurrentStage > 0 ? Instance.CurrentStage : 1;
+            var frontierStage = Mathf.Clamp(Instance.HighestClearedStage + 1, 1, MaxStage);
+            return Mathf.Clamp(Mathf.Max(currentStage, frontierStage), 1, MaxStage);
+        }
+
+        public static bool CanTravelToStage(int stage)
+        {
+            return stage >= 1 && stage <= GetMaxReachableStage();
+        }
+
         public static int GetRemainingMonths()
         {
             return Mathf.Max(0, LifetimeMonths - GetElapsedMonths());
@@ -288,6 +305,11 @@ namespace Wuxing.Game
             if (stage <= 0)
             {
                 return MapNodeType.Battle;
+            }
+
+            if (stage == 1)
+            {
+                return MapNodeType.Rest;
             }
 
             switch (stage)
@@ -346,6 +368,59 @@ namespace Wuxing.Game
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
             return RunAdvanceResult.ContinueMap;
+        }
+
+        public static RunAdvanceResult TravelToStage(int targetStage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return RunAdvanceResult.ContinueMap;
+            }
+
+            if (Instance.CurrentStage <= 0)
+            {
+                Instance.CurrentStage = 1;
+            }
+
+            var clampedStage = Mathf.Clamp(targetStage, 1, GetMaxReachableStage());
+            var monthCost = Mathf.Abs(clampedStage - Instance.CurrentStage);
+            Instance.ElapsedMonths += monthCost;
+            Instance.CurrentStage = clampedStage;
+
+            if (Instance.ElapsedMonths >= LifetimeMonths)
+            {
+                Instance.CurrentStage = 0;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+                return RunAdvanceResult.LifespanEnded;
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return RunAdvanceResult.ContinueMap;
+        }
+
+        public static void MarkCurrentStageCleared()
+        {
+            MarkStageCleared(GetCurrentStage());
+        }
+
+        public static void MarkStageCleared(int stage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            var resolvedStage = Mathf.Clamp(stage, 0, MaxStage);
+            if (resolvedStage > Instance.HighestClearedStage)
+            {
+                Instance.HighestClearedStage = resolvedStage;
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+            }
         }
 
         public static int GetLastBattleStage()
@@ -409,37 +484,48 @@ namespace Wuxing.Game
 
         public static string BuildCurrentNodeDetail(bool english)
         {
-            var currentStage = Mathf.Max(1, GetCurrentStage());
-            var nodeType = GetNodeType(currentStage);
-            var monthCost = GetNodeMonthCost(currentStage);
+            return BuildNodeDetail(english, Mathf.Max(1, GetCurrentStage()));
+        }
+
+        public static string BuildNodeDetail(bool english, int stage)
+        {
+            var resolvedStage = Mathf.Max(1, stage);
+            var nodeType = GetNodeType(resolvedStage);
+
+            if (resolvedStage == 1)
+            {
+                return english
+                    ? "Safe starting area reserved for future features."
+                    : "当前作为安全起点，后续会加入更多功能。";
+            }
 
             if (english)
             {
                 switch (nodeType)
                 {
                     case MapNodeType.Elite:
-                        return "Node Detail\nType: Elite Battle\nTime Cost: " + monthCost + " month\nReward: Better growth and higher loot chance.";
+                        return "Elite battle with higher growth and better loot.";
                     case MapNodeType.Rest:
-                        return "Node Detail\nType: Rest Stop\nTime Cost: " + monthCost + " month\nReward: Safe advance and time pressure management.";
+                        return "Rest stop for stable progress and time management.";
                     case MapNodeType.Boss:
-                        return "Node Detail\nType: Boss Battle\nTime Cost: " + monthCost + " month\nReward: Finish the current route if victorious.";
+                        return "Boss battle. Winning can finish the current route.";
                     case MapNodeType.Battle:
                     default:
-                        return "Node Detail\nType: Standard Battle\nTime Cost: " + monthCost + " month\nReward: Farm exp and equipment before advancing.";
+                        return "Standard battle for growth, spirit stones, and equipment drops.";
                 }
             }
 
             switch (nodeType)
             {
                 case MapNodeType.Elite:
-                    return "节点详情\n类型：精英战斗\n耗时：一月\n收益：成长更多，掉落也更好。";
+                    return "精英战斗，成长更多，掉落也更好。";
                 case MapNodeType.Rest:
-                    return "节点详情\n类型：休整节点\n耗时：一月\n收益：稳定推进，缓和本轮节奏。";
+                    return "休整节点，适合稳定推进，缓和本轮节奏。";
                 case MapNodeType.Boss:
-                    return "节点详情\n类型：首领战斗\n耗时：一月\n收益：若能取胜，本轮路线直接完成。";
+                    return "首领战斗，若能取胜，本轮路线直接完成。";
                 case MapNodeType.Battle:
                 default:
-                    return "节点详情\n类型：普通战斗\n耗时：一月\n收益：可刷经验与装备，再决定是否推进。";
+                    return "普通战斗，可获得修为、灵石与装备掉落。";
             }
         }
 
@@ -468,8 +554,8 @@ namespace Wuxing.Game
             {
                 var nextStage = Mathf.Max(1, GetCurrentStage() + 1);
                 return english
-                    ? "Next: farm this stage again or challenge Stage " + nextStage + "."
-                    : "下一步：可以继续刷当前关，或挑战第 " + nextStage + " 关。";
+                    ? "Next: return to the map, repeat this stage, or move on toward Stage " + nextStage + "."
+                    : "下一步：返回地图后，可继续挑战本关，或前往第 " + nextStage + " 关。";
             }
 
             var retryStage = Mathf.Max(1, GetCurrentStage());
@@ -551,6 +637,7 @@ namespace Wuxing.Game
             var builder = new System.Text.StringBuilder();
             var currentStage = Mathf.Max(1, GetCurrentStage());
             var maxStage = GetMaxStage();
+            var maxReachable = GetMaxReachableStage();
 
             for (var stage = 1; stage <= maxStage; stage++)
             {
@@ -559,9 +646,24 @@ namespace Wuxing.Game
                     builder.Append('\n');
                 }
 
-                var state = stage < currentStage ? (english ? "[Done]" : "[已过]")
-                    : stage == currentStage ? (english ? "[Now]" : "[当前]")
-                    : (english ? "[Next]" : "[未至]");
+                string state;
+                if (stage < currentStage)
+                {
+                    state = english ? "[Done]" : "[已过]";
+                }
+                else if (stage == currentStage)
+                {
+                    state = english ? "[Now]" : "[当前]";
+                }
+                else if (stage <= maxReachable)
+                {
+                    state = english ? "[Open]" : "[可达]";
+                }
+                else
+                {
+                    state = english ? "[Locked]" : "[未开]";
+                }
+
                 builder.Append(state)
                     .Append(' ')
                     .Append(stage)
@@ -574,6 +676,11 @@ namespace Wuxing.Game
 
         public static string GetNodeTypeLabel(bool english, int stage)
         {
+            if (stage == 1)
+            {
+                return english ? "Village" : "新手村";
+            }
+
             switch (GetNodeType(stage))
             {
                 case MapNodeType.Elite:
