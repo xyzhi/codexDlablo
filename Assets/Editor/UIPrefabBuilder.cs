@@ -740,12 +740,13 @@ public static class UIPrefabBuilder
 
     private static bool AreAllGeneratedPrefabsPresent()
     {
-        return File.Exists(RootFolder + "/CanvasRoot.prefab")
-            && File.Exists(PagesFolder + "/MainMenuPage.prefab")
-            && File.Exists(PagesFolder + "/MapPage.prefab")
-            && File.Exists(PagesFolder + "/BattlePage.prefab")
-            && File.Exists(PopupsFolder + "/ConfirmPopup.prefab")
-            && File.Exists(PopupsFolder + "/ToastPopup.prefab");
+        return File.Exists(GetProjectAbsolutePath(RootFolder + "/CanvasRoot.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PagesFolder + "/StartPage.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MainMenuPage.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MapPage.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PagesFolder + "/BattlePage.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ConfirmPopup.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ToastPopup.prefab"));
     }
 
     private static string ComputeBuildInputHash()
@@ -754,7 +755,7 @@ public static class UIPrefabBuilder
         foreach (var path in GetTrackedInputFiles())
         {
             builder.Append(path).Append('\n');
-            builder.Append(File.ReadAllText(path)).Append('\n');
+            builder.Append(File.ReadAllText(GetProjectAbsolutePath(path))).Append('\n');
         }
 
         using (var sha = SHA256.Create())
@@ -778,31 +779,53 @@ public static class UIPrefabBuilder
 
     private static void AddTrackedCsFiles(List<string> files, string folder)
     {
-        if (!Directory.Exists(folder))
+        var absoluteFolder = GetProjectAbsolutePath(folder);
+        if (!Directory.Exists(absoluteFolder))
         {
             return;
         }
 
-        var folderFiles = Directory.GetFiles(folder, "*.cs", SearchOption.AllDirectories);
+        var folderFiles = Directory.GetFiles(absoluteFolder, "*.cs", SearchOption.AllDirectories);
         for (var i = 0; i < folderFiles.Length; i++)
         {
-            files.Add(folderFiles[i].Replace("\\", "/"));
+            files.Add(ToProjectRelativePath(folderFiles[i]));
         }
     }
 
     private static string ReadLastBuildHash()
     {
-        return File.Exists(BuildStatePath) ? File.ReadAllText(BuildStatePath).Trim() : string.Empty;
+        var path = GetProjectAbsolutePath(BuildStatePath);
+        return File.Exists(path) ? File.ReadAllText(path).Trim() : string.Empty;
     }
 
     private static void WriteLastBuildHash(string hash)
     {
-        if (!Directory.Exists(BuildStateFolder))
+        var folder = GetProjectAbsolutePath(BuildStateFolder);
+        if (!Directory.Exists(folder))
         {
-            Directory.CreateDirectory(BuildStateFolder);
+            Directory.CreateDirectory(folder);
         }
 
-        File.WriteAllText(BuildStatePath, hash ?? string.Empty);
+        File.WriteAllText(GetProjectAbsolutePath(BuildStatePath), hash ?? string.Empty);
+    }
+
+    private static string GetProjectAbsolutePath(string relativePath)
+    {
+        var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        var normalized = relativePath.Replace("\\", "/");
+        return Path.GetFullPath(Path.Combine(projectRoot, normalized));
+    }
+
+    private static string ToProjectRelativePath(string absolutePath)
+    {
+        var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, "..")).Replace("\\", "/");
+        var normalized = Path.GetFullPath(absolutePath).Replace("\\", "/");
+        if (normalized.StartsWith(projectRoot + "/", System.StringComparison.OrdinalIgnoreCase))
+        {
+            return normalized.Substring(projectRoot.Length + 1);
+        }
+
+        return normalized;
     }
 
     private static void EnsureFolder(string path)

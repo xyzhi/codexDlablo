@@ -7,11 +7,5 @@ public static class UIEditorShortcuts
     {
         UIPrefabBuilder.BuildPrefabs();
     }
-
-    [MenuItem("工具/强制重建UI预设", priority = 2001)]
-    public static void ForceBuildUiPrefabsShortcut()
-    {
-        UIPrefabBuilder.BuildPrefabs(true);
-    }
 }
 
