@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -138,7 +139,6 @@ namespace Wuxing.UI
         {
             if (isMoving) return;
 
-            var isEnglish = IsEnglish();
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
@@ -146,12 +146,12 @@ namespace Wuxing.UI
             }
 
             popup.Setup(
-                isEnglish ? "Run Skills" : "已学功法",
-                GameProgressManager.BuildLearnedSkillsOverview(isEnglish),
+                LocalizationManager.GetText("map.skill_overview_title"),
+                GameProgressManager.BuildLearnedSkillsOverview(IsEnglish()),
                 false,
                 null,
                 null,
-                isEnglish ? "Close" : "关闭",
+                LocalizationManager.GetText("common.button_close"),
                 null);
         }
 
@@ -179,7 +179,6 @@ namespace Wuxing.UI
             isMoving = false;
             moveCoroutine = null;
 
-            var isEnglish = IsEnglish();
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
@@ -189,10 +188,8 @@ namespace Wuxing.UI
             }
 
             popup.Setup(
-                isEnglish ? "Lifespan Ended" : "寿元已尽",
-                isEnglish
-                    ? "Your lifespan has run out during this journey. The current run will end and return to the main menu."
-                    : "你在本轮途中寿元耗尽。当前局将结束，并返回主界面。",
+                LocalizationManager.GetText("map.lifespan_title"),
+                LocalizationManager.GetText("map.lifespan_message"),
                 false,
                 delegate
                 {
@@ -200,7 +197,7 @@ namespace Wuxing.UI
                     UIManager.Instance.ShowPage("MainMenu");
                 },
                 null,
-                isEnglish ? "Back To Main Menu" : "返回主界面",
+                LocalizationManager.GetText("map.button_back_main"),
                 null);
         }
 
@@ -273,11 +270,7 @@ namespace Wuxing.UI
             var nodeType = GameProgressManager.GetNodeType(stage);
             if (stage == 1)
             {
-                GameProgressManager.MarkCurrentStageCleared();
-                RefreshView();
-                UIManager.Instance.ShowToast(IsEnglish()
-                    ? "Novice Village is reserved for future features."
-                    : "新手村当前作为占位区域，后续会加入更多功能。", MapToastDuration);
+                ShowVillageEventChoices(stage);
                 return;
             }
 
@@ -289,17 +282,287 @@ namespace Wuxing.UI
 
             if (nodeType == MapNodeType.Rest)
             {
-                GameProgressManager.MarkCurrentStageCleared();
-                RefreshView();
-                UIManager.Instance.ShowToast(IsEnglish()
-                    ? "You stop to regulate your breath. One month passes quietly."
-                    : "你在此调息静修，一月悄然而过。", MapToastDuration);
+                ShowRestEventChoices(stage);
                 return;
             }
 
-            UIManager.Instance.ShowToast(IsEnglish()
-                ? "The destination event has been triggered."
-                : "目的地事件已触发。", MapToastDuration);
+            UIManager.Instance.ShowToast(LocalizationManager.GetText("map.toast_event_triggered"), MapToastDuration);
+        }
+
+        private void ShowNodeRewardPopup(string title, string message)
+        {
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                UIManager.Instance.ShowToast(message, MapToastDuration);
+                return;
+            }
+
+            popup.Setup(
+                title,
+                message,
+                false,
+                null,
+                null,
+                LocalizationManager.GetText("map.button_continue"),
+                null);
+        }
+
+        private void ShowRestEventChoices(int stage)
+        {
+            var isEnglish = IsEnglish();
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                ResolveRestChoice(stage, 0);
+                return;
+            }
+
+            var element = GameProgressManager.GetSpiritStoneElementForStage(stage);
+            var forgeCost = 10 + stage * 2;
+            var thirdChoiceLabel = stage >= 4
+                ? string.Format(
+                    LocalizationManager.GetText("map.rest_choice_refine"),
+                    GameProgressManager.GetSpiritStoneName(element, isEnglish),
+                    forgeCost,
+                    24 + stage * 5)
+                : string.Format(
+                    LocalizationManager.GetText("map.rest_choice_sort"),
+                    9 + stage * 3,
+                    GameProgressManager.GetSpiritStoneName(element, isEnglish),
+                    8 + stage * 3);
+            var choiceLabels = new List<string>
+            {
+                string.Format(LocalizationManager.GetText("map.rest_choice_breath"), 14 + stage * 4),
+                string.Format(
+                    LocalizationManager.GetText("map.rest_choice_gather"),
+                    4 + stage * 2,
+                    GameProgressManager.GetSpiritStoneName(element, isEnglish),
+                    14 + stage * 4),
+                thirdChoiceLabel
+            };
+
+            var choiceActions = new List<Action>
+            {
+                delegate { ResolveRestChoice(stage, 0); },
+                delegate { ResolveRestChoice(stage, 1); },
+                delegate { ResolveRestChoice(stage, 2); }
+            };
+
+            popup.SetupChoices(
+                LocalizationManager.GetText("map.rest_title"),
+                LocalizationManager.GetText("map.rest_message"),
+                choiceLabels,
+                choiceActions);
+        }
+
+        private void ShowVillageEventChoices(int stage)
+        {
+            var isEnglish = IsEnglish();
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                ResolveVillageChoice(stage, 0);
+                return;
+            }
+
+            var element = GameProgressManager.GetSpiritStoneElementForStage(stage);
+            var choiceLabels = new List<string>
+            {
+                string.Format(LocalizationManager.GetText("map.village_choice_elder"), 18),
+                string.Format(LocalizationManager.GetText("map.village_choice_supply"), 6, GameProgressManager.GetSpiritStoneName(element, isEnglish), 18),
+                LocalizationManager.GetText("map.village_choice_scripture")
+            };
+
+            var choiceActions = new List<Action>
+            {
+                delegate { ResolveVillageChoice(stage, 0); },
+                delegate { ResolveVillageChoice(stage, 1); },
+                delegate { ResolveVillageChoice(stage, 2); }
+            };
+
+            popup.SetupChoices(
+                LocalizationManager.GetText("map.village_title"),
+                LocalizationManager.GetText("map.village_message"),
+                choiceLabels,
+                choiceActions);
+        }
+
+        private void ResolveRestChoice(int stage, int optionIndex)
+        {
+            var element = GameProgressManager.GetSpiritStoneElementForStage(stage);
+            BattleRewardResult reward;
+            string intro;
+
+            switch (optionIndex)
+            {
+                case 1:
+                    reward = GameProgressManager.GrantProgressReward(4 + stage * 2, element, 14 + stage * 4);
+                    intro = LocalizationManager.GetText("map.rest_result_gather");
+                    break;
+                case 2:
+                    if (stage >= 4)
+                    {
+                        var cost = 10 + stage * 2;
+                        if (!GameProgressManager.TrySpendSpiritStones(element, cost))
+                        {
+                            ShowNodeRewardPopup(
+                                LocalizationManager.GetText("map.not_enough_stones_title"),
+                                LocalizationManager.GetText("map.not_enough_stones_message"));
+                            return;
+                        }
+
+                        reward = GameProgressManager.GrantProgressReward(24 + stage * 5, element, 0);
+                        intro = LocalizationManager.GetText("map.rest_result_refine");
+                        break;
+                    }
+
+                    reward = GameProgressManager.GrantProgressReward(9 + stage * 3, element, 8 + stage * 3);
+                    intro = LocalizationManager.GetText("map.rest_result_sort");
+                    break;
+                default:
+                    reward = GameProgressManager.GrantProgressReward(14 + stage * 4, element, 0);
+                    intro = LocalizationManager.GetText("map.rest_result_breath");
+                    break;
+            }
+
+            GameProgressManager.MarkCurrentStageCleared();
+            RefreshView();
+            ShowNodeRewardPopup(
+                LocalizationManager.GetText("map.rest_result_title"),
+                BuildNodeRewardMessage(intro, reward, IsEnglish()));
+        }
+
+        private void ResolveVillageChoice(int stage, int optionIndex)
+        {
+            var element = GameProgressManager.GetSpiritStoneElementForStage(stage);
+
+            if (optionIndex == 2)
+            {
+                GameProgressManager.PrepareSkillRewardOptions();
+                ShowVillageSkillRewardChoices(stage);
+                return;
+            }
+
+            var reward = optionIndex == 1
+                ? GameProgressManager.GrantProgressReward(6, element, 18)
+                : GameProgressManager.GrantProgressReward(18, element, 0);
+            var intro = optionIndex == 1
+                ? LocalizationManager.GetText("map.village_result_supply")
+                : LocalizationManager.GetText("map.village_result_elder");
+
+            GameProgressManager.MarkCurrentStageCleared();
+            RefreshView();
+            ShowNodeRewardPopup(
+                LocalizationManager.GetText("map.village_result_title"),
+                BuildNodeRewardMessage(intro, reward, IsEnglish()));
+        }
+
+        private void ShowVillageSkillRewardChoices(int stage)
+        {
+            var isEnglish = IsEnglish();
+            var options = GameProgressManager.GetPendingSkillRewardOptions();
+            if (options.Count == 0)
+            {
+                ResolveVillageChoice(stage, 0);
+                return;
+            }
+
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                var applied = GameProgressManager.ApplyPendingSkillReward(0);
+                FinalizeVillageSkillReward(applied, isEnglish);
+                return;
+            }
+
+            var choiceLabels = new List<string>();
+            var choiceActions = new List<Action>();
+            for (var i = 0; i < options.Count; i++)
+            {
+                var capturedIndex = i;
+                choiceLabels.Add(BuildMapSkillRewardChoiceLabel(options[i], isEnglish));
+                choiceActions.Add(delegate
+                {
+                    var applied = GameProgressManager.ApplyPendingSkillReward(capturedIndex);
+                    FinalizeVillageSkillReward(applied, isEnglish);
+                });
+            }
+
+            popup.SetupChoices(
+                LocalizationManager.GetText("map.scripture_title"),
+                LocalizationManager.GetText("map.scripture_message"),
+                choiceLabels,
+                choiceActions);
+        }
+
+        private void FinalizeVillageSkillReward(SkillRewardOption option, bool isEnglish)
+        {
+            GameProgressManager.MarkCurrentStageCleared();
+            RefreshView();
+            ShowNodeRewardPopup(
+                LocalizationManager.GetText("map.village_result_title"),
+                option == null
+                    ? LocalizationManager.GetText("map.scripture_empty")
+                    : LocalizationManager.GetText("map.scripture_intro") + "\n\n" + BuildMapSkillRewardToast(option, isEnglish));
+        }
+
+        private static string BuildMapSkillRewardChoiceLabel(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null)
+            {
+                return LocalizationManager.GetText("map.reward_choice_empty");
+            }
+
+            return string.Format(
+                LocalizationManager.GetText("map.reward_choice_label"),
+                option.SkillName,
+                option.CharacterName,
+                option.ResultLevel,
+                LocalizationManager.GetText(option.IsUpgrade ? "map.reward_result_upgrade" : "map.reward_result_learn"),
+                option.SkillElement);
+        }
+
+        private static string BuildMapSkillRewardToast(SkillRewardOption option, bool isEnglish)
+        {
+            if (option == null)
+            {
+                return string.Empty;
+            }
+
+            return string.Format(
+                LocalizationManager.GetText(option.IsUpgrade ? "map.reward_toast_upgrade" : "map.reward_toast_learn"),
+                option.CharacterName,
+                option.SkillName,
+                option.ResultLevel);
+        }
+
+        private string BuildNodeRewardMessage(string intro, BattleRewardResult reward, bool isEnglish)
+        {
+            if (reward == null)
+            {
+                return intro;
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(intro)
+                .Append('\n')
+                .Append('\n')
+                .Append(LocalizationManager.GetText("map.reward_title"))
+                .Append('\n')
+                .Append(LocalizationManager.GetText("map.reward_exp"))
+                .Append(reward.ExpGained)
+                .Append(" / ")
+                .Append(GameProgressManager.BuildSpiritStoneGainText(reward, isEnglish, false));
+
+            if (reward.LevelsGained > 0)
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("map.reward_levelup"))
+                    .Append(reward.LevelsGained);
+            }
+
+            return builder.ToString();
         }
 
         private void RefreshView()
@@ -316,14 +579,15 @@ namespace Wuxing.UI
 
             if (statusText != null)
             {
-                statusText.text = isEnglish
-                    ? "Current Position: Stage " + currentStage + " 路 " + GameProgressManager.GetNodeTypeLabel(true, currentStage)
-                    : "当前位置：第 " + currentStage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, currentStage);
+                statusText.text = string.Format(
+                    LocalizationManager.GetText("map.status_current_position"),
+                    currentStage,
+                    GameProgressManager.GetNodeTypeLabel(isEnglish, currentStage));
             }
 
             if (regionText != null)
             {
-                regionText.text = (isEnglish ? "Region: " : "区域：") + GameProgressManager.GetStageTheme(isEnglish, currentStage);
+                regionText.text = LocalizationManager.GetText("map.region_prefix") + GameProgressManager.GetStageTheme(isEnglish, currentStage);
             }
 
             if (longevityText != null)
@@ -338,6 +602,7 @@ namespace Wuxing.UI
 
             if (routeText != null)
             {
+                routeText.supportRichText = true;
                 routeText.text = BuildProfileText(isEnglish, currentStage, maxReachableStage);
             }
 
@@ -351,12 +616,12 @@ namespace Wuxing.UI
             var canMoveNext = !isMoving && GameProgressManager.CanTravelToStage(currentStage + 1);
             var canEnterSelected = !isMoving && GameProgressManager.CanTravelToStage(selectedStage);
 
-            SetButtonText(previousButton, isEnglish ? "Previous" : "后退");
-            SetButtonText(nextButton, isEnglish ? "Next" : "前进");
-            SetButtonText(enterButton, isEnglish ? "Enter Node" : "进入节点");
-            SetButtonText(equipmentButton, isEnglish ? "Equipment" : "查看装备");
-            SetButtonText(skillOverviewButton, isEnglish ? "Run Skills" : "已学功法");
-            SetButtonText(resetButton, isEnglish ? "Reset Run" : "重置本轮");
+            SetButtonText(previousButton, LocalizationManager.GetText("map.button_previous"));
+            SetButtonText(nextButton, LocalizationManager.GetText("map.button_next"));
+            SetButtonText(enterButton, LocalizationManager.GetText("map.button_enter"));
+            SetButtonText(equipmentButton, LocalizationManager.GetText("battle.button_equipment"));
+            SetButtonText(skillOverviewButton, LocalizationManager.GetText("map.button_skill_overview"));
+            SetButtonText(resetButton, LocalizationManager.GetText("map.button_reset_run"));
             SetButtonText(backButton, LocalizationManager.GetText("map.button_back_menu"));
 
             if (previousButton != null) previousButton.interactable = canMovePrevious;
@@ -498,19 +763,16 @@ namespace Wuxing.UI
             var monthCost = Mathf.Max(1, Mathf.Abs(selectedStage - currentStage));
 
             var builder = new StringBuilder();
-            builder.Append(isEnglish ? "Selected Node" : "选中节点")
+            builder.Append(LocalizationManager.GetText("map.detail_title"))
                 .Append('\n')
-                .Append(isEnglish ? "Stage " : "第 ")
-                .Append(selectedStage)
-                .Append(isEnglish ? " · " : " 关 · ")
-                .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage))
+                .Append(string.Format(LocalizationManager.GetText("map.detail_stage"), selectedStage, GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage)))
                 .Append('\n')
-                .Append(isEnglish ? "Reachable: " : "是否可达：")
-                .Append(canReach ? (isEnglish ? "Yes" : "可达") : (isEnglish ? "Locked" : "未解锁"))
+                .Append(LocalizationManager.GetText("map.detail_reachable"))
+                .Append(LocalizationManager.GetText(canReach ? "map.detail_reachable_yes" : "map.detail_reachable_locked"))
                 .Append('\n')
-                .Append(isEnglish ? "Time Cost: " : "耗时：")
+                .Append(LocalizationManager.GetText("map.detail_time_cost"))
                 .Append(monthCost)
-                .Append(isEnglish ? " month(s)" : " 月")
+                .Append(LocalizationManager.GetText("map.detail_month_suffix"))
                 .Append('\n')
                 .Append('\n')
                 .Append(GameProgressManager.BuildNodeDetail(isEnglish, selectedStage));
@@ -524,10 +786,8 @@ namespace Wuxing.UI
 
             builder.Append('\n')
                 .Append('\n')
-                .Append(isEnglish ? "Arrival Effect: " : "到达效果：")
-                .Append(selectedNodeType == MapNodeType.Rest
-                    ? (isEnglish ? "Trigger rest immediately and stay on the map." : "立刻触发休整事件，并停留在地图上。")
-                    : (isEnglish ? "Start battle automatically after movement ends." : "移动结束后自动进入战斗。"));
+                .Append(LocalizationManager.GetText("map.detail_arrival_effect"))
+                .Append(LocalizationManager.GetText(selectedNodeType == MapNodeType.Rest ? "map.detail_arrival_rest" : "map.detail_arrival_battle"));
 
             return builder.ToString();
         }
@@ -535,29 +795,28 @@ namespace Wuxing.UI
         private string BuildProfileText(bool isEnglish, int currentStage, int maxReachableStage)
         {
             var builder = new StringBuilder();
-            builder.Append(isEnglish ? "Profile" : "个人信息")
+            builder.Append(LocalizationManager.GetText("map.profile_title"))
                 .Append('\n')
-                .Append(isEnglish ? "Current Stage: " : "当前关卡：")
+                .Append(LocalizationManager.GetText("map.profile_current_stage"))
                 .Append(currentStage)
                 .Append('\n')
-                .Append(isEnglish ? "Highest Cleared: " : "最高通关：")
+                .Append(LocalizationManager.GetText("map.profile_highest_cleared"))
                 .Append(GameProgressManager.GetHighestClearedStage())
                 .Append('\n')
-                .Append(isEnglish ? "Reachable Frontier: " : "可达前沿：第 ")
+                .Append(LocalizationManager.GetText("map.profile_reachable_frontier"))
                 .Append(maxReachableStage)
-                .Append(isEnglish ? string.Empty : " 关")
                 .Append('\n')
-                .Append(isEnglish ? "Cultivation Lv." : "修为等级 ")
+                .Append(LocalizationManager.GetText("map.profile_cultivation_level"))
                 .Append(GameProgressManager.GetCultivationLevel())
                 .Append('\n')
-                .Append(isEnglish ? "Exp: " : "经验：")
+                .Append(LocalizationManager.GetText("map.profile_exp"))
                 .Append(GameProgressManager.GetCultivationExp())
                 .Append('/')
                 .Append(GameProgressManager.GetRequiredExpForNextLevel())
                 .Append('\n')
                 .Append(GameProgressManager.BuildSpiritStoneSummary(isEnglish, true))
                 .Append('\n')
-                .Append(isEnglish ? "Owned Equipment: " : "已拥有装备：")
+                .Append(LocalizationManager.GetText("map.profile_owned_equipment"))
                 .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
                 .Append('\n')
                 .Append('\n')
@@ -567,17 +826,18 @@ namespace Wuxing.UI
 
         private string BuildArrivalToast(int stage)
         {
-            var isEnglish = IsEnglish();
-            return isEnglish
-                ? "Arrived at Stage " + stage + " 路 " + GameProgressManager.GetNodeTypeLabel(true, stage)
-                : "已抵达第 " + stage + " 关 · " + GameProgressManager.GetNodeTypeLabel(false, stage);
+            return string.Format(
+                LocalizationManager.GetText("map.arrival_toast"),
+                stage,
+                GameProgressManager.GetNodeTypeLabel(IsEnglish(), stage));
         }
 
         private string BuildNodeLabel(int stage)
         {
-            var isEnglish = IsEnglish();
-            return (isEnglish ? "Stage " : "第 ") + stage + (isEnglish ? string.Empty : "关") + "\n"
-                + GameProgressManager.GetNodeTypeLabel(isEnglish, stage);
+            return string.Format(
+                LocalizationManager.GetText("map.node_label"),
+                stage,
+                GameProgressManager.GetNodeTypeLabel(IsEnglish(), stage));
         }
 
         private Color GetNodeColor(int stage, int currentStage)
@@ -603,4 +863,6 @@ namespace Wuxing.UI
         }
     }
 }
+
+
 

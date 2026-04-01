@@ -109,7 +109,7 @@ battle.prep_threat,威胁：,Threat:
 battle.prep_preview,预估：,Preview: 
 battle.prep_likely_victory,较大概率胜利,Likely Victory
 battle.prep_likely_defeat,较大概率失败,Likely Defeat
-battle.prep_rounds_prefix,"，约 ", in 
+battle.prep_rounds_prefix,，约 , in 
 battle.prep_rounds_suffix, 回合。, rounds.
 battle.prep_tip,建议：如果预估不理想，先调整装备再开战。,Tip: Adjust equipment before battle if the preview looks risky.
 battle.threat_low,低,Low
@@ -121,3 +121,103 @@ battle.threat_high,高,High
 
 
 
+common.button_close,关闭,Close
+map.toast_event_triggered,目的地事件已触发。,The destination event has been triggered.
+map.button_continue,继续,Continue
+map.rest_choice_refine,"炼化灵石
+消耗：{0} -{1}
+经验 +{2}","Refine Through Stones
+Cost: {0} -{1}
+Exp +{2}"
+map.rest_choice_sort,"整理行囊
+经验 +{0}
+{1} +{2}","Sort Equipment
+Exp +{0}
+{1} +{2}"
+map.rest_choice_breath,"调息养元
+经验 +{0}
+灵石 +0","Breathing Practice
+Exp +{0}
+Spirit Stones +0"
+map.rest_choice_gather,"采集灵石
+经验 +{0}
+{1} +{2}","Gather Qi Crystals
+Exp +{0}
+{1} +{2}"
+map.rest_title,休整事件,Rest Event
+map.rest_message,选择你在此地如何调整状态。,Choose how to spend this stop.
+map.village_choice_elder,"长者指点
+经验 +{0}
+灵石 +0","Elder's Guidance
+Exp +{0}
+Spirit Stones +0"
+map.village_choice_supply,"行商补给
+经验 +{0}
+{1} +{2}","Merchant Supply
+Exp +{0}
+{1} +{2}"
+map.village_choice_scripture,"借阅藏经
+获得 1 次功法机缘","Borrow Scripture
+Gain 1 skill reward choice"
+map.village_title,新手村,Novice Village
+map.village_message,离开新手村前，选择一份启程助力。,"Before leaving the village, choose one piece of support."
+map.rest_result_gather,你在附近采集五行灵石，囊中收获更丰。,You gather the local five-element crystals and leave with fuller pockets.
+map.not_enough_stones_title,灵石不足,Not Enough Spirit Stones
+map.not_enough_stones_message,你手中的对应灵石不足，暂时无法进行这次炼化。,You do not have enough matching spirit stones to refine this stop.
+map.rest_result_refine,你将储备灵石当场炼化，强行换来一段更猛的修为推进。,You refine stored spirit stones into pure progress and push your cultivation further.
+map.rest_result_sort,你整理装备与气机，为下一段路做足准备。,You sort equipment and steady your rhythm before moving on.
+map.rest_result_breath,你专心调息运转周天，修为更进一步。,You focus on breathing practice and deepen your cultivation.
+map.rest_result_title,休整结果,Rest Result
+map.village_result_supply,路过行商给你留下一份赶路所需的修行补给。,A passing merchant leaves you a small bundle of cultivation supplies.
+map.village_result_elder,临行前，村中长者给了你几句修行指点。,The village elder gives you a few words of guidance before you set out.
+map.village_result_title,村中收获,Village Result
+map.scripture_title,借阅藏经,Borrow Scripture
+map.scripture_message,选择一项开局功法机缘。,Choose one starter skill reward.
+map.scripture_empty,你整理思绪后，轻装上路。,You leave the village with a clearer mind.
+map.scripture_intro,你从村中藏经阁借得一页功法残卷。,You borrow a manual from the village archive.
+map.reward_choice_empty,空白奖励,Empty
+map.reward_choice_label,"功法机缘
+{0}
+角色：{1}
+结果：Lv.{2} {3}
+五行：{4}","Reward
+{0}
+Target: {1}
+Result: Lv.{2} {3}
+Element: {4}"
+map.reward_result_upgrade,升级,Upgrade
+map.reward_result_learn,习得,Learn
+map.reward_toast_upgrade,{0} 将 {1} 提升至 Lv.{2}。,{0} upgraded {1} to Lv.{2}.
+map.reward_toast_learn,{0} 习得 {1}，当前 Lv.{2}。,{0} learned {1} at Lv.{2}.
+map.reward_title,获得,Reward
+map.reward_exp,经验 +,Exp +
+map.reward_levelup,修为提升 +,Cultivation Lv. +
+map.skill_overview_title,已学功法,Run Skills
+map.lifespan_title,寿元已尽,Lifespan Ended
+map.lifespan_message,你在本轮途中寿元耗尽。当前局将结束，并返回主界面。,Your lifespan has run out during this journey. The current run will end and return to the main menu.
+map.button_back_main,返回主界面,Back To Main Menu
+map.detail_title,选中节点,Selected Node
+map.detail_stage,第 {0} 关 · {1},Stage {0} · {1}
+map.detail_reachable,是否可达：,Reachable: 
+map.detail_reachable_yes,可达,Yes
+map.detail_reachable_locked,未解锁,Locked
+map.detail_time_cost,耗时：,Time Cost: 
+map.detail_month_suffix, 月, month(s)
+map.detail_arrival_effect,到达效果：,Arrival Effect: 
+map.detail_arrival_rest,立刻触发休整事件，并停留在地图上。,Trigger rest immediately and stay on the map.
+map.detail_arrival_battle,移动结束后自动进入战斗。,Start battle automatically after movement ends.
+map.profile_title,个人信息,Profile
+map.profile_current_stage,当前关卡：,Current Stage: 
+map.profile_highest_cleared,最高通关：,Highest Cleared: 
+map.profile_reachable_frontier,可达前沿：,Reachable Frontier: 
+map.profile_cultivation_level,修为等级 ,Cultivation Lv.
+map.profile_exp,经验：,Exp: 
+map.profile_owned_equipment,已拥有装备：,Owned Equipment: 
+map.arrival_toast,已抵达第 {0} 关 · {1},Arrived at Stage {0} · {1}
+map.node_label,"第{0}关
+{1}","Stage {0}
+{1}"
+map.status_current_position,当前位置：第 {0} 关 · {1},Current Position: Stage {0} · {1}
+map.button_previous,后退,Previous
+map.button_next,前进,Next
+map.button_skill_overview,已学功法,Run Skills

@@ -1001,7 +1001,7 @@ namespace Wuxing.UI
             {
                 builder.Append("Rewards\n")
                     .Append("Exp +").Append(reward.ExpGained)
-                    .Append(" / ").Append(GameProgressManager.BuildSpiritStoneGainText(reward, true, true));
+                    .Append(" / ").Append(GameProgressManager.BuildSpiritStoneGainText(reward, true, false));
 
                 if (reward.LevelsGained > 0)
                 {
@@ -1018,7 +1018,7 @@ namespace Wuxing.UI
 
             builder.Append("战利品\n")
                 .Append("经验 +").Append(reward.ExpGained)
-                .Append(" / ").Append(GameProgressManager.BuildSpiritStoneGainText(reward, false, true));
+                .Append(" / ").Append(GameProgressManager.BuildSpiritStoneGainText(reward, false, false));
 
             if (reward.LevelsGained > 0)
             {
@@ -1604,6 +1604,7 @@ namespace Wuxing.UI
         }
     }
 }
+
 
 
 

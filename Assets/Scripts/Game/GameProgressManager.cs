@@ -226,6 +226,75 @@ namespace Wuxing.Game
             return reward;
         }
 
+        public static BattleRewardResult GrantNonBattleRewards(int stage, MapNodeType nodeType)
+        {
+            EnsureInstance();
+            var reward = new BattleRewardResult();
+            if (Instance == null)
+            {
+                return reward;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            switch (nodeType)
+            {
+                case MapNodeType.Rest:
+                    reward.ExpGained = resolvedStage == 1 ? 12 : 10 + resolvedStage * 4;
+                    reward.SpiritStonesGained = resolvedStage == 1 ? 10 : 6 + resolvedStage * 3;
+                    break;
+                default:
+                    reward.ExpGained = 6 + resolvedStage * 2;
+                    reward.SpiritStonesGained = 4 + resolvedStage * 2;
+                    break;
+            }
+
+            reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
+            reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
+
+            Instance.CultivationExp += reward.ExpGained;
+            Instance.AddSpiritStones(reward.SpiritStoneElement, reward.SpiritStonesGained);
+
+            while (Instance.CultivationExp >= Instance.GetRequiredExpInternal())
+            {
+                Instance.CultivationExp -= Instance.GetRequiredExpInternal();
+                Instance.CultivationLevel += 1;
+                reward.LevelsGained += 1;
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return reward;
+        }
+
+        public static BattleRewardResult GrantProgressReward(int expGained, string spiritStoneElement, int spiritStoneCount)
+        {
+            EnsureInstance();
+            var reward = new BattleRewardResult();
+            if (Instance == null)
+            {
+                return reward;
+            }
+
+            reward.ExpGained = Mathf.Max(0, expGained);
+            reward.SpiritStonesGained = Mathf.Max(0, spiritStoneCount);
+            reward.SpiritStoneElement = string.IsNullOrEmpty(spiritStoneElement) ? "Earth" : spiritStoneElement;
+            reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
+
+            Instance.CultivationExp += reward.ExpGained;
+            Instance.AddSpiritStones(reward.SpiritStoneElement, reward.SpiritStonesGained);
+
+            while (Instance.CultivationExp >= Instance.GetRequiredExpInternal())
+            {
+                Instance.CultivationExp -= Instance.GetRequiredExpInternal();
+                Instance.CultivationLevel += 1;
+                reward.LevelsGained += 1;
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return reward;
+        }
+
         public static int GetCultivationLevel()
         {
             EnsureInstance();
@@ -248,6 +317,51 @@ namespace Wuxing.Game
         {
             EnsureInstance();
             return Instance != null ? Instance.GetSpiritStoneCountInternal(element) : 0;
+        }
+
+        public static bool TrySpendSpiritStones(string element, int amount)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return false;
+            }
+
+            var cost = Mathf.Max(0, amount);
+            if (cost <= 0)
+            {
+                return true;
+            }
+
+            var normalized = NormalizeSpiritStoneElement(element);
+            if (Instance.GetSpiritStoneCountInternal(normalized) < cost)
+            {
+                return false;
+            }
+
+            switch (normalized)
+            {
+                case "metal":
+                    Instance.MetalSpiritStones -= cost;
+                    break;
+                case "wood":
+                    Instance.WoodSpiritStones -= cost;
+                    break;
+                case "water":
+                    Instance.WaterSpiritStones -= cost;
+                    break;
+                case "fire":
+                    Instance.FireSpiritStones -= cost;
+                    break;
+                default:
+                    Instance.EarthSpiritStones -= cost;
+                    break;
+            }
+
+            Instance.SyncSpiritStoneTotal();
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return true;
         }
 
         public static string BuildSpiritStoneSummary(bool english, bool richText = false)
@@ -285,6 +399,11 @@ namespace Wuxing.Game
         {
             EnsureInstance();
             return Instance != null ? Instance.GetRequiredExpInternal() : 60;
+        }
+
+        public static string GetSpiritStoneElementForStage(int stage)
+        {
+            return GetSpiritStoneElementByStage(stage);
         }
 
         public static bool OwnsEquipment(string equipmentId)

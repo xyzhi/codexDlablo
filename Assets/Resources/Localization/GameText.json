@@ -112,8 +112,8 @@
         },
         {
             "key": "battle.player_content",
-            "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150",
-            "en": "Unit A  HP 120/120\nUnit B  HP 150/150"
+            "zhHans": "角色甲  HP 120/120\r\n角色乙  HP 150/150",
+            "en": "Unit A  HP 120/120\r\nUnit B  HP 150/150"
         },
         {
             "key": "battle.enemy_team",
@@ -122,8 +122,8 @@
         },
         {
             "key": "battle.enemy_content",
-            "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90",
-            "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90"
+            "zhHans": "敌人甲  HP 100/100\r\n敌人乙  HP 90/90",
+            "en": "Enemy A  HP 100/100\r\nEnemy B  HP 90/90"
         },
         {
             "key": "battle.equipment_title",
@@ -564,6 +564,326 @@
             "key": "battle.threat_high",
             "zhHans": "高",
             "en": "High"
+        },
+        {
+            "key": "common.button_close",
+            "zhHans": "关闭",
+            "en": "Close"
+        },
+        {
+            "key": "map.toast_event_triggered",
+            "zhHans": "目的地事件已触发。",
+            "en": "The destination event has been triggered."
+        },
+        {
+            "key": "map.button_continue",
+            "zhHans": "继续",
+            "en": "Continue"
+        },
+        {
+            "key": "map.rest_choice_refine",
+            "zhHans": "炼化灵石\n消耗：{0} -{1}\n经验 +{2}",
+            "en": "Refine Through Stones\nCost: {0} -{1}\nExp +{2}"
+        },
+        {
+            "key": "map.rest_choice_sort",
+            "zhHans": "整理行囊\n经验 +{0}\n{1} +{2}",
+            "en": "Sort Equipment\nExp +{0}\n{1} +{2}"
+        },
+        {
+            "key": "map.rest_choice_breath",
+            "zhHans": "调息养元\n经验 +{0}\n灵石 +0",
+            "en": "Breathing Practice\nExp +{0}\nSpirit Stones +0"
+        },
+        {
+            "key": "map.rest_choice_gather",
+            "zhHans": "采集灵石\n经验 +{0}\n{1} +{2}",
+            "en": "Gather Qi Crystals\nExp +{0}\n{1} +{2}"
+        },
+        {
+            "key": "map.rest_title",
+            "zhHans": "休整事件",
+            "en": "Rest Event"
+        },
+        {
+            "key": "map.rest_message",
+            "zhHans": "选择你在此地如何调整状态。",
+            "en": "Choose how to spend this stop."
+        },
+        {
+            "key": "map.village_choice_elder",
+            "zhHans": "长者指点\n经验 +{0}\n灵石 +0",
+            "en": "Elder's Guidance\nExp +{0}\nSpirit Stones +0"
+        },
+        {
+            "key": "map.village_choice_supply",
+            "zhHans": "行商补给\n经验 +{0}\n{1} +{2}",
+            "en": "Merchant Supply\nExp +{0}\n{1} +{2}"
+        },
+        {
+            "key": "map.village_choice_scripture",
+            "zhHans": "借阅藏经\n获得 1 次功法机缘",
+            "en": "Borrow Scripture\nGain 1 skill reward choice"
+        },
+        {
+            "key": "map.village_title",
+            "zhHans": "新手村",
+            "en": "Novice Village"
+        },
+        {
+            "key": "map.village_message",
+            "zhHans": "离开新手村前，选择一份启程助力。",
+            "en": "Before leaving the village, choose one piece of support."
+        },
+        {
+            "key": "map.rest_result_gather",
+            "zhHans": "你在附近采集五行灵石，囊中收获更丰。",
+            "en": "You gather the local five-element crystals and leave with fuller pockets."
+        },
+        {
+            "key": "map.not_enough_stones_title",
+            "zhHans": "灵石不足",
+            "en": "Not Enough Spirit Stones"
+        },
+        {
+            "key": "map.not_enough_stones_message",
+            "zhHans": "你手中的对应灵石不足，暂时无法进行这次炼化。",
+            "en": "You do not have enough matching spirit stones to refine this stop."
+        },
+        {
+            "key": "map.rest_result_refine",
+            "zhHans": "你将储备灵石当场炼化，强行换来一段更猛的修为推进。",
+            "en": "You refine stored spirit stones into pure progress and push your cultivation further."
+        },
+        {
+            "key": "map.rest_result_sort",
+            "zhHans": "你整理装备与气机，为下一段路做足准备。",
+            "en": "You sort equipment and steady your rhythm before moving on."
+        },
+        {
+            "key": "map.rest_result_breath",
+            "zhHans": "你专心调息运转周天，修为更进一步。",
+            "en": "You focus on breathing practice and deepen your cultivation."
+        },
+        {
+            "key": "map.rest_result_title",
+            "zhHans": "休整结果",
+            "en": "Rest Result"
+        },
+        {
+            "key": "map.village_result_supply",
+            "zhHans": "路过行商给你留下一份赶路所需的修行补给。",
+            "en": "A passing merchant leaves you a small bundle of cultivation supplies."
+        },
+        {
+            "key": "map.village_result_elder",
+            "zhHans": "临行前，村中长者给了你几句修行指点。",
+            "en": "The village elder gives you a few words of guidance before you set out."
+        },
+        {
+            "key": "map.village_result_title",
+            "zhHans": "村中收获",
+            "en": "Village Result"
+        },
+        {
+            "key": "map.scripture_title",
+            "zhHans": "借阅藏经",
+            "en": "Borrow Scripture"
+        },
+        {
+            "key": "map.scripture_message",
+            "zhHans": "选择一项开局功法机缘。",
+            "en": "Choose one starter skill reward."
+        },
+        {
+            "key": "map.scripture_empty",
+            "zhHans": "你整理思绪后，轻装上路。",
+            "en": "You leave the village with a clearer mind."
+        },
+        {
+            "key": "map.scripture_intro",
+            "zhHans": "你从村中藏经阁借得一页功法残卷。",
+            "en": "You borrow a manual from the village archive."
+        },
+        {
+            "key": "map.reward_choice_empty",
+            "zhHans": "空白奖励",
+            "en": "Empty"
+        },
+        {
+            "key": "map.reward_choice_label",
+            "zhHans": "功法机缘\n{0}\n角色：{1}\n结果：Lv.{2} {3}\n五行：{4}",
+            "en": "Reward\n{0}\nTarget: {1}\nResult: Lv.{2} {3}\nElement: {4}"
+        },
+        {
+            "key": "map.reward_result_upgrade",
+            "zhHans": "升级",
+            "en": "Upgrade"
+        },
+        {
+            "key": "map.reward_result_learn",
+            "zhHans": "习得",
+            "en": "Learn"
+        },
+        {
+            "key": "map.reward_toast_upgrade",
+            "zhHans": "{0} 将 {1} 提升至 Lv.{2}。",
+            "en": "{0} upgraded {1} to Lv.{2}."
+        },
+        {
+            "key": "map.reward_toast_learn",
+            "zhHans": "{0} 习得 {1}，当前 Lv.{2}。",
+            "en": "{0} learned {1} at Lv.{2}."
+        },
+        {
+            "key": "map.reward_title",
+            "zhHans": "获得",
+            "en": "Reward"
+        },
+        {
+            "key": "map.reward_exp",
+            "zhHans": "经验 +",
+            "en": "Exp +"
+        },
+        {
+            "key": "map.reward_levelup",
+            "zhHans": "修为提升 +",
+            "en": "Cultivation Lv. +"
+        },
+        {
+            "key": "map.skill_overview_title",
+            "zhHans": "已学功法",
+            "en": "Run Skills"
+        },
+        {
+            "key": "map.lifespan_title",
+            "zhHans": "寿元已尽",
+            "en": "Lifespan Ended"
+        },
+        {
+            "key": "map.lifespan_message",
+            "zhHans": "你在本轮途中寿元耗尽。当前局将结束，并返回主界面。",
+            "en": "Your lifespan has run out during this journey. The current run will end and return to the main menu."
+        },
+        {
+            "key": "map.button_back_main",
+            "zhHans": "返回主界面",
+            "en": "Back To Main Menu"
+        },
+        {
+            "key": "map.detail_title",
+            "zhHans": "选中节点",
+            "en": "Selected Node"
+        },
+        {
+            "key": "map.detail_stage",
+            "zhHans": "第 {0} 关 · {1}",
+            "en": "Stage {0} · {1}"
+        },
+        {
+            "key": "map.detail_reachable",
+            "zhHans": "是否可达：",
+            "en": "Reachable: "
+        },
+        {
+            "key": "map.detail_reachable_yes",
+            "zhHans": "可达",
+            "en": "Yes"
+        },
+        {
+            "key": "map.detail_reachable_locked",
+            "zhHans": "未解锁",
+            "en": "Locked"
+        },
+        {
+            "key": "map.detail_time_cost",
+            "zhHans": "耗时：",
+            "en": "Time Cost: "
+        },
+        {
+            "key": "map.detail_month_suffix",
+            "zhHans": " 月",
+            "en": " month(s)"
+        },
+        {
+            "key": "map.detail_arrival_effect",
+            "zhHans": "到达效果：",
+            "en": "Arrival Effect: "
+        },
+        {
+            "key": "map.detail_arrival_rest",
+            "zhHans": "立刻触发休整事件，并停留在地图上。",
+            "en": "Trigger rest immediately and stay on the map."
+        },
+        {
+            "key": "map.detail_arrival_battle",
+            "zhHans": "移动结束后自动进入战斗。",
+            "en": "Start battle automatically after movement ends."
+        },
+        {
+            "key": "map.profile_title",
+            "zhHans": "个人信息",
+            "en": "Profile"
+        },
+        {
+            "key": "map.profile_current_stage",
+            "zhHans": "当前关卡：",
+            "en": "Current Stage: "
+        },
+        {
+            "key": "map.profile_highest_cleared",
+            "zhHans": "最高通关：",
+            "en": "Highest Cleared: "
+        },
+        {
+            "key": "map.profile_reachable_frontier",
+            "zhHans": "可达前沿：",
+            "en": "Reachable Frontier: "
+        },
+        {
+            "key": "map.profile_cultivation_level",
+            "zhHans": "修为等级 ",
+            "en": "Cultivation Lv."
+        },
+        {
+            "key": "map.profile_exp",
+            "zhHans": "经验：",
+            "en": "Exp: "
+        },
+        {
+            "key": "map.profile_owned_equipment",
+            "zhHans": "已拥有装备：",
+            "en": "Owned Equipment: "
+        },
+        {
+            "key": "map.arrival_toast",
+            "zhHans": "已抵达第 {0} 关 · {1}",
+            "en": "Arrived at Stage {0} · {1}"
+        },
+        {
+            "key": "map.node_label",
+            "zhHans": "第{0}关\n{1}",
+            "en": "Stage {0}\n{1}"
+        },
+        {
+            "key": "map.status_current_position",
+            "zhHans": "当前位置：第 {0} 关 · {1}",
+            "en": "Current Position: Stage {0} · {1}"
+        },
+        {
+            "key": "map.button_previous",
+            "zhHans": "后退",
+            "en": "Previous"
+        },
+        {
+            "key": "map.button_next",
+            "zhHans": "前进",
+            "en": "Next"
+        },
+        {
+            "key": "map.button_skill_overview",
+            "zhHans": "已学功法",
+            "en": "Run Skills"
         }
     ]
 }
