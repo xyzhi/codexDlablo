@@ -38,6 +38,7 @@ public static class UIPrefabBuilder
         BuildMapPagePrefab();
         BuildBattlePagePrefab();
         BuildConfirmPopupPrefab();
+        BuildSpiritStoneConvertPopupPrefab();
         BuildToastPopupPrefab();
 
         WriteLastBuildHash(inputHash);
@@ -338,27 +339,34 @@ public static class UIPrefabBuilder
         var equipmentButton = UIFactory.CreateButton(actionRow, "EquipmentButton", "Equipment", delegate { });
         var equipmentRect = equipmentButton.GetComponent<RectTransform>();
         equipmentRect.anchorMin = new Vector2(0f, 0f);
-        equipmentRect.anchorMax = new Vector2(0.23f, 1f);
+        equipmentRect.anchorMax = new Vector2(0.18f, 1f);
         equipmentRect.offsetMin = Vector2.zero;
         equipmentRect.offsetMax = new Vector2(-6f, 0f);
 
+        var spiritConvertButton = UIFactory.CreateButton(actionRow, "SpiritConvertButton", "灵石转换", delegate { });
+        var spiritConvertRect = spiritConvertButton.GetComponent<RectTransform>();
+        spiritConvertRect.anchorMin = new Vector2(0.2f, 0f);
+        spiritConvertRect.anchorMax = new Vector2(0.38f, 1f);
+        spiritConvertRect.offsetMin = Vector2.zero;
+        spiritConvertRect.offsetMax = new Vector2(-4f, 0f);
+
         var skillOverviewButton = UIFactory.CreateButton(actionRow, "SkillOverviewButton", "已学功法", delegate { });
         var skillOverviewRect = skillOverviewButton.GetComponent<RectTransform>();
-        skillOverviewRect.anchorMin = new Vector2(0.26f, 0f);
-        skillOverviewRect.anchorMax = new Vector2(0.49f, 1f);
+        skillOverviewRect.anchorMin = new Vector2(0.4f, 0f);
+        skillOverviewRect.anchorMax = new Vector2(0.58f, 1f);
         skillOverviewRect.offsetMin = Vector2.zero;
         skillOverviewRect.offsetMax = new Vector2(-2f, 0f);
 
         var resetButton = UIFactory.CreateButton(actionRow, "ResetButton", "Reset Run", delegate { });
         var resetRect = resetButton.GetComponent<RectTransform>();
-        resetRect.anchorMin = new Vector2(0.51f, 0f);
-        resetRect.anchorMax = new Vector2(0.74f, 1f);
+        resetRect.anchorMin = new Vector2(0.6f, 0f);
+        resetRect.anchorMax = new Vector2(0.78f, 1f);
         resetRect.offsetMin = Vector2.zero;
         resetRect.offsetMax = new Vector2(-2f, 0f);
 
         var backButton = UIFactory.CreateButton(actionRow, "BackButton", "Back To Menu", delegate { });
         var backRect = backButton.GetComponent<RectTransform>();
-        backRect.anchorMin = new Vector2(0.77f, 0f);
+        backRect.anchorMin = new Vector2(0.8f, 0f);
         backRect.anchorMax = new Vector2(1f, 1f);
         backRect.offsetMin = new Vector2(4f, 0f);
         backRect.offsetMax = Vector2.zero;
@@ -375,6 +383,7 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "enterButton", enterButton);
         BindSerializedProperty(page, "nextButton", nextButton);
         BindSerializedProperty(page, "equipmentButton", equipmentButton);
+        BindSerializedProperty(page, "spiritConvertButton", spiritConvertButton);
         BindSerializedProperty(page, "skillOverviewButton", skillOverviewButton);
         BindSerializedProperty(page, "resetButton", resetButton);
         BindSerializedProperty(page, "backButton", backButton);
@@ -631,6 +640,136 @@ public static class UIPrefabBuilder
         SavePrefab(root, PopupsFolder + "/ConfirmPopup.prefab");
     }
 
+    private static void BuildSpiritStoneConvertPopupPrefab()
+    {
+        var root = UIFactory.CreatePanel(null, "SpiritStoneConvertPopup", new Color(0f, 0f, 0f, 0.74f));
+        var panel = UIFactory.CreatePanel(root.transform, "Panel", new Color(0.08f, 0.09f, 0.12f, 0.97f));
+        var panelRect = panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.08f, 0.18f);
+        panelRect.anchorMax = new Vector2(0.92f, 0.82f);
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.94f, 0.84f, 0.6f, 0.66f), 1f);
+
+        var titleText = UIFactory.CreateText(panel.transform, "TitleText", "灵石转换", 40, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f, 1f));
+        titleText.rectTransform.anchorMin = new Vector2(0.08f, 0.9f);
+        titleText.rectTransform.anchorMax = new Vector2(0.92f, 0.97f);
+        titleText.rectTransform.offsetMin = Vector2.zero;
+        titleText.rectTransform.offsetMax = Vector2.zero;
+
+        var introText = UIFactory.CreateText(panel.transform, "IntroText", "按五行相生，将一种灵石炼化为下一相灵石。", 20, TextAnchor.MiddleCenter, new Color(0.84f, 0.9f, 0.96f, 0.82f));
+        introText.rectTransform.anchorMin = new Vector2(0.08f, 0.82f);
+        introText.rectTransform.anchorMax = new Vector2(0.92f, 0.89f);
+        introText.rectTransform.offsetMin = Vector2.zero;
+        introText.rectTransform.offsetMax = Vector2.zero;
+
+        var sigilArea = UIFactory.CreateContainer(panel.transform, "SigilArea", new Vector2(0.08f, 0.34f), new Vector2(0.92f, 0.78f), Vector2.zero, Vector2.zero);
+        var centerGlow = UIFactory.CreatePanel(sigilArea, "CenterGlow", new Color(0.2f, 0.24f, 0.32f, 0.16f));
+        var centerGlowRect = centerGlow.GetComponent<RectTransform>();
+        centerGlowRect.anchorMin = new Vector2(0.5f, 0.5f);
+        centerGlowRect.anchorMax = new Vector2(0.5f, 0.5f);
+        centerGlowRect.pivot = new Vector2(0.5f, 0.5f);
+        centerGlowRect.anchoredPosition = Vector2.zero;
+        centerGlowRect.sizeDelta = new Vector2(320f, 320f);
+
+        var flowBeam = UIFactory.CreatePanel(sigilArea, "FlowBeam", new Color(1f, 0.92f, 0.76f, 0f));
+        var flowBeamRect = flowBeam.GetComponent<RectTransform>();
+        flowBeamRect.anchorMin = new Vector2(0.5f, 0.5f);
+        flowBeamRect.anchorMax = new Vector2(0.5f, 0.5f);
+        flowBeamRect.pivot = new Vector2(0f, 0.5f);
+        flowBeamRect.anchoredPosition = Vector2.zero;
+        flowBeamRect.sizeDelta = new Vector2(0f, 14f);
+
+        var p1 = new Vector2(0f, 182f);
+        var p2 = new Vector2(172f, 56f);
+        var p3 = new Vector2(108f, -150f);
+        var p4 = new Vector2(-108f, -150f);
+        var p5 = new Vector2(-172f, 56f);
+        var edgeColor = new Color(0.94f, 0.84f, 0.6f, 0.24f);
+        var innerColor = new Color(0.75f, 0.86f, 0.98f, 0.13f);
+
+        CreateSegment(sigilArea, "PentagonA", p1, p2, edgeColor, 2f);
+        CreateSegment(sigilArea, "PentagonB", p2, p3, edgeColor, 2f);
+        CreateSegment(sigilArea, "PentagonC", p3, p4, edgeColor, 2f);
+        CreateSegment(sigilArea, "PentagonD", p4, p5, edgeColor, 2f);
+        CreateSegment(sigilArea, "PentagonE", p5, p1, edgeColor, 2f);
+        CreateSegment(sigilArea, "InnerA", p1, p3, innerColor, 1.4f);
+        CreateSegment(sigilArea, "InnerB", p3, p5, innerColor, 1.4f);
+        CreateSegment(sigilArea, "InnerC", p5, p2, innerColor, 1.4f);
+        CreateSegment(sigilArea, "InnerD", p2, p4, innerColor, 1.4f);
+        CreateSegment(sigilArea, "InnerE", p4, p1, innerColor, 1.4f);
+
+        CreateSpiritStoneNode(sigilArea, "Metal", p1);
+        CreateSpiritStoneNode(sigilArea, "Water", p2);
+        CreateSpiritStoneNode(sigilArea, "Wood", p3);
+        CreateSpiritStoneNode(sigilArea, "Fire", p4);
+        CreateSpiritStoneNode(sigilArea, "Earth", p5);
+
+        var summaryText = UIFactory.CreateText(panel.transform, "SummaryText", "2 金灵石 -> 1 水灵石", 22, TextAnchor.MiddleCenter, new Color(0.96f, 0.94f, 0.88f, 1f));
+        summaryText.rectTransform.anchorMin = new Vector2(0.1f, 0.24f);
+        summaryText.rectTransform.anchorMax = new Vector2(0.9f, 0.33f);
+        summaryText.rectTransform.offsetMin = Vector2.zero;
+        summaryText.rectTransform.offsetMax = Vector2.zero;
+
+        var quantityLabelText = UIFactory.CreateText(panel.transform, "QuantityLabelText", "转换次数", 20, TextAnchor.MiddleLeft, new Color(0.84f, 0.9f, 0.96f, 0.82f));
+        quantityLabelText.rectTransform.anchorMin = new Vector2(0.1f, 0.18f);
+        quantityLabelText.rectTransform.anchorMax = new Vector2(0.32f, 0.22f);
+        quantityLabelText.rectTransform.offsetMin = Vector2.zero;
+        quantityLabelText.rectTransform.offsetMax = Vector2.zero;
+
+        var quantityRow = UIFactory.CreateContainer(panel.transform, "QuantityRow", new Vector2(0.1f, 0.11f), new Vector2(0.9f, 0.17f), Vector2.zero, Vector2.zero);
+        var minusButton = UIFactory.CreateButton(quantityRow, "MinusButton", "-", delegate { });
+        var minusRect = minusButton.GetComponent<RectTransform>();
+        minusRect.anchorMin = new Vector2(0f, 0f);
+        minusRect.anchorMax = new Vector2(0.18f, 1f);
+        minusRect.offsetMin = Vector2.zero;
+        minusRect.offsetMax = new Vector2(-4f, 0f);
+
+        var quantityValueText = UIFactory.CreateText(quantityRow, "QuantityValueText", "1", 26, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f, 1f));
+        quantityValueText.rectTransform.anchorMin = new Vector2(0.22f, 0f);
+        quantityValueText.rectTransform.anchorMax = new Vector2(0.48f, 1f);
+        quantityValueText.rectTransform.offsetMin = Vector2.zero;
+        quantityValueText.rectTransform.offsetMax = Vector2.zero;
+
+        var plusButton = UIFactory.CreateButton(quantityRow, "PlusButton", "+", delegate { });
+        var plusRect = plusButton.GetComponent<RectTransform>();
+        plusRect.anchorMin = new Vector2(0.52f, 0f);
+        plusRect.anchorMax = new Vector2(0.7f, 1f);
+        plusRect.offsetMin = Vector2.zero;
+        plusRect.offsetMax = new Vector2(-4f, 0f);
+
+        var maxButton = UIFactory.CreateButton(quantityRow, "MaxButton", "MAX", delegate { });
+        var maxRect = maxButton.GetComponent<RectTransform>();
+        maxRect.anchorMin = new Vector2(0.74f, 0f);
+        maxRect.anchorMax = new Vector2(1f, 1f);
+        maxRect.offsetMin = Vector2.zero;
+        maxRect.offsetMax = Vector2.zero;
+
+        var actionRow = UIFactory.CreateContainer(panel.transform, "ActionRow", new Vector2(0.1f, 0.02f), new Vector2(0.9f, 0.07f), Vector2.zero, Vector2.zero);
+        var convertButton = UIFactory.CreateButton(actionRow, "ConvertButton", "开始转换", delegate { });
+        var convertRect = convertButton.GetComponent<RectTransform>();
+        convertRect.anchorMin = new Vector2(0f, 0f);
+        convertRect.anchorMax = new Vector2(0.62f, 1f);
+        convertRect.offsetMin = Vector2.zero;
+        convertRect.offsetMax = new Vector2(-6f, 0f);
+        convertButton.GetComponent<Image>().color = new Color(0.42f, 0.22f, 0.12f, 0.94f);
+
+        var closeButton = UIFactory.CreateButton(actionRow, "CloseButton", "关闭", delegate { });
+        var closeRect = closeButton.GetComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(0.66f, 0f);
+        closeRect.anchorMax = new Vector2(1f, 1f);
+        closeRect.offsetMin = Vector2.zero;
+        closeRect.offsetMax = Vector2.zero;
+
+        var resultText = UIFactory.CreateText(panel.transform, "ResultText", "点击任意一系灵石，按相生规则进行转换。", 18, TextAnchor.MiddleCenter, new Color(0.92f, 0.84f, 0.72f, 0.9f));
+        resultText.rectTransform.anchorMin = new Vector2(0.08f, 0.07f);
+        resultText.rectTransform.anchorMax = new Vector2(0.92f, 0.12f);
+        resultText.rectTransform.offsetMin = Vector2.zero;
+        resultText.rectTransform.offsetMax = Vector2.zero;
+
+        root.AddComponent<UISpiritStoneConvertPopup>();
+        SavePrefab(root, PopupsFolder + "/SpiritStoneConvertPopup.prefab");
+    }
     private static void BuildToastPopupPrefab()
     {
         var root = new GameObject("ToastPopup", typeof(RectTransform), typeof(CanvasGroup), typeof(UIToastPopup));
@@ -694,6 +833,87 @@ public static class UIPrefabBuilder
 
 
 
+    private static Button CreateSpiritStoneNode(Transform parent, string element, Vector2 position)
+    {
+        var buttonObject = new GameObject("Node" + element, typeof(RectTransform), typeof(Image), typeof(Button));
+        buttonObject.transform.SetParent(parent, false);
+
+        var rect = buttonObject.GetComponent<RectTransform>();
+        rect.anchorMin = new Vector2(0.5f, 0.5f);
+        rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = new Vector2(164f, 172f);
+
+        var image = buttonObject.GetComponent<Image>();
+        image.color = new Color(1f, 1f, 1f, 0.01f);
+
+        var button = buttonObject.GetComponent<Button>();
+        button.targetGraphic = image;
+
+        var ring = UIFactory.CreatePanel(buttonObject.transform, "Ring", new Color(1f, 1f, 1f, 0.08f));
+        var ringRect = ring.GetComponent<RectTransform>();
+        ringRect.anchorMin = new Vector2(0.5f, 0.5f);
+        ringRect.anchorMax = new Vector2(0.5f, 0.5f);
+        ringRect.pivot = new Vector2(0.5f, 0.5f);
+        ringRect.anchoredPosition = new Vector2(0f, 6f);
+        ringRect.sizeDelta = new Vector2(108f, 108f);
+        ringRect.localEulerAngles = new Vector3(0f, 0f, 45f);
+        UIFactory.AddOutlineBox(ring.transform, "Outline", new Color(1f, 0.94f, 0.76f, 0.55f), 1f);
+
+        var glow = UIFactory.CreatePanel(buttonObject.transform, "Glow", new Color(1f, 1f, 1f, 0.1f));
+        var glowRect = glow.GetComponent<RectTransform>();
+        glowRect.anchorMin = new Vector2(0.5f, 0.5f);
+        glowRect.anchorMax = new Vector2(0.5f, 0.5f);
+        glowRect.pivot = new Vector2(0.5f, 0.5f);
+        glowRect.anchoredPosition = new Vector2(0f, 6f);
+        glowRect.sizeDelta = new Vector2(126f, 126f);
+        glowRect.localEulerAngles = new Vector3(0f, 0f, 45f);
+
+        var core = UIFactory.CreatePanel(buttonObject.transform, "Core", new Color(1f, 1f, 1f, 0.68f));
+        var coreRect = core.GetComponent<RectTransform>();
+        coreRect.anchorMin = new Vector2(0.5f, 0.5f);
+        coreRect.anchorMax = new Vector2(0.5f, 0.5f);
+        coreRect.pivot = new Vector2(0.5f, 0.5f);
+        coreRect.anchoredPosition = new Vector2(0f, 6f);
+        coreRect.sizeDelta = new Vector2(78f, 78f);
+        coreRect.localEulerAngles = new Vector3(0f, 0f, 45f);
+        UIFactory.AddOutlineBox(core.transform, "Outline", new Color(1f, 0.95f, 0.82f, 0.65f), 1f);
+
+        var namePlate = UIFactory.CreatePanel(buttonObject.transform, "NamePlate", new Color(0.08f, 0.1f, 0.14f, 0.42f));
+        var namePlateRect = namePlate.GetComponent<RectTransform>();
+        namePlateRect.anchorMin = new Vector2(0.12f, 0.66f);
+        namePlateRect.anchorMax = new Vector2(0.88f, 0.84f);
+        namePlateRect.offsetMin = Vector2.zero;
+        namePlateRect.offsetMax = Vector2.zero;
+
+        var nameText = UIFactory.CreateText(buttonObject.transform, "NameText", element, 18, TextAnchor.MiddleCenter, new Color(0.95f, 0.96f, 0.98f, 0.96f));
+        nameText.rectTransform.anchorMin = new Vector2(0.08f, 0.67f);
+        nameText.rectTransform.anchorMax = new Vector2(0.92f, 0.84f);
+        nameText.rectTransform.offsetMin = Vector2.zero;
+        nameText.rectTransform.offsetMax = Vector2.zero;
+        var nameOutline = nameText.gameObject.AddComponent<Outline>();
+        nameOutline.effectColor = new Color(0f, 0f, 0f, 0.78f);
+        nameOutline.effectDistance = new Vector2(1f, -1f);
+
+        var countPlate = UIFactory.CreatePanel(buttonObject.transform, "CountPlate", new Color(0.12f, 0.09f, 0.08f, 0.4f));
+        var countPlateRect = countPlate.GetComponent<RectTransform>();
+        countPlateRect.anchorMin = new Vector2(0.18f, 0.06f);
+        countPlateRect.anchorMax = new Vector2(0.82f, 0.24f);
+        countPlateRect.offsetMin = Vector2.zero;
+        countPlateRect.offsetMax = Vector2.zero;
+
+        var countText = UIFactory.CreateText(buttonObject.transform, "CountText", "x0", 24, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f, 1f));
+        countText.rectTransform.anchorMin = new Vector2(0.16f, 0.06f);
+        countText.rectTransform.anchorMax = new Vector2(0.84f, 0.24f);
+        countText.rectTransform.offsetMin = Vector2.zero;
+        countText.rectTransform.offsetMax = Vector2.zero;
+        var countOutline = countText.gameObject.AddComponent<Outline>();
+        countOutline.effectColor = new Color(0f, 0f, 0f, 0.82f);
+        countOutline.effectDistance = new Vector2(1f, -1f);
+
+        return button;
+    }
     private static Image CreateSegment(Transform parent, string name, Vector2 start, Vector2 end, Color color, float thickness)
     {
         var lineObject = new GameObject(name, typeof(RectTransform), typeof(Image));
@@ -754,6 +974,7 @@ public static class UIPrefabBuilder
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MapPage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/BattlePage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ConfirmPopup.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/SpiritStoneConvertPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ToastPopup.prefab"));
     }
 
@@ -861,6 +1082,12 @@ public static class UIPrefabBuilder
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
     }
 }
+
+
+
+
+
+
 
 
 

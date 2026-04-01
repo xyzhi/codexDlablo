@@ -13,6 +13,7 @@ public static class ConfigValidator
     private const string SkillCsvPath = "Docs/Skill.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
+    private const string SpiritStoneConversionCsvPath = "Docs/SpiritStoneConversion.csv";
     private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
@@ -71,6 +72,7 @@ public static class ConfigValidator
             var skillTable = LoadTable(SkillCsvPath, "技能表");
             var equipmentTable = LoadTable(EquipmentCsvPath, "装备表");
             var spiritStoneTable = LoadTable(SpiritStoneCsvPath, "灵石表");
+            var spiritStoneConversionTable = LoadTable(SpiritStoneConversionCsvPath, "灵石转换表");
             var stageBalanceTable = LoadTable(StageBalanceCsvPath, "关卡成长表");
             var stageNodeTable = LoadTable(StageNodeCsvPath, "关卡节点表");
             var eventOptionTable = LoadTable(EventOptionCsvPath, "事件选项表");
@@ -82,6 +84,7 @@ public static class ConfigValidator
             ValidateEnemyTable(enemyTable, skillIds, items);
             ValidateEquipmentTable(equipmentTable, items);
             ValidateSpiritStoneTable(spiritStoneTable, items);
+            ValidateSpiritStoneConversionTable(spiritStoneConversionTable, items);
             ValidateStageBalanceTable(stageBalanceTable, items);
             var eventProfiles = ValidateEventOptionTable(eventOptionTable, localizationKeys, items);
             ValidateStageNodeTable(stageNodeTable, eventProfiles, items);
@@ -260,6 +263,54 @@ public static class ConfigValidator
 
             DetectMojibake(row, items, "Name");
             DetectMojibake(row, items, "Notes");
+        }
+    }
+
+    private static void ValidateSpiritStoneConversionTable(CsvTable table, List<ValidationItem> items)
+    {
+        var sourceElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "SourceElement", "TargetElement", "CostAmount", "GainAmount");
+            ValidateIntegerField(row, items, "CostAmount");
+            ValidateIntegerField(row, items, "GainAmount");
+
+            var source = row.Get("SourceElement").Trim();
+            var target = row.Get("TargetElement").Trim();
+            if (!string.IsNullOrEmpty(source) && !IsValidElementToken(source))
+            {
+                AddError(items, row, "SourceElement", $"源灵石五行不合法：'{source}'。");
+            }
+
+            if (!string.IsNullOrEmpty(target) && !IsValidElementToken(target))
+            {
+                AddError(items, row, "TargetElement", $"目标灵石五行不合法：'{target}'。");
+            }
+
+            if (!string.IsNullOrEmpty(source) && !sourceElements.Add(source))
+            {
+                AddError(items, row, "SourceElement", $"发现重复源灵石配置：'{source}'。每种灵石只能配置一条转换规则。");
+            }
+
+            if (!string.IsNullOrEmpty(source) && !string.IsNullOrEmpty(target)
+                && string.Equals(source, target, StringComparison.OrdinalIgnoreCase))
+            {
+                AddError(items, row, "TargetElement", "灵石转换的源和目标不能相同。");
+            }
+
+            int cost;
+            if (int.TryParse(row.Get("CostAmount"), out cost) && cost <= 0)
+            {
+                AddError(items, row, "CostAmount", "转换消耗必须大于 0。");
+            }
+
+            int gain;
+            if (int.TryParse(row.Get("GainAmount"), out gain) && gain <= 0)
+            {
+                AddError(items, row, "GainAmount", "转换产出必须大于 0。");
+            }
         }
     }
 
@@ -988,4 +1039,3 @@ public static class ConfigValidator
         public string Message { get; private set; }
     }
 }
-

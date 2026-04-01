@@ -1559,6 +1559,61 @@
                         "key":  "map.random_cooldown_message",
                         "zhHans":  "这处随机机缘刚刚触发过，还需要再等待 {0} 个月才会恢复。",
                         "en":  "This random opportunity was triggered recently. It will recover in {0} month(s)."
+                    },
+                    {
+                        "zhHans":  "灵石转换",
+                        "key":  "map.button_spirit_convert",
+                        "en":  "Spirit Convert"
+                    },
+                    {
+                        "zhHans":  "灵石转换",
+                        "key":  "convert.title",
+                        "en":  "Spirit Stone Conversion"
+                    },
+                    {
+                        "zhHans":  "按五行相生，将一种灵石炼化为下一相灵石。",
+                        "key":  "convert.intro",
+                        "en":  "Refine one spirit stone into the next generating element."
+                    },
+                    {
+                        "zhHans":  "转换次数",
+                        "key":  "convert.quantity",
+                        "en":  "Conversion Count"
+                    },
+                    {
+                        "zhHans":  "开始转换",
+                        "key":  "convert.button_convert",
+                        "en":  "Convert"
+                    },
+                    {
+                        "zhHans":  "最大",
+                        "key":  "convert.button_max",
+                        "en":  "Max"
+                    },
+                    {
+                        "zhHans":  "当前规则：{0} {1} -\u003e {2} {3}",
+                        "key":  "convert.summary_ratio",
+                        "en":  "Rule: {0} {1} -\u003e {2} {3}"
+                    },
+                    {
+                        "zhHans":  "本次将消耗 {0} {1}，获得 {2} {3}。",
+                        "key":  "convert.summary_preview",
+                        "en":  "This conversion spends {0} {1} and grants {2} {3}."
+                    },
+                    {
+                        "zhHans":  "点击任意一系灵石，按相生规则进行转换。",
+                        "key":  "convert.status_select",
+                        "en":  "Select any spirit stone and convert it along the generating cycle."
+                    },
+                    {
+                        "zhHans":  "当前灵石不足，无法完成本次转换。",
+                        "key":  "convert.status_not_enough",
+                        "en":  "Not enough spirit stones for this conversion."
+                    },
+                    {
+                        "zhHans":  "已将 {0} {1} 炼化为 {2} {3}。",
+                        "key":  "convert.status_done",
+                        "en":  "Converted {0} {1} into {2} {3}."
                     }
                 ]
 }

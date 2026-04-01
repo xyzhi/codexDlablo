@@ -1,0 +1,6 @@
+﻿SourceElement,TargetElement,CostAmount,GainAmount,Notes
+Metal,Water,2,1,金生水
+Water,Wood,2,1,水生木
+Wood,Fire,2,1,木生火
+Fire,Earth,2,1,火生土
+Earth,Metal,2,1,土生金

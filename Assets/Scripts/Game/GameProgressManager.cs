@@ -467,6 +467,64 @@ namespace Wuxing.Game
             return true;
         }
 
+        public static bool TryConvertSpiritStones(string sourceElement, string targetElement, int costAmount, int gainAmount, int convertCount)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return false;
+            }
+
+            var resolvedCount = Mathf.Max(0, convertCount);
+            if (resolvedCount <= 0)
+            {
+                return false;
+            }
+
+            var normalizedSource = NormalizeSpiritStoneElement(sourceElement);
+            var normalizedTarget = NormalizeSpiritStoneElement(targetElement);
+            if (string.Equals(normalizedSource, normalizedTarget, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            var totalCost = Mathf.Max(1, costAmount) * resolvedCount;
+            var totalGain = Mathf.Max(1, gainAmount) * resolvedCount;
+            if (Instance.GetSpiritStoneCountInternal(normalizedSource) < totalCost)
+            {
+                return false;
+            }
+
+            switch (normalizedSource)
+            {
+                case "metal":
+                    Instance.MetalSpiritStones -= totalCost;
+                    break;
+                case "wood":
+                    Instance.WoodSpiritStones -= totalCost;
+                    break;
+                case "water":
+                    Instance.WaterSpiritStones -= totalCost;
+                    break;
+                case "fire":
+                    Instance.FireSpiritStones -= totalCost;
+                    break;
+                default:
+                    Instance.EarthSpiritStones -= totalCost;
+                    break;
+            }
+
+            Instance.AddSpiritStones(normalizedTarget, totalGain);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return true;
+        }
+
+        public static string GetSpiritStoneColorHex(string element)
+        {
+            return GetSpiritStoneColorHexInternal(element);
+        }
+
         public static string BuildSpiritStoneSummary(bool english, bool richText = false)
         {
             EnsureInstance();
@@ -2080,7 +2138,7 @@ namespace Wuxing.Game
             return "<color=" + GetSpiritStoneColorHex(element) + ">" + content + "</color>";
         }
 
-        private static string GetSpiritStoneColorHex(string element)
+        private static string GetSpiritStoneColorHexInternal(string element)
         {
             var database = SpiritStoneDatabaseLoader.Load();
             if (database != null && database.SpiritStones != null)
@@ -2335,5 +2393,6 @@ namespace Wuxing.Game
         }
     }
 }
+
 
 

@@ -1,0 +1,39 @@
+﻿{
+  "conversions": [
+    {
+      "SourceElement": "Metal",
+      "TargetElement": "Water",
+      "CostAmount": 2,
+      "GainAmount": 1,
+      "Notes": "金生水"
+    },
+    {
+      "SourceElement": "Water",
+      "TargetElement": "Wood",
+      "CostAmount": 2,
+      "GainAmount": 1,
+      "Notes": "水生木"
+    },
+    {
+      "SourceElement": "Wood",
+      "TargetElement": "Fire",
+      "CostAmount": 2,
+      "GainAmount": 1,
+      "Notes": "木生火"
+    },
+    {
+      "SourceElement": "Fire",
+      "TargetElement": "Earth",
+      "CostAmount": 2,
+      "GainAmount": 1,
+      "Notes": "火生土"
+    },
+    {
+      "SourceElement": "Earth",
+      "TargetElement": "Metal",
+      "CostAmount": 2,
+      "GainAmount": 1,
+      "Notes": "土生金"
+    }
+  ]
+}

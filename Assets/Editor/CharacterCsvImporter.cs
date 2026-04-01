@@ -13,6 +13,7 @@ public static class CharacterCsvImporter
     private const string SkillCsvPath = "Docs/Skill.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
+    private const string SpiritStoneConversionCsvPath = "Docs/SpiritStoneConversion.csv";
     private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
@@ -25,6 +26,7 @@ public static class CharacterCsvImporter
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
     private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
     private const string SpiritStoneJsonPath = ConfigOutputFolder + "/SpiritStoneDatabase.json";
+    private const string SpiritStoneConversionJsonPath = ConfigOutputFolder + "/SpiritStoneConversionDatabase.json";
     private const string StageBalanceJsonPath = ConfigOutputFolder + "/StageBalanceDatabase.json";
     private const string StageNodeJsonPath = ConfigOutputFolder + "/StageNodeDatabase.json";
     private const string EventOptionJsonPath = ConfigOutputFolder + "/EventOptionDatabase.json";
@@ -40,13 +42,14 @@ public static class CharacterCsvImporter
             ImportSkills();
             ImportEquipments();
             ImportSpiritStones();
+            ImportSpiritStoneConversions();
             ImportStageBalances();
             ImportStageNodes();
             ImportEventOptions();
             ImportEventProfiles();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("Imported all CSV files successfully.");
+            Debug.Log("角色、敌人、技能、装备、灵石、灵石转换、关卡成长、关卡节点、事件选项、事件配置和语言表已完成导入。");
         }
         catch (Exception exception)
         {
@@ -232,7 +235,38 @@ public static class CharacterCsvImporter
         WriteJson(SpiritStoneJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
-    [MenuItem("Tools/Config/Import Stage Balance CSV")]
+    [MenuItem("工具/配置/仅导入灵石转换表")]
+    public static void ImportSpiritStoneConversions()
+    {
+        var rows = ReadRequiredRows(SpiritStoneConversionCsvPath, "SpiritStoneConversion CSV");
+        var configs = new List<SpiritStoneConversionConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 5)
+            {
+                throw new InvalidOperationException($"Invalid spirit stone conversion row at line {i + 1}.");
+            }
+            configs.Add(new SpiritStoneConversionConfig
+            {
+                SourceElement = columns[0],
+                TargetElement = columns[1],
+                CostAmount = ParseInt(columns[2], nameof(SpiritStoneConversionConfig.CostAmount), i + 1),
+                GainAmount = ParseInt(columns[3], nameof(SpiritStoneConversionConfig.GainAmount), i + 1),
+                Notes = columns[4]
+            });
+        }
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new SpiritStoneConversionDatabase();
+        database.conversions = configs;
+        WriteJson(SpiritStoneConversionJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} spirit stone conversions to {SpiritStoneConversionJsonPath}");
+    }
+    [MenuItem("工具/配置/仅导入关卡成长表")]
     public static void ImportStageBalances()
     {
         var rows = ReadRequiredRows(StageBalanceCsvPath, "StageBalance CSV");

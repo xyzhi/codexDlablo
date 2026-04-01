@@ -140,6 +140,7 @@ namespace Wuxing.UI
             _pagePrefabPaths["Map"] = "Prefabs/UI/Pages/MapPage";
             _pagePrefabPaths["Battle"] = "Prefabs/UI/Pages/BattlePage";
             _popupPrefabPaths["Confirm"] = "Prefabs/UI/Popups/ConfirmPopup";
+            _popupPrefabPaths["SpiritConvert"] = "Prefabs/UI/Popups/SpiritStoneConvertPopup";
         }
 
         private static UIPage InstantiatePage(string prefabPath, Transform parent)
@@ -181,6 +182,7 @@ namespace Wuxing.UI
         }
     }
 }
+
 
 
 

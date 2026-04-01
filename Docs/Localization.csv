@@ -311,3 +311,14 @@
 "map.fortune_skill_empty","这次机缘来得快去得也快，没有留下新的法门。","This opportunity fades quickly and leaves no new technique behind."
 "map.random_cooldown_title","机缘未复","Opportunity Cooling Down"
 "map.random_cooldown_message","这处随机机缘刚刚触发过，还需要再等待 {0} 个月才会恢复。","This random opportunity was triggered recently. It will recover in {0} month(s)."
+map.button_spirit_convert,灵石转换,Spirit Convert
+convert.title,灵石转换,Spirit Stone Conversion
+convert.intro,按五行相生，将一种灵石炼化为下一相灵石。,Refine one spirit stone into the next generating element.
+convert.quantity,转换次数,Conversion Count
+convert.button_convert,开始转换,Convert
+convert.button_max,最大,Max
+convert.summary_ratio,"当前规则：{0} {1} -> {2} {3}","Rule: {0} {1} -> {2} {3}"
+convert.summary_preview,"本次将消耗 {0} {1}，获得 {2} {3}。","This conversion spends {0} {1} and grants {2} {3}."
+convert.status_select,点击任意一系灵石，按相生规则进行转换。,Select any spirit stone and convert it along the generating cycle.
+convert.status_not_enough,当前灵石不足，无法完成本次转换。,Not enough spirit stones for this conversion.
+convert.status_done,"已将 {0} {1} 炼化为 {2} {3}。","Converted {0} {1} into {2} {3}."

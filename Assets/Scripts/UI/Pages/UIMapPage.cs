@@ -31,6 +31,7 @@ namespace Wuxing.UI
         [SerializeField] private Button enterButton;
         [SerializeField] private Button nextButton;
         [SerializeField] private Button equipmentButton;
+        [SerializeField] private Button spiritConvertButton;
         [SerializeField] private Button skillOverviewButton;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button backButton;
@@ -59,6 +60,7 @@ namespace Wuxing.UI
             if (enterButton != null) enterButton.onClick.AddListener(OnClickEnter);
             if (nextButton != null) nextButton.onClick.AddListener(OnClickNext);
             if (equipmentButton != null) equipmentButton.onClick.AddListener(OnClickEquipment);
+            if (spiritConvertButton != null) spiritConvertButton.onClick.AddListener(OnClickSpiritConvert);
             if (skillOverviewButton != null) skillOverviewButton.onClick.AddListener(OnClickSkillOverview);
             if (resetButton != null) resetButton.onClick.AddListener(OnClickReset);
             if (backButton != null) backButton.onClick.AddListener(OnClickBack);
@@ -82,6 +84,7 @@ namespace Wuxing.UI
             if (enterButton != null) enterButton.onClick.RemoveListener(OnClickEnter);
             if (nextButton != null) nextButton.onClick.RemoveListener(OnClickNext);
             if (equipmentButton != null) equipmentButton.onClick.RemoveListener(OnClickEquipment);
+            if (spiritConvertButton != null) spiritConvertButton.onClick.RemoveListener(OnClickSpiritConvert);
             if (skillOverviewButton != null) skillOverviewButton.onClick.RemoveListener(OnClickSkillOverview);
             if (resetButton != null) resetButton.onClick.RemoveListener(OnClickReset);
             if (backButton != null) backButton.onClick.RemoveListener(OnClickBack);
@@ -131,6 +134,11 @@ namespace Wuxing.UI
             UIManager.Instance.ShowPage("Battle", "equipment");
         }
 
+        private void OnClickSpiritConvert()
+        {
+            if (isMoving) return;
+            UIManager.Instance.ShowPopup<UISpiritStoneConvertPopup>("SpiritConvert");
+        }
         private void OnClickSkillOverview()
         {
             if (isMoving) return;
@@ -866,6 +874,7 @@ namespace Wuxing.UI
             SetButtonText(nextButton, LocalizationManager.GetText("map.button_next"));
             SetButtonText(enterButton, LocalizationManager.GetText("map.button_enter"));
             SetButtonText(equipmentButton, LocalizationManager.GetText("battle.button_equipment"));
+            SetButtonText(spiritConvertButton, LocalizationManager.GetText("map.button_spirit_convert"));
             SetButtonText(skillOverviewButton, LocalizationManager.GetText("map.button_skill_overview"));
             SetButtonText(resetButton, LocalizationManager.GetText("map.button_reset_run"));
             SetButtonText(backButton, LocalizationManager.GetText("map.button_back_menu"));
@@ -874,6 +883,7 @@ namespace Wuxing.UI
             if (nextButton != null) nextButton.interactable = canMoveNext;
             if (enterButton != null) enterButton.interactable = canEnterSelected;
             if (equipmentButton != null) equipmentButton.interactable = !isMoving;
+            if (spiritConvertButton != null) spiritConvertButton.interactable = !isMoving;
             if (skillOverviewButton != null) skillOverviewButton.interactable = !isMoving;
             if (resetButton != null) resetButton.interactable = !isMoving;
             if (backButton != null) backButton.interactable = !isMoving;
@@ -1130,6 +1140,8 @@ namespace Wuxing.UI
         }
     }
 }
+
+
 
 
 
