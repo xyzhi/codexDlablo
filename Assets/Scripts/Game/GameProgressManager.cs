@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Wuxing.Config;
+using Wuxing.Localization;
 
 namespace Wuxing.Game
 {
@@ -26,8 +27,10 @@ namespace Wuxing.Game
         private const string OwnedEquipmentPrefKey = "game.progress.owned_equipment";
         private const string LearnedSkillsPrefKey = "game.progress.learned_skills";
         private const string PendingSkillRewardsPrefKey = "game.progress.pending_skill_rewards";
+        private const string FixedStageEventsPrefKey = "game.progress.fixed_stage_events";
+        private const string RandomStageEventStatesPrefKey = "game.progress.random_stage_events";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
-        private const int MaxStage = 8;
+        private const int MaxStage = 100;
         private const int LifetimeMonths = 360;
 
         private static readonly string[] BaseOwnedEquipmentIds =
@@ -63,6 +66,8 @@ namespace Wuxing.Game
         private readonly List<string> ownedEquipmentIds = new List<string>();
         private readonly List<CharacterRunData> characterRunData = new List<CharacterRunData>();
         private readonly List<SkillRewardOption> pendingSkillRewards = new List<SkillRewardOption>();
+        private readonly List<int> completedFixedEventStages = new List<int>();
+        private readonly List<StageRandomEventState> randomStageEventStates = new List<StageRandomEventState>();
 
         private void Awake()
         {
@@ -107,6 +112,8 @@ namespace Wuxing.Game
                 Instance.ResetOwnedEquipmentToBase();
                 Instance.characterRunData.Clear();
                 Instance.pendingSkillRewards.Clear();
+                Instance.completedFixedEventStages.Clear();
+                Instance.randomStageEventStates.Clear();
                 Instance.SaveProgress();
                 ProgressChanged?.Invoke();
             }
@@ -180,6 +187,8 @@ namespace Wuxing.Game
             Instance.ResetOwnedEquipmentToBase();
             Instance.characterRunData.Clear();
             Instance.pendingSkillRewards.Clear();
+            Instance.completedFixedEventStages.Clear();
+            Instance.randomStageEventStates.Clear();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
         }
@@ -194,8 +203,8 @@ namespace Wuxing.Game
             }
 
             var resolvedStage = Mathf.Max(1, stage);
-            reward.ExpGained = 18 + resolvedStage * 8;
-            reward.SpiritStonesGained = 12 + resolvedStage * 5;
+            reward.ExpGained = GetConfiguredBattleExpReward(resolvedStage);
+            reward.SpiritStonesGained = GetConfiguredBattleSpiritStoneReward(resolvedStage);
             reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
@@ -236,18 +245,8 @@ namespace Wuxing.Game
             }
 
             var resolvedStage = Mathf.Max(1, stage);
-            switch (nodeType)
-            {
-                case MapNodeType.Rest:
-                    reward.ExpGained = resolvedStage == 1 ? 12 : 10 + resolvedStage * 4;
-                    reward.SpiritStonesGained = resolvedStage == 1 ? 10 : 6 + resolvedStage * 3;
-                    break;
-                default:
-                    reward.ExpGained = 6 + resolvedStage * 2;
-                    reward.SpiritStonesGained = 4 + resolvedStage * 2;
-                    break;
-            }
-
+            reward.ExpGained = GetConfiguredNonBattleExpReward(resolvedStage, nodeType);
+            reward.SpiritStonesGained = GetConfiguredNonBattleSpiritStoneReward(resolvedStage, nodeType);
             reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
@@ -473,7 +472,7 @@ namespace Wuxing.Game
             EnsureInstance();
             if (Instance == null)
             {
-                return english ? "Spirit Stones: 0" : "灵石：0";
+                return LocalizationManager.GetText("progress.spirit_stones_zero");
             }
 
             var parts = new List<string>
@@ -485,14 +484,14 @@ namespace Wuxing.Game
                 Instance.BuildSpiritStoneEntry("Earth", english, richText)
             };
 
-            return (english ? "Spirit Stones: " : "灵石：") + string.Join("  ", parts.ToArray());
+            return LocalizationManager.GetText("progress.spirit_stones_prefix") + string.Join("  ", parts.ToArray());
         }
 
         public static string BuildSpiritStoneGainText(BattleRewardResult reward, bool english, bool richText = false)
         {
             if (reward == null || reward.SpiritStonesGained <= 0)
             {
-                return english ? "Spirit Stones +0" : "灵石 +0";
+                return LocalizationManager.GetText("progress.spirit_stones_gain_zero");
             }
 
             var content = GetSpiritStoneName(reward.SpiritStoneElement, english) + " +" + reward.SpiritStonesGained;
@@ -562,11 +561,11 @@ namespace Wuxing.Game
             var skillDatabase = SkillDatabaseLoader.Load();
             if (characterDatabase == null || skillDatabase == null)
             {
-                return english ? "Learned skills data is unavailable." : "当前无法读取已学功法数据。";
+                return LocalizationManager.GetText("progress.skills_unavailable");
             }
 
             var builder = new StringBuilder();
-            builder.Append(english ? "Current Run Skills" : "当前局功法总览");
+            builder.Append(LocalizationManager.GetText("progress.run_skills_title"));
 
             for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
             {
@@ -593,18 +592,18 @@ namespace Wuxing.Game
                 }
 
                 builder.Append("\n\n")
-                    .Append(english ? "Character: " : "角色：")
+                    .Append(LocalizationManager.GetText("progress.skills_character"))
                     .Append(character.Name)
                     .Append('\n')
-                    .Append(english ? "Current Skills: " : "当前可用：")
+                    .Append(LocalizationManager.GetText("progress.skills_current"))
                     .Append(currentSkillNames.Count > 0
-                        ? string.Join(english ? ", " : "、", currentSkillNames.ToArray())
-                        : (english ? "None" : "无"))
+                        ? string.Join(LocalizationManager.GetText("common.separator_names"), currentSkillNames.ToArray())
+                        : LocalizationManager.GetText("progress.skills_none"))
                     .Append('\n')
-                    .Append(english ? "New This Run: " : "本局新增：")
+                    .Append(LocalizationManager.GetText("progress.skills_new"))
                     .Append(learnedSkillNames.Count > 0
-                        ? string.Join(english ? ", " : "、", learnedSkillNames.ToArray())
-                        : (english ? "None" : "暂无"));
+                        ? string.Join(LocalizationManager.GetText("common.separator_names"), learnedSkillNames.ToArray())
+                        : LocalizationManager.GetText("progress.skills_none"));
             }
 
             return builder.ToString();
@@ -874,6 +873,150 @@ namespace Wuxing.Game
             return stage <= 1 ? "VillageStart" : "DefaultBattle";
         }
 
+        public static string GetStageEventMode(int stage)
+        {
+            var config = GetStageNodeConfig(stage);
+            if (config != null && !string.IsNullOrEmpty(config.EventMode))
+            {
+                var normalized = config.EventMode.Trim().ToLowerInvariant();
+                switch (normalized)
+                {
+                    case "random":
+                    case "\u968f\u673a":
+                        return "Random";
+                    case "fixed":
+                    case "\u56fa\u5b9a":
+                        return "Fixed";
+                    case "none":
+                    case "battle":
+                    default:
+                        return "None";
+                }
+            }
+
+            return IsBattleNode(GetNodeType(stage)) ? "None" : "Fixed";
+        }
+
+        public static int GetStageEventCooldownMonths(int stage)
+        {
+            var config = GetStageNodeConfig(stage);
+            return config != null ? Mathf.Max(0, config.CooldownMonths) : 0;
+        }
+
+        public static bool IsFixedStageEventConsumed(int stage)
+        {
+            EnsureInstance();
+            return Instance != null && Instance.completedFixedEventStages.Contains(Mathf.Max(1, stage));
+        }
+
+        public static bool ConsumeFixedStageEvent(int stage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return false;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            if (Instance.completedFixedEventStages.Contains(resolvedStage))
+            {
+                return false;
+            }
+
+            Instance.completedFixedEventStages.Add(resolvedStage);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return true;
+        }
+
+        public static int GetRandomStageCooldownRemainingMonths(int stage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return 0;
+            }
+
+            var cooldownMonths = GetStageEventCooldownMonths(stage);
+            if (cooldownMonths <= 0)
+            {
+                return 0;
+            }
+
+            var state = Instance.GetRandomStageEventState(stage);
+            if (state == null)
+            {
+                return 0;
+            }
+
+            var monthsPassed = Mathf.Max(0, Instance.ElapsedMonths - state.LastTriggeredMonth);
+            return Mathf.Max(0, cooldownMonths - monthsPassed);
+        }
+
+        public static bool MarkRandomStageEventTriggered(int stage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return false;
+            }
+
+            var remaining = GetRandomStageCooldownRemainingMonths(stage);
+            if (remaining > 0)
+            {
+                return false;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            var state = Instance.GetRandomStageEventState(resolvedStage);
+            if (state == null)
+            {
+                state = new StageRandomEventState
+                {
+                    Stage = resolvedStage,
+                    LastTriggeredMonth = Instance.ElapsedMonths
+                };
+                Instance.randomStageEventStates.Add(state);
+            }
+            else
+            {
+                state.LastTriggeredMonth = Instance.ElapsedMonths;
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return true;
+        }
+
+        public static bool HasEnoughSpiritStones(string element, int amount)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return false;
+            }
+
+            if (amount <= 0)
+            {
+                return true;
+            }
+
+            switch (NormalizeSpiritStoneElement(element))
+            {
+                case "metal":
+                    return Instance.MetalSpiritStones >= amount;
+                case "wood":
+                    return Instance.WoodSpiritStones >= amount;
+                case "water":
+                    return Instance.WaterSpiritStones >= amount;
+                case "fire":
+                    return Instance.FireSpiritStones >= amount;
+                case "earth":
+                default:
+                    return Instance.EarthSpiritStones >= amount;
+            }
+        }
+
         public static MapNodeType GetNodeType(int stage)
         {
             if (stage <= 0)
@@ -896,6 +1039,50 @@ namespace Wuxing.Game
             return database != null ? database.GetByStage(Mathf.Max(1, stage)) : null;
         }
 
+        private static int GetConfiguredBattleExpReward(int stage)
+        {
+            var config = GetStageNodeConfig(stage);
+            return config != null && config.BattleExpReward > 0
+                ? config.BattleExpReward
+                : 18 + Mathf.Max(1, stage) * 8;
+        }
+
+        private static int GetConfiguredBattleSpiritStoneReward(int stage)
+        {
+            var config = GetStageNodeConfig(stage);
+            return config != null && config.BattleSpiritStoneReward > 0
+                ? config.BattleSpiritStoneReward
+                : 12 + Mathf.Max(1, stage) * 5;
+        }
+
+        private static int GetConfiguredNonBattleExpReward(int stage, MapNodeType nodeType)
+        {
+            var config = GetStageNodeConfig(stage);
+            if (config != null && config.NonBattleExpReward > 0)
+            {
+                return config.NonBattleExpReward;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            return nodeType == MapNodeType.Rest
+                ? (resolvedStage == 1 ? 12 : 10 + resolvedStage * 4)
+                : 6 + resolvedStage * 2;
+        }
+
+        private static int GetConfiguredNonBattleSpiritStoneReward(int stage, MapNodeType nodeType)
+        {
+            var config = GetStageNodeConfig(stage);
+            if (config != null && config.NonBattleSpiritStoneReward > 0)
+            {
+                return config.NonBattleSpiritStoneReward;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            return nodeType == MapNodeType.Rest
+                ? (resolvedStage == 1 ? 10 : 6 + resolvedStage * 3)
+                : 4 + resolvedStage * 2;
+        }
+
         private static MapNodeType ParseNodeType(string rawValue)
         {
             if (string.IsNullOrEmpty(rawValue))
@@ -906,16 +1093,16 @@ namespace Wuxing.Game
             switch (rawValue.Trim().ToLowerInvariant())
             {
                 case "elite":
-                case "精英":
+                case "\u7cbe\u82f1":
                     return MapNodeType.Elite;
                 case "rest":
-                case "休整":
+                case "\u4f11\u6574":
                     return MapNodeType.Rest;
                 case "boss":
-                case "首领":
+                case "\u9996\u9886":
                     return MapNodeType.Boss;
                 case "battle":
-                case "战斗":
+                case "\u6218\u6597":
                 default:
                     return MapNodeType.Battle;
             }
@@ -1047,7 +1234,7 @@ namespace Wuxing.Game
                 }
             }
 
-            return english ? "Outer Hills" : "山门外围";
+            return LocalizationManager.GetText("map.stage_theme_default");
         }
 
         public static string BuildCurrentObjective(bool english)
@@ -1055,14 +1242,10 @@ namespace Wuxing.Game
             var currentStage = GetCurrentStage();
             if (currentStage <= 0)
             {
-                return english
-                    ? "Start a new run from Stage 1."
-                    : "从第 1 关开始新的一轮。";
+                return LocalizationManager.GetText("progress.current_objective_start");
             }
 
-            return english
-                ? "Clear or farm Stage " + currentStage + " before moving on."
-                : "可反复挑战第 " + currentStage + " 关，刷成长后再推进。";
+            return string.Format(LocalizationManager.GetText("progress.current_objective_stage"), currentStage);
         }
 
         public static int GetNodeMonthCost(int stage)
@@ -1088,34 +1271,17 @@ namespace Wuxing.Game
                 }
             }
 
-            var nodeType = GetNodeType(resolvedStage);
-            if (english)
-            {
-                switch (nodeType)
-                {
-                    case MapNodeType.Elite:
-                        return "Elite battle with higher growth and better loot.";
-                    case MapNodeType.Rest:
-                        return "Rest stop for stable progress and time management.";
-                    case MapNodeType.Boss:
-                        return "Boss battle. Winning can finish the current route.";
-                    case MapNodeType.Battle:
-                    default:
-                        return "Standard battle for growth, spirit stones, and equipment drops.";
-                }
-            }
-
-            switch (nodeType)
+            switch (GetNodeType(resolvedStage))
             {
                 case MapNodeType.Elite:
-                    return "精英战斗，成长更多，掉落也更好。";
+                    return LocalizationManager.GetText("map.node_detail_elite");
                 case MapNodeType.Rest:
-                    return "休整节点，适合稳定推进，缓和本轮节奏。";
+                    return LocalizationManager.GetText("map.node_detail_rest");
                 case MapNodeType.Boss:
-                    return "首领战斗，若能取胜，本轮路线直接完成。";
+                    return LocalizationManager.GetText("map.node_detail_boss");
                 case MapNodeType.Battle:
                 default:
-                    return "普通战斗，可获得修为、灵石与装备掉落。";
+                    return LocalizationManager.GetText("map.node_detail_battle");
             }
         }
 
@@ -1123,19 +1289,14 @@ namespace Wuxing.Game
         {
             if (GetLastBattleStage() <= 0)
             {
-                return english ? "No battle record yet." : "还没有战斗记录。";
+                return LocalizationManager.GetText("progress.last_battle_none");
             }
 
-            if (english)
-            {
-                return "Last battle: Stage " + GetLastBattleStage()
-                    + ", " + (GetLastBattleVictory() ? "Victory" : "Defeat")
-                    + ", " + GetLastBattleRounds() + " rounds.";
-            }
-
-            return "上一场：第 " + GetLastBattleStage()
-                + " 关，" + (GetLastBattleVictory() ? "胜利" : "失败")
-                + "，" + GetLastBattleRounds() + " 回合。";
+            return string.Format(
+                LocalizationManager.GetText("progress.last_battle_summary"),
+                GetLastBattleStage(),
+                LocalizationManager.GetText(GetLastBattleVictory() ? "battle.status_victory" : "battle.status_defeat"),
+                GetLastBattleRounds());
         }
 
         public static string BuildPostBattleNextStep(bool english, bool lastBattleVictory)
@@ -1143,15 +1304,11 @@ namespace Wuxing.Game
             if (lastBattleVictory)
             {
                 var nextStage = Mathf.Max(1, GetCurrentStage() + 1);
-                return english
-                    ? "Next: return to the map, repeat this stage, or move on toward Stage " + nextStage + "."
-                    : "下一步：返回地图后，可继续挑战本关，或前往第 " + nextStage + " 关。";
+                return string.Format(LocalizationManager.GetText("progress.next_step_victory"), nextStage);
             }
 
             var retryStage = Mathf.Max(1, GetCurrentStage());
-            return english
-                ? "Next: adjust equipment and retry Stage " + retryStage + "."
-                : "下一步：调整装备后重试第 " + retryStage + " 关。";
+            return string.Format(LocalizationManager.GetText("progress.next_step_defeat"), retryStage);
         }
 
         public static string BuildProgressSummary(bool english)
@@ -1160,42 +1317,29 @@ namespace Wuxing.Game
             var currentStage = GetCurrentStage();
             var highestCleared = GetHighestClearedStage();
 
-            if (english)
-            {
-                var builder =
-                    "Current Stage " + currentStage + " / Highest Cleared " + highestCleared +
-                    "\nRun State: " + (HasActiveRun() ? "In Progress" : "Idle") +
-                    "\nNext Step: " + (HasActiveRun() ? ("Continue Stage " + currentStage) : "Start From Stage 1") +
-                    "\nCultivation Lv." + GetCultivationLevel() +
-                    " / Exp " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
-                    "\n" + BuildSpiritStoneSummary(true);
-
-                if (Instance != null && Instance.HasLastBattle)
-                {
-                    builder += "\nLast Battle: Stage " + Instance.LastBattleStage
-                        + " / " + (Instance.LastBattleVictory ? "Victory" : "Defeat")
-                        + " / Rounds " + Instance.LastBattleRounds;
-                }
-
-                return builder;
-            }
-
-            var summary =
-                "当前关卡 " + currentStage + " / 最高通关 " + highestCleared +
-                "\n本轮状态：" + (HasActiveRun() ? "进行中" : "待开始") +
-                "\n下一步：" + (HasActiveRun() ? ("继续第 " + currentStage + " 关") : "从第 1 关开始") +
-                "\n修为等级 " + GetCultivationLevel() +
-                " / 经验 " + GetCultivationExp() + "/" + GetRequiredExpForNextLevel() +
-                "\n" + BuildSpiritStoneSummary(false);
+            var builder = new StringBuilder();
+            builder.Append(string.Format(LocalizationManager.GetText("progress.summary_line_stage"), currentStage, highestCleared))
+                .Append("\n")
+                .Append(LocalizationManager.GetText("progress.run_state"))
+                .Append(LocalizationManager.GetText(HasActiveRun() ? "progress.run_state_active" : "progress.run_state_idle"))
+                .Append("\n")
+                .Append(LocalizationManager.GetText("progress.next_step_line"))
+                .Append(HasActiveRun()
+                    ? string.Format(LocalizationManager.GetText("progress.continue_stage"), currentStage)
+                    : LocalizationManager.GetText("progress.start_from_stage_one"))
+                .Append("\n")
+                .Append(string.Format(LocalizationManager.GetText("progress.summary_line_cultivation"), GetCultivationLevel(), GetCultivationExp(), GetRequiredExpForNextLevel()))
+                .Append("\n")
+                .Append(BuildSpiritStoneSummary(english));
 
             if (Instance != null && Instance.HasLastBattle)
             {
-                summary += "\n上一场：第 " + Instance.LastBattleStage
-                    + " 关 / " + (Instance.LastBattleVictory ? "胜利" : "失败")
-                    + " / " + Instance.LastBattleRounds + " 回合";
+                builder.Append("\n")
+                    .Append(LocalizationManager.GetText("progress.summary_line_last_battle"))
+                    .Append(BuildLastBattleSummary(english));
             }
 
-            return summary;
+            return builder.ToString();
         }
 
         public static string BuildLongevitySummary(bool english)
@@ -1204,22 +1348,12 @@ namespace Wuxing.Game
             var years = remainingMonths / 12;
             var months = remainingMonths % 12;
 
-            if (english)
-            {
-                return "Lifespan: " + years + "y " + months + "m remaining";
-            }
-
             if (remainingMonths <= 0)
             {
-                return "阳寿：已尽";
+                return LocalizationManager.GetText("progress.lifespan_exhausted");
             }
 
-            if (months == 0)
-            {
-                return "阳寿：余" + ToChineseNumber(years) + "载整";
-            }
-
-            return "阳寿：余" + ToChineseNumber(years) + "载" + ToChineseNumber(months) + "月";
+            return string.Format(LocalizationManager.GetText("progress.lifespan_remaining"), years, months);
         }
 
         public static string BuildMapRouteSummary(bool english)
@@ -1236,25 +1370,25 @@ namespace Wuxing.Game
                     builder.Append('\n');
                 }
 
-                string state;
+                string stateKey;
                 if (stage < currentStage)
                 {
-                    state = english ? "[Done]" : "[已过]";
+                    stateKey = "progress.route_state_done";
                 }
                 else if (stage == currentStage)
                 {
-                    state = english ? "[Now]" : "[当前]";
+                    stateKey = "progress.route_state_now";
                 }
                 else if (stage <= maxReachable)
                 {
-                    state = english ? "[Open]" : "[可达]";
+                    stateKey = "progress.route_state_open";
                 }
                 else
                 {
-                    state = english ? "[Locked]" : "[未开]";
+                    stateKey = "progress.route_state_locked";
                 }
 
-                builder.Append(state)
+                builder.Append(LocalizationManager.GetText(stateKey))
                     .Append(' ')
                     .Append(stage)
                     .Append(". ")
@@ -1268,20 +1402,20 @@ namespace Wuxing.Game
         {
             if (stage == 1)
             {
-                return english ? "Village" : "新手村";
+                return LocalizationManager.GetText("map.node_type_village");
             }
 
             switch (GetNodeType(stage))
             {
                 case MapNodeType.Elite:
-                    return english ? "Elite" : "精英";
+                    return LocalizationManager.GetText("map.node_type_elite");
                 case MapNodeType.Rest:
-                    return english ? "Rest" : "休整";
+                    return LocalizationManager.GetText("map.node_type_rest");
                 case MapNodeType.Boss:
-                    return english ? "Boss" : "首领";
+                    return LocalizationManager.GetText("map.node_type_boss");
                 case MapNodeType.Battle:
                 default:
-                    return english ? "Battle" : "战斗";
+                    return LocalizationManager.GetText("map.node_type_battle");
             }
         }
 
@@ -1311,6 +1445,8 @@ namespace Wuxing.Game
             LoadOwnedEquipment();
             LoadLearnedSkills();
             LoadPendingSkillRewards();
+            LoadCompletedFixedEventStages();
+            LoadRandomStageEventStates();
         }
 
         private void SaveProgress()
@@ -1334,6 +1470,8 @@ namespace Wuxing.Game
             PlayerPrefs.SetString(OwnedEquipmentPrefKey, SerializeOwnedEquipment());
             PlayerPrefs.SetString(LearnedSkillsPrefKey, SerializeLearnedSkills());
             PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
+            PlayerPrefs.SetString(FixedStageEventsPrefKey, SerializeCompletedFixedEventStages());
+            PlayerPrefs.SetString(RandomStageEventStatesPrefKey, SerializeRandomStageEventStates());
             PlayerPrefs.SetString(RunDataSnapshotPrefKey, JsonUtility.ToJson(BuildRunDataSnapshot()));
             PlayerPrefs.Save();
         }
@@ -1673,7 +1811,7 @@ namespace Wuxing.Game
 
         private static string ToChineseNumber(int value)
         {
-            var digits = new[] { "零", "一", "二", "三", "四", "五", "六", "七", "八", "九" };
+            var digits = new[] { "\u96f6", "\u4e00", "\u4e8c", "\u4e09", "\u56db", "\u4e94", "\u516d", "\u4e03", "\u516b", "\u4e5d" };
             if (value < 10)
             {
                 return digits[Mathf.Clamp(value, 0, 9)];
@@ -1681,7 +1819,7 @@ namespace Wuxing.Game
 
             if (value < 20)
             {
-                return value == 10 ? "十" : "十" + digits[value % 10];
+                return value == 10 ? "\u5341" : "\u5341" + digits[value % 10];
             }
 
             if (value < 100)
@@ -1689,8 +1827,8 @@ namespace Wuxing.Game
                 var tens = value / 10;
                 var units = value % 10;
                 return units == 0
-                    ? digits[tens] + "十"
-                    : digits[tens] + "十" + digits[units];
+                    ? digits[tens] + "\u5341"
+                    : digits[tens] + "\u5341" + digits[units];
             }
 
             return value.ToString();
@@ -1704,7 +1842,7 @@ namespace Wuxing.Game
             }
 
             return string.Equals(skill.Category, "Passive", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(skill.Category, "被动", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(skill.Category, "\u88ab\u52a8", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(skill.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase);
         }
 
@@ -1762,14 +1900,14 @@ namespace Wuxing.Game
 
             switch (quality.Trim().ToLowerInvariant())
             {
-                case "绝品":
+                case "\u7edd\u54c1":
                 case "epic":
                 case "legendary":
                     return "epic";
-                case "稀有":
+                case "\u7a00\u6709":
                 case "rare":
                     return "rare";
-                case "普通":
+                case "\u666e\u901a":
                 case "common":
                 default:
                     return "common";
@@ -1827,7 +1965,10 @@ namespace Wuxing.Game
 
         private static string GetSkillLabel(SkillDatabase skillDatabase, string characterId, string skillId)
         {
-            return GetSkillDisplayName(skillDatabase, skillId) + " Lv." + GetSkillLevel(characterId, skillId);
+            return GetSkillDisplayName(skillDatabase, skillId)
+                + " "
+                + LocalizationManager.GetText("common.level_prefix")
+                + GetSkillLevel(characterId, skillId);
         }
 
         private void ResetSpiritStones()
@@ -1903,6 +2044,12 @@ namespace Wuxing.Game
 
         private static string GetSpiritStoneElementByStage(int stage)
         {
+            var config = GetStageNodeConfig(stage);
+            if (config != null && !string.IsNullOrEmpty(config.SpiritStoneElement))
+            {
+                return NormalizeSpiritStoneElement(config.SpiritStoneElement);
+            }
+
             switch ((Mathf.Max(1, stage) - 1) % 5)
             {
                 case 0:
@@ -1920,38 +2067,12 @@ namespace Wuxing.Game
 
         public static string GetSpiritStoneName(string element, bool english)
         {
-            switch (NormalizeSpiritStoneElement(element))
-            {
-                case "metal":
-                    return english ? "Metal Spirit Stone" : "金灵石";
-                case "wood":
-                    return english ? "Wood Spirit Stone" : "木灵石";
-                case "water":
-                    return english ? "Water Spirit Stone" : "水灵石";
-                case "fire":
-                    return english ? "Fire Spirit Stone" : "火灵石";
-                case "earth":
-                default:
-                    return english ? "Earth Spirit Stone" : "土灵石";
-            }
+            return GetSpiritStoneLocalizedText(element, false);
         }
 
         private static string GetSpiritStoneShortName(string element, bool english)
         {
-            switch (NormalizeSpiritStoneElement(element))
-            {
-                case "metal":
-                    return english ? "Metal" : "金";
-                case "wood":
-                    return english ? "Wood" : "木";
-                case "water":
-                    return english ? "Water" : "水";
-                case "fire":
-                    return english ? "Fire" : "火";
-                case "earth":
-                default:
-                    return english ? "Earth" : "土";
-            }
+            return GetSpiritStoneLocalizedText(element, true);
         }
 
         private static string WrapSpiritStoneColor(string element, string content)
@@ -1961,6 +2082,26 @@ namespace Wuxing.Game
 
         private static string GetSpiritStoneColorHex(string element)
         {
+            var database = SpiritStoneDatabaseLoader.Load();
+            if (database != null && database.SpiritStones != null)
+            {
+                var normalized = NormalizeSpiritStoneElement(element);
+                for (var i = 0; i < database.SpiritStones.Count; i++)
+                {
+                    var config = database.SpiritStones[i];
+                    if (config == null)
+                    {
+                        continue;
+                    }
+
+                    if (NormalizeSpiritStoneElement(config.Element) == normalized
+                        && !string.IsNullOrEmpty(config.ColorHex))
+                    {
+                        return config.ColorHex;
+                    }
+                }
+            }
+
             switch (NormalizeSpiritStoneElement(element))
             {
                 case "metal":
@@ -1977,6 +2118,32 @@ namespace Wuxing.Game
             }
         }
 
+        private static string GetSpiritStoneLocalizedText(string element, bool shortName)
+        {
+            var normalized = NormalizeSpiritStoneElement(element);
+            var key = "spirit_stone." + normalized + (shortName ? ".short" : ".name");
+            var localized = LocalizationManager.GetText(key);
+            if (!string.IsNullOrEmpty(localized) && !string.Equals(localized, key, StringComparison.Ordinal))
+            {
+                return localized;
+            }
+
+            switch (normalized)
+            {
+                case "metal":
+                    return shortName ? "\u91d1" : "\u91d1\u7075\u77f3";
+                case "wood":
+                    return shortName ? "\u6728" : "\u6728\u7075\u77f3";
+                case "water":
+                    return shortName ? "\u6c34" : "\u6c34\u7075\u77f3";
+                case "fire":
+                    return shortName ? "\u706b" : "\u706b\u7075\u77f3";
+                case "earth":
+                default:
+                    return shortName ? "\u571f" : "\u571f\u7075\u77f3";
+            }
+        }
+
         private static string NormalizeSpiritStoneElement(string element)
         {
             if (string.IsNullOrEmpty(element))
@@ -1986,19 +2153,19 @@ namespace Wuxing.Game
 
             switch (element.Trim().ToLowerInvariant())
             {
-                case "金":
+                case "\u91d1":
                 case "metal":
                     return "metal";
-                case "木":
+                case "\u6728":
                 case "wood":
                     return "wood";
-                case "水":
+                case "\u6c34":
                 case "water":
                     return "water";
-                case "火":
+                case "\u706b":
                 case "fire":
                     return "fire";
-                case "土":
+                case "\u571f":
                 case "earth":
                 default:
                     return "earth";
@@ -2039,6 +2206,103 @@ namespace Wuxing.Game
             progressObject.AddComponent<GameProgressManager>();
         }
 
+        private StageRandomEventState GetRandomStageEventState(int stage)
+        {
+            var resolvedStage = Mathf.Max(1, stage);
+            for (var i = 0; i < randomStageEventStates.Count; i++)
+            {
+                var state = randomStageEventStates[i];
+                if (state != null && state.Stage == resolvedStage)
+                {
+                    return state;
+                }
+            }
+
+            return null;
+        }
+
+        private void LoadCompletedFixedEventStages()
+        {
+            completedFixedEventStages.Clear();
+            var raw = PlayerPrefs.GetString(FixedStageEventsPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<IntListWrapper>(raw);
+            if (wrapper == null || wrapper.Values == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Values.Count; i++)
+            {
+                var stage = Mathf.Max(1, wrapper.Values[i]);
+                if (!completedFixedEventStages.Contains(stage))
+                {
+                    completedFixedEventStages.Add(stage);
+                }
+            }
+        }
+
+        private string SerializeCompletedFixedEventStages()
+        {
+            var wrapper = new IntListWrapper();
+            wrapper.Values.AddRange(completedFixedEventStages);
+            return JsonUtility.ToJson(wrapper);
+        }
+
+        private void LoadRandomStageEventStates()
+        {
+            randomStageEventStates.Clear();
+            var raw = PlayerPrefs.GetString(RandomStageEventStatesPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<StageRandomEventStateListWrapper>(raw);
+            if (wrapper == null || wrapper.Entries == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Entries.Count; i++)
+            {
+                var entry = wrapper.Entries[i];
+                if (entry == null || entry.Stage <= 0)
+                {
+                    continue;
+                }
+
+                randomStageEventStates.Add(new StageRandomEventState
+                {
+                    Stage = Mathf.Max(1, entry.Stage),
+                    LastTriggeredMonth = Mathf.Max(0, entry.LastTriggeredMonth)
+                });
+            }
+        }
+
+        private string SerializeRandomStageEventStates()
+        {
+            var wrapper = new StageRandomEventStateListWrapper();
+            for (var i = 0; i < randomStageEventStates.Count; i++)
+            {
+                var entry = randomStageEventStates[i];
+                if (entry != null)
+                {
+                    wrapper.Entries.Add(new StageRandomEventState
+                    {
+                        Stage = entry.Stage,
+                        LastTriggeredMonth = entry.LastTriggeredMonth
+                    });
+                }
+            }
+
+            return JsonUtility.ToJson(wrapper);
+        }
+
         [Serializable]
         private class CharacterRunDataListWrapper
         {
@@ -2046,9 +2310,28 @@ namespace Wuxing.Game
         }
 
         [Serializable]
+        private class IntListWrapper
+        {
+            public List<int> Values = new List<int>();
+        }
+
+        [Serializable]
         private class SkillRewardOptionListWrapper
         {
             public List<SkillRewardOption> Entries = new List<SkillRewardOption>();
+        }
+
+        [Serializable]
+        private class StageRandomEventState
+        {
+            public int Stage;
+            public int LastTriggeredMonth;
+        }
+
+        [Serializable]
+        private class StageRandomEventStateListWrapper
+        {
+            public List<StageRandomEventState> Entries = new List<StageRandomEventState>();
         }
     }
 }

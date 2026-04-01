@@ -275,19 +275,7 @@ namespace Wuxing.UI
         {
             var eventProfile = GameProgressManager.GetStageEventProfile(stage);
             var nodeType = GameProgressManager.GetNodeType(stage);
-
-            switch (eventProfile)
-            {
-                case "VillageStart":
-                    ShowVillageEventChoices(stage);
-                    return;
-                case "TradeMarket":
-                    ShowMarketEventChoices(stage);
-                    return;
-                case "InsightSanctum":
-                    ShowInsightEventChoices(stage);
-                    return;
-            }
+            var eventMode = GameProgressManager.GetStageEventMode(stage);
 
             if (GameProgressManager.IsBattleNode(nodeType))
             {
@@ -295,9 +283,21 @@ namespace Wuxing.UI
                 return;
             }
 
+            if (string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase))
+            {
+                TriggerRandomConfiguredEvent(stage, eventProfile);
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(eventProfile))
+            {
+                ShowConfiguredEventChoices(stage, eventProfile);
+                return;
+            }
+
             if (nodeType == MapNodeType.Rest)
             {
-                ShowRestEventChoices(stage);
+                ShowConfiguredEventChoices(stage, "Rest");
                 return;
             }
 
@@ -322,27 +322,16 @@ namespace Wuxing.UI
                 LocalizationManager.GetText("map.button_continue"),
                 null);
         }
-        private void ShowRestEventChoices(int stage)
+
+        private void ShowRandomEventCooldownPopup(int stage)
         {
-            ShowConfiguredEventChoices(stage, "Rest", "map.rest_title", "map.rest_message");
+            var remainingMonths = GameProgressManager.GetRandomStageCooldownRemainingMonths(stage);
+            ShowNodeRewardPopup(
+                LocalizationManager.GetText("map.random_cooldown_title"),
+                string.Format(LocalizationManager.GetText("map.random_cooldown_message"), Mathf.Max(0, remainingMonths)));
         }
 
-        private void ShowVillageEventChoices(int stage)
-        {
-            ShowConfiguredEventChoices(stage, "VillageStart", "map.village_title", "map.village_message");
-        }
-
-        private void ShowMarketEventChoices(int stage)
-        {
-            ShowConfiguredEventChoices(stage, "TradeMarket", "map.market_title", "map.market_message");
-        }
-
-        private void ShowInsightEventChoices(int stage)
-        {
-            ShowConfiguredEventChoices(stage, "InsightSanctum", "map.insight_title", "map.insight_message");
-        }
-
-        private void ShowConfiguredEventChoices(int stage, string profile, string titleKey, string messageKey)
+        private void ShowConfiguredEventChoices(int stage, string profile)
         {
             var options = GetEventOptions(profile);
             if (options.Count == 0)
@@ -351,10 +340,18 @@ namespace Wuxing.UI
                 return;
             }
 
+            var profileConfig = GetEventProfile(profile);
+            var titleKey = profileConfig != null && !string.IsNullOrEmpty(profileConfig.TitleKey)
+                ? profileConfig.TitleKey
+                : "map.title";
+            var messageKey = profileConfig != null && !string.IsNullOrEmpty(profileConfig.MessageKey)
+                ? profileConfig.MessageKey
+                : "map.toast_event_triggered";
+
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
-                ResolveConfiguredEventChoice(stage, profile, 0);
+                ResolveConfiguredEventChoice(stage, profile, 0, false);
                 return;
             }
 
@@ -366,7 +363,7 @@ namespace Wuxing.UI
                 var capturedIndex = i;
                 var option = options[i];
                 choiceLabels.Add(BuildConfiguredChoiceLabel(option, stage, isEnglish));
-                choiceActions.Add(delegate { ResolveConfiguredEventChoice(stage, profile, capturedIndex); });
+                choiceActions.Add(delegate { ResolveConfiguredEventChoice(stage, profile, capturedIndex, false); });
             }
 
             popup.SetupChoices(
@@ -376,7 +373,51 @@ namespace Wuxing.UI
                 choiceActions);
         }
 
-        private void ResolveConfiguredEventChoice(int stage, string profile, int optionIndex)
+        private void TriggerRandomConfiguredEvent(int stage, string profile)
+        {
+            if (GameProgressManager.GetRandomStageCooldownRemainingMonths(stage) > 0)
+            {
+                ShowRandomEventCooldownPopup(stage);
+                return;
+            }
+
+            var options = GetEventOptions(profile);
+            if (options.Count == 0)
+            {
+                UIManager.Instance.ShowToast(LocalizationManager.GetText("map.toast_event_triggered"), MapToastDuration);
+                return;
+            }
+
+            var availableOptions = new List<EventOptionConfig>();
+            for (var i = 0; i < options.Count; i++)
+            {
+                var option = options[i];
+                if (option == null)
+                {
+                    continue;
+                }
+
+                var element = ResolveEventSpiritStoneElement(option, stage);
+                var cost = ResolveScaledValue(option.SpiritStoneCostBase, option.SpiritStoneCostPerStage, stage);
+                if (cost <= 0 || GameProgressManager.HasEnoughSpiritStones(element, cost))
+                {
+                    availableOptions.Add(option);
+                }
+            }
+
+            if (availableOptions.Count == 0)
+            {
+                ShowNodeRewardPopup(
+                    LocalizationManager.GetText("map.not_enough_stones_title"),
+                    LocalizationManager.GetText("map.not_enough_stones_message"));
+                return;
+            }
+
+            var selectedOption = availableOptions[UnityEngine.Random.Range(0, availableOptions.Count)];
+            ExecuteConfiguredEventOption(stage, selectedOption, true);
+        }
+
+        private void ResolveConfiguredEventChoice(int stage, string profile, int optionIndex, bool isRandomEvent)
         {
             var options = GetEventOptions(profile);
             if (optionIndex < 0 || optionIndex >= options.Count)
@@ -385,6 +426,11 @@ namespace Wuxing.UI
             }
 
             var option = options[optionIndex];
+            ExecuteConfiguredEventOption(stage, option, isRandomEvent);
+        }
+
+        private void ExecuteConfiguredEventOption(int stage, EventOptionConfig option, bool isRandomEvent)
+        {
             if (option == null)
             {
                 return;
@@ -403,10 +449,16 @@ namespace Wuxing.UI
             var exp = ResolveScaledValue(option.ExpBase, option.ExpPerStage, stage);
             var spiritStoneCount = ResolveScaledValue(option.SpiritStoneBase, option.SpiritStonePerStage, stage);
             var rewardMode = ParseRewardMode(option.RewardMode);
+            if (rewardMode == "Utility")
+            {
+                ExecuteUtilityAction(stage, option, isRandomEvent);
+                return;
+            }
+
             if (rewardMode == "Skill")
             {
                 GameProgressManager.PrepareSkillRewardOptions(ParseRewardNodeType(option.SkillRewardNodeType));
-                ShowConfiguredSkillRewardChoices(option);
+                ShowConfiguredSkillRewardChoices(stage, option, isRandomEvent);
                 return;
             }
 
@@ -415,18 +467,62 @@ namespace Wuxing.UI
                 : GameProgressManager.GrantProgressReward(exp, element, spiritStoneCount);
 
             CompleteNodeRewardFlow(
+                stage,
                 LocalizationManager.GetText(option.ResultTitleKey),
                 LocalizationManager.GetText(option.ResultIntroKey),
-                reward);
+                reward,
+                isRandomEvent);
         }
 
-        private void ShowConfiguredSkillRewardChoices(EventOptionConfig option)
+        private void ExecuteUtilityAction(int stage, EventOptionConfig option, bool isRandomEvent)
+        {
+            FinalizeStageEventState(stage, isRandomEvent);
+            RefreshView();
+
+            var action = option.UtilityAction ?? string.Empty;
+            if (string.Equals(action, "OpenEquipment", StringComparison.OrdinalIgnoreCase))
+            {
+                UIManager.Instance.ShowPage("Battle", "equipment");
+                return;
+            }
+
+            if (string.Equals(action, "OpenSkillOverview", StringComparison.OrdinalIgnoreCase))
+            {
+                var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+                if (popup != null)
+                {
+                    popup.Setup(
+                        LocalizationManager.GetText("map.skill_overview_title"),
+                        GameProgressManager.BuildLearnedSkillsOverview(IsEnglish()),
+                        false,
+                        null,
+                        null,
+                        LocalizationManager.GetText("map.button_continue"),
+                        null);
+                }
+                return;
+            }
+
+            ShowNodeRewardPopup(
+                LocalizationManager.GetText(option.ResultTitleKey),
+                LocalizationManager.GetText(option.ResultIntroKey));
+        }
+
+        private void ShowConfiguredSkillRewardChoices(int stage, EventOptionConfig option, bool isRandomEvent)
         {
             var isEnglish = IsEnglish();
             var options = GameProgressManager.GetPendingSkillRewardOptions();
             if (options.Count == 0)
             {
-                FinalizeConfiguredSkillReward(option, null, isEnglish);
+                FinalizeConfiguredSkillReward(stage, option, null, isEnglish, isRandomEvent);
+                return;
+            }
+
+            if (isRandomEvent)
+            {
+                var randomIndex = UnityEngine.Random.Range(0, options.Count);
+                var autoApplied = GameProgressManager.ApplyPendingSkillReward(randomIndex);
+                FinalizeConfiguredSkillReward(stage, option, autoApplied, isEnglish, true);
                 return;
             }
 
@@ -434,7 +530,7 @@ namespace Wuxing.UI
             if (popup == null)
             {
                 var applied = GameProgressManager.ApplyPendingSkillReward(0);
-                FinalizeConfiguredSkillReward(option, applied, isEnglish);
+                FinalizeConfiguredSkillReward(stage, option, applied, isEnglish, false);
                 return;
             }
 
@@ -447,7 +543,7 @@ namespace Wuxing.UI
                 choiceActions.Add(delegate
                 {
                     var applied = GameProgressManager.ApplyPendingSkillReward(capturedIndex);
-                    FinalizeConfiguredSkillReward(option, applied, isEnglish);
+                    FinalizeConfiguredSkillReward(stage, option, applied, isEnglish, false);
                 });
             }
 
@@ -458,9 +554,9 @@ namespace Wuxing.UI
                 choiceActions);
         }
 
-        private void FinalizeConfiguredSkillReward(EventOptionConfig option, SkillRewardOption appliedOption, bool isEnglish)
+        private void FinalizeConfiguredSkillReward(int stage, EventOptionConfig option, SkillRewardOption appliedOption, bool isEnglish, bool isRandomEvent)
         {
-            GameProgressManager.MarkCurrentStageCleared();
+            FinalizeStageEventState(stage, isRandomEvent);
             RefreshView();
             ShowNodeRewardPopup(
                 LocalizationManager.GetText(option.ResultTitleKey),
@@ -473,6 +569,12 @@ namespace Wuxing.UI
         {
             var database = EventOptionDatabaseLoader.Load();
             return database != null ? database.GetByProfile(profile) : new List<EventOptionConfig>();
+        }
+
+        private static EventProfileConfig GetEventProfile(string profile)
+        {
+            var database = EventProfileDatabaseLoader.Load();
+            return database != null ? database.GetByProfile(profile) : null;
         }
 
         private string BuildConfiguredChoiceLabel(EventOptionConfig option, int stage, bool isEnglish)
@@ -514,6 +616,10 @@ namespace Wuxing.UI
             {
                 lines.Add(GetSkillRewardGainText(ParseRewardNodeType(option.SkillRewardNodeType)));
             }
+            else if (rewardMode == "Utility")
+            {
+                lines.Add(GetUtilityActionText(option.UtilityAction));
+            }
 
             return BuildChoiceLabel(title, lines.ToArray());
         }
@@ -548,6 +654,11 @@ namespace Wuxing.UI
             if (string.Equals(rawValue, "Skill", StringComparison.OrdinalIgnoreCase))
             {
                 return "Skill";
+            }
+
+            if (string.Equals(rawValue, "Utility", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Utility";
             }
 
             return "Progress";
@@ -586,11 +697,36 @@ namespace Wuxing.UI
             }
         }
 
-        private void CompleteNodeRewardFlow(string title, string intro, BattleRewardResult reward)
+        private void CompleteNodeRewardFlow(int stage, string title, string intro, BattleRewardResult reward, bool isRandomEvent)
         {
-            GameProgressManager.MarkCurrentStageCleared();
+            FinalizeStageEventState(stage, isRandomEvent);
             RefreshView();
             ShowNodeRewardPopup(title, BuildNodeRewardMessage(intro, reward, IsEnglish()));
+        }
+
+        private void FinalizeStageEventState(int stage, bool isRandomEvent)
+        {
+            if (isRandomEvent)
+            {
+                GameProgressManager.MarkRandomStageEventTriggered(stage);
+            }
+
+            GameProgressManager.MarkCurrentStageCleared();
+        }
+
+        private string GetUtilityActionText(string utilityAction)
+        {
+            if (string.Equals(utilityAction, "OpenEquipment", StringComparison.OrdinalIgnoreCase))
+            {
+                return LocalizationManager.GetText("map.choice_open_equipment");
+            }
+
+            if (string.Equals(utilityAction, "OpenSkillOverview", StringComparison.OrdinalIgnoreCase))
+            {
+                return LocalizationManager.GetText("map.choice_open_skills");
+            }
+
+            return LocalizationManager.GetText("map.choice_open_route");
         }
 
         private static string BuildChoiceLabel(string title, params string[] lines)
@@ -871,6 +1007,7 @@ namespace Wuxing.UI
             var selectedNodeType = GameProgressManager.GetNodeType(selectedStage);
             var canReach = GameProgressManager.CanTravelToStage(selectedStage);
             var monthCost = Mathf.Max(1, Mathf.Abs(selectedStage - currentStage));
+            var eventMode = GameProgressManager.GetStageEventMode(selectedStage);
 
             var builder = new StringBuilder();
             builder.Append(LocalizationManager.GetText("map.detail_title"))
@@ -882,8 +1019,28 @@ namespace Wuxing.UI
                 .Append('\n')
                 .Append(LocalizationManager.GetText("map.detail_time_cost"))
                 .Append(monthCost)
-                .Append(LocalizationManager.GetText("map.detail_month_suffix"))
-                .Append('\n')
+                .Append(LocalizationManager.GetText("map.detail_month_suffix"));
+
+            if (!GameProgressManager.IsBattleNode(selectedNodeType))
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("map.detail_event_mode"))
+                    .Append(LocalizationManager.GetText(string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase)
+                        ? "map.detail_event_random"
+                        : "map.detail_event_fixed"));
+
+                if (string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase))
+                {
+                    var remainingMonths = GameProgressManager.GetRandomStageCooldownRemainingMonths(selectedStage);
+                    builder.Append('\n')
+                        .Append(LocalizationManager.GetText("map.detail_event_cooldown"))
+                        .Append(remainingMonths > 0
+                            ? string.Format(LocalizationManager.GetText("map.detail_event_remaining"), remainingMonths)
+                            : LocalizationManager.GetText("map.detail_event_ready"));
+                }
+            }
+
+            builder.Append('\n')
                 .Append('\n')
                 .Append(GameProgressManager.BuildNodeDetail(isEnglish, selectedStage));
 

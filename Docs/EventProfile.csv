@@ -1,0 +1,8 @@
+﻿Profile,TitleKey,MessageKey,Notes
+VillageStart,map.village_title,map.village_message,开局固定服务点
+Rest,map.rest_title,map.rest_message,普通休整事件
+TradeMarket,map.market_title,map.market_message,固定交易事件
+InsightSanctum,map.insight_title,map.insight_message,高阶机缘事件
+WanderingFortune,map.fortune_result_title,map.random_event_message,随机机缘事件
+SpiritBroker,map.broker_title,map.broker_message,牙行事件
+TrialForge,map.forge_title,map.forge_message,熔炉事件

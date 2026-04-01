@@ -1,259 +1,313 @@
-﻿Key,ZhHans,En
-menu.title,五行行者,Wuxing Wanderer
-landing.kicker,单机修仙肉鸽,CULTIVATION ROGUELIKE
-landing.title,五行行者,Wuxing Wanderer
-landing.subtitle,以寿元为火，以五行为刃。,Burn lifespan as fuel, wield the five elements as your blade.
-landing.feature_1,五行灵根构筑，决定你这一局能走多远。,Build around elemental roots and decide how far this run can go.
-landing.feature_2,自动战斗，策略重心放在配装、路线与功法取舍。,Auto battles keep the focus on loadouts, routes, and cultivation choices.
-landing.feature_3,寿元会随着推进不断流逝，每一步都在逼近终局。,Lifespan drains as you advance, and every step pushes you closer to the end.
-landing.button_enter,开始游戏,Start Game
-landing.footer,进入主菜单后可继续推进地图、战斗与构筑。,Enter the main menu to continue your route, battles, and build.
-menu.subtitle,第一阶段 / 第一步 / 文字与线框 UGUI,Phase 1 / Step 1 / Text and line UGUI
-menu.button_battle,进入战斗页,Open Battle Page
-menu.button_popup,打开确认弹窗,Open Confirm Popup
-menu.button_toast,显示提示,Show Toast
-menu.button_language,切换语言,Switch Language
-menu.button_rebuild_ui,重建UI预设,Rebuild UI Prefabs
-menu.footer,这一版先只用文字、线条和矩形框，方便后续替换美术。,This version uses text lines and rectangles first so art can be replaced later.
-battle.summary_no_data,无数据,No data
-battle.summary_no_units,无单位,No units
-battle.summary_dead,阵亡,KO
-battle.log_config_missing,战斗配置缺失，请先导入全部 CSV。,Battle config missing. Import all CSV files first.
-battle.title,战斗页占位,Battle Page Placeholder
-battle.player_team,我方队伍,Player Team
-battle.player_content,"角色甲  HP 120/120
-角色乙  HP 150/150","Unit A  HP 120/120
-Unit B  HP 150/150"
-battle.enemy_team,敌方队伍,Enemy Team
-battle.enemy_content,"敌人甲  HP 100/100
-敌人乙  HP 90/90","Enemy A  HP 100/100
-Enemy B  HP 90/90"
-battle.equipment_title,装备,Equipment
-battle.equipment_none,无装备,None
-battle.equipment_detail_title,装备详情,Equipment Detail
-battle.equipment_preset_balanced,均衡,Balanced
-battle.equipment_preset_burst,爆发,Burst
-battle.log_title,战斗日志,Battle Log
-battle.log_content,下一步这里会接真实战斗日志。,This area will show real battle logs in the next step.
-battle.log_round,回合,Round
-battle.log_enemy_defeated,敌方全灭,Enemy team defeated.
-battle.log_player_defeated,我方全灭,Player team defeated.
-battle.log_round_limit,达到回合上限,Battle reached round limit.
-battle.log_casts,施放,casts
-battle.log_heals,治疗了,heals
-battle.log_takes,受到,takes
-battle.log_damage,伤害,damage
-battle.log_steadies,稳住了身形,steadies
-battle.log_attacks,攻击,attacks
-battle.log_on,目标,on
-battle.log_for,造成,for
-battle.log_fallen,已阵亡。,has fallen.
-battle.log_finished,战斗结束,Battle finished
-battle.status_idle,等待开始战斗,Waiting to start battle
-battle.status_victory,战斗胜利,Battle Victory
-battle.status_defeat,战斗失败,Battle Defeat
-battle.result_rounds,总回合数,Total Rounds
-battle.button_start,开始战斗,Start Battle
-battle.button_restart,重开,Restart
-battle.button_review,回顾,Review
-battle.button_open_result,打开结算窗口,Open Result Window
-battle.button_back,返回主菜单,Back To Main Menu
-battle.button_tip,显示提示,Show Tip
-battle.button_close_log,关闭日志,Close Log
-battle.button_equipment,查看装备,Equipment
-battle.button_cycle_equipment,切换方案,Switch Preset
-battle.button_close_equipment,关闭装备,Close
-popup.confirm.title,确认,Confirm
-popup.confirm.message,这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。,This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later.
-popup.confirm_button,确认,Confirm
-popup.cancel_button,取消,Cancel
-toast.framework_ready,UI 框架已经就绪。,UI framework is ready.
-toast.confirmed,你点击了确认。,Confirm clicked.
-toast.cancelled,你取消了操作。,Cancelled.
-toast.battle_next,下一步会接入真正的战斗系统。,The real battle system will be connected next.
-toast.language_changed,语言已切换。,Language switched.
-toast.ui_prefabs_rebuilt,UI预设已重建。,UI prefabs rebuilt.
-toast.editor_only,该功能仅在Unity编辑器中可用。,This feature is only available in the Unity Editor.
-common.separator_names,、,", "
-map.title,地图路线,Map Route
-map.status_prefix,当前节点：,Current Node: 
-map.region_prefix,区域：,Region: 
-map.button_enter,进入节点,Enter Node
-map.button_pass_month,推进一月,Pass One Month
-map.button_reset_run,重置本轮,Reset Run
-map.button_back_menu,返回主菜单,Back To Menu
-map.toast_lifespan_ended,阳寿已尽，本轮结束。,Lifespan exhausted. The run has ended.
-map.toast_route_complete,本轮路线完成，返回主菜单。,Route complete. Returning to main menu.
-map.toast_month_passed,又逝一月。,One month passes.
-battle.slot_weapon,武器,Weapon
-battle.slot_armor,护甲,Armor
-battle.slot_accessory,饰品,Accessory
-battle.editor_target,当前角色,Editing Unit
-battle.editor_stats,当前属性,Stats
-battle.editor_skills,当前技能,Skills
-battle.editor_team_totals,队伍总属性,Team Totals
-battle.editor_preview,战斗预览,Battle Preview
-battle.editor_owned_equipment,已拥有装备,Owned Equipment
-battle.editor_unit_prefix,角色: ,Unit: 
-battle.preview_victory,预计胜利,Victory
-battle.preview_defeat,预计失败,Defeat
-battle.preview_rounds,回合数,Rounds
-battle.button_reset_loadout,重置装备,Reset Loadout
-battle.button_auto_offense,自动输出,Auto Offense
-battle.button_auto_defense,自动生存,Auto Defense
-battle.prep_status_prefix,正在准备第 ,Preparing Stage 
-battle.prep_status_suffix, 关, stage
-battle.prep_briefing_prefix,第 ,Stage 
-battle.prep_briefing_suffix, 关简报, Briefing
-battle.prep_objective,目标：击败全部敌人。,Objective: Defeat all enemies.
-battle.prep_enemies,敌人：,Enemies: 
-battle.prep_threat,威胁：,Threat: 
-battle.prep_preview,预估：,Preview: 
-battle.prep_likely_victory,较大概率胜利,Likely Victory
-battle.prep_likely_defeat,较大概率失败,Likely Defeat
-battle.prep_rounds_prefix,，约 , in 
-battle.prep_rounds_suffix, 回合。, rounds.
-battle.prep_tip,建议：如果预估不理想，先调整装备再开战。,Tip: Adjust equipment before battle if the preview looks risky.
-battle.threat_low,低,Low
-battle.threat_medium,中,Medium
-battle.threat_medium_high,中高,Medium-High
-battle.threat_high,高,High
-
-
-
-
-
-common.button_close,关闭,Close
-map.toast_event_triggered,目的地事件已触发。,The destination event has been triggered.
-map.button_continue,继续,Continue
-map.rest_choice_refine,"炼化灵石
-消耗：{0} -{1}
-经验 +{2}","Refine Through Stones
-Cost: {0} -{1}
-Exp +{2}"
-map.rest_choice_sort,"整理行囊
-经验 +{0}
-{1} +{2}","Sort Equipment
-Exp +{0}
-{1} +{2}"
-map.rest_choice_breath,"调息养元
-经验 +{0}
-灵石 +0","Breathing Practice
-Exp +{0}
-Spirit Stones +0"
-map.rest_choice_gather,"采集灵石
-经验 +{0}
-{1} +{2}","Gather Qi Crystals
-Exp +{0}
-{1} +{2}"
-map.rest_title,休整事件,Rest Event
-map.rest_message,选择你在此地如何调整状态。,Choose how to spend this stop.
-map.village_choice_elder,"长者指点
-经验 +{0}
-灵石 +0","Elder's Guidance
-Exp +{0}
-Spirit Stones +0"
-map.village_choice_supply,"行商补给
-经验 +{0}
-{1} +{2}","Merchant Supply
-Exp +{0}
-{1} +{2}"
-map.village_choice_scripture,"借阅藏经
-获得 1 次功法机缘","Borrow Scripture
-Gain 1 skill reward choice"
-map.village_title,新手村,Novice Village
-map.village_message,离开新手村前，选择一份启程助力。,"Before leaving the village, choose one piece of support."
-map.rest_result_gather,你在附近采集五行灵石，囊中收获更丰。,You gather the local five-element crystals and leave with fuller pockets.
-map.not_enough_stones_title,灵石不足,Not Enough Spirit Stones
-map.not_enough_stones_message,你手中的对应灵石不足，暂时无法进行这次炼化。,You do not have enough matching spirit stones to refine this stop.
-map.rest_result_refine,你将储备灵石当场炼化，强行换来一段更猛的修为推进。,You refine stored spirit stones into pure progress and push your cultivation further.
-map.rest_result_sort,你整理装备与气机，为下一段路做足准备。,You sort equipment and steady your rhythm before moving on.
-map.rest_result_breath,你专心调息运转周天，修为更进一步。,You focus on breathing practice and deepen your cultivation.
-map.rest_result_title,休整结果,Rest Result
-map.village_result_supply,路过行商给你留下一份赶路所需的修行补给。,A passing merchant leaves you a small bundle of cultivation supplies.
-map.village_result_elder,临行前，村中长者给了你几句修行指点。,The village elder gives you a few words of guidance before you set out.
-map.village_result_title,村中收获,Village Result
-map.scripture_title,借阅藏经,Borrow Scripture
-map.scripture_message,选择一项开局功法机缘。,Choose one starter skill reward.
-map.scripture_empty,你整理思绪后，轻装上路。,You leave the village with a clearer mind.
-map.scripture_intro,你从村中藏经阁借得一页功法残卷。,You borrow a manual from the village archive.
-map.reward_choice_empty,空白奖励,Empty
-map.reward_choice_label,"功法机缘
-{0}
-角色：{1}
-结果：Lv.{2} {3}
-五行：{4}","Reward
-{0}
-Target: {1}
-Result: Lv.{2} {3}
-Element: {4}"
-map.reward_result_upgrade,升级,Upgrade
-map.reward_result_learn,习得,Learn
-map.reward_toast_upgrade,{0} 将 {1} 提升至 Lv.{2}。,{0} upgraded {1} to Lv.{2}.
-map.reward_toast_learn,{0} 习得 {1}，当前 Lv.{2}。,{0} learned {1} at Lv.{2}.
-map.reward_title,获得,Reward
-map.reward_exp,经验 +,Exp +
-map.reward_levelup,修为提升 +,Cultivation Lv. +
-map.skill_overview_title,已学功法,Run Skills
-map.lifespan_title,寿元已尽,Lifespan Ended
-map.lifespan_message,你在本轮途中寿元耗尽。当前局将结束，并返回主界面。,Your lifespan has run out during this journey. The current run will end and return to the main menu.
-map.button_back_main,返回主界面,Back To Main Menu
-map.detail_title,选中节点,Selected Node
-map.detail_stage,第 {0} 关 · {1},Stage {0} · {1}
-map.detail_reachable,是否可达：,Reachable: 
-map.detail_reachable_yes,可达,Yes
-map.detail_reachable_locked,未解锁,Locked
-map.detail_time_cost,耗时：,Time Cost: 
-map.detail_month_suffix, 月, month(s)
-map.detail_arrival_effect,到达效果：,Arrival Effect: 
-map.detail_arrival_rest,立刻触发休整事件，并停留在地图上。,Trigger rest immediately and stay on the map.
-map.detail_arrival_battle,移动结束后自动进入战斗。,Start battle automatically after movement ends.
-map.profile_title,个人信息,Profile
-map.profile_current_stage,当前关卡：,Current Stage: 
-map.profile_highest_cleared,最高通关：,Highest Cleared: 
-map.profile_reachable_frontier,可达前沿：,Reachable Frontier: 
-map.profile_cultivation_level,修为等级 ,Cultivation Lv.
-map.profile_exp,经验：,Exp: 
-map.profile_owned_equipment,已拥有装备：,Owned Equipment: 
-map.arrival_toast,已抵达第 {0} 关 · {1},Arrived at Stage {0} · {1}
-map.node_label,"第{0}关
-{1}","Stage {0}
-{1}"
-map.status_current_position,当前位置：第 {0} 关 · {1},Current Position: Stage {0} · {1}
-map.button_previous,后退,Previous
-map.button_next,前进,Next
-map.button_skill_overview,已学功法,Run Skills
-
-map.market_title,行旅集市,Traveling Market
-map.market_message,你可以在这里拿灵石换资源，或稳稳补一轮状态。,Trade spirit stones for resources here, or take a steady refill before moving on.
-map.market_choice_relic,换购法器,Trade for Relic
-map.market_choice_manual,换购残卷,Trade for Manual
-map.market_choice_supply,补足行囊,Restock Supplies
-map.market_result_title,集市收获,Market Result
-map.market_result_relic,你用手头灵石换来一件趁手法器，顺便稳住了一截修为。,You trade your spirit stones for a fitting relic and stabilize your cultivation a bit.
-map.market_result_supply,你补足了路上的必需品，推进节奏重新平顺下来。,You restock what you need for the road and smooth out your run tempo.
-map.market_skill_title,集市残卷,Market Manual
-map.market_skill_message,从摊位上的几页残卷里挑一份带走。,Choose one manual from the incomplete pages on the stall.
-map.market_skill_intro,你从集市摊位上换来一页残卷。,You trade for a torn manual page from the market stall.
-map.market_skill_empty,你翻遍摊位，却没有遇到合适的机缘。,You search every stall, but no fitting opportunity reveals itself.
-map.insight_title,悟道静室,Insight Sanctum
-map.insight_message,首领战前的最后一站，你可以换一轮更激进的成长。,This is your last stop before the boss, a place to force one more spike in power.
-map.insight_choice_core,凝练道基,Condense Foundation
-map.insight_choice_cache,开启遗藏,Open Relic Cache
-map.insight_choice_enlighten,闭关顿悟,Seek Enlightenment
-map.insight_result_title,静室所得,Sanctum Result
-map.insight_result_core,你以灵石强行凝练道基，换来一段更扎实的修为突破。,You force your foundation tighter with spirit stones and secure a sharper cultivation jump.
-map.insight_result_cache,你开启静室遗藏，补到一份装备机缘与临战储备。,You open the sanctum cache and come away with gear and a bit of battle stock.
-map.insight_skill_title,顿悟机缘,Moment of Insight
-map.insight_skill_message,从这一次顿悟里定下一门最终要诀。,Choose the technique that crystallizes from this moment of insight.
-map.insight_skill_intro,你在静室闭关片刻，抓住了一线更高阶的功法机缘。,A brief retreat inside the sanctum reveals a higher-tier skill opportunity.
-map.insight_skill_empty,这一次闭关没有新的感悟，只留下片刻清明。,This retreat brings no new revelation, only a brief moment of clarity.
-map.choice_cost,消耗：{0} -{1},Cost: {0} -{1}
-map.choice_gain_exp,经验 +{0},Exp +{0}
-map.choice_gain_stones,{0} +{1},{0} +{1}
-map.choice_gain_equipment,装备机缘 1 次,Gain 1 equipment reward
-map.choice_gain_skill_elite,获得 1 次高阶功法机缘,Gain 1 high-tier skill reward
-map.choice_gain_skill_boss,获得 1 次顶阶功法机缘,Gain 1 boss-tier skill reward
-map.reward_equipment,装备掉落：,Equipment Drop: 
-map.choice_gain_skill,获得 1 次功法机缘,Gain 1 skill reward
-
+﻿"﻿Key","ZhHans","En"
+"menu.title","五行行者","Wuxing Wanderer"
+"landing.kicker","单机修仙肉鸽","CULTIVATION ROGUELIKE"
+"landing.title","五行行者","Wuxing Wanderer"
+"landing.subtitle","以寿元为火，以五行为刃。","Burn lifespan as fuel"
+"landing.feature_1","五行灵根构筑，决定你这一局能走多远。","Build around elemental roots and decide how far this run can go."
+"landing.feature_2","自动战斗，策略重心放在配装、路线与功法取舍。","Auto battles keep the focus on loadouts"
+"landing.feature_3","寿元会随着推进不断流逝，每一步都在逼近终局。","Lifespan drains as you advance"
+"landing.button_enter","开始游戏","Start Game"
+"landing.footer","进入主菜单后可继续推进地图、战斗与构筑。","Enter the main menu to continue your route"
+"menu.subtitle","第一阶段 / 第一步 / 文字与线框 UGUI","Phase 1 / Step 1 / Text and line UGUI"
+"menu.button_battle","进入战斗页","Open Battle Page"
+"menu.button_popup","打开确认弹窗","Open Confirm Popup"
+"menu.button_toast","显示提示","Show Toast"
+"menu.button_language","切换语言","Switch Language"
+"menu.button_rebuild_ui","重建UI预设","Rebuild UI Prefabs"
+"menu.footer","这一版先只用文字、线条和矩形框，方便后续替换美术。","This version uses text lines and rectangles first so art can be replaced later."
+"battle.summary_no_data","无数据","No data"
+"battle.summary_no_units","无单位","No units"
+"battle.summary_dead","阵亡","KO"
+"battle.log_config_missing","战斗配置缺失，请先导入全部 CSV。","Battle config missing. Import all CSV files first."
+"battle.title","战斗页占位","Battle Page Placeholder"
+"battle.player_team","我方队伍","Player Team"
+"battle.player_content","角色甲  HP 120/120角色乙  HP 150/150","Unit A  HP 120/120Unit B  HP 150/150"
+"battle.enemy_team","敌方队伍","Enemy Team"
+"battle.enemy_content","敌人甲  HP 100/100敌人乙  HP 90/90","Enemy A  HP 100/100Enemy B  HP 90/90"
+"battle.equipment_title","装备","Equipment"
+"battle.equipment_none","无装备","None"
+"battle.equipment_detail_title","装备详情","Equipment Detail"
+"battle.equipment_preset_balanced","均衡","Balanced"
+"battle.equipment_preset_burst","爆发","Burst"
+"battle.log_title","战斗日志","Battle Log"
+"battle.log_content","下一步这里会接真实战斗日志。","This area will show real battle logs in the next step."
+"battle.log_round","回合","Round"
+"battle.log_enemy_defeated","敌方全灭","Enemy team defeated."
+"battle.log_player_defeated","我方全灭","Player team defeated."
+"battle.log_round_limit","达到回合上限","Battle reached round limit."
+"battle.log_casts","施放","casts"
+"battle.log_heals","治疗了","heals"
+"battle.log_takes","受到","takes"
+"battle.log_damage","伤害","damage"
+"battle.log_steadies","稳住了身形","steadies"
+"battle.log_attacks","攻击","attacks"
+"battle.log_on","目标","on"
+"battle.log_for","造成","for"
+"battle.log_fallen","已阵亡。","has fallen."
+"battle.log_finished","战斗结束","Battle finished"
+"battle.status_idle","等待开始战斗","Waiting to start battle"
+"battle.status_victory","战斗胜利","Battle Victory"
+"battle.status_defeat","战斗失败","Battle Defeat"
+"battle.result_rounds","总回合数","Total Rounds"
+"battle.button_start","开始战斗","Start Battle"
+"battle.button_restart","重开","Restart"
+"battle.button_review","回顾","Review"
+"battle.button_open_result","打开结算窗口","Open Result Window"
+"battle.button_back","返回主菜单","Back To Main Menu"
+"battle.button_tip","显示提示","Show Tip"
+"battle.button_close_log","关闭日志","Close Log"
+"battle.button_equipment","查看装备","Equipment"
+"battle.button_cycle_equipment","切换方案","Switch Preset"
+"battle.button_close_equipment","关闭装备","Close"
+"popup.confirm.title","确认","Confirm"
+"popup.confirm.message","这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。","This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later."
+"popup.confirm_button","确认","Confirm"
+"popup.cancel_button","取消","Cancel"
+"toast.framework_ready","UI 框架已经就绪。","UI framework is ready."
+"toast.confirmed","你点击了确认。","Confirm clicked."
+"toast.cancelled","你取消了操作。","Cancelled."
+"toast.battle_next","下一步会接入真正的战斗系统。","The real battle system will be connected next."
+"toast.language_changed","语言已切换。","Language switched."
+"toast.ui_prefabs_rebuilt","UI预设已重建。","UI prefabs rebuilt."
+"toast.editor_only","该功能仅在Unity编辑器中可用。","This feature is only available in the Unity Editor."
+"common.separator_names","、",", "
+"map.title","地图路线","Map Route"
+"map.status_prefix","当前节点：","Current Node: "
+"map.region_prefix","区域：","Region: "
+"map.button_enter","进入节点","Enter Node"
+"map.button_pass_month","推进一月","Pass One Month"
+"map.button_reset_run","重置本轮","Reset Run"
+"map.button_back_menu","返回主菜单","Back To Menu"
+"map.toast_lifespan_ended","阳寿已尽，本轮结束。","Lifespan exhausted. The run has ended."
+"map.toast_route_complete","本轮路线完成，返回主菜单。","Route complete. Returning to main menu."
+"map.toast_month_passed","又逝一月。","One month passes."
+"battle.slot_weapon","武器","Weapon"
+"battle.slot_armor","护甲","Armor"
+"battle.slot_accessory","饰品","Accessory"
+"battle.editor_target","当前角色","Editing Unit"
+"battle.editor_stats","当前属性","Stats"
+"battle.editor_skills","当前技能","Skills"
+"battle.editor_team_totals","队伍总属性","Team Totals"
+"battle.editor_preview","战斗预览","Battle Preview"
+"battle.editor_owned_equipment","已拥有装备","Owned Equipment"
+"battle.editor_unit_prefix","角色: ","Unit: "
+"battle.preview_victory","预计胜利","Victory"
+"battle.preview_defeat","预计失败","Defeat"
+"battle.preview_rounds","回合数","Rounds"
+"battle.button_reset_loadout","重置装备","Reset Loadout"
+"battle.button_auto_offense","自动输出","Auto Offense"
+"battle.button_auto_defense","自动生存","Auto Defense"
+"battle.prep_status_prefix","正在准备第 ","Preparing Stage "
+"battle.prep_status_suffix","关","stage"
+"battle.prep_briefing_prefix","第 ","Stage "
+"battle.prep_briefing_suffix","关简报","Briefing"
+"battle.prep_objective","目标：击败全部敌人。","Objective: Defeat all enemies."
+"battle.prep_enemies","敌人：","Enemies: "
+"battle.prep_threat","威胁：","Threat: "
+"battle.prep_preview","预估：","Preview: "
+"battle.prep_likely_victory","较大概率胜利","Likely Victory"
+"battle.prep_likely_defeat","较大概率失败","Likely Defeat"
+"battle.prep_rounds_prefix","，约 ","in "
+"battle.prep_rounds_suffix","回合。","rounds."
+"battle.prep_tip","建议：如果预估不理想，先调整装备再开战。","Tip: Adjust equipment before battle if the preview looks risky."
+"battle.threat_low","低","Low"
+"battle.threat_medium","中","Medium"
+"battle.threat_medium_high","中高","Medium-High"
+"battle.threat_high","高","High"
+"common.button_close","关闭","Close"
+"map.toast_event_triggered","目的地事件已触发。","The destination event has been triggered."
+"map.button_continue","继续","Continue"
+"map.rest_choice_refine","炼化灵石消耗：{0} -{1}经验 +{2}","Refine Through StonesCost: {0} -{1}Exp +{2}"
+"map.rest_choice_sort","整理行囊经验 +{0}{1} +{2}","Sort EquipmentExp +{0}{1} +{2}"
+"map.rest_choice_breath","调息养元经验 +{0}灵石 +0","Breathing PracticeExp +{0}Spirit Stones +0"
+"map.rest_choice_gather","采集灵石经验 +{0}{1} +{2}","Gather Qi CrystalsExp +{0}{1} +{2}"
+"map.rest_title","休整事件","Rest Event"
+"map.rest_message","选择你在此地如何调整状态。","Choose how to spend this stop."
+"map.village_choice_elder","长者指点经验 +{0}灵石 +0","Elder's GuidanceExp +{0}Spirit Stones +0"
+"map.village_choice_supply","行商补给经验 +{0}{1} +{2}","Merchant SupplyExp +{0}{1} +{2}"
+"map.village_choice_scripture","借阅藏经获得 1 次功法机缘","Borrow ScriptureGain 1 skill reward choice"
+"map.village_title","新手村","Novice Village"
+"map.village_message","离开新手村前，选择一份启程助力。","Before leaving the village, choose one piece of support."
+"map.rest_result_gather","你在附近采集五行灵石，囊中收获更丰。","You gather the local five-element crystals and leave with fuller pockets."
+"map.not_enough_stones_title","灵石不足","Not Enough Spirit Stones"
+"map.not_enough_stones_message","你手中的对应灵石不足，暂时无法进行这次炼化。","You do not have enough matching spirit stones to refine this stop."
+"map.rest_result_refine","你将储备灵石当场炼化，强行换来一段更猛的修为推进。","You refine stored spirit stones into pure progress and push your cultivation further."
+"map.rest_result_sort","你整理装备与气机，为下一段路做足准备。","You sort equipment and steady your rhythm before moving on."
+"map.rest_result_breath","你专心调息运转周天，修为更进一步。","You focus on breathing practice and deepen your cultivation."
+"map.rest_result_title","休整结果","Rest Result"
+"map.village_result_supply","路过行商给你留下一份赶路所需的修行补给。","A passing merchant leaves you a small bundle of cultivation supplies."
+"map.village_result_elder","临行前，村中长者给了你几句修行指点。","The village elder gives you a few words of guidance before you set out."
+"map.village_result_title","村中收获","Village Result"
+"map.scripture_title","借阅藏经","Borrow Scripture"
+"map.scripture_message","选择一项开局功法机缘。","Choose one starter skill reward."
+"map.scripture_empty","你整理思绪后，轻装上路。","You leave the village with a clearer mind."
+"map.scripture_intro","你从村中藏经阁借得一页功法残卷。","You borrow a manual from the village archive."
+"map.reward_choice_empty","空白奖励","Empty"
+"map.reward_choice_label","功法机缘{0}角色：{1}结果：Lv.{2} {3}五行：{4}","Reward{0}Target: {1}Result: Lv.{2} {3}Element: {4}"
+"map.reward_result_upgrade","升级","Upgrade"
+"map.reward_result_learn","习得","Learn"
+"map.reward_toast_upgrade","{0} 将 {1} 提升至 Lv.{2}。","{0} upgraded {1} to Lv.{2}."
+"map.reward_toast_learn","{0} 习得 {1}，当前 Lv.{2}。","{0} learned {1} at Lv.{2}."
+"map.reward_title","获得","Reward"
+"map.reward_exp","经验 +","Exp +"
+"map.reward_levelup","修为提升 +","Cultivation Lv. +"
+"map.skill_overview_title","已学功法","Run Skills"
+"map.lifespan_title","寿元已尽","Lifespan Ended"
+"map.lifespan_message","你在本轮途中寿元耗尽。当前局将结束，并返回主界面。","Your lifespan has run out during this journey. The current run will end and return to the main menu."
+"map.button_back_main","返回主界面","Back To Main Menu"
+"map.detail_title","选中节点","Selected Node"
+"map.detail_stage","第 {0} 关 · {1}","Stage {0} · {1}"
+"map.detail_reachable","是否可达：","Reachable: "
+"map.detail_reachable_yes","可达","Yes"
+"map.detail_reachable_locked","未解锁","Locked"
+"map.detail_time_cost","耗时：","Time Cost: "
+"map.detail_month_suffix","月","month(s)"
+"map.detail_arrival_effect","到达效果：","Arrival Effect: "
+"map.detail_arrival_rest","立刻触发休整事件，并停留在地图上。","Trigger rest immediately and stay on the map."
+"map.detail_arrival_battle","移动结束后自动进入战斗。","Start battle automatically after movement ends."
+"map.profile_title","个人信息","Profile"
+"map.profile_current_stage","当前关卡：","Current Stage: "
+"map.profile_highest_cleared","最高通关：","Highest Cleared: "
+"map.profile_reachable_frontier","可达前沿：","Reachable Frontier: "
+"map.profile_cultivation_level","修为等级 ","Cultivation Lv."
+"map.profile_exp","经验：","Exp: "
+"map.profile_owned_equipment","已拥有装备：","Owned Equipment: "
+"map.arrival_toast","已抵达第 {0} 关 · {1}","Arrived at Stage {0} · {1}"
+"map.node_label","第{0}关{1}","Stage {0}{1}"
+"map.status_current_position","当前位置：第 {0} 关 · {1}","Current Position: Stage {0} · {1}"
+"map.button_previous","后退","Previous"
+"map.button_next","前进","Next"
+"map.button_skill_overview","已学功法","Run Skills"
+"map.market_title","行旅集市","Traveling Market"
+"map.market_message","你可以在这里拿灵石换资源，或稳稳补一轮状态。","Trade spirit stones for resources here"
+"map.market_choice_relic","换购法器","Trade for Relic"
+"map.market_choice_manual","换购残卷","Trade for Manual"
+"map.market_choice_supply","补足行囊","Restock Supplies"
+"map.market_result_title","集市收获","Market Result"
+"map.market_result_relic","你用手头灵石换来一件趁手法器，顺便稳住了一截修为。","You trade your spirit stones for a fitting relic and stabilize your cultivation a bit."
+"map.market_result_supply","你补足了路上的必需品，推进节奏重新平顺下来。","You restock what you need for the road and smooth out your run tempo."
+"map.market_skill_title","集市残卷","Market Manual"
+"map.market_skill_message","从摊位上的几页残卷里挑一份带走。","Choose one manual from the incomplete pages on the stall."
+"map.market_skill_intro","你从集市摊位上换来一页残卷。","You trade for a torn manual page from the market stall."
+"map.market_skill_empty","你翻遍摊位，却没有遇到合适的机缘。","You search every stall"
+"map.insight_title","悟道静室","Insight Sanctum"
+"map.insight_message","首领战前的最后一站，你可以换一轮更激进的成长。","This is your last stop before the boss"
+"map.insight_choice_core","凝练道基","Condense Foundation"
+"map.insight_choice_cache","开启遗藏","Open Relic Cache"
+"map.insight_choice_enlighten","闭关顿悟","Seek Enlightenment"
+"map.insight_result_title","静室所得","Sanctum Result"
+"map.insight_result_core","你以灵石强行凝练道基，换来一段更扎实的修为突破。","You force your foundation tighter with spirit stones and secure a sharper cultivation jump."
+"map.insight_result_cache","你开启静室遗藏，补到一份装备机缘与临战储备。","You open the sanctum cache and come away with gear and a bit of battle stock."
+"map.insight_skill_title","顿悟机缘","Moment of Insight"
+"map.insight_skill_message","从这一次顿悟里定下一门最终要诀。","Choose the technique that crystallizes from this moment of insight."
+"map.insight_skill_intro","你在静室闭关片刻，抓住了一线更高阶的功法机缘。","A brief retreat inside the sanctum reveals a higher-tier skill opportunity."
+"map.insight_skill_empty","这一次闭关没有新的感悟，只留下片刻清明。","This retreat brings no new revelation"
+"map.choice_cost","消耗：{0} -{1}","Cost: {0} -{1}"
+"map.choice_gain_exp","经验 +{0}","Exp +{0}"
+"map.choice_gain_stones","{0} +{1}","{0} +{1}"
+"map.choice_gain_equipment","装备机缘 1 次","Gain 1 equipment reward"
+"map.choice_gain_skill_elite","获得 1 次高阶功法机缘","Gain 1 high-tier skill reward"
+"map.choice_gain_skill_boss","获得 1 次顶阶功法机缘","Gain 1 boss-tier skill reward"
+"map.reward_equipment","装备掉落：","Equipment Drop: "
+"map.choice_gain_skill","获得 1 次功法机缘","Gain 1 skill reward"
+"map.detail_event_mode","事件类型：","Event Type: "
+"map.detail_event_fixed","固定事件","Fixed Event"
+"map.detail_event_random","随机机缘","Random Opportunity"
+"map.detail_event_cooldown","机缘冷却：","Cooldown: "
+"map.detail_event_ready","已就绪","Ready"
+"map.detail_event_remaining","剩余 {0} 月","{0} month(s) remaining"
+"map.village_choice_prepare","整备兵甲","Prepare Equipment"
+"map.village_choice_review","温习功法","Review Learned Skills"
+"map.village_choice_route","察看路标","Inspect Route"
+"map.village_result_prepare","此处只提供整备，不直接赠送资源。你可以随时整理当前装备。","This stop offers preparation only. You can reorganize your equipment here without gaining direct rewards."
+"map.village_result_review","此处只供温习功法，不直接赠送资源。你可以查看当前已学功法。","This stop is for reviewing skills only. You can inspect learned techniques here without gaining direct rewards."
+"map.village_result_route","此处是固定路标点，用来确认前路与节奏，不直接产出奖励。","This fixed waypoint helps you review the route and pacing. It does not grant direct rewards."
+"map.choice_open_equipment","打开装备整理","Open equipment management"
+"map.choice_open_skills","查看已学功法","Open learned skills overview"
+"map.choice_open_route","查看路线说明","Review route briefing"
+"map.random_event_message","此地会随机触发一段机缘，触发后需等待冷却恢复。","A random opportunity may trigger here and must recover after its cooldown."
+"map.node_type_village","新手村","Village"
+"map.node_type_battle","战斗","Battle"
+"map.node_type_elite","精英","Elite"
+"map.node_type_rest","休整","Rest"
+"map.node_type_boss","首领","Boss"
+"spirit_stone.metal.name","金灵石","Metal Spirit Stone"
+"spirit_stone.wood.name","木灵石","Wood Spirit Stone"
+"spirit_stone.water.name","水灵石","Water Spirit Stone"
+"spirit_stone.fire.name","火灵石","Fire Spirit Stone"
+"spirit_stone.earth.name","土灵石","Earth Spirit Stone"
+"spirit_stone.metal.short","金","Metal"
+"spirit_stone.wood.short","木","Wood"
+"spirit_stone.water.short","水","Water"
+"spirit_stone.fire.short","火","Fire"
+"spirit_stone.earth.short","土","Earth"
+"map.broker_title","灵石牙行","Spirit Broker"
+"map.broker_message","这里专做灵石与机缘的交换，适合把库存资源转成即时战力。","A broker stop for turning stored spirit stones into immediate power."
+"map.broker_choice_refine","折价炼化","Refine at Discount"
+"map.broker_choice_cache","收购旧藏","Buy Hidden Cache"
+"map.broker_choice_manual","竞拍残卷","Bid for Manual"
+"map.broker_result_title","牙行所得","Broker Result"
+"map.broker_result_refine","你把一批灵石低价炼化，换来一截扎实的修为增长。","You refine a batch of stones at a discount and turn it into steady cultivation growth."
+"map.broker_result_cache","你从牙行收来一份旧藏，顺手补到一轮装备与路资。","You acquire a hidden cache from the broker and round out your gear and travel stock."
+"map.broker_skill_title","牙行残卷","Broker Manual"
+"map.broker_skill_message","从这批流转而来的残卷里挑一份带走。","Choose one manual from the circulating fragments."
+"map.broker_skill_intro","你从牙行竞下了一份更高阶的功法残卷。","You win a higher-tier skill fragment from the broker."
+"map.broker_skill_empty","这批残卷都不合眼缘，没有换到想要的机缘。","None of the broker manuals fit your build this time."
+"map.forge_title","试炼熔炉","Trial Forge"
+"map.forge_message","这里更像一次冲刺抉择，你可以用现有资源换一轮更激进的成长。","A sprint-focused stop where you trade current resources for a more aggressive power spike."
+"map.forge_choice_temper","熔炉淬体","Temper in the Forge"
+"map.forge_choice_hoard","开启炉藏","Open Forge Cache"
+"map.forge_choice_secret","夺炉真诀","Claim Secret Formula"
+"map.forge_result_title","熔炉所得","Forge Result"
+"map.forge_result_temper","你借熔炉之力强行淬体，换来一段更激进的成长。","You force a body-tempering session through the forge and gain a sharper growth spike."
+"map.forge_result_hoard","你打开炉中旧藏，补到一份装备机缘与临战资源。","You open the forge cache and gain gear opportunity plus battle stock."
+"map.forge_skill_title","熔炉真诀","Forge Secret"
+"map.forge_skill_message","从熔炉异象里定下一门更高阶的法诀。","Choose the stronger technique revealed by the forge omen."
+"map.forge_skill_intro","你在熔炉异象中抓住了一门顶阶功法机缘。","You seize a top-tier skill opportunity from the forge omen."
+"map.forge_skill_empty","这次熔炉异象没有留下新的法诀。","This forge omen leaves no new technique behind."
+"common.level_prefix","Lv.","Lv."
+"progress.spirit_stones_zero","灵石：无","Spirit Stones: None"
+"progress.spirit_stones_prefix","灵石：","Spirit Stones: "
+"progress.spirit_stones_gain_zero","无灵石","No spirit stones"
+"progress.skills_unavailable","当前无法读取功法数据。","Skill data is currently unavailable."
+"progress.run_skills_title","本轮功法","Run Skills"
+"progress.skills_character","角色：","Character: "
+"progress.skills_current","当前可用：","Current: "
+"progress.skills_new","本局新增：","New This Run: "
+"progress.skills_none","无","None"
+"progress.last_battle_none","上一场：暂无战斗记录","Last Battle: None yet"
+"progress.last_battle_summary","上一场：第 {0} 关，{1}，{2} 回合。","Last Battle: Stage {0}, {1}, {2} rounds."
+"progress.next_step_victory","下一步：回到地图，准备前往第 {0} 关。","Next: Return to the map and prepare for Stage {0}."
+"progress.next_step_defeat","下一步：回到地图，从第 {0} 关重新整备。","Next: Return to the map and regroup from Stage {0}."
+"progress.summary_line_stage","当前关卡：{0} / 已通关：{1}","Current Stage: {0} / Cleared: {1}"
+"progress.run_state","本轮状态：","Run State: "
+"progress.run_state_active","进行中","Active"
+"progress.run_state_idle","未开始","Idle"
+"progress.next_step_line","路线建议：","Route Advice: "
+"progress.continue_stage","继续第 {0} 关","Continue Stage {0}"
+"progress.start_from_stage_one","从第 1 关开始新一轮","Start a new run from Stage 1"
+"progress.summary_line_cultivation","修为：Lv.{0}（{1}/{2}）","Cultivation: Lv.{0} ({1}/{2})"
+"progress.summary_line_last_battle","战斗记录：","Battle Record: "
+"progress.lifespan_exhausted","阳寿已尽","Lifespan Exhausted"
+"progress.lifespan_remaining","阳寿：余 {0} 载 {1} 月","Lifespan: {0} years {1} months remaining"
+"progress.route_state_done","已过","Done"
+"progress.route_state_now","当前","Current"
+"progress.route_state_open","可达","Reachable"
+"progress.route_state_locked","未解锁","Locked"
+"progress.current_objective_start","从第 1 关开始新一轮试炼。","Start a new run from Stage 1."
+"progress.current_objective_stage","先完成或反复整备第 {0} 关，再决定是否继续前进。","Clear or prepare around Stage {0} before moving on."
+"map.stage_theme_default","山门外圃","Outer Hills"
+"map.node_detail_battle","标准战斗节点，可获得修为、灵石与装备掉落。","Standard battle node with cultivation, spirit stones, and equipment rewards."
+"map.node_detail_elite","精英战斗节点，敌人更强，但奖励品质更高。","Elite battle node with stronger enemies and better rewards."
+"map.node_detail_rest","休整节点，用来调整资源、节奏与临战状态。","Rest node for adjusting resources, pacing, and battle readiness."
+"map.node_detail_boss","首领战节点，胜利后可推进当前章节。","Boss battle node. Victory advances the current chapter."
+"map.fortune_result_title","游历所得","Fortune Result"
+"map.fortune_choice_blessing","顺势纳福","Take the Blessing"
+"map.fortune_choice_cache","拾取遗藏","Claim the Cache"
+"map.fortune_choice_insight","捕捉灵感","Capture the Insight"
+"map.fortune_result_blessing","你顺着流转的机缘收拢气运，换来一段平稳的修为与灵石增长。","You ride the passing fortune into a steady gain of cultivation and spirit stones."
+"map.fortune_result_cache","你在沿途残痕里翻出一份旧藏，顺手补到装备与些许路资。","You uncover a forgotten cache along the road and come away with gear plus a little stock."
+"map.fortune_skill_intro","你抓住转瞬即逝的一线灵感，凝成一次更高阶的功法机缘。","You seize a fleeting flash of insight and turn it into a higher-tier skill opportunity."
+"map.fortune_skill_empty","这次机缘来得快去得也快，没有留下新的法门。","This opportunity fades quickly and leaves no new technique behind."
+"map.random_cooldown_title","机缘未复","Opportunity Cooling Down"
+"map.random_cooldown_message","这处随机机缘刚刚触发过，还需要再等待 {0} 个月才会恢复。","This random opportunity was triggered recently. It will recover in {0} month(s)."

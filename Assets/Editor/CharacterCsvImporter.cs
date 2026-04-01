@@ -16,6 +16,7 @@ public static class CharacterCsvImporter
     private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
+    private const string EventProfileCsvPath = "Docs/EventProfile.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
     private const string LocalizationOutputFolder = "Assets/Resources/Localization";
@@ -27,8 +28,9 @@ public static class CharacterCsvImporter
     private const string StageBalanceJsonPath = ConfigOutputFolder + "/StageBalanceDatabase.json";
     private const string StageNodeJsonPath = ConfigOutputFolder + "/StageNodeDatabase.json";
     private const string EventOptionJsonPath = ConfigOutputFolder + "/EventOptionDatabase.json";
+    private const string EventProfileJsonPath = ConfigOutputFolder + "/EventProfileDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
-    [MenuItem("工具/配置/导入全部CSV")]
+    [MenuItem("Tools/Config/Import All CSV")]
     public static void ImportAll()
     {
         try
@@ -41,16 +43,17 @@ public static class CharacterCsvImporter
             ImportStageBalances();
             ImportStageNodes();
             ImportEventOptions();
+            ImportEventProfiles();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能、装备、灵石、关卡成长、关卡节点、事件选项和语言表已完成导入。");
+            Debug.Log("Imported all CSV files successfully.");
         }
         catch (Exception exception)
         {
             Debug.LogError(exception.Message);
         }
     }
-    [MenuItem("工具/配置/仅导入角色表")]
+    [MenuItem("Tools/Config/Import Characters CSV")]
     public static void ImportCharacters()
     {
         var rows = ReadRequiredRows(CharacterCsvPath, "Character CSV");
@@ -88,7 +91,7 @@ public static class CharacterCsvImporter
         WriteJson(CharacterJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} characters to {CharacterJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入敌人表")]
+    [MenuItem("Tools/Config/Import Enemies CSV")]
     public static void ImportEnemies()
     {
         var rows = ReadRequiredRows(EnemyCsvPath, "Enemy CSV");
@@ -126,7 +129,7 @@ public static class CharacterCsvImporter
         WriteJson(EnemyJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} enemies to {EnemyJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入技能表")]
+    [MenuItem("Tools/Config/Import Skills CSV")]
     public static void ImportSkills()
     {
         var rows = ReadRequiredRows(SkillCsvPath, "Skill CSV");
@@ -164,7 +167,7 @@ public static class CharacterCsvImporter
         WriteJson(SkillJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} skills to {SkillJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入装备表")]
+    [MenuItem("Tools/Config/Import Equipment CSV")]
     public static void ImportEquipments()
     {
         var rows = ReadRequiredRows(EquipmentCsvPath, "Equipment CSV");
@@ -198,7 +201,7 @@ public static class CharacterCsvImporter
         WriteJson(EquipmentJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} equipments to {EquipmentJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入灵石表")]
+    [MenuItem("Tools/Config/Import Spirit Stone CSV")]
     public static void ImportSpiritStones()
     {
         var rows = ReadRequiredRows(SpiritStoneCsvPath, "SpiritStone CSV");
@@ -229,7 +232,7 @@ public static class CharacterCsvImporter
         WriteJson(SpiritStoneJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入关卡成长表")]
+    [MenuItem("Tools/Config/Import Stage Balance CSV")]
     public static void ImportStageBalances()
     {
         var rows = ReadRequiredRows(StageBalanceCsvPath, "StageBalance CSV");
@@ -266,7 +269,7 @@ public static class CharacterCsvImporter
         WriteJson(StageBalanceJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} stage balances to {StageBalanceJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入关卡节点表")]
+    [MenuItem("Tools/Config/Import Stage Nodes CSV")]
     public static void ImportStageNodes()
     {
         var rows = ReadRequiredRows(StageNodeCsvPath, "StageNode CSV");
@@ -278,7 +281,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 8)
+            if (columns.Count < 15)
             {
                 throw new InvalidOperationException($"Invalid stage node row at line {i + 1}.");
             }
@@ -287,11 +290,18 @@ public static class CharacterCsvImporter
                 Stage = ParseInt(columns[0], nameof(StageNodeConfig.Stage), i + 1),
                 NodeType = columns[1],
                 EventProfile = columns[2],
-                ThemeZh = columns[3],
-                ThemeEn = columns[4],
-                DetailZh = columns[5],
-                DetailEn = columns[6],
-                Notes = columns[7]
+                SpiritStoneElement = columns[3],
+                ThemeZh = columns[4],
+                ThemeEn = columns[5],
+                DetailZh = columns[6],
+                DetailEn = columns[7],
+                EventMode = columns[8],
+                CooldownMonths = ParseInt(columns[9], nameof(StageNodeConfig.CooldownMonths), i + 1),
+                BattleExpReward = ParseInt(columns[10], nameof(StageNodeConfig.BattleExpReward), i + 1),
+                BattleSpiritStoneReward = ParseInt(columns[11], nameof(StageNodeConfig.BattleSpiritStoneReward), i + 1),
+                NonBattleExpReward = ParseInt(columns[12], nameof(StageNodeConfig.NonBattleExpReward), i + 1),
+                NonBattleSpiritStoneReward = ParseInt(columns[13], nameof(StageNodeConfig.NonBattleSpiritStoneReward), i + 1),
+                Notes = columns[14]
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
@@ -300,7 +310,7 @@ public static class CharacterCsvImporter
         WriteJson(StageNodeJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} stage nodes to {StageNodeJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入事件选项表")]
+    [MenuItem("Tools/Config/Import Event Options CSV")]
     public static void ImportEventOptions()
     {
         var rows = ReadRequiredRows(EventOptionCsvPath, "EventOption CSV");
@@ -312,7 +322,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 18)
+            if (columns.Count < 19)
             {
                 throw new InvalidOperationException($"Invalid event option row at line {i + 1}.");
             }
@@ -322,20 +332,21 @@ public static class CharacterCsvImporter
                 OptionIndex = ParseInt(columns[1], nameof(EventOptionConfig.OptionIndex), i + 1),
                 TitleKey = columns[2],
                 RewardMode = columns[3],
-                SpiritStoneElement = columns[4],
-                ExpBase = ParseInt(columns[5], nameof(EventOptionConfig.ExpBase), i + 1),
-                ExpPerStage = ParseInt(columns[6], nameof(EventOptionConfig.ExpPerStage), i + 1),
-                SpiritStoneBase = ParseInt(columns[7], nameof(EventOptionConfig.SpiritStoneBase), i + 1),
-                SpiritStonePerStage = ParseInt(columns[8], nameof(EventOptionConfig.SpiritStonePerStage), i + 1),
-                SpiritStoneCostBase = ParseInt(columns[9], nameof(EventOptionConfig.SpiritStoneCostBase), i + 1),
-                SpiritStoneCostPerStage = ParseInt(columns[10], nameof(EventOptionConfig.SpiritStoneCostPerStage), i + 1),
-                SkillRewardNodeType = columns[11],
-                SelectionTitleKey = columns[12],
-                SelectionMessageKey = columns[13],
-                ResultTitleKey = columns[14],
-                ResultIntroKey = columns[15],
-                EmptyResultKey = columns[16],
-                Notes = columns[17]
+                UtilityAction = columns[4],
+                SpiritStoneElement = columns[5],
+                ExpBase = ParseInt(columns[6], nameof(EventOptionConfig.ExpBase), i + 1),
+                ExpPerStage = ParseInt(columns[7], nameof(EventOptionConfig.ExpPerStage), i + 1),
+                SpiritStoneBase = ParseInt(columns[8], nameof(EventOptionConfig.SpiritStoneBase), i + 1),
+                SpiritStonePerStage = ParseInt(columns[9], nameof(EventOptionConfig.SpiritStonePerStage), i + 1),
+                SpiritStoneCostBase = ParseInt(columns[10], nameof(EventOptionConfig.SpiritStoneCostBase), i + 1),
+                SpiritStoneCostPerStage = ParseInt(columns[11], nameof(EventOptionConfig.SpiritStoneCostPerStage), i + 1),
+                SkillRewardNodeType = columns[12],
+                SelectionTitleKey = columns[13],
+                SelectionMessageKey = columns[14],
+                ResultTitleKey = columns[15],
+                ResultIntroKey = columns[16],
+                EmptyResultKey = columns[17],
+                Notes = columns[18]
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
@@ -344,7 +355,37 @@ public static class CharacterCsvImporter
         WriteJson(EventOptionJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} event options to {EventOptionJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入语言表")]
+    [MenuItem("Tools/Config/Import Event Profiles CSV")]
+    public static void ImportEventProfiles()
+    {
+        var rows = ReadRequiredRows(EventProfileCsvPath, "EventProfile CSV");
+        var configs = new List<EventProfileConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 4)
+            {
+                throw new InvalidOperationException($"Invalid event profile row at line {i + 1}.");
+            }
+            configs.Add(new EventProfileConfig
+            {
+                Profile = columns[0],
+                TitleKey = columns[1],
+                MessageKey = columns[2],
+                Notes = columns[3]
+            });
+        }
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new EventProfileDatabase();
+        database.eventProfiles = configs;
+        WriteJson(EventProfileJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} event profiles to {EventProfileJsonPath}");
+    }
+    [MenuItem("Tools/Config/Import Localization CSV")]
     public static void ImportLocalization()
     {
         var rows = ReadRequiredRows(LocalizationCsvPath, "Localization CSV");
@@ -496,3 +537,4 @@ public static class CharacterCsvImporter
         }
     }
 }
+

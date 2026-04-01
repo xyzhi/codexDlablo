@@ -8,6 +8,7 @@ namespace Wuxing.Config
         public int OptionIndex;
         public string TitleKey;
         public string RewardMode;
+        public string UtilityAction;
         public string SpiritStoneElement;
         public int ExpBase;
         public int ExpPerStage;

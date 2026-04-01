@@ -1,0 +1,46 @@
+﻿{
+    "eventProfiles": [
+        {
+            "Profile": "VillageStart",
+            "TitleKey": "map.village_title",
+            "MessageKey": "map.village_message",
+            "Notes": "开局固定服务点"
+        },
+        {
+            "Profile": "Rest",
+            "TitleKey": "map.rest_title",
+            "MessageKey": "map.rest_message",
+            "Notes": "普通休整事件"
+        },
+        {
+            "Profile": "TradeMarket",
+            "TitleKey": "map.market_title",
+            "MessageKey": "map.market_message",
+            "Notes": "固定交易事件"
+        },
+        {
+            "Profile": "InsightSanctum",
+            "TitleKey": "map.insight_title",
+            "MessageKey": "map.insight_message",
+            "Notes": "高阶机缘事件"
+        },
+        {
+            "Profile": "WanderingFortune",
+            "TitleKey": "map.fortune_result_title",
+            "MessageKey": "map.random_event_message",
+            "Notes": "随机机缘事件"
+        },
+        {
+            "Profile": "SpiritBroker",
+            "TitleKey": "map.broker_title",
+            "MessageKey": "map.broker_message",
+            "Notes": "牙行事件"
+        },
+        {
+            "Profile": "TrialForge",
+            "TitleKey": "map.forge_title",
+            "MessageKey": "map.forge_message",
+            "Notes": "熔炉事件"
+        }
+    ]
+}

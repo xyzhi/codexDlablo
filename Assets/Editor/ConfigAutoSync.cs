@@ -71,6 +71,7 @@ public static class ConfigAutoSync
             && IsOutputUpToDate("Docs/StageBalance.csv", "Assets/Resources/Configs/StageBalanceDatabase.json")
             && IsOutputUpToDate("Docs/StageNode.csv", "Assets/Resources/Configs/StageNodeDatabase.json")
             && IsOutputUpToDate("Docs/EventOption.csv", "Assets/Resources/Configs/EventOptionDatabase.json")
+            && IsOutputUpToDate("Docs/EventProfile.csv", "Assets/Resources/Configs/EventProfileDatabase.json")
             && IsOutputUpToDate("Docs/Localization.csv", "Assets/Resources/Localization/GameText.json");
     }
 
