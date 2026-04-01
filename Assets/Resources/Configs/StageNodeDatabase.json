@@ -1,84 +1,1004 @@
 ﻿{
-    "stageNodes": [
-        {
-            "Stage": 1,
-            "NodeType": "Rest",
-            "EventProfile": "VillageStart",
-            "ThemeZh": "山门外围",
-            "ThemeEn": "Outer Hills",
-            "DetailZh": "安全起点，可从村中助力里拿到开局资源或功法机缘。",
-            "DetailEn": "Safe opening area with a starter boost, supplies, or skill opportunity.",
-            "Notes": "开局事件点"
-        },
-        {
-            "Stage": 2,
-            "NodeType": "Battle",
-            "EventProfile": "DefaultBattle",
-            "ThemeZh": "山门外围",
-            "ThemeEn": "Outer Hills",
-            "DetailZh": "普通战斗，可获得修为、灵石与装备掉落。",
-            "DetailEn": "Standard battle for growth, spirit stones, and equipment drops.",
-            "Notes": "基础战斗"
-        },
-        {
-            "Stage": 3,
-            "NodeType": "Elite",
-            "EventProfile": "DefaultElite",
-            "ThemeZh": "焚风古道",
-            "ThemeEn": "Burning Trail",
-            "DetailZh": "精英战斗，成长更多，掉落也更好。",
-            "DetailEn": "Elite battle with higher growth and better loot.",
-            "Notes": "第一处精英"
-        },
-        {
-            "Stage": 4,
-            "NodeType": "Rest",
-            "EventProfile": "TradeMarket",
-            "ThemeZh": "焚风古道",
-            "ThemeEn": "Burning Trail",
-            "DetailZh": "资源交易点，可换装备、功法机缘或稳健补给。",
-            "DetailEn": "Trading stop for gear, skill opportunities, or steady supplies.",
-            "Notes": "策划可自由调整到其他关卡"
-        },
-        {
-            "Stage": 5,
-            "NodeType": "Battle",
-            "EventProfile": "DefaultBattle",
-            "ThemeZh": "地宫遗迹",
-            "ThemeEn": "Deep Ruins",
-            "DetailZh": "普通战斗，可获得修为、灵石与装备掉落。",
-            "DetailEn": "Standard battle for growth, spirit stones, and equipment drops.",
-            "Notes": "中段战斗"
-        },
-        {
-            "Stage": 6,
-            "NodeType": "Elite",
-            "EventProfile": "DefaultElite",
-            "ThemeZh": "地宫遗迹",
-            "ThemeEn": "Deep Ruins",
-            "DetailZh": "精英战斗，成长更多，掉落也更好。",
-            "DetailEn": "Elite battle with higher growth and better loot.",
-            "Notes": "第二处精英"
-        },
-        {
-            "Stage": 7,
-            "NodeType": "Rest",
-            "EventProfile": "InsightSanctum",
-            "ThemeZh": "登天阶",
-            "ThemeEn": "Ascension Path",
-            "DetailZh": "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
-            "DetailEn": "High-tier opportunity stop before the boss for one last build spike.",
-            "Notes": "后段机缘点"
-        },
-        {
-            "Stage": 8,
-            "NodeType": "Boss",
-            "EventProfile": "DefaultBoss",
-            "ThemeZh": "登天阶",
-            "ThemeEn": "Ascension Path",
-            "DetailZh": "首领战斗，若能取胜，本轮路线直接完成。",
-            "DetailEn": "Boss battle. Winning can finish the current route.",
-            "Notes": "终局首领"
-        }
-    ]
+    "stageNodes":  [
+                       {
+                           "Stage":  1,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "VillageStart",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "安全起点，可从村中助力里拿到开局资源或功法机缘。",
+                           "DetailEn":  "Safe opening area with a starter boost, supplies, or skill opportunity.",
+                           "Notes":  "开局事件点"
+                       },
+                       {
+                           "Stage":  2,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  3,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "精英战斗，成长更多，掉落也更好。",
+                           "DetailEn":  "Elite battle with higher growth and better loot.",
+                           "Notes":  "章节前段精英"
+                       },
+                       {
+                           "Stage":  4,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "资源交易点，可换装备、功法机缘或稳健补给。",
+                           "DetailEn":  "Trading stop for gear, skill opportunities, or steady supplies.",
+                           "Notes":  "章节前段交易"
+                       },
+                       {
+                           "Stage":  5,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  6,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  7,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通休整点，可换一口气继续推进。",
+                           "DetailEn":  "A normal rest stop to catch your breath before pushing onward.",
+                           "Notes":  "章节中段休整"
+                       },
+                       {
+                           "Stage":  8,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "精英战斗，强度略升，是章节中段的第一次检验。",
+                           "DetailEn":  "An elite battle that checks whether your mid-chapter build is online.",
+                           "Notes":  "章节中段精英"
+                       },
+                       {
+                           "Stage":  9,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  10,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  11,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "中段交易点，可用已有资源补强装备或换取机缘。",
+                           "DetailEn":  "A mid-chapter market to convert current resources into gear or opportunities.",
+                           "Notes":  "章节中段交易"
+                       },
+                       {
+                           "Stage":  12,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "精英战斗，掉落更优，适合检验这一段的资源转化效率。",
+                           "DetailEn":  "An elite battle with better loot that tests your resource conversion this chapter.",
+                           "Notes":  "章节中后段精英"
+                       },
+                       {
+                           "Stage":  13,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  14,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "后段整备点，用来修正构筑节奏。",
+                           "DetailEn":  "A late-chapter rest stop for correcting your build tempo.",
+                           "Notes":  "章节后段休整"
+                       },
+                       {
+                           "Stage":  15,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  16,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "高压精英战，首领战前的重要门槛。",
+                           "DetailEn":  "A high-pressure elite battle that serves as an important gate before the boss.",
+                           "Notes":  "首领前精英"
+                       },
+                       {
+                           "Stage":  17,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "InsightSanctum",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+                           "DetailEn":  "A high-tier opportunity stop before the boss for one last build spike.",
+                           "Notes":  "首领前机缘点"
+                       },
+                       {
+                           "Stage":  18,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  19,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "首领前压轴精英战，决定你能否带着完整状态挑战本章首领。",
+                           "DetailEn":  "A final elite battle before the boss that decides whether you enter the chapter climax in good shape.",
+                           "Notes":  "首领前终检"
+                       },
+                       {
+                           "Stage":  20,
+                           "NodeType":  "Boss",
+                           "EventProfile":  "DefaultBoss",
+                           "ThemeZh":  "山门外围",
+                           "ThemeEn":  "Outer Hills",
+                           "DetailZh":  "章节首领战，取胜后方可进入下一重区域。",
+                           "DetailEn":  "A chapter boss battle. Victory unlocks the next region.",
+                           "Notes":  "章节首领"
+                       },
+                       {
+                           "Stage":  21,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "章节开端的整备点，适合稳住资源并为后续连续战斗做准备。",
+                           "DetailEn":  "A chapter opening rest stop to stabilize resources before the next combat stretch.",
+                           "Notes":  "章节开场休整"
+                       },
+                       {
+                           "Stage":  22,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  23,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "精英战斗，成长更多，掉落也更好。",
+                           "DetailEn":  "Elite battle with higher growth and better loot.",
+                           "Notes":  "章节前段精英"
+                       },
+                       {
+                           "Stage":  24,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "资源交易点，可换装备、功法机缘或稳健补给。",
+                           "DetailEn":  "Trading stop for gear, skill opportunities, or steady supplies.",
+                           "Notes":  "章节前段交易"
+                       },
+                       {
+                           "Stage":  25,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  26,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  27,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通休整点，可换一口气继续推进。",
+                           "DetailEn":  "A normal rest stop to catch your breath before pushing onward.",
+                           "Notes":  "章节中段休整"
+                       },
+                       {
+                           "Stage":  28,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "精英战斗，强度略升，是章节中段的第一次检验。",
+                           "DetailEn":  "An elite battle that checks whether your mid-chapter build is online.",
+                           "Notes":  "章节中段精英"
+                       },
+                       {
+                           "Stage":  29,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  30,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  31,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "中段交易点，可用已有资源补强装备或换取机缘。",
+                           "DetailEn":  "A mid-chapter market to convert current resources into gear or opportunities.",
+                           "Notes":  "章节中段交易"
+                       },
+                       {
+                           "Stage":  32,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "精英战斗，掉落更优，适合检验这一段的资源转化效率。",
+                           "DetailEn":  "An elite battle with better loot that tests your resource conversion this chapter.",
+                           "Notes":  "章节中后段精英"
+                       },
+                       {
+                           "Stage":  33,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  34,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "后段整备点，用来修正构筑节奏。",
+                           "DetailEn":  "A late-chapter rest stop for correcting your build tempo.",
+                           "Notes":  "章节后段休整"
+                       },
+                       {
+                           "Stage":  35,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  36,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "高压精英战，首领战前的重要门槛。",
+                           "DetailEn":  "A high-pressure elite battle that serves as an important gate before the boss.",
+                           "Notes":  "首领前精英"
+                       },
+                       {
+                           "Stage":  37,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "InsightSanctum",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+                           "DetailEn":  "A high-tier opportunity stop before the boss for one last build spike.",
+                           "Notes":  "首领前机缘点"
+                       },
+                       {
+                           "Stage":  38,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  39,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "首领前压轴精英战，决定你能否带着完整状态挑战本章首领。",
+                           "DetailEn":  "A final elite battle before the boss that decides whether you enter the chapter climax in good shape.",
+                           "Notes":  "首领前终检"
+                       },
+                       {
+                           "Stage":  40,
+                           "NodeType":  "Boss",
+                           "EventProfile":  "DefaultBoss",
+                           "ThemeZh":  "焚风古道",
+                           "ThemeEn":  "Burning Trail",
+                           "DetailZh":  "章节首领战，取胜后方可进入下一重区域。",
+                           "DetailEn":  "A chapter boss battle. Victory unlocks the next region.",
+                           "Notes":  "章节首领"
+                       },
+                       {
+                           "Stage":  41,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "章节开端的整备点，适合稳住资源并为后续连续战斗做准备。",
+                           "DetailEn":  "A chapter opening rest stop to stabilize resources before the next combat stretch.",
+                           "Notes":  "章节开场休整"
+                       },
+                       {
+                           "Stage":  42,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  43,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "精英战斗，成长更多，掉落也更好。",
+                           "DetailEn":  "Elite battle with higher growth and better loot.",
+                           "Notes":  "章节前段精英"
+                       },
+                       {
+                           "Stage":  44,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "资源交易点，可换装备、功法机缘或稳健补给。",
+                           "DetailEn":  "Trading stop for gear, skill opportunities, or steady supplies.",
+                           "Notes":  "章节前段交易"
+                       },
+                       {
+                           "Stage":  45,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  46,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  47,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通休整点，可换一口气继续推进。",
+                           "DetailEn":  "A normal rest stop to catch your breath before pushing onward.",
+                           "Notes":  "章节中段休整"
+                       },
+                       {
+                           "Stage":  48,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "精英战斗，强度略升，是章节中段的第一次检验。",
+                           "DetailEn":  "An elite battle that checks whether your mid-chapter build is online.",
+                           "Notes":  "章节中段精英"
+                       },
+                       {
+                           "Stage":  49,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  50,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  51,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "中段交易点，可用已有资源补强装备或换取机缘。",
+                           "DetailEn":  "A mid-chapter market to convert current resources into gear or opportunities.",
+                           "Notes":  "章节中段交易"
+                       },
+                       {
+                           "Stage":  52,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "精英战斗，掉落更优，适合检验这一段的资源转化效率。",
+                           "DetailEn":  "An elite battle with better loot that tests your resource conversion this chapter.",
+                           "Notes":  "章节中后段精英"
+                       },
+                       {
+                           "Stage":  53,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  54,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "后段整备点，用来修正构筑节奏。",
+                           "DetailEn":  "A late-chapter rest stop for correcting your build tempo.",
+                           "Notes":  "章节后段休整"
+                       },
+                       {
+                           "Stage":  55,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  56,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "高压精英战，首领战前的重要门槛。",
+                           "DetailEn":  "A high-pressure elite battle that serves as an important gate before the boss.",
+                           "Notes":  "首领前精英"
+                       },
+                       {
+                           "Stage":  57,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "InsightSanctum",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+                           "DetailEn":  "A high-tier opportunity stop before the boss for one last build spike.",
+                           "Notes":  "首领前机缘点"
+                       },
+                       {
+                           "Stage":  58,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  59,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "首领前压轴精英战，决定你能否带着完整状态挑战本章首领。",
+                           "DetailEn":  "A final elite battle before the boss that decides whether you enter the chapter climax in good shape.",
+                           "Notes":  "首领前终检"
+                       },
+                       {
+                           "Stage":  60,
+                           "NodeType":  "Boss",
+                           "EventProfile":  "DefaultBoss",
+                           "ThemeZh":  "地宫遗迹",
+                           "ThemeEn":  "Deep Ruins",
+                           "DetailZh":  "章节首领战，取胜后方可进入下一重区域。",
+                           "DetailEn":  "A chapter boss battle. Victory unlocks the next region.",
+                           "Notes":  "章节首领"
+                       },
+                       {
+                           "Stage":  61,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "章节开端的整备点，适合稳住资源并为后续连续战斗做准备。",
+                           "DetailEn":  "A chapter opening rest stop to stabilize resources before the next combat stretch.",
+                           "Notes":  "章节开场休整"
+                       },
+                       {
+                           "Stage":  62,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  63,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "精英战斗，成长更多，掉落也更好。",
+                           "DetailEn":  "Elite battle with higher growth and better loot.",
+                           "Notes":  "章节前段精英"
+                       },
+                       {
+                           "Stage":  64,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "资源交易点，可换装备、功法机缘或稳健补给。",
+                           "DetailEn":  "Trading stop for gear, skill opportunities, or steady supplies.",
+                           "Notes":  "章节前段交易"
+                       },
+                       {
+                           "Stage":  65,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  66,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  67,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通休整点，可换一口气继续推进。",
+                           "DetailEn":  "A normal rest stop to catch your breath before pushing onward.",
+                           "Notes":  "章节中段休整"
+                       },
+                       {
+                           "Stage":  68,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "精英战斗，强度略升，是章节中段的第一次检验。",
+                           "DetailEn":  "An elite battle that checks whether your mid-chapter build is online.",
+                           "Notes":  "章节中段精英"
+                       },
+                       {
+                           "Stage":  69,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  70,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  71,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "中段交易点，可用已有资源补强装备或换取机缘。",
+                           "DetailEn":  "A mid-chapter market to convert current resources into gear or opportunities.",
+                           "Notes":  "章节中段交易"
+                       },
+                       {
+                           "Stage":  72,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "精英战斗，掉落更优，适合检验这一段的资源转化效率。",
+                           "DetailEn":  "An elite battle with better loot that tests your resource conversion this chapter.",
+                           "Notes":  "章节中后段精英"
+                       },
+                       {
+                           "Stage":  73,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  74,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "后段整备点，用来修正构筑节奏。",
+                           "DetailEn":  "A late-chapter rest stop for correcting your build tempo.",
+                           "Notes":  "章节后段休整"
+                       },
+                       {
+                           "Stage":  75,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  76,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "高压精英战，首领战前的重要门槛。",
+                           "DetailEn":  "A high-pressure elite battle that serves as an important gate before the boss.",
+                           "Notes":  "首领前精英"
+                       },
+                       {
+                           "Stage":  77,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "InsightSanctum",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+                           "DetailEn":  "A high-tier opportunity stop before the boss for one last build spike.",
+                           "Notes":  "首领前机缘点"
+                       },
+                       {
+                           "Stage":  78,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  79,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "首领前压轴精英战，决定你能否带着完整状态挑战本章首领。",
+                           "DetailEn":  "A final elite battle before the boss that decides whether you enter the chapter climax in good shape.",
+                           "Notes":  "首领前终检"
+                       },
+                       {
+                           "Stage":  80,
+                           "NodeType":  "Boss",
+                           "EventProfile":  "DefaultBoss",
+                           "ThemeZh":  "登天阶",
+                           "ThemeEn":  "Ascension Path",
+                           "DetailZh":  "章节首领战，取胜后方可进入下一重区域。",
+                           "DetailEn":  "A chapter boss battle. Victory unlocks the next region.",
+                           "Notes":  "章节首领"
+                       },
+                       {
+                           "Stage":  81,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "章节开端的整备点，适合稳住资源并为后续连续战斗做准备。",
+                           "DetailEn":  "A chapter opening rest stop to stabilize resources before the next combat stretch.",
+                           "Notes":  "章节开场休整"
+                       },
+                       {
+                           "Stage":  82,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  83,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "精英战斗，成长更多，掉落也更好。",
+                           "DetailEn":  "Elite battle with higher growth and better loot.",
+                           "Notes":  "章节前段精英"
+                       },
+                       {
+                           "Stage":  84,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "资源交易点，可换装备、功法机缘或稳健补给。",
+                           "DetailEn":  "Trading stop for gear, skill opportunities, or steady supplies.",
+                           "Notes":  "章节前段交易"
+                       },
+                       {
+                           "Stage":  85,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  86,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  87,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通休整点，可换一口气继续推进。",
+                           "DetailEn":  "A normal rest stop to catch your breath before pushing onward.",
+                           "Notes":  "章节中段休整"
+                       },
+                       {
+                           "Stage":  88,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "精英战斗，强度略升，是章节中段的第一次检验。",
+                           "DetailEn":  "An elite battle that checks whether your mid-chapter build is online.",
+                           "Notes":  "章节中段精英"
+                       },
+                       {
+                           "Stage":  89,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  90,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  91,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "TradeMarket",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "中段交易点，可用已有资源补强装备或换取机缘。",
+                           "DetailEn":  "A mid-chapter market to convert current resources into gear or opportunities.",
+                           "Notes":  "章节中段交易"
+                       },
+                       {
+                           "Stage":  92,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "精英战斗，掉落更优，适合检验这一段的资源转化效率。",
+                           "DetailEn":  "An elite battle with better loot that tests your resource conversion this chapter.",
+                           "Notes":  "章节中后段精英"
+                       },
+                       {
+                           "Stage":  93,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  94,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "Rest",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "后段整备点，用来修正构筑节奏。",
+                           "DetailEn":  "A late-chapter rest stop for correcting your build tempo.",
+                           "Notes":  "章节后段休整"
+                       },
+                       {
+                           "Stage":  95,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  96,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "高压精英战，首领战前的重要门槛。",
+                           "DetailEn":  "A high-pressure elite battle that serves as an important gate before the boss.",
+                           "Notes":  "首领前精英"
+                       },
+                       {
+                           "Stage":  97,
+                           "NodeType":  "Rest",
+                           "EventProfile":  "InsightSanctum",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+                           "DetailEn":  "A high-tier opportunity stop before the boss for one last build spike.",
+                           "Notes":  "首领前机缘点"
+                       },
+                       {
+                           "Stage":  98,
+                           "NodeType":  "Battle",
+                           "EventProfile":  "DefaultBattle",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "普通战斗，可获得修为、灵石与装备掉落。",
+                           "DetailEn":  "Standard battle for growth, spirit stones, and equipment drops.",
+                           "Notes":  "常规推进战"
+                       },
+                       {
+                           "Stage":  99,
+                           "NodeType":  "Elite",
+                           "EventProfile":  "DefaultElite",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "首领前压轴精英战，决定你能否带着完整状态挑战本章首领。",
+                           "DetailEn":  "A final elite battle before the boss that decides whether you enter the chapter climax in good shape.",
+                           "Notes":  "首领前终检"
+                       },
+                       {
+                           "Stage":  100,
+                           "NodeType":  "Boss",
+                           "EventProfile":  "DefaultBoss",
+                           "ThemeZh":  "五行天阙",
+                           "ThemeEn":  "Fivefold Apex",
+                           "DetailZh":  "最终首领战。击败此敌后，本轮修行才算真正通关。",
+                           "DetailEn":  "The final boss battle. Defeat this enemy to fully clear the run.",
+                           "Notes":  "终局首领"
+                       }
+                   ]
 }
