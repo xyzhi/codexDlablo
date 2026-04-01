@@ -12,7 +12,7 @@ namespace Wuxing.UI
 {
     public class UIMapPage : UIPage
     {
-        public const float MapToastDuration = 1.6f;
+        public const float MapToastDuration = 1.25f;
 
         private const float MoveDurationPerStep = 0.5f;
         private const float NodeSpacing = 185f;
@@ -111,15 +111,10 @@ namespace Wuxing.UI
 
         private void OnClickEnter()
         {
+            if (isMoving) return;
             var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
-            if (selectedStage == currentStage)
-            {
-                TriggerStageEvent(currentStage);
-                return;
-            }
-
-            if (!GameProgressManager.CanTravelToStage(selectedStage)) return;
-            StartMoveToStage(selectedStage, true);
+            ShowArrivalToast(currentStage);
+            TriggerStageEvent(currentStage);
         }
 
         private void OnClickNext()
@@ -239,11 +234,11 @@ namespace Wuxing.UI
             moveCoroutine = null;
             RefreshView();
 
-            UIManager.Instance.ShowToast(BuildArrivalToast(Mathf.Max(1, GameProgressManager.GetCurrentStage())), MapToastDuration);
-
             if (triggerEventAfterMove)
             {
-                TriggerStageEvent(Mathf.Max(1, GameProgressManager.GetCurrentStage()));
+                var arrivedStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+                ShowArrivalToast(arrivedStage);
+                TriggerStageEvent(arrivedStage);
             }
         }
 
@@ -262,6 +257,14 @@ namespace Wuxing.UI
                 var t = Mathf.Clamp01(elapsed / MoveDurationPerStep);
                 UpdateTravelerMarkerPosition(Vector2.Lerp(fromPosition, toPosition, t));
                 yield return null;
+            }
+        }
+
+        private void ShowArrivalToast(int stage)
+        {
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.ShowToast(BuildArrivalToast(stage), MapToastDuration);
             }
         }
 
@@ -614,7 +617,7 @@ namespace Wuxing.UI
         {
             var canMovePrevious = !isMoving && GameProgressManager.CanTravelToStage(currentStage - 1);
             var canMoveNext = !isMoving && GameProgressManager.CanTravelToStage(currentStage + 1);
-            var canEnterSelected = !isMoving && GameProgressManager.CanTravelToStage(selectedStage);
+            var canEnterSelected = !isMoving;
 
             SetButtonText(previousButton, LocalizationManager.GetText("map.button_previous"));
             SetButtonText(nextButton, LocalizationManager.GetText("map.button_next"));
@@ -863,6 +866,11 @@ namespace Wuxing.UI
         }
     }
 }
+
+
+
+
+
 
 
 
