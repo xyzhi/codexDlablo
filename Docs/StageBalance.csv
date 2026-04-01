@@ -1,0 +1,9 @@
+﻿Stage,EnemyHPBonus,EnemyATKBonus,EnemyDEFBonus,EnemyMPBonus,EnemyEquipmentCount,PlayerHPBonus,PlayerATKBonus,PlayerDEFBonus,PlayerMPBonus,Notes
+1,0,0,0,0,0,20,3,2,0,新手保护关
+2,5,1,1,1,1,14,3,2,4,单主角过渡补正
+3,10,2,1,1,1,14,3,2,6,降低第三关硬墙
+4,26,6,2,4,2,0,0,0,0,回到正式双装成长
+5,36,8,3,6,2,0,0,0,0,中段持续抬升
+6,46,10,4,8,2,0,0,0,0,精英压力提升
+7,56,12,5,10,2,0,0,0,0,后段高压区
+8,66,14,6,12,2,0,0,0,0,Boss关成长

@@ -267,12 +267,29 @@ namespace Wuxing.UI
                 battlePlaybackCoroutine = null;
             }
 
-            GameProgressManager.RetreatToPreviousStage();
-            UIManager.Instance.ShowToast(LocalizationManager.Instance != null
-                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
-                ? "You fled the battle and fell back one stage."
-                : "你已逃离战斗，退回上一关。", 2f);
-            UIManager.Instance.ShowPage("Map");
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                return;
+            }
+
+            popup.Setup(
+                isEnglish ? "Retreat" : "撤退结算",
+                BuildRetreatMessage(isEnglish),
+                false,
+                delegate
+                {
+                    GameProgressManager.RetreatToPreviousStage();
+                    UIManager.Instance.ShowToast(isEnglish
+                        ? "You fled the battle and fell back one stage."
+                        : "你已逃离战斗，退回上一关。", 2f);
+                    UIManager.Instance.ShowPage("Map");
+                },
+                delegate { },
+                isEnglish ? "Confirm Retreat" : "确认撤退",
+                isEnglish ? "Keep Fighting" : "继续战斗");
         }
 
         private void OnClickStartBattle()
@@ -777,9 +794,7 @@ namespace Wuxing.UI
                 return;
             }
 
-            var message = isEnglish
-                ? "Game Over\n\nThis run has ended. Please start again or reset the run from the main menu."
-                : "游戏结束\n\n本轮已经结束，请重新开始，或回到主界面后重置本轮。";
+            var message = BuildDefeatMessage(playback, isEnglish);
 
             popup.Setup(
                 LocalizationManager.GetText("battle.status_defeat"),
@@ -800,14 +815,14 @@ namespace Wuxing.UI
             var options = GameProgressManager.GetPendingSkillRewardOptions();
             if (options.Count == 0)
             {
-                UIManager.Instance.ShowPage("Map");
+                HandlePostVictoryNavigation(isEnglish);
                 return;
             }
 
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
-                UIManager.Instance.ShowPage("Map");
+                HandlePostVictoryNavigation(isEnglish);
                 return;
             }
             var labels = new List<string>();
@@ -825,7 +840,7 @@ namespace Wuxing.UI
                         UIManager.Instance.ShowToast(BuildSkillRewardToast(appliedOption, isEnglish), 1.8f);
                     }
 
-                    UIManager.Instance.ShowPage("Map");
+                    HandlePostVictoryNavigation(isEnglish);
                 });
             }
 
@@ -834,6 +849,38 @@ namespace Wuxing.UI
                 BuildVictoryChoiceMessage(playback, reward, isEnglish),
                 labels,
                 actions);
+        }
+
+        private void HandlePostVictoryNavigation(bool isEnglish)
+        {
+            if (GameProgressManager.GetCurrentStage() >= GameProgressManager.GetMaxStage())
+            {
+                var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+                if (popup == null)
+                {
+                    GameProgressManager.ResetRun();
+                    UIManager.Instance.ShowPage("MainMenu");
+                    return;
+                }
+
+                popup.Setup(
+                    isEnglish ? "Route Complete" : "本轮通关",
+                    isEnglish
+                        ? "You have cleared the final boss of this route. The current run will be closed and return to the main menu."
+                        : "你已击败当前路线的最终首领。本轮将完成结算，并返回主界面。",
+                    false,
+                    delegate
+                    {
+                        GameProgressManager.ResetRun();
+                        UIManager.Instance.ShowPage("MainMenu");
+                    },
+                    null,
+                    isEnglish ? "Finish Run" : "完成本轮",
+                    null);
+                return;
+            }
+
+            UIManager.Instance.ShowPage("Map");
         }
 
         private static string BuildVictoryChoiceTitle(bool isEnglish)
@@ -850,6 +897,40 @@ namespace Wuxing.UI
                 + LocalizationManager.GetText("battle.result_rounds") + ": " + playback.TotalRounds + "\n\n"
                 + BuildRewardSummary(reward, isEnglish) + "\n\n"
                 + (isEnglish ? "Choose one reward. After choosing, return to the map." : "请选择一项功法机缘，选择后将直接返回地图。");
+        }
+
+        private static string BuildDefeatMessage(BattlePlaybackResult playback, bool isEnglish)
+        {
+            if (isEnglish)
+            {
+                return "Run Failed\n\nStage: " + GameProgressManager.GetCurrentStage()
+                    + "\nRounds: " + (playback != null ? playback.TotalRounds : 0)
+                    + "\nResult: Defeat"
+                    + "\n\nThe current run has ended and will return to the main menu.";
+            }
+
+            return "本轮失败\n\n关卡：第 " + GameProgressManager.GetCurrentStage() + " 关"
+                + "\n回合数：" + (playback != null ? playback.TotalRounds : 0)
+                + "\n结果：战败"
+                + "\n\n当前局将结束，并返回主界面。";
+        }
+
+        private static string BuildRetreatMessage(bool isEnglish)
+        {
+            var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+            var retreatStage = Mathf.Max(1, currentStage - 1);
+            if (isEnglish)
+            {
+                return "Current Stage: " + currentStage
+                    + "\nAfter retreat: Stage " + retreatStage
+                    + "\nPenalty: lose current battle progress and return to the map."
+                    + "\n\nConfirm retreat?";
+            }
+
+            return "当前关卡：第 " + currentStage + " 关"
+                + "\n撤退后：回到第 " + retreatStage + " 关"
+                + "\n代价：放弃本场战斗进度，并返回地图。"
+                + "\n\n是否确认撤退？";
         }
 
         private static string BuildSkillRewardOptionText(SkillRewardOption option, bool isEnglish)

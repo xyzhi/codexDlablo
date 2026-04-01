@@ -860,97 +860,55 @@ namespace Wuxing.Battle
                 return;
             }
 
-            if (stage == 2)
+            var config = GetStageBalance(stage);
+            if (config != null)
             {
-                unit.MaxHP += 8;
-                unit.CurrentHP += 8;
-                unit.ATK += 2;
-                unit.DEF += 1;
-                unit.MaxMP += 1;
-                unit.CurrentMP += 1;
-                return;
-            }
-
-            if (stage == 3)
-            {
-                unit.MaxHP += 16;
-                unit.CurrentHP += 16;
-                unit.ATK += 4;
-                unit.DEF += 1;
-                unit.MaxMP += 2;
-                unit.CurrentMP += 2;
+                ApplyStatBonus(unit, config.EnemyHPBonus, config.EnemyATKBonus, config.EnemyDEFBonus, config.EnemyMPBonus);
                 return;
             }
 
             var extraStages = stage - 3;
-            unit.MaxHP += 16 + extraStages * 10;
-            unit.CurrentHP += 16 + extraStages * 10;
-            unit.ATK += 4 + extraStages * 2;
-            unit.DEF += 1 + extraStages * 1;
-            unit.MaxMP += 2 + extraStages * 2;
-            unit.CurrentMP += 2 + extraStages * 2;
+            ApplyStatBonus(unit, 16 + extraStages * 10, 4 + extraStages * 2, 1 + extraStages, 2 + extraStages * 2);
         }
-
         private static void ApplyEnemyEquipmentByStage(BattleUnitRuntime unit, EquipmentDatabase equipmentDatabase, int stage)
         {
-            if (unit == null)
+            if (unit == null || stage <= 1 || equipmentDatabase == null || DefaultEnemyEquipmentIds == null)
             {
                 return;
             }
 
-            if (stage <= 1)
+            string[] equipmentIds;
+            if (!DefaultEnemyEquipmentIds.TryGetValue(unit.Id, out equipmentIds) || equipmentIds == null || equipmentIds.Length == 0)
             {
                 return;
             }
 
-            if (stage == 2 && equipmentDatabase != null && DefaultEnemyEquipmentIds != null)
+            var config = GetStageBalance(stage);
+            var equipmentCount = config != null
+                ? Mathf.Max(0, config.EnemyEquipmentCount)
+                : (stage <= 3 ? 1 : equipmentIds.Length);
+            if (equipmentCount <= 0)
             {
-                string[] equipmentIds;
-                if (!DefaultEnemyEquipmentIds.TryGetValue(unit.Id, out equipmentIds) || equipmentIds == null || equipmentIds.Length == 0)
-                {
-                    return;
-                }
-
-                var firstEquipment = equipmentDatabase.GetById(equipmentIds[0]);
-                if (firstEquipment != null)
-                {
-                    unit.ApplyEquipment(firstEquipment);
-                }
-
                 return;
             }
 
-            if (stage == 3 && equipmentDatabase != null && DefaultEnemyEquipmentIds != null)
+            var appliedCount = 0;
+            for (var i = 0; i < equipmentIds.Length; i++)
             {
-                string[] equipmentIds;
-                if (!DefaultEnemyEquipmentIds.TryGetValue(unit.Id, out equipmentIds) || equipmentIds == null || equipmentIds.Length == 0)
+                var equipment = equipmentDatabase.GetById(equipmentIds[i]);
+                if (equipment == null)
                 {
-                    return;
+                    continue;
                 }
 
-                var appliedCount = 0;
-                for (var i = 0; i < equipmentIds.Length; i++)
+                unit.ApplyEquipment(equipment);
+                appliedCount++;
+                if (appliedCount >= equipmentCount)
                 {
-                    var equipment = equipmentDatabase.GetById(equipmentIds[i]);
-                    if (equipment == null)
-                    {
-                        continue;
-                    }
-
-                    unit.ApplyEquipment(equipment);
-                    appliedCount++;
-                    if (appliedCount >= 2)
-                    {
-                        break;
-                    }
+                    break;
                 }
-
-                return;
             }
-
-            ApplyDefaultEquipment(unit, equipmentDatabase, DefaultEnemyEquipmentIds);
         }
-
         private static void ApplyEarlyStagePlayerSupport(BattleUnitRuntime unit, int stage)
         {
             if (unit == null)
@@ -958,32 +916,39 @@ namespace Wuxing.Battle
                 return;
             }
 
+            var config = GetStageBalance(stage);
+            if (config != null)
+            {
+                ApplyStatBonus(unit, config.PlayerHPBonus, config.PlayerATKBonus, config.PlayerDEFBonus, config.PlayerMPBonus);
+                return;
+            }
+
             if (stage == 1)
             {
-                unit.MaxHP += 20;
-                unit.CurrentHP += 20;
-                unit.ATK += 3;
-                unit.DEF += 2;
-                return;
-            }
-
-            if (stage == 2)
-            {
-                unit.MaxHP += 10;
-                unit.CurrentHP += 10;
-                unit.ATK += 2;
-                unit.DEF += 1;
-                return;
-            }
-
-            if (stage == 3)
-            {
-                unit.MaxHP += 6;
-                unit.CurrentHP += 6;
-                unit.ATK += 1;
+                ApplyStatBonus(unit, 20, 3, 2, 0);
             }
         }
 
+        private static StageBalanceConfig GetStageBalance(int stage)
+        {
+            var database = StageBalanceDatabaseLoader.Load();
+            return database != null ? database.GetByStage(stage) : null;
+        }
+
+        private static void ApplyStatBonus(BattleUnitRuntime unit, int hpBonus, int atkBonus, int defBonus, int mpBonus)
+        {
+            if (unit == null)
+            {
+                return;
+            }
+
+            unit.MaxHP += hpBonus;
+            unit.CurrentHP += hpBonus;
+            unit.ATK += atkBonus;
+            unit.DEF += defBonus;
+            unit.MaxMP += mpBonus;
+            unit.CurrentMP += mpBonus;
+        }
         private static Dictionary<string, string[]> GetCurrentPlayerEquipmentPreset()
         {
             EnsureEquipmentSettingsLoaded();
@@ -1623,6 +1588,9 @@ namespace Wuxing.Battle
         }
     }
 }
+
+
+
 
 
 

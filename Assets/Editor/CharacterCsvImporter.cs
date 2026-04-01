@@ -14,6 +14,7 @@ public static class CharacterCsvImporter
     private const string SkillCsvPath = "Docs/Skill.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
+    private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
 
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
@@ -24,6 +25,7 @@ public static class CharacterCsvImporter
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
     private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
     private const string SpiritStoneJsonPath = ConfigOutputFolder + "/SpiritStoneDatabase.json";
+    private const string StageBalanceJsonPath = ConfigOutputFolder + "/StageBalanceDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
 
     [MenuItem("工具/配置/导入全部CSV")]
@@ -36,9 +38,10 @@ public static class CharacterCsvImporter
             ImportSkills();
             ImportEquipments();
             ImportSpiritStones();
+            ImportStageBalances();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能、装备、灵石和语言表已完成导入。");
+            Debug.Log("角色、敌人、技能、装备、灵石、关卡成长和语言表已完成导入。");
         }
         catch (Exception exception)
         {
@@ -284,6 +287,48 @@ public static class CharacterCsvImporter
         Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
 
+
+    [MenuItem("工具/配置/仅导入关卡成长表")]
+    public static void ImportStageBalances()
+    {
+        var rows = ReadRequiredRows(StageBalanceCsvPath, "StageBalance CSV");
+        var configs = new List<StageBalanceConfig>();
+
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 11)
+            {
+                throw new InvalidOperationException($"Invalid stage balance row at line {i + 1}.");
+            }
+
+            configs.Add(new StageBalanceConfig
+            {
+                Stage = ParseInt(columns[0], nameof(StageBalanceConfig.Stage), i + 1),
+                EnemyHPBonus = ParseInt(columns[1], nameof(StageBalanceConfig.EnemyHPBonus), i + 1),
+                EnemyATKBonus = ParseInt(columns[2], nameof(StageBalanceConfig.EnemyATKBonus), i + 1),
+                EnemyDEFBonus = ParseInt(columns[3], nameof(StageBalanceConfig.EnemyDEFBonus), i + 1),
+                EnemyMPBonus = ParseInt(columns[4], nameof(StageBalanceConfig.EnemyMPBonus), i + 1),
+                EnemyEquipmentCount = ParseInt(columns[5], nameof(StageBalanceConfig.EnemyEquipmentCount), i + 1),
+                PlayerHPBonus = ParseInt(columns[6], nameof(StageBalanceConfig.PlayerHPBonus), i + 1),
+                PlayerATKBonus = ParseInt(columns[7], nameof(StageBalanceConfig.PlayerATKBonus), i + 1),
+                PlayerDEFBonus = ParseInt(columns[8], nameof(StageBalanceConfig.PlayerDEFBonus), i + 1),
+                PlayerMPBonus = ParseInt(columns[9], nameof(StageBalanceConfig.PlayerMPBonus), i + 1),
+                Notes = columns[10]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new StageBalanceDatabase();
+        database.stageBalances = configs;
+        WriteJson(StageBalanceJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} stage balances to {StageBalanceJsonPath}");
+    }
     private static List<List<string>> ReadRequiredRows(string relativePath, string displayName)
     {
         var csvPath = GetProjectFilePath(relativePath);
@@ -423,6 +468,8 @@ public static class CharacterCsvImporter
         }
     }
 }
+
+
 
 
 

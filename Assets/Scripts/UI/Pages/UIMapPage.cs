@@ -174,6 +174,36 @@ namespace Wuxing.UI
             RefreshView();
         }
 
+        private void ShowLifespanEndedPopup()
+        {
+            isMoving = false;
+            moveCoroutine = null;
+
+            var isEnglish = IsEnglish();
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                GameProgressManager.ResetRun();
+                UIManager.Instance.ShowPage("MainMenu");
+                return;
+            }
+
+            popup.Setup(
+                isEnglish ? "Lifespan Ended" : "寿元已尽",
+                isEnglish
+                    ? "Your lifespan has run out during this journey. The current run will end and return to the main menu."
+                    : "你在本轮途中寿元耗尽。当前局将结束，并返回主界面。",
+                false,
+                delegate
+                {
+                    GameProgressManager.ResetRun();
+                    UIManager.Instance.ShowPage("MainMenu");
+                },
+                null,
+                isEnglish ? "Back To Main Menu" : "返回主界面",
+                null);
+        }
+
         private void StartMoveToStage(int targetStage, bool triggerEventAfterMove)
         {
             if (isMoving) return;
@@ -198,10 +228,7 @@ namespace Wuxing.UI
                 var advanceResult = GameProgressManager.TravelToStage(nextStage);
                 if (advanceResult == RunAdvanceResult.LifespanEnded)
                 {
-                    UIManager.Instance.ShowToast(IsEnglish()
-                        ? "Lifespan exhausted. The run has ended."
-                        : "\u9633\u5bff\u5df2\u5c3d\uff0c\u672c\u8f6e\u7ed3\u675f\u3002", MapToastDuration);
-                    UIManager.Instance.ShowPage("MainMenu");
+                    ShowLifespanEndedPopup();
                     yield break;
                 }
 
@@ -576,3 +603,4 @@ namespace Wuxing.UI
         }
     }
 }
+

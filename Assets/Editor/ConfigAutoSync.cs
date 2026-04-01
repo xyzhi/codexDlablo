@@ -68,6 +68,7 @@ public static class ConfigAutoSync
             && IsOutputUpToDate("Docs/Skill.csv", "Assets/Resources/Configs/SkillDatabase.json")
             && IsOutputUpToDate("Docs/Equipment.csv", "Assets/Resources/Configs/EquipmentDatabase.json")
             && IsOutputUpToDate("Docs/SpiritStone.csv", "Assets/Resources/Configs/SpiritStoneDatabase.json")
+            && IsOutputUpToDate("Docs/StageBalance.csv", "Assets/Resources/Configs/StageBalanceDatabase.json")
             && IsOutputUpToDate("Docs/Localization.csv", "Assets/Resources/Localization/GameText.json");
     }
 
@@ -125,4 +126,6 @@ public sealed class ConfigCsvAutoSyncPostprocessor : AssetPostprocessor
         return false;
     }
 }
+
+
 
