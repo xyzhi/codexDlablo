@@ -19,6 +19,12 @@
             "ResultTitleKey": "map.village_result_title",
             "ResultIntroKey": "map.village_result_prepare",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Village service open equipment"
         },
         {
@@ -40,6 +46,12 @@
             "ResultTitleKey": "map.village_result_title",
             "ResultIntroKey": "map.village_result_review",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Village service open skill overview"
         },
         {
@@ -61,6 +73,12 @@
             "ResultTitleKey": "map.village_result_title",
             "ResultIntroKey": "map.village_result_route",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Village service route briefing"
         },
         {
@@ -82,6 +100,12 @@
             "ResultTitleKey": "map.rest_result_title",
             "ResultIntroKey": "map.rest_result_breath",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Rest exp focus"
         },
         {
@@ -103,6 +127,12 @@
             "ResultTitleKey": "map.rest_result_title",
             "ResultIntroKey": "map.rest_result_gather",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Rest spirit stone focus"
         },
         {
@@ -124,6 +154,12 @@
             "ResultTitleKey": "map.rest_result_title",
             "ResultIntroKey": "map.rest_result_sort",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Rest balanced reward"
         },
         {
@@ -145,6 +181,12 @@
             "ResultTitleKey": "map.market_result_title",
             "ResultIntroKey": "map.market_result_relic",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Market relic trade"
         },
         {
@@ -166,6 +208,12 @@
             "ResultTitleKey": "map.market_result_title",
             "ResultIntroKey": "map.market_skill_intro",
             "EmptyResultKey": "map.market_skill_empty",
+            "BuffType": "0",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Market elite skill trade"
         },
         {
@@ -187,6 +235,12 @@
             "ResultTitleKey": "map.market_result_title",
             "ResultIntroKey": "map.market_result_supply",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Market balanced resupply with stone cost"
         },
         {
@@ -208,6 +262,12 @@
             "ResultTitleKey": "map.insight_result_title",
             "ResultIntroKey": "map.insight_result_core",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Sanctum exp spike"
         },
         {
@@ -229,6 +289,12 @@
             "ResultTitleKey": "map.insight_result_title",
             "ResultIntroKey": "map.insight_result_cache",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Sanctum cache reward"
         },
         {
@@ -250,6 +316,12 @@
             "ResultTitleKey": "map.insight_result_title",
             "ResultIntroKey": "map.insight_skill_intro",
             "EmptyResultKey": "map.insight_skill_empty",
+            "BuffType": "0",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Sanctum boss-tier skill choice"
         },
         {
@@ -271,6 +343,12 @@
             "ResultTitleKey": "map.broker_result_title",
             "ResultIntroKey": "map.broker_result_refine",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Broker convert stones to cultivation"
         },
         {
@@ -292,6 +370,12 @@
             "ResultTitleKey": "map.broker_result_title",
             "ResultIntroKey": "map.broker_result_cache",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Broker cache deal"
         },
         {
@@ -313,6 +397,12 @@
             "ResultTitleKey": "map.broker_result_title",
             "ResultIntroKey": "map.broker_skill_intro",
             "EmptyResultKey": "map.broker_skill_empty",
+            "BuffType": "0",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Broker elite skill deal"
         },
         {
@@ -334,6 +424,12 @@
             "ResultTitleKey": "map.forge_result_title",
             "ResultIntroKey": "map.forge_result_temper",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Forge cultivation tempering"
         },
         {
@@ -355,6 +451,12 @@
             "ResultTitleKey": "map.forge_result_title",
             "ResultIntroKey": "map.forge_result_hoard",
             "EmptyResultKey": "",
+            "BuffType": "",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Forge cache reward"
         },
         {
@@ -376,6 +478,12 @@
             "ResultTitleKey": "map.forge_result_title",
             "ResultIntroKey": "map.forge_skill_intro",
             "EmptyResultKey": "map.forge_skill_empty",
+            "BuffType": "0",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Forge boss-tier insight"
         },
         {
@@ -403,7 +511,7 @@
             "BuffDurationMonths": 4,
             "BuffTitleKey": "map.effect_cultivation_title",
             "BuffDescriptionKey": "map.effect_cultivation_desc",
-            "Notes": "Random blessing payout"
+            "Notes": "Random blessing payout with timed cultivation effect"
         },
         {
             "Profile": "WanderingFortune",
@@ -430,7 +538,7 @@
             "BuffDurationMonths": 4,
             "BuffTitleKey": "map.effect_stone_title",
             "BuffDescriptionKey": "map.effect_stone_desc",
-            "Notes": "Random cache drop"
+            "Notes": "Random cache drop with timed stone effect"
         },
         {
             "Profile": "WanderingFortune",
@@ -451,6 +559,12 @@
             "ResultTitleKey": "map.fortune_result_title",
             "ResultIntroKey": "map.fortune_skill_intro",
             "EmptyResultKey": "map.fortune_skill_empty",
+            "BuffType": "0",
+            "BuffValueBase": 0,
+            "BuffValuePerStage": 0,
+            "BuffDurationMonths": 0,
+            "BuffTitleKey": "",
+            "BuffDescriptionKey": "",
             "Notes": "Random elite skill insight"
         }
     ]

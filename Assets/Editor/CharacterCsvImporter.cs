@@ -483,8 +483,75 @@ public static class CharacterCsvImporter
     {
         var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         var absolutePath = Path.Combine(projectRoot, assetRelativePath);
+        if (File.Exists(absolutePath))
+        {
+            var existingJson = File.ReadAllText(absolutePath, Encoding.UTF8);
+            if (AreJsonContentsEquivalent(existingJson, json))
+            {
+                return;
+            }
+        }
+
         File.WriteAllText(absolutePath, json, new UTF8Encoding(true));
     }
+
+    private static bool AreJsonContentsEquivalent(string left, string right)
+    {
+        return string.Equals(
+            CompactJsonForComparison(left),
+            CompactJsonForComparison(right),
+            StringComparison.Ordinal);
+    }
+
+    private static string CompactJsonForComparison(string json)
+    {
+        if (string.IsNullOrEmpty(json))
+        {
+            return string.Empty;
+        }
+
+        var builder = new StringBuilder(json.Length);
+        var inString = false;
+        var escaping = false;
+
+        for (var i = 0; i < json.Length; i++)
+        {
+            var ch = json[i];
+            if (inString)
+            {
+                builder.Append(ch);
+                if (escaping)
+                {
+                    escaping = false;
+                }
+                else if (ch == '\\')
+                {
+                    escaping = true;
+                }
+                else if (ch == '"')
+                {
+                    inString = false;
+                }
+
+                continue;
+            }
+
+            if (ch == '"')
+            {
+                inString = true;
+                builder.Append(ch);
+                continue;
+            }
+
+            if (!char.IsWhiteSpace(ch))
+            {
+                builder.Append(ch);
+            }
+        }
+
+        return builder.ToString();
+    }
+
     private static int ParseInt(string value, string fieldName, int lineNumber)
     {
         int result;
