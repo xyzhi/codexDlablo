@@ -102,7 +102,7 @@ battle.button_reset_loadout,重置装备,Reset Loadout
 battle.button_auto_offense,自动输出,Auto Offense
 battle.button_auto_defense,自动生存,Auto Defense
 battle.prep_status_prefix,正在准备第 ,Preparing Stage 
-battle.prep_status_suffix, 关,
+battle.prep_status_suffix, 关, stage
 battle.prep_briefing_prefix,第 ,Stage 
 battle.prep_briefing_suffix, 关简报, Briefing
 battle.prep_objective,目标：击败全部敌人。,Objective: Defeat all enemies.
@@ -256,3 +256,4 @@ map.choice_gain_skill_elite,获得 1 次高阶功法机缘,Gain 1 high-tier skil
 map.choice_gain_skill_boss,获得 1 次顶阶功法机缘,Gain 1 boss-tier skill reward
 map.reward_equipment,装备掉落：,Equipment Drop: 
 map.choice_gain_skill,获得 1 次功法机缘,Gain 1 skill reward
+
