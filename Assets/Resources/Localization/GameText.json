@@ -1,899 +1,1059 @@
 ﻿{
-    "entries": [
-        {
-            "key": "menu.title",
-            "zhHans": "五行行者",
-            "en": "Wuxing Wanderer"
-        },
-        {
-            "key": "landing.kicker",
-            "zhHans": "单机修仙肉鸽",
-            "en": "CULTIVATION ROGUELIKE"
-        },
-        {
-            "key": "landing.title",
-            "zhHans": "五行行者",
-            "en": "Wuxing Wanderer"
-        },
-        {
-            "key": "landing.subtitle",
-            "zhHans": "以寿元为火，以五行为刃。",
-            "en": "Burn lifespan as fuel"
-        },
-        {
-            "key": "landing.feature_1",
-            "zhHans": "五行灵根构筑，决定你这一局能走多远。",
-            "en": "Build around elemental roots and decide how far this run can go."
-        },
-        {
-            "key": "landing.feature_2",
-            "zhHans": "自动战斗，策略重心放在配装、路线与功法取舍。",
-            "en": "Auto battles keep the focus on loadouts"
-        },
-        {
-            "key": "landing.feature_3",
-            "zhHans": "寿元会随着推进不断流逝，每一步都在逼近终局。",
-            "en": "Lifespan drains as you advance"
-        },
-        {
-            "key": "landing.button_enter",
-            "zhHans": "开始游戏",
-            "en": "Start Game"
-        },
-        {
-            "key": "landing.footer",
-            "zhHans": "进入主菜单后可继续推进地图、战斗与构筑。",
-            "en": "Enter the main menu to continue your route"
-        },
-        {
-            "key": "menu.subtitle",
-            "zhHans": "第一阶段 / 第一步 / 文字与线框 UGUI",
-            "en": "Phase 1 / Step 1 / Text and line UGUI"
-        },
-        {
-            "key": "menu.button_battle",
-            "zhHans": "进入战斗页",
-            "en": "Open Battle Page"
-        },
-        {
-            "key": "menu.button_popup",
-            "zhHans": "打开确认弹窗",
-            "en": "Open Confirm Popup"
-        },
-        {
-            "key": "menu.button_toast",
-            "zhHans": "显示提示",
-            "en": "Show Toast"
-        },
-        {
-            "key": "menu.button_language",
-            "zhHans": "切换语言",
-            "en": "Switch Language"
-        },
-        {
-            "key": "menu.button_rebuild_ui",
-            "zhHans": "重建UI预设",
-            "en": "Rebuild UI Prefabs"
-        },
-        {
-            "key": "menu.footer",
-            "zhHans": "这一版先只用文字、线条和矩形框，方便后续替换美术。",
-            "en": "This version uses text lines and rectangles first so art can be replaced later."
-        },
-        {
-            "key": "battle.summary_no_data",
-            "zhHans": "无数据",
-            "en": "No data"
-        },
-        {
-            "key": "battle.summary_no_units",
-            "zhHans": "无单位",
-            "en": "No units"
-        },
-        {
-            "key": "battle.summary_dead",
-            "zhHans": "阵亡",
-            "en": "KO"
-        },
-        {
-            "key": "battle.log_config_missing",
-            "zhHans": "战斗配置缺失，请先导入全部 CSV。",
-            "en": "Battle config missing. Import all CSV files first."
-        },
-        {
-            "key": "battle.title",
-            "zhHans": "战斗页占位",
-            "en": "Battle Page Placeholder"
-        },
-        {
-            "key": "battle.player_team",
-            "zhHans": "我方队伍",
-            "en": "Player Team"
-        },
-        {
-            "key": "battle.player_content",
-            "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150",
-            "en": "Unit A  HP 120/120\nUnit B  HP 150/150"
-        },
-        {
-            "key": "battle.enemy_team",
-            "zhHans": "敌方队伍",
-            "en": "Enemy Team"
-        },
-        {
-            "key": "battle.enemy_content",
-            "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90",
-            "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90"
-        },
-        {
-            "key": "battle.equipment_title",
-            "zhHans": "装备",
-            "en": "Equipment"
-        },
-        {
-            "key": "battle.equipment_none",
-            "zhHans": "无装备",
-            "en": "None"
-        },
-        {
-            "key": "battle.equipment_detail_title",
-            "zhHans": "装备详情",
-            "en": "Equipment Detail"
-        },
-        {
-            "key": "battle.equipment_preset_balanced",
-            "zhHans": "均衡",
-            "en": "Balanced"
-        },
-        {
-            "key": "battle.equipment_preset_burst",
-            "zhHans": "爆发",
-            "en": "Burst"
-        },
-        {
-            "key": "battle.log_title",
-            "zhHans": "战斗日志",
-            "en": "Battle Log"
-        },
-        {
-            "key": "battle.log_content",
-            "zhHans": "下一步这里会接真实战斗日志。",
-            "en": "This area will show real battle logs in the next step."
-        },
-        {
-            "key": "battle.log_round",
-            "zhHans": "回合",
-            "en": "Round"
-        },
-        {
-            "key": "battle.log_enemy_defeated",
-            "zhHans": "敌方全灭",
-            "en": "Enemy team defeated."
-        },
-        {
-            "key": "battle.log_player_defeated",
-            "zhHans": "我方全灭",
-            "en": "Player team defeated."
-        },
-        {
-            "key": "battle.log_round_limit",
-            "zhHans": "达到回合上限",
-            "en": "Battle reached round limit."
-        },
-        {
-            "key": "battle.log_casts",
-            "zhHans": "施放",
-            "en": "casts"
-        },
-        {
-            "key": "battle.log_heals",
-            "zhHans": "治疗了",
-            "en": "heals"
-        },
-        {
-            "key": "battle.log_takes",
-            "zhHans": "受到",
-            "en": "takes"
-        },
-        {
-            "key": "battle.log_damage",
-            "zhHans": "伤害",
-            "en": "damage"
-        },
-        {
-            "key": "battle.log_steadies",
-            "zhHans": "稳住了身形",
-            "en": "steadies"
-        },
-        {
-            "key": "battle.log_attacks",
-            "zhHans": "攻击",
-            "en": "attacks"
-        },
-        {
-            "key": "battle.log_on",
-            "zhHans": "目标",
-            "en": "on"
-        },
-        {
-            "key": "battle.log_for",
-            "zhHans": "造成",
-            "en": "for"
-        },
-        {
-            "key": "battle.log_fallen",
-            "zhHans": "已阵亡。",
-            "en": "has fallen."
-        },
-        {
-            "key": "battle.log_finished",
-            "zhHans": "战斗结束",
-            "en": "Battle finished"
-        },
-        {
-            "key": "battle.status_idle",
-            "zhHans": "等待开始战斗",
-            "en": "Waiting to start battle"
-        },
-        {
-            "key": "battle.status_victory",
-            "zhHans": "战斗胜利",
-            "en": "Battle Victory"
-        },
-        {
-            "key": "battle.status_defeat",
-            "zhHans": "战斗失败",
-            "en": "Battle Defeat"
-        },
-        {
-            "key": "battle.result_rounds",
-            "zhHans": "总回合数",
-            "en": "Total Rounds"
-        },
-        {
-            "key": "battle.button_start",
-            "zhHans": "开始战斗",
-            "en": "Start Battle"
-        },
-        {
-            "key": "battle.button_restart",
-            "zhHans": "重开",
-            "en": "Restart"
-        },
-        {
-            "key": "battle.button_review",
-            "zhHans": "回顾",
-            "en": "Review"
-        },
-        {
-            "key": "battle.button_open_result",
-            "zhHans": "打开结算窗口",
-            "en": "Open Result Window"
-        },
-        {
-            "key": "battle.button_back",
-            "zhHans": "返回主菜单",
-            "en": "Back To Main Menu"
-        },
-        {
-            "key": "battle.button_tip",
-            "zhHans": "显示提示",
-            "en": "Show Tip"
-        },
-        {
-            "key": "battle.button_close_log",
-            "zhHans": "关闭日志",
-            "en": "Close Log"
-        },
-        {
-            "key": "battle.button_equipment",
-            "zhHans": "查看装备",
-            "en": "Equipment"
-        },
-        {
-            "key": "battle.button_cycle_equipment",
-            "zhHans": "切换方案",
-            "en": "Switch Preset"
-        },
-        {
-            "key": "battle.button_close_equipment",
-            "zhHans": "关闭装备",
-            "en": "Close"
-        },
-        {
-            "key": "popup.confirm.title",
-            "zhHans": "确认",
-            "en": "Confirm"
-        },
-        {
-            "key": "popup.confirm.message",
-            "zhHans": "这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。",
-            "en": "This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later."
-        },
-        {
-            "key": "popup.confirm_button",
-            "zhHans": "确认",
-            "en": "Confirm"
-        },
-        {
-            "key": "popup.cancel_button",
-            "zhHans": "取消",
-            "en": "Cancel"
-        },
-        {
-            "key": "toast.framework_ready",
-            "zhHans": "UI 框架已经就绪。",
-            "en": "UI framework is ready."
-        },
-        {
-            "key": "toast.confirmed",
-            "zhHans": "你点击了确认。",
-            "en": "Confirm clicked."
-        },
-        {
-            "key": "toast.cancelled",
-            "zhHans": "你取消了操作。",
-            "en": "Cancelled."
-        },
-        {
-            "key": "toast.battle_next",
-            "zhHans": "下一步会接入真正的战斗系统。",
-            "en": "The real battle system will be connected next."
-        },
-        {
-            "key": "toast.language_changed",
-            "zhHans": "语言已切换。",
-            "en": "Language switched."
-        },
-        {
-            "key": "toast.ui_prefabs_rebuilt",
-            "zhHans": "UI预设已重建。",
-            "en": "UI prefabs rebuilt."
-        },
-        {
-            "key": "toast.editor_only",
-            "zhHans": "该功能仅在Unity编辑器中可用。",
-            "en": "This feature is only available in the Unity Editor."
-        },
-        {
-            "key": "common.separator_names",
-            "zhHans": "、",
-            "en": ", "
-        },
-        {
-            "key": "map.title",
-            "zhHans": "地图路线",
-            "en": "Map Route"
-        },
-        {
-            "key": "map.status_prefix",
-            "zhHans": "当前节点：",
-            "en": "Current Node: "
-        },
-        {
-            "key": "map.region_prefix",
-            "zhHans": "区域：",
-            "en": "Region: "
-        },
-        {
-            "key": "map.button_enter",
-            "zhHans": "进入节点",
-            "en": "Enter Node"
-        },
-        {
-            "key": "map.button_pass_month",
-            "zhHans": "推进一月",
-            "en": "Pass One Month"
-        },
-        {
-            "key": "map.button_reset_run",
-            "zhHans": "重置本轮",
-            "en": "Reset Run"
-        },
-        {
-            "key": "map.button_back_menu",
-            "zhHans": "返回主菜单",
-            "en": "Back To Menu"
-        },
-        {
-            "key": "map.toast_lifespan_ended",
-            "zhHans": "阳寿已尽，本轮结束。",
-            "en": "Lifespan exhausted. The run has ended."
-        },
-        {
-            "key": "map.toast_route_complete",
-            "zhHans": "本轮路线完成，返回主菜单。",
-            "en": "Route complete. Returning to main menu."
-        },
-        {
-            "key": "map.toast_month_passed",
-            "zhHans": "又逝一月。",
-            "en": "One month passes."
-        },
-        {
-            "key": "battle.slot_weapon",
-            "zhHans": "武器",
-            "en": "Weapon"
-        },
-        {
-            "key": "battle.slot_armor",
-            "zhHans": "护甲",
-            "en": "Armor"
-        },
-        {
-            "key": "battle.slot_accessory",
-            "zhHans": "饰品",
-            "en": "Accessory"
-        },
-        {
-            "key": "battle.editor_target",
-            "zhHans": "当前角色",
-            "en": "Editing Unit"
-        },
-        {
-            "key": "battle.editor_stats",
-            "zhHans": "当前属性",
-            "en": "Stats"
-        },
-        {
-            "key": "battle.editor_skills",
-            "zhHans": "当前技能",
-            "en": "Skills"
-        },
-        {
-            "key": "battle.editor_team_totals",
-            "zhHans": "队伍总属性",
-            "en": "Team Totals"
-        },
-        {
-            "key": "battle.editor_preview",
-            "zhHans": "战斗预览",
-            "en": "Battle Preview"
-        },
-        {
-            "key": "battle.editor_owned_equipment",
-            "zhHans": "已拥有装备",
-            "en": "Owned Equipment"
-        },
-        {
-            "key": "battle.editor_unit_prefix",
-            "zhHans": "角色: ",
-            "en": "Unit: "
-        },
-        {
-            "key": "battle.preview_victory",
-            "zhHans": "预计胜利",
-            "en": "Victory"
-        },
-        {
-            "key": "battle.preview_defeat",
-            "zhHans": "预计失败",
-            "en": "Defeat"
-        },
-        {
-            "key": "battle.preview_rounds",
-            "zhHans": "回合数",
-            "en": "Rounds"
-        },
-        {
-            "key": "battle.button_reset_loadout",
-            "zhHans": "重置装备",
-            "en": "Reset Loadout"
-        },
-        {
-            "key": "battle.button_auto_offense",
-            "zhHans": "自动输出",
-            "en": "Auto Offense"
-        },
-        {
-            "key": "battle.button_auto_defense",
-            "zhHans": "自动生存",
-            "en": "Auto Defense"
-        },
-        {
-            "key": "battle.prep_status_prefix",
-            "zhHans": "正在准备第 ",
-            "en": "Preparing Stage "
-        },
-        {
-            "key": "battle.prep_status_suffix",
-            "zhHans": " 关",
-            "en": ""
-        },
-        {
-            "key": "battle.prep_briefing_prefix",
-            "zhHans": "第 ",
-            "en": "Stage "
-        },
-        {
-            "key": "battle.prep_briefing_suffix",
-            "zhHans": " 关简报",
-            "en": " Briefing"
-        },
-        {
-            "key": "battle.prep_objective",
-            "zhHans": "目标：击败全部敌人。",
-            "en": "Objective: Defeat all enemies."
-        },
-        {
-            "key": "battle.prep_enemies",
-            "zhHans": "敌人：",
-            "en": "Enemies: "
-        },
-        {
-            "key": "battle.prep_threat",
-            "zhHans": "威胁：",
-            "en": "Threat: "
-        },
-        {
-            "key": "battle.prep_preview",
-            "zhHans": "预估：",
-            "en": "Preview: "
-        },
-        {
-            "key": "battle.prep_likely_victory",
-            "zhHans": "较大概率胜利",
-            "en": "Likely Victory"
-        },
-        {
-            "key": "battle.prep_likely_defeat",
-            "zhHans": "较大概率失败",
-            "en": "Likely Defeat"
-        },
-        {
-            "key": "battle.prep_rounds_prefix",
-            "zhHans": "，约 ",
-            "en": " in "
-        },
-        {
-            "key": "battle.prep_rounds_suffix",
-            "zhHans": " 回合。",
-            "en": " rounds."
-        },
-        {
-            "key": "battle.prep_tip",
-            "zhHans": "建议：如果预估不理想，先调整装备再开战。",
-            "en": "Tip: Adjust equipment before battle if the preview looks risky."
-        },
-        {
-            "key": "battle.threat_low",
-            "zhHans": "低",
-            "en": "Low"
-        },
-        {
-            "key": "battle.threat_medium",
-            "zhHans": "中",
-            "en": "Medium"
-        },
-        {
-            "key": "battle.threat_medium_high",
-            "zhHans": "中高",
-            "en": "Medium-High"
-        },
-        {
-            "key": "battle.threat_high",
-            "zhHans": "高",
-            "en": "High"
-        },
-        {
-            "key": "common.button_close",
-            "zhHans": "关闭",
-            "en": "Close"
-        },
-        {
-            "key": "map.toast_event_triggered",
-            "zhHans": "目的地事件已触发。",
-            "en": "The destination event has been triggered."
-        },
-        {
-            "key": "map.button_continue",
-            "zhHans": "继续",
-            "en": "Continue"
-        },
-        {
-            "key": "map.rest_choice_refine",
-            "zhHans": "炼化灵石\n消耗：{0} -{1}\n经验 +{2}",
-            "en": "Refine Through Stones\nCost: {0} -{1}\nExp +{2}"
-        },
-        {
-            "key": "map.rest_choice_sort",
-            "zhHans": "整理行囊\n经验 +{0}\n{1} +{2}",
-            "en": "Sort Equipment\nExp +{0}\n{1} +{2}"
-        },
-        {
-            "key": "map.rest_choice_breath",
-            "zhHans": "调息养元\n经验 +{0}\n灵石 +0",
-            "en": "Breathing Practice\nExp +{0}\nSpirit Stones +0"
-        },
-        {
-            "key": "map.rest_choice_gather",
-            "zhHans": "采集灵石\n经验 +{0}\n{1} +{2}",
-            "en": "Gather Qi Crystals\nExp +{0}\n{1} +{2}"
-        },
-        {
-            "key": "map.rest_title",
-            "zhHans": "休整事件",
-            "en": "Rest Event"
-        },
-        {
-            "key": "map.rest_message",
-            "zhHans": "选择你在此地如何调整状态。",
-            "en": "Choose how to spend this stop."
-        },
-        {
-            "key": "map.village_choice_elder",
-            "zhHans": "长者指点\n经验 +{0}\n灵石 +0",
-            "en": "Elder's Guidance\nExp +{0}\nSpirit Stones +0"
-        },
-        {
-            "key": "map.village_choice_supply",
-            "zhHans": "行商补给\n经验 +{0}\n{1} +{2}",
-            "en": "Merchant Supply\nExp +{0}\n{1} +{2}"
-        },
-        {
-            "key": "map.village_choice_scripture",
-            "zhHans": "借阅藏经\n获得 1 次功法机缘",
-            "en": "Borrow Scripture\nGain 1 skill reward choice"
-        },
-        {
-            "key": "map.village_title",
-            "zhHans": "新手村",
-            "en": "Novice Village"
-        },
-        {
-            "key": "map.village_message",
-            "zhHans": "离开新手村前，选择一份启程助力。",
-            "en": "Before leaving the village, choose one piece of support."
-        },
-        {
-            "key": "map.rest_result_gather",
-            "zhHans": "你在附近采集五行灵石，囊中收获更丰。",
-            "en": "You gather the local five-element crystals and leave with fuller pockets."
-        },
-        {
-            "key": "map.not_enough_stones_title",
-            "zhHans": "灵石不足",
-            "en": "Not Enough Spirit Stones"
-        },
-        {
-            "key": "map.not_enough_stones_message",
-            "zhHans": "你手中的对应灵石不足，暂时无法进行这次炼化。",
-            "en": "You do not have enough matching spirit stones to refine this stop."
-        },
-        {
-            "key": "map.rest_result_refine",
-            "zhHans": "你将储备灵石当场炼化，强行换来一段更猛的修为推进。",
-            "en": "You refine stored spirit stones into pure progress and push your cultivation further."
-        },
-        {
-            "key": "map.rest_result_sort",
-            "zhHans": "你整理装备与气机，为下一段路做足准备。",
-            "en": "You sort equipment and steady your rhythm before moving on."
-        },
-        {
-            "key": "map.rest_result_breath",
-            "zhHans": "你专心调息运转周天，修为更进一步。",
-            "en": "You focus on breathing practice and deepen your cultivation."
-        },
-        {
-            "key": "map.rest_result_title",
-            "zhHans": "休整结果",
-            "en": "Rest Result"
-        },
-        {
-            "key": "map.village_result_supply",
-            "zhHans": "路过行商给你留下一份赶路所需的修行补给。",
-            "en": "A passing merchant leaves you a small bundle of cultivation supplies."
-        },
-        {
-            "key": "map.village_result_elder",
-            "zhHans": "临行前，村中长者给了你几句修行指点。",
-            "en": "The village elder gives you a few words of guidance before you set out."
-        },
-        {
-            "key": "map.village_result_title",
-            "zhHans": "村中收获",
-            "en": "Village Result"
-        },
-        {
-            "key": "map.scripture_title",
-            "zhHans": "借阅藏经",
-            "en": "Borrow Scripture"
-        },
-        {
-            "key": "map.scripture_message",
-            "zhHans": "选择一项开局功法机缘。",
-            "en": "Choose one starter skill reward."
-        },
-        {
-            "key": "map.scripture_empty",
-            "zhHans": "你整理思绪后，轻装上路。",
-            "en": "You leave the village with a clearer mind."
-        },
-        {
-            "key": "map.scripture_intro",
-            "zhHans": "你从村中藏经阁借得一页功法残卷。",
-            "en": "You borrow a manual from the village archive."
-        },
-        {
-            "key": "map.reward_choice_empty",
-            "zhHans": "空白奖励",
-            "en": "Empty"
-        },
-        {
-            "key": "map.reward_choice_label",
-            "zhHans": "功法机缘\n{0}\n角色：{1}\n结果：Lv.{2} {3}\n五行：{4}",
-            "en": "Reward\n{0}\nTarget: {1}\nResult: Lv.{2} {3}\nElement: {4}"
-        },
-        {
-            "key": "map.reward_result_upgrade",
-            "zhHans": "升级",
-            "en": "Upgrade"
-        },
-        {
-            "key": "map.reward_result_learn",
-            "zhHans": "习得",
-            "en": "Learn"
-        },
-        {
-            "key": "map.reward_toast_upgrade",
-            "zhHans": "{0} 将 {1} 提升至 Lv.{2}。",
-            "en": "{0} upgraded {1} to Lv.{2}."
-        },
-        {
-            "key": "map.reward_toast_learn",
-            "zhHans": "{0} 习得 {1}，当前 Lv.{2}。",
-            "en": "{0} learned {1} at Lv.{2}."
-        },
-        {
-            "key": "map.reward_title",
-            "zhHans": "获得",
-            "en": "Reward"
-        },
-        {
-            "key": "map.reward_exp",
-            "zhHans": "经验 +",
-            "en": "Exp +"
-        },
-        {
-            "key": "map.reward_levelup",
-            "zhHans": "修为提升 +",
-            "en": "Cultivation Lv. +"
-        },
-        {
-            "key": "map.skill_overview_title",
-            "zhHans": "已学功法",
-            "en": "Run Skills"
-        },
-        {
-            "key": "map.lifespan_title",
-            "zhHans": "寿元已尽",
-            "en": "Lifespan Ended"
-        },
-        {
-            "key": "map.lifespan_message",
-            "zhHans": "你在本轮途中寿元耗尽。当前局将结束，并返回主界面。",
-            "en": "Your lifespan has run out during this journey. The current run will end and return to the main menu."
-        },
-        {
-            "key": "map.button_back_main",
-            "zhHans": "返回主界面",
-            "en": "Back To Main Menu"
-        },
-        {
-            "key": "map.detail_title",
-            "zhHans": "选中节点",
-            "en": "Selected Node"
-        },
-        {
-            "key": "map.detail_stage",
-            "zhHans": "第 {0} 关 · {1}",
-            "en": "Stage {0} · {1}"
-        },
-        {
-            "key": "map.detail_reachable",
-            "zhHans": "是否可达：",
-            "en": "Reachable: "
-        },
-        {
-            "key": "map.detail_reachable_yes",
-            "zhHans": "可达",
-            "en": "Yes"
-        },
-        {
-            "key": "map.detail_reachable_locked",
-            "zhHans": "未解锁",
-            "en": "Locked"
-        },
-        {
-            "key": "map.detail_time_cost",
-            "zhHans": "耗时：",
-            "en": "Time Cost: "
-        },
-        {
-            "key": "map.detail_month_suffix",
-            "zhHans": " 月",
-            "en": " month(s)"
-        },
-        {
-            "key": "map.detail_arrival_effect",
-            "zhHans": "到达效果：",
-            "en": "Arrival Effect: "
-        },
-        {
-            "key": "map.detail_arrival_rest",
-            "zhHans": "立刻触发休整事件，并停留在地图上。",
-            "en": "Trigger rest immediately and stay on the map."
-        },
-        {
-            "key": "map.detail_arrival_battle",
-            "zhHans": "移动结束后自动进入战斗。",
-            "en": "Start battle automatically after movement ends."
-        },
-        {
-            "key": "map.profile_title",
-            "zhHans": "个人信息",
-            "en": "Profile"
-        },
-        {
-            "key": "map.profile_current_stage",
-            "zhHans": "当前关卡：",
-            "en": "Current Stage: "
-        },
-        {
-            "key": "map.profile_highest_cleared",
-            "zhHans": "最高通关：",
-            "en": "Highest Cleared: "
-        },
-        {
-            "key": "map.profile_reachable_frontier",
-            "zhHans": "可达前沿：",
-            "en": "Reachable Frontier: "
-        },
-        {
-            "key": "map.profile_cultivation_level",
-            "zhHans": "修为等级 ",
-            "en": "Cultivation Lv."
-        },
-        {
-            "key": "map.profile_exp",
-            "zhHans": "经验：",
-            "en": "Exp: "
-        },
-        {
-            "key": "map.profile_owned_equipment",
-            "zhHans": "已拥有装备：",
-            "en": "Owned Equipment: "
-        },
-        {
-            "key": "map.arrival_toast",
-            "zhHans": "已抵达第 {0} 关 · {1}",
-            "en": "Arrived at Stage {0} · {1}"
-        },
-        {
-            "key": "map.node_label",
-            "zhHans": "第{0}关\n{1}",
-            "en": "Stage {0}\n{1}"
-        },
-        {
-            "key": "map.status_current_position",
-            "zhHans": "当前位置：第 {0} 关 · {1}",
-            "en": "Current Position: Stage {0} · {1}"
-        },
-        {
-            "key": "map.button_previous",
-            "zhHans": "后退",
-            "en": "Previous"
-        },
-        {
-            "key": "map.button_next",
-            "zhHans": "前进",
-            "en": "Next"
-        },
-        {
-            "key": "map.button_skill_overview",
-            "zhHans": "已学功法",
-            "en": "Run Skills"
-        }
-    ]
+    "entries":  [
+                    {
+                        "key":  "menu.title",
+                        "zhHans":  "五行行者",
+                        "en":  "Wuxing Wanderer"
+                    },
+                    {
+                        "key":  "landing.kicker",
+                        "zhHans":  "单机修仙肉鸽",
+                        "en":  "CULTIVATION ROGUELIKE"
+                    },
+                    {
+                        "key":  "landing.title",
+                        "zhHans":  "五行行者",
+                        "en":  "Wuxing Wanderer"
+                    },
+                    {
+                        "key":  "landing.subtitle",
+                        "zhHans":  "以寿元为火，以五行为刃。",
+                        "en":  "Burn lifespan as fuel"
+                    },
+                    {
+                        "key":  "landing.feature_1",
+                        "zhHans":  "五行灵根构筑，决定你这一局能走多远。",
+                        "en":  "Build around elemental roots and decide how far this run can go."
+                    },
+                    {
+                        "key":  "landing.feature_2",
+                        "zhHans":  "自动战斗，策略重心放在配装、路线与功法取舍。",
+                        "en":  "Auto battles keep the focus on loadouts"
+                    },
+                    {
+                        "key":  "landing.feature_3",
+                        "zhHans":  "寿元会随着推进不断流逝，每一步都在逼近终局。",
+                        "en":  "Lifespan drains as you advance"
+                    },
+                    {
+                        "key":  "landing.button_enter",
+                        "zhHans":  "开始游戏",
+                        "en":  "Start Game"
+                    },
+                    {
+                        "key":  "landing.footer",
+                        "zhHans":  "进入主菜单后可继续推进地图、战斗与构筑。",
+                        "en":  "Enter the main menu to continue your route"
+                    },
+                    {
+                        "key":  "menu.subtitle",
+                        "zhHans":  "第一阶段 / 第一步 / 文字与线框 UGUI",
+                        "en":  "Phase 1 / Step 1 / Text and line UGUI"
+                    },
+                    {
+                        "key":  "menu.button_battle",
+                        "zhHans":  "进入战斗页",
+                        "en":  "Open Battle Page"
+                    },
+                    {
+                        "key":  "menu.button_popup",
+                        "zhHans":  "打开确认弹窗",
+                        "en":  "Open Confirm Popup"
+                    },
+                    {
+                        "key":  "menu.button_toast",
+                        "zhHans":  "显示提示",
+                        "en":  "Show Toast"
+                    },
+                    {
+                        "key":  "menu.button_language",
+                        "zhHans":  "切换语言",
+                        "en":  "Switch Language"
+                    },
+                    {
+                        "key":  "menu.button_rebuild_ui",
+                        "zhHans":  "重建UI预设",
+                        "en":  "Rebuild UI Prefabs"
+                    },
+                    {
+                        "key":  "menu.footer",
+                        "zhHans":  "这一版先只用文字、线条和矩形框，方便后续替换美术。",
+                        "en":  "This version uses text lines and rectangles first so art can be replaced later."
+                    },
+                    {
+                        "key":  "battle.summary_no_data",
+                        "zhHans":  "无数据",
+                        "en":  "No data"
+                    },
+                    {
+                        "key":  "battle.summary_no_units",
+                        "zhHans":  "无单位",
+                        "en":  "No units"
+                    },
+                    {
+                        "key":  "battle.summary_dead",
+                        "zhHans":  "阵亡",
+                        "en":  "KO"
+                    },
+                    {
+                        "key":  "battle.log_config_missing",
+                        "zhHans":  "战斗配置缺失，请先导入全部 CSV。",
+                        "en":  "Battle config missing. Import all CSV files first."
+                    },
+                    {
+                        "key":  "battle.title",
+                        "zhHans":  "战斗页占位",
+                        "en":  "Battle Page Placeholder"
+                    },
+                    {
+                        "key":  "battle.player_team",
+                        "zhHans":  "我方队伍",
+                        "en":  "Player Team"
+                    },
+                    {
+                        "key":  "battle.player_content",
+                        "zhHans":  "角色甲  HP 120/120\n角色乙  HP 150/150",
+                        "en":  "Unit A  HP 120/120\nUnit B  HP 150/150"
+                    },
+                    {
+                        "key":  "battle.enemy_team",
+                        "zhHans":  "敌方队伍",
+                        "en":  "Enemy Team"
+                    },
+                    {
+                        "key":  "battle.enemy_content",
+                        "zhHans":  "敌人甲  HP 100/100\n敌人乙  HP 90/90",
+                        "en":  "Enemy A  HP 100/100\nEnemy B  HP 90/90"
+                    },
+                    {
+                        "key":  "battle.equipment_title",
+                        "zhHans":  "装备",
+                        "en":  "Equipment"
+                    },
+                    {
+                        "key":  "battle.equipment_none",
+                        "zhHans":  "无装备",
+                        "en":  "None"
+                    },
+                    {
+                        "key":  "battle.equipment_detail_title",
+                        "zhHans":  "装备详情",
+                        "en":  "Equipment Detail"
+                    },
+                    {
+                        "key":  "battle.equipment_preset_balanced",
+                        "zhHans":  "均衡",
+                        "en":  "Balanced"
+                    },
+                    {
+                        "key":  "battle.equipment_preset_burst",
+                        "zhHans":  "爆发",
+                        "en":  "Burst"
+                    },
+                    {
+                        "key":  "battle.log_title",
+                        "zhHans":  "战斗日志",
+                        "en":  "Battle Log"
+                    },
+                    {
+                        "key":  "battle.log_content",
+                        "zhHans":  "下一步这里会接真实战斗日志。",
+                        "en":  "This area will show real battle logs in the next step."
+                    },
+                    {
+                        "key":  "battle.log_round",
+                        "zhHans":  "回合",
+                        "en":  "Round"
+                    },
+                    {
+                        "key":  "battle.log_enemy_defeated",
+                        "zhHans":  "敌方全灭",
+                        "en":  "Enemy team defeated."
+                    },
+                    {
+                        "key":  "battle.log_player_defeated",
+                        "zhHans":  "我方全灭",
+                        "en":  "Player team defeated."
+                    },
+                    {
+                        "key":  "battle.log_round_limit",
+                        "zhHans":  "达到回合上限",
+                        "en":  "Battle reached round limit."
+                    },
+                    {
+                        "key":  "battle.log_casts",
+                        "zhHans":  "施放",
+                        "en":  "casts"
+                    },
+                    {
+                        "key":  "battle.log_heals",
+                        "zhHans":  "治疗了",
+                        "en":  "heals"
+                    },
+                    {
+                        "key":  "battle.log_takes",
+                        "zhHans":  "受到",
+                        "en":  "takes"
+                    },
+                    {
+                        "key":  "battle.log_damage",
+                        "zhHans":  "伤害",
+                        "en":  "damage"
+                    },
+                    {
+                        "key":  "battle.log_steadies",
+                        "zhHans":  "稳住了身形",
+                        "en":  "steadies"
+                    },
+                    {
+                        "key":  "battle.log_attacks",
+                        "zhHans":  "攻击",
+                        "en":  "attacks"
+                    },
+                    {
+                        "key":  "battle.log_on",
+                        "zhHans":  "目标",
+                        "en":  "on"
+                    },
+                    {
+                        "key":  "battle.log_for",
+                        "zhHans":  "造成",
+                        "en":  "for"
+                    },
+                    {
+                        "key":  "battle.log_fallen",
+                        "zhHans":  "已阵亡。",
+                        "en":  "has fallen."
+                    },
+                    {
+                        "key":  "battle.log_finished",
+                        "zhHans":  "战斗结束",
+                        "en":  "Battle finished"
+                    },
+                    {
+                        "key":  "battle.status_idle",
+                        "zhHans":  "等待开始战斗",
+                        "en":  "Waiting to start battle"
+                    },
+                    {
+                        "key":  "battle.status_victory",
+                        "zhHans":  "战斗胜利",
+                        "en":  "Battle Victory"
+                    },
+                    {
+                        "key":  "battle.status_defeat",
+                        "zhHans":  "战斗失败",
+                        "en":  "Battle Defeat"
+                    },
+                    {
+                        "key":  "battle.result_rounds",
+                        "zhHans":  "总回合数",
+                        "en":  "Total Rounds"
+                    },
+                    {
+                        "key":  "battle.button_start",
+                        "zhHans":  "开始战斗",
+                        "en":  "Start Battle"
+                    },
+                    {
+                        "key":  "battle.button_restart",
+                        "zhHans":  "重开",
+                        "en":  "Restart"
+                    },
+                    {
+                        "key":  "battle.button_review",
+                        "zhHans":  "回顾",
+                        "en":  "Review"
+                    },
+                    {
+                        "key":  "battle.button_open_result",
+                        "zhHans":  "打开结算窗口",
+                        "en":  "Open Result Window"
+                    },
+                    {
+                        "key":  "battle.button_back",
+                        "zhHans":  "返回主菜单",
+                        "en":  "Back To Main Menu"
+                    },
+                    {
+                        "key":  "battle.button_tip",
+                        "zhHans":  "显示提示",
+                        "en":  "Show Tip"
+                    },
+                    {
+                        "key":  "battle.button_close_log",
+                        "zhHans":  "关闭日志",
+                        "en":  "Close Log"
+                    },
+                    {
+                        "key":  "battle.button_equipment",
+                        "zhHans":  "查看装备",
+                        "en":  "Equipment"
+                    },
+                    {
+                        "key":  "battle.button_cycle_equipment",
+                        "zhHans":  "切换方案",
+                        "en":  "Switch Preset"
+                    },
+                    {
+                        "key":  "battle.button_close_equipment",
+                        "zhHans":  "关闭装备",
+                        "en":  "Close"
+                    },
+                    {
+                        "key":  "popup.confirm.title",
+                        "zhHans":  "确认",
+                        "en":  "Confirm"
+                    },
+                    {
+                        "key":  "popup.confirm.message",
+                        "zhHans":  "这是第一阶段的 UGUI 框架，后面可以把这些线框替换成正式美术。",
+                        "en":  "This popup is part of the first-phase UGUI framework. These boxes can be replaced by final art later."
+                    },
+                    {
+                        "key":  "popup.confirm_button",
+                        "zhHans":  "确认",
+                        "en":  "Confirm"
+                    },
+                    {
+                        "key":  "popup.cancel_button",
+                        "zhHans":  "取消",
+                        "en":  "Cancel"
+                    },
+                    {
+                        "key":  "toast.framework_ready",
+                        "zhHans":  "UI 框架已经就绪。",
+                        "en":  "UI framework is ready."
+                    },
+                    {
+                        "key":  "toast.confirmed",
+                        "zhHans":  "你点击了确认。",
+                        "en":  "Confirm clicked."
+                    },
+                    {
+                        "key":  "toast.cancelled",
+                        "zhHans":  "你取消了操作。",
+                        "en":  "Cancelled."
+                    },
+                    {
+                        "key":  "toast.battle_next",
+                        "zhHans":  "下一步会接入真正的战斗系统。",
+                        "en":  "The real battle system will be connected next."
+                    },
+                    {
+                        "key":  "toast.language_changed",
+                        "zhHans":  "语言已切换。",
+                        "en":  "Language switched."
+                    },
+                    {
+                        "key":  "toast.ui_prefabs_rebuilt",
+                        "zhHans":  "UI预设已重建。",
+                        "en":  "UI prefabs rebuilt."
+                    },
+                    {
+                        "key":  "toast.editor_only",
+                        "zhHans":  "该功能仅在Unity编辑器中可用。",
+                        "en":  "This feature is only available in the Unity Editor."
+                    },
+                    {
+                        "key":  "common.separator_names",
+                        "zhHans":  "、",
+                        "en":  ","
+                    },
+                    {
+                        "key":  "map.title",
+                        "zhHans":  "地图路线",
+                        "en":  "Map Route"
+                    },
+                    {
+                        "key":  "map.status_prefix",
+                        "zhHans":  "当前节点：",
+                        "en":  "Current Node:"
+                    },
+                    {
+                        "key":  "map.region_prefix",
+                        "zhHans":  "区域：",
+                        "en":  "Region:"
+                    },
+                    {
+                        "key":  "map.button_enter",
+                        "zhHans":  "进入节点",
+                        "en":  "Enter Node"
+                    },
+                    {
+                        "key":  "map.button_pass_month",
+                        "zhHans":  "推进一月",
+                        "en":  "Pass One Month"
+                    },
+                    {
+                        "key":  "map.button_reset_run",
+                        "zhHans":  "重置本轮",
+                        "en":  "Reset Run"
+                    },
+                    {
+                        "key":  "map.button_back_menu",
+                        "zhHans":  "返回主菜单",
+                        "en":  "Back To Menu"
+                    },
+                    {
+                        "key":  "map.toast_lifespan_ended",
+                        "zhHans":  "阳寿已尽，本轮结束。",
+                        "en":  "Lifespan exhausted. The run has ended."
+                    },
+                    {
+                        "key":  "map.toast_route_complete",
+                        "zhHans":  "本轮路线完成，返回主菜单。",
+                        "en":  "Route complete. Returning to main menu."
+                    },
+                    {
+                        "key":  "map.toast_month_passed",
+                        "zhHans":  "又逝一月。",
+                        "en":  "One month passes."
+                    },
+                    {
+                        "key":  "battle.slot_weapon",
+                        "zhHans":  "武器",
+                        "en":  "Weapon"
+                    },
+                    {
+                        "key":  "battle.slot_armor",
+                        "zhHans":  "护甲",
+                        "en":  "Armor"
+                    },
+                    {
+                        "key":  "battle.slot_accessory",
+                        "zhHans":  "饰品",
+                        "en":  "Accessory"
+                    },
+                    {
+                        "key":  "battle.editor_target",
+                        "zhHans":  "当前角色",
+                        "en":  "Editing Unit"
+                    },
+                    {
+                        "key":  "battle.editor_stats",
+                        "zhHans":  "当前属性",
+                        "en":  "Stats"
+                    },
+                    {
+                        "key":  "battle.editor_skills",
+                        "zhHans":  "当前技能",
+                        "en":  "Skills"
+                    },
+                    {
+                        "key":  "battle.editor_team_totals",
+                        "zhHans":  "队伍总属性",
+                        "en":  "Team Totals"
+                    },
+                    {
+                        "key":  "battle.editor_preview",
+                        "zhHans":  "战斗预览",
+                        "en":  "Battle Preview"
+                    },
+                    {
+                        "key":  "battle.editor_owned_equipment",
+                        "zhHans":  "已拥有装备",
+                        "en":  "Owned Equipment"
+                    },
+                    {
+                        "key":  "battle.editor_unit_prefix",
+                        "zhHans":  "角色:",
+                        "en":  "Unit:"
+                    },
+                    {
+                        "key":  "battle.preview_victory",
+                        "zhHans":  "预计胜利",
+                        "en":  "Victory"
+                    },
+                    {
+                        "key":  "battle.preview_defeat",
+                        "zhHans":  "预计失败",
+                        "en":  "Defeat"
+                    },
+                    {
+                        "key":  "battle.preview_rounds",
+                        "zhHans":  "回合数",
+                        "en":  "Rounds"
+                    },
+                    {
+                        "key":  "battle.button_reset_loadout",
+                        "zhHans":  "重置装备",
+                        "en":  "Reset Loadout"
+                    },
+                    {
+                        "key":  "battle.button_auto_offense",
+                        "zhHans":  "自动输出",
+                        "en":  "Auto Offense"
+                    },
+                    {
+                        "key":  "battle.button_auto_defense",
+                        "zhHans":  "自动生存",
+                        "en":  "Auto Defense"
+                    },
+                    {
+                        "key":  "battle.prep_status_prefix",
+                        "zhHans":  "正在准备第",
+                        "en":  "Preparing Stage"
+                    },
+                    {
+                        "key":  "battle.prep_status_suffix",
+                        "zhHans":  "关",
+                        "en":  ""
+                    },
+                    {
+                        "key":  "battle.prep_briefing_prefix",
+                        "zhHans":  "第",
+                        "en":  "Stage"
+                    },
+                    {
+                        "key":  "battle.prep_briefing_suffix",
+                        "zhHans":  "关简报",
+                        "en":  "Briefing"
+                    },
+                    {
+                        "key":  "battle.prep_objective",
+                        "zhHans":  "目标：击败全部敌人。",
+                        "en":  "Objective: Defeat all enemies."
+                    },
+                    {
+                        "key":  "battle.prep_enemies",
+                        "zhHans":  "敌人：",
+                        "en":  "Enemies:"
+                    },
+                    {
+                        "key":  "battle.prep_threat",
+                        "zhHans":  "威胁：",
+                        "en":  "Threat:"
+                    },
+                    {
+                        "key":  "battle.prep_preview",
+                        "zhHans":  "预估：",
+                        "en":  "Preview:"
+                    },
+                    {
+                        "key":  "battle.prep_likely_victory",
+                        "zhHans":  "较大概率胜利",
+                        "en":  "Likely Victory"
+                    },
+                    {
+                        "key":  "battle.prep_likely_defeat",
+                        "zhHans":  "较大概率失败",
+                        "en":  "Likely Defeat"
+                    },
+                    {
+                        "key":  "battle.prep_rounds_prefix",
+                        "zhHans":  "，约",
+                        "en":  "in"
+                    },
+                    {
+                        "key":  "battle.prep_rounds_suffix",
+                        "zhHans":  "回合。",
+                        "en":  "rounds."
+                    },
+                    {
+                        "key":  "battle.prep_tip",
+                        "zhHans":  "建议：如果预估不理想，先调整装备再开战。",
+                        "en":  "Tip: Adjust equipment before battle if the preview looks risky."
+                    },
+                    {
+                        "key":  "battle.threat_low",
+                        "zhHans":  "低",
+                        "en":  "Low"
+                    },
+                    {
+                        "key":  "battle.threat_medium",
+                        "zhHans":  "中",
+                        "en":  "Medium"
+                    },
+                    {
+                        "key":  "battle.threat_medium_high",
+                        "zhHans":  "中高",
+                        "en":  "Medium-High"
+                    },
+                    {
+                        "key":  "battle.threat_high",
+                        "zhHans":  "高",
+                        "en":  "High"
+                    },
+                    {
+                        "key":  "common.button_close",
+                        "zhHans":  "关闭",
+                        "en":  "Close"
+                    },
+                    {
+                        "key":  "map.toast_event_triggered",
+                        "zhHans":  "目的地事件已触发。",
+                        "en":  "The destination event has been triggered."
+                    },
+                    {
+                        "key":  "map.button_continue",
+                        "zhHans":  "继续",
+                        "en":  "Continue"
+                    },
+                    {
+                        "key":  "map.rest_choice_refine",
+                        "zhHans":  "炼化灵石\n消耗：{0} -{1}\n经验 +{2}",
+                        "en":  "Refine Through Stones\nCost: {0} -{1}\nExp +{2}"
+                    },
+                    {
+                        "key":  "map.rest_choice_sort",
+                        "zhHans":  "整理行囊\n经验 +{0}\n{1} +{2}",
+                        "en":  "Sort Equipment\nExp +{0}\n{1} +{2}"
+                    },
+                    {
+                        "key":  "map.rest_choice_breath",
+                        "zhHans":  "调息养元\n经验 +{0}\n灵石 +0",
+                        "en":  "Breathing Practice\nExp +{0}\nSpirit Stones +0"
+                    },
+                    {
+                        "key":  "map.rest_choice_gather",
+                        "zhHans":  "采集灵石\n经验 +{0}\n{1} +{2}",
+                        "en":  "Gather Qi Crystals\nExp +{0}\n{1} +{2}"
+                    },
+                    {
+                        "key":  "map.rest_title",
+                        "zhHans":  "休整事件",
+                        "en":  "Rest Event"
+                    },
+                    {
+                        "key":  "map.rest_message",
+                        "zhHans":  "选择你在此地如何调整状态。",
+                        "en":  "Choose how to spend this stop."
+                    },
+                    {
+                        "key":  "map.village_choice_elder",
+                        "zhHans":  "长者指点\n经验 +{0}\n灵石 +0",
+                        "en":  "Elder\u0027s Guidance\nExp +{0}\nSpirit Stones +0"
+                    },
+                    {
+                        "key":  "map.village_choice_supply",
+                        "zhHans":  "行商补给\n经验 +{0}\n{1} +{2}",
+                        "en":  "Merchant Supply\nExp +{0}\n{1} +{2}"
+                    },
+                    {
+                        "key":  "map.village_choice_scripture",
+                        "zhHans":  "借阅藏经\n获得 1 次功法机缘",
+                        "en":  "Borrow Scripture\nGain 1 skill reward choice"
+                    },
+                    {
+                        "key":  "map.village_title",
+                        "zhHans":  "新手村",
+                        "en":  "Novice Village"
+                    },
+                    {
+                        "key":  "map.village_message",
+                        "zhHans":  "离开新手村前，选择一份启程助力。",
+                        "en":  "Before leaving the village, choose one piece of support."
+                    },
+                    {
+                        "key":  "map.rest_result_gather",
+                        "zhHans":  "你在附近采集五行灵石，囊中收获更丰。",
+                        "en":  "You gather the local five-element crystals and leave with fuller pockets."
+                    },
+                    {
+                        "key":  "map.not_enough_stones_title",
+                        "zhHans":  "灵石不足",
+                        "en":  "Not Enough Spirit Stones"
+                    },
+                    {
+                        "key":  "map.not_enough_stones_message",
+                        "zhHans":  "你手中的对应灵石不足，暂时无法进行这次炼化。",
+                        "en":  "You do not have enough matching spirit stones to refine this stop."
+                    },
+                    {
+                        "key":  "map.rest_result_refine",
+                        "zhHans":  "你将储备灵石当场炼化，强行换来一段更猛的修为推进。",
+                        "en":  "You refine stored spirit stones into pure progress and push your cultivation further."
+                    },
+                    {
+                        "key":  "map.rest_result_sort",
+                        "zhHans":  "你整理装备与气机，为下一段路做足准备。",
+                        "en":  "You sort equipment and steady your rhythm before moving on."
+                    },
+                    {
+                        "key":  "map.rest_result_breath",
+                        "zhHans":  "你专心调息运转周天，修为更进一步。",
+                        "en":  "You focus on breathing practice and deepen your cultivation."
+                    },
+                    {
+                        "key":  "map.rest_result_title",
+                        "zhHans":  "休整结果",
+                        "en":  "Rest Result"
+                    },
+                    {
+                        "key":  "map.village_result_supply",
+                        "zhHans":  "路过行商给你留下一份赶路所需的修行补给。",
+                        "en":  "A passing merchant leaves you a small bundle of cultivation supplies."
+                    },
+                    {
+                        "key":  "map.village_result_elder",
+                        "zhHans":  "临行前，村中长者给了你几句修行指点。",
+                        "en":  "The village elder gives you a few words of guidance before you set out."
+                    },
+                    {
+                        "key":  "map.village_result_title",
+                        "zhHans":  "村中收获",
+                        "en":  "Village Result"
+                    },
+                    {
+                        "key":  "map.scripture_title",
+                        "zhHans":  "借阅藏经",
+                        "en":  "Borrow Scripture"
+                    },
+                    {
+                        "key":  "map.scripture_message",
+                        "zhHans":  "选择一项开局功法机缘。",
+                        "en":  "Choose one starter skill reward."
+                    },
+                    {
+                        "key":  "map.scripture_empty",
+                        "zhHans":  "你整理思绪后，轻装上路。",
+                        "en":  "You leave the village with a clearer mind."
+                    },
+                    {
+                        "key":  "map.scripture_intro",
+                        "zhHans":  "你从村中藏经阁借得一页功法残卷。",
+                        "en":  "You borrow a manual from the village archive."
+                    },
+                    {
+                        "key":  "map.reward_choice_empty",
+                        "zhHans":  "空白奖励",
+                        "en":  "Empty"
+                    },
+                    {
+                        "key":  "map.reward_choice_label",
+                        "zhHans":  "功法机缘\n{0}\n角色：{1}\n结果：Lv.{2} {3}\n五行：{4}",
+                        "en":  "Reward\n{0}\nTarget: {1}\nResult: Lv.{2} {3}\nElement: {4}"
+                    },
+                    {
+                        "key":  "map.reward_result_upgrade",
+                        "zhHans":  "升级",
+                        "en":  "Upgrade"
+                    },
+                    {
+                        "key":  "map.reward_result_learn",
+                        "zhHans":  "习得",
+                        "en":  "Learn"
+                    },
+                    {
+                        "key":  "map.reward_toast_upgrade",
+                        "zhHans":  "{0} 将 {1} 提升至 Lv.{2}。",
+                        "en":  "{0} upgraded {1} to Lv.{2}."
+                    },
+                    {
+                        "key":  "map.reward_toast_learn",
+                        "zhHans":  "{0} 习得 {1}，当前 Lv.{2}。",
+                        "en":  "{0} learned {1} at Lv.{2}."
+                    },
+                    {
+                        "key":  "map.reward_title",
+                        "zhHans":  "获得",
+                        "en":  "Reward"
+                    },
+                    {
+                        "key":  "map.reward_exp",
+                        "zhHans":  "经验 +",
+                        "en":  "Exp +"
+                    },
+                    {
+                        "key":  "map.reward_levelup",
+                        "zhHans":  "修为提升 +",
+                        "en":  "Cultivation Lv. +"
+                    },
+                    {
+                        "key":  "map.skill_overview_title",
+                        "zhHans":  "已学功法",
+                        "en":  "Run Skills"
+                    },
+                    {
+                        "key":  "map.lifespan_title",
+                        "zhHans":  "寿元已尽",
+                        "en":  "Lifespan Ended"
+                    },
+                    {
+                        "key":  "map.lifespan_message",
+                        "zhHans":  "你在本轮途中寿元耗尽。当前局将结束，并返回主界面。",
+                        "en":  "Your lifespan has run out during this journey. The current run will end and return to the main menu."
+                    },
+                    {
+                        "key":  "map.button_back_main",
+                        "zhHans":  "返回主界面",
+                        "en":  "Back To Main Menu"
+                    },
+                    {
+                        "key":  "map.detail_title",
+                        "zhHans":  "选中节点",
+                        "en":  "Selected Node"
+                    },
+                    {
+                        "key":  "map.detail_stage",
+                        "zhHans":  "第 {0} 关 · {1}",
+                        "en":  "Stage {0} · {1}"
+                    },
+                    {
+                        "key":  "map.detail_reachable",
+                        "zhHans":  "是否可达：",
+                        "en":  "Reachable:"
+                    },
+                    {
+                        "key":  "map.detail_reachable_yes",
+                        "zhHans":  "可达",
+                        "en":  "Yes"
+                    },
+                    {
+                        "key":  "map.detail_reachable_locked",
+                        "zhHans":  "未解锁",
+                        "en":  "Locked"
+                    },
+                    {
+                        "key":  "map.detail_time_cost",
+                        "zhHans":  "耗时：",
+                        "en":  "Time Cost:"
+                    },
+                    {
+                        "key":  "map.detail_month_suffix",
+                        "zhHans":  "月",
+                        "en":  "month(s)"
+                    },
+                    {
+                        "key":  "map.detail_arrival_effect",
+                        "zhHans":  "到达效果：",
+                        "en":  "Arrival Effect:"
+                    },
+                    {
+                        "key":  "map.detail_arrival_rest",
+                        "zhHans":  "立刻触发休整事件，并停留在地图上。",
+                        "en":  "Trigger rest immediately and stay on the map."
+                    },
+                    {
+                        "key":  "map.detail_arrival_battle",
+                        "zhHans":  "移动结束后自动进入战斗。",
+                        "en":  "Start battle automatically after movement ends."
+                    },
+                    {
+                        "key":  "map.profile_title",
+                        "zhHans":  "个人信息",
+                        "en":  "Profile"
+                    },
+                    {
+                        "key":  "map.profile_current_stage",
+                        "zhHans":  "当前关卡：",
+                        "en":  "Current Stage:"
+                    },
+                    {
+                        "key":  "map.profile_highest_cleared",
+                        "zhHans":  "最高通关：",
+                        "en":  "Highest Cleared:"
+                    },
+                    {
+                        "key":  "map.profile_reachable_frontier",
+                        "zhHans":  "可达前沿：",
+                        "en":  "Reachable Frontier:"
+                    },
+                    {
+                        "key":  "map.profile_cultivation_level",
+                        "zhHans":  "修为等级",
+                        "en":  "Cultivation Lv."
+                    },
+                    {
+                        "key":  "map.profile_exp",
+                        "zhHans":  "经验：",
+                        "en":  "Exp:"
+                    },
+                    {
+                        "key":  "map.profile_owned_equipment",
+                        "zhHans":  "已拥有装备：",
+                        "en":  "Owned Equipment:"
+                    },
+                    {
+                        "key":  "map.arrival_toast",
+                        "zhHans":  "已抵达第 {0} 关 · {1}",
+                        "en":  "Arrived at Stage {0} · {1}"
+                    },
+                    {
+                        "key":  "map.node_label",
+                        "zhHans":  "第{0}关\n{1}",
+                        "en":  "Stage {0}\n{1}"
+                    },
+                    {
+                        "key":  "map.status_current_position",
+                        "zhHans":  "当前位置：第 {0} 关 · {1}",
+                        "en":  "Current Position: Stage {0} · {1}"
+                    },
+                    {
+                        "key":  "map.button_previous",
+                        "zhHans":  "后退",
+                        "en":  "Previous"
+                    },
+                    {
+                        "key":  "map.button_next",
+                        "zhHans":  "前进",
+                        "en":  "Next"
+                    },
+                    {
+                        "key":  "map.button_skill_overview",
+                        "zhHans":  "已学功法",
+                        "en":  "Run Skills"
+                    },
+                    {
+                        "key":  "map.market_title",
+                        "zhHans":  "行旅集市",
+                        "en":  "Traveling Market"
+                    },
+                    {
+                        "key":  "map.market_message",
+                        "zhHans":  "你可以在这里拿灵石换资源，或稳稳补一轮状态。",
+                        "en":  "Trade spirit stones for resources here"
+                    },
+                    {
+                        "key":  "map.market_choice_relic",
+                        "zhHans":  "换购法器",
+                        "en":  "Trade for Relic"
+                    },
+                    {
+                        "key":  "map.market_choice_manual",
+                        "zhHans":  "换购残卷",
+                        "en":  "Trade for Manual"
+                    },
+                    {
+                        "key":  "map.market_choice_supply",
+                        "zhHans":  "补足行囊",
+                        "en":  "Restock Supplies"
+                    },
+                    {
+                        "key":  "map.market_result_title",
+                        "zhHans":  "集市收获",
+                        "en":  "Market Result"
+                    },
+                    {
+                        "key":  "map.market_result_relic",
+                        "zhHans":  "你用手头灵石换来一件趁手法器，顺便稳住了一截修为。",
+                        "en":  "You trade your spirit stones for a fitting relic and stabilize your cultivation a bit."
+                    },
+                    {
+                        "key":  "map.market_result_supply",
+                        "zhHans":  "你补足了路上的必需品，推进节奏重新平顺下来。",
+                        "en":  "You restock what you need for the road and smooth out your run tempo."
+                    },
+                    {
+                        "key":  "map.market_skill_title",
+                        "zhHans":  "集市残卷",
+                        "en":  "Market Manual"
+                    },
+                    {
+                        "key":  "map.market_skill_message",
+                        "zhHans":  "从摊位上的几页残卷里挑一份带走。",
+                        "en":  "Choose one manual from the incomplete pages on the stall."
+                    },
+                    {
+                        "key":  "map.market_skill_intro",
+                        "zhHans":  "你从集市摊位上换来一页残卷。",
+                        "en":  "You trade for a torn manual page from the market stall."
+                    },
+                    {
+                        "key":  "map.market_skill_empty",
+                        "zhHans":  "你翻遍摊位，却没有遇到合适的机缘。",
+                        "en":  "You search every stall"
+                    },
+                    {
+                        "key":  "map.insight_title",
+                        "zhHans":  "悟道静室",
+                        "en":  "Insight Sanctum"
+                    },
+                    {
+                        "key":  "map.insight_message",
+                        "zhHans":  "首领战前的最后一站，你可以换一轮更激进的成长。",
+                        "en":  "This is your last stop before the boss"
+                    },
+                    {
+                        "key":  "map.insight_choice_core",
+                        "zhHans":  "凝练道基",
+                        "en":  "Condense Foundation"
+                    },
+                    {
+                        "key":  "map.insight_choice_cache",
+                        "zhHans":  "开启遗藏",
+                        "en":  "Open Relic Cache"
+                    },
+                    {
+                        "key":  "map.insight_choice_enlighten",
+                        "zhHans":  "闭关顿悟",
+                        "en":  "Seek Enlightenment"
+                    },
+                    {
+                        "key":  "map.insight_result_title",
+                        "zhHans":  "静室所得",
+                        "en":  "Sanctum Result"
+                    },
+                    {
+                        "key":  "map.insight_result_core",
+                        "zhHans":  "你以灵石强行凝练道基，换来一段更扎实的修为突破。",
+                        "en":  "You force your foundation tighter with spirit stones and secure a sharper cultivation jump."
+                    },
+                    {
+                        "key":  "map.insight_result_cache",
+                        "zhHans":  "你开启静室遗藏，补到一份装备机缘与临战储备。",
+                        "en":  "You open the sanctum cache and come away with gear and a bit of battle stock."
+                    },
+                    {
+                        "key":  "map.insight_skill_title",
+                        "zhHans":  "顿悟机缘",
+                        "en":  "Moment of Insight"
+                    },
+                    {
+                        "key":  "map.insight_skill_message",
+                        "zhHans":  "从这一次顿悟里定下一门最终要诀。",
+                        "en":  "Choose the technique that crystallizes from this moment of insight."
+                    },
+                    {
+                        "key":  "map.insight_skill_intro",
+                        "zhHans":  "你在静室闭关片刻，抓住了一线更高阶的功法机缘。",
+                        "en":  "A brief retreat inside the sanctum reveals a higher-tier skill opportunity."
+                    },
+                    {
+                        "key":  "map.insight_skill_empty",
+                        "zhHans":  "这一次闭关没有新的感悟，只留下片刻清明。",
+                        "en":  "This retreat brings no new revelation"
+                    },
+                    {
+                        "key":  "map.choice_cost",
+                        "zhHans":  "消耗：{0} -{1}",
+                        "en":  "Cost: {0} -{1}"
+                    },
+                    {
+                        "key":  "map.choice_gain_exp",
+                        "zhHans":  "经验 +{0}",
+                        "en":  "Exp +{0}"
+                    },
+                    {
+                        "key":  "map.choice_gain_stones",
+                        "zhHans":  "{0} +{1}",
+                        "en":  "{0} +{1}"
+                    },
+                    {
+                        "key":  "map.choice_gain_equipment",
+                        "zhHans":  "装备机缘 1 次",
+                        "en":  "Gain 1 equipment reward"
+                    },
+                    {
+                        "key":  "map.choice_gain_skill_elite",
+                        "zhHans":  "获得 1 次高阶功法机缘",
+                        "en":  "Gain 1 high-tier skill reward"
+                    },
+                    {
+                        "key":  "map.choice_gain_skill_boss",
+                        "zhHans":  "获得 1 次顶阶功法机缘",
+                        "en":  "Gain 1 boss-tier skill reward"
+                    },
+                    {
+                        "key":  "map.reward_equipment",
+                        "zhHans":  "装备掉落：",
+                        "en":  "Equipment Drop:"
+                    },
+                    {
+                        "key":  "map.choice_gain_skill",
+                        "zhHans":  "获得 1 次功法机缘",
+                        "en":  "Gain 1 skill reward"
+                    }
+                ]
 }

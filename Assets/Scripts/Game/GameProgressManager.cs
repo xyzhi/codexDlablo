@@ -508,6 +508,11 @@ namespace Wuxing.Game
 
         public static void PrepareSkillRewardOptions()
         {
+            PrepareSkillRewardOptions(GetNodeType(GetCurrentStage()));
+        }
+
+        public static void PrepareSkillRewardOptions(MapNodeType rewardNodeType)
+        {
             EnsureInstance();
             if (Instance == null)
             {
@@ -526,7 +531,6 @@ namespace Wuxing.Game
             }
 
             var weightedCandidates = new List<SkillRewardOption>();
-            var nodeType = GetNodeType(GetCurrentStage());
             for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
             {
                 var characterId = BasePlayerCharacterIds[i];
@@ -560,7 +564,7 @@ namespace Wuxing.Game
                         IsUpgrade = isUpgrade
                     };
 
-                    var weight = GetSkillRewardWeight(skill, nodeType, isUpgrade);
+                    var weight = GetSkillRewardWeight(skill, rewardNodeType, isUpgrade);
                     for (var copy = 0; copy < weight; copy++)
                     {
                         weightedCandidates.Add(option);
@@ -585,6 +589,57 @@ namespace Wuxing.Game
 
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
+        }
+
+        public static BattleRewardResult GrantEquipmentReward(int stage, int expGained, string spiritStoneElement, int spiritStoneCount)
+        {
+            EnsureInstance();
+            var reward = new BattleRewardResult();
+            if (Instance == null)
+            {
+                return reward;
+            }
+
+            var resolvedStage = Mathf.Max(1, stage);
+            reward.ExpGained = Mathf.Max(0, expGained);
+            reward.SpiritStoneElement = string.IsNullOrEmpty(spiritStoneElement)
+                ? GetSpiritStoneElementByStage(resolvedStage)
+                : spiritStoneElement;
+            reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
+            reward.SpiritStonesGained = Mathf.Max(0, spiritStoneCount);
+
+            if (reward.ExpGained > 0)
+            {
+                Instance.CultivationExp += reward.ExpGained;
+            }
+
+            if (reward.SpiritStonesGained > 0)
+            {
+                Instance.AddSpiritStones(reward.SpiritStoneElement, reward.SpiritStonesGained);
+            }
+
+            while (Instance.CultivationExp >= Instance.GetRequiredExpInternal())
+            {
+                Instance.CultivationExp -= Instance.GetRequiredExpInternal();
+                Instance.CultivationLevel += 1;
+                reward.LevelsGained += 1;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase != null)
+            {
+                var drop = Instance.RollEquipmentDrop(equipmentDatabase, resolvedStage);
+                if (drop != null)
+                {
+                    Instance.ownedEquipmentIds.Add(drop.Id);
+                    reward.DroppedEquipmentId = drop.Id;
+                    reward.DroppedEquipmentName = drop.Name;
+                }
+            }
+
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return reward;
         }
 
         public static List<SkillRewardOption> GetPendingSkillRewardOptions()
@@ -668,7 +723,10 @@ namespace Wuxing.Game
 
         public static int GetMaxStage()
         {
-            return MaxStage;
+            var database = StageNodeDatabaseLoader.Load();
+            return database != null && database.StageNodes != null && database.StageNodes.Count > 0
+                ? database.StageNodes.Count
+                : MaxStage;
         }
 
         public static int GetElapsedMonths()
@@ -686,8 +744,9 @@ namespace Wuxing.Game
             }
 
             var currentStage = Instance.CurrentStage > 0 ? Instance.CurrentStage : 1;
-            var frontierStage = Mathf.Clamp(Instance.HighestClearedStage + 1, 1, MaxStage);
-            return Mathf.Clamp(Mathf.Max(currentStage, frontierStage), 1, MaxStage);
+            var maxStage = GetMaxStage();
+            var frontierStage = Mathf.Clamp(Instance.HighestClearedStage + 1, 1, maxStage);
+            return Mathf.Clamp(Mathf.Max(currentStage, frontierStage), 1, maxStage);
         }
 
         public static bool CanTravelToStage(int stage)
@@ -700,6 +759,17 @@ namespace Wuxing.Game
             return Mathf.Max(0, LifetimeMonths - GetElapsedMonths());
         }
 
+        public static string GetStageEventProfile(int stage)
+        {
+            var config = GetStageNodeConfig(stage);
+            if (config != null && !string.IsNullOrEmpty(config.EventProfile))
+            {
+                return config.EventProfile;
+            }
+
+            return stage <= 1 ? "VillageStart" : "DefaultBattle";
+        }
+
         public static MapNodeType GetNodeType(int stage)
         {
             if (stage <= 0)
@@ -707,21 +777,41 @@ namespace Wuxing.Game
                 return MapNodeType.Battle;
             }
 
-            if (stage == 1)
+            var config = GetStageNodeConfig(stage);
+            if (config != null)
             {
-                return MapNodeType.Rest;
+                return ParseNodeType(config.NodeType);
             }
 
-            switch (stage)
+            return MapNodeType.Battle;
+        }
+
+        private static StageNodeConfig GetStageNodeConfig(int stage)
+        {
+            var database = StageNodeDatabaseLoader.Load();
+            return database != null ? database.GetByStage(Mathf.Max(1, stage)) : null;
+        }
+
+        private static MapNodeType ParseNodeType(string rawValue)
+        {
+            if (string.IsNullOrEmpty(rawValue))
             {
-                case 3:
-                case 6:
+                return MapNodeType.Battle;
+            }
+
+            switch (rawValue.Trim().ToLowerInvariant())
+            {
+                case "elite":
+                case "精英":
                     return MapNodeType.Elite;
-                case 4:
-                case 7:
+                case "rest":
+                case "休整":
                     return MapNodeType.Rest;
-                case 8:
+                case "boss":
+                case "首领":
                     return MapNodeType.Boss;
+                case "battle":
+                case "战斗":
                 default:
                     return MapNodeType.Battle;
             }
@@ -756,7 +846,7 @@ namespace Wuxing.Game
                 return RunAdvanceResult.LifespanEnded;
             }
 
-            if (Instance.CurrentStage >= MaxStage)
+            if (Instance.CurrentStage >= GetMaxStage())
             {
                 Instance.CurrentStage = 0;
                 Instance.SaveProgress();
@@ -814,7 +904,7 @@ namespace Wuxing.Game
                 return;
             }
 
-            var resolvedStage = Mathf.Clamp(stage, 0, MaxStage);
+            var resolvedStage = Mathf.Clamp(stage, 0, GetMaxStage());
             if (resolvedStage > Instance.HighestClearedStage)
             {
                 Instance.HighestClearedStage = resolvedStage;
@@ -843,23 +933,17 @@ namespace Wuxing.Game
 
         public static string GetStageTheme(bool english, int stage)
         {
-            var resolvedStage = Mathf.Max(1, stage);
-            if (resolvedStage <= 2)
+            var config = GetStageNodeConfig(stage);
+            if (config != null)
             {
-                return english ? "Outer Hills" : "山门外围";
+                var configuredTheme = english ? config.ThemeEn : config.ThemeZh;
+                if (!string.IsNullOrEmpty(configuredTheme))
+                {
+                    return configuredTheme;
+                }
             }
 
-            if (resolvedStage <= 4)
-            {
-                return english ? "Burning Trail" : "焚风古道";
-            }
-
-            if (resolvedStage <= 6)
-            {
-                return english ? "Deep Ruins" : "地宫遗迹";
-            }
-
-            return english ? "Ascension Path" : "登天阶";
+            return english ? "Outer Hills" : "山门外围";
         }
 
         public static string BuildCurrentObjective(bool english)
@@ -890,15 +974,17 @@ namespace Wuxing.Game
         public static string BuildNodeDetail(bool english, int stage)
         {
             var resolvedStage = Mathf.Max(1, stage);
-            var nodeType = GetNodeType(resolvedStage);
-
-            if (resolvedStage == 1)
+            var config = GetStageNodeConfig(resolvedStage);
+            if (config != null)
             {
-                return english
-                    ? "Safe starting area reserved for future features."
-                    : "当前作为安全起点，后续会加入更多功能。";
+                var configuredDetail = english ? config.DetailEn : config.DetailZh;
+                if (!string.IsNullOrEmpty(configuredDetail))
+                {
+                    return configuredDetail;
+                }
             }
 
+            var nodeType = GetNodeType(resolvedStage);
             if (english)
             {
                 switch (nodeType)

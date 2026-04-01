@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine;
 using Wuxing.Config;
 using Wuxing.Localization;
-
 public static class CharacterCsvImporter
 {
     private const string CharacterCsvPath = "Docs/Character.csv";
@@ -15,19 +14,20 @@ public static class CharacterCsvImporter
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
     private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
+    private const string StageNodeCsvPath = "Docs/StageNode.csv";
+    private const string EventOptionCsvPath = "Docs/EventOption.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
-
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
     private const string LocalizationOutputFolder = "Assets/Resources/Localization";
-
     private const string CharacterJsonPath = ConfigOutputFolder + "/CharacterDatabase.json";
     private const string EnemyJsonPath = ConfigOutputFolder + "/EnemyDatabase.json";
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
     private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
     private const string SpiritStoneJsonPath = ConfigOutputFolder + "/SpiritStoneDatabase.json";
     private const string StageBalanceJsonPath = ConfigOutputFolder + "/StageBalanceDatabase.json";
+    private const string StageNodeJsonPath = ConfigOutputFolder + "/StageNodeDatabase.json";
+    private const string EventOptionJsonPath = ConfigOutputFolder + "/EventOptionDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
-
     [MenuItem("工具/配置/导入全部CSV")]
     public static void ImportAll()
     {
@@ -39,22 +39,22 @@ public static class CharacterCsvImporter
             ImportEquipments();
             ImportSpiritStones();
             ImportStageBalances();
+            ImportStageNodes();
+            ImportEventOptions();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能、装备、灵石、关卡成长和语言表已完成导入。");
+            Debug.Log("角色、敌人、技能、装备、灵石、关卡成长、关卡节点、事件选项和语言表已完成导入。");
         }
         catch (Exception exception)
         {
             Debug.LogError(exception.Message);
         }
     }
-
     [MenuItem("工具/配置/仅导入角色表")]
     public static void ImportCharacters()
     {
         var rows = ReadRequiredRows(CharacterCsvPath, "Character CSV");
         var configs = new List<CharacterConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -62,12 +62,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 12)
             {
                 throw new InvalidOperationException($"Invalid character row at line {i + 1}.");
             }
-
             configs.Add(new CharacterConfig
             {
                 Id = columns[0],
@@ -84,20 +82,17 @@ public static class CharacterCsvImporter
                 GrowthNotes = columns[11]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new CharacterDatabase();
         database.characters = configs;
         WriteJson(CharacterJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} characters to {CharacterJsonPath}");
     }
-
     [MenuItem("工具/配置/仅导入敌人表")]
     public static void ImportEnemies()
     {
         var rows = ReadRequiredRows(EnemyCsvPath, "Enemy CSV");
         var configs = new List<EnemyConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -105,12 +100,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 12)
             {
                 throw new InvalidOperationException($"Invalid enemy row at line {i + 1}.");
             }
-
             configs.Add(new EnemyConfig
             {
                 Id = columns[0],
@@ -127,20 +120,17 @@ public static class CharacterCsvImporter
                 Notes = columns[11]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new EnemyDatabase();
         database.enemies = configs;
         WriteJson(EnemyJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} enemies to {EnemyJsonPath}");
     }
-
     [MenuItem("工具/配置/仅导入技能表")]
     public static void ImportSkills()
     {
         var rows = ReadRequiredRows(SkillCsvPath, "Skill CSV");
         var configs = new List<SkillConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -148,12 +138,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 12)
             {
                 throw new InvalidOperationException($"Invalid skill row at line {i + 1}.");
             }
-
             configs.Add(new SkillConfig
             {
                 Id = columns[0],
@@ -170,20 +158,17 @@ public static class CharacterCsvImporter
                 Notes = columns[11]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new SkillDatabase();
         database.skills = configs;
         WriteJson(SkillJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} skills to {SkillJsonPath}");
     }
-
     [MenuItem("工具/配置/仅导入装备表")]
     public static void ImportEquipments()
     {
         var rows = ReadRequiredRows(EquipmentCsvPath, "Equipment CSV");
         var configs = new List<EquipmentConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -191,12 +176,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 8)
             {
                 throw new InvalidOperationException($"Invalid equipment row at line {i + 1}.");
             }
-
             configs.Add(new EquipmentConfig
             {
                 Id = columns[0],
@@ -209,61 +192,17 @@ public static class CharacterCsvImporter
                 Notes = columns[7]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new EquipmentDatabase();
         database.equipments = configs;
         WriteJson(EquipmentJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} equipments to {EquipmentJsonPath}");
     }
-
-    [MenuItem("工具/配置/仅导入语言表")]
-    public static void ImportLocalization()
-    {
-        var rows = ReadRequiredRows(LocalizationCsvPath, "Localization CSV");
-        var entries = new List<LocalizationEntry>();
-
-        for (var i = 1; i < rows.Count; i++)
-        {
-            var columns = rows[i];
-            if (IsRowEmpty(columns))
-            {
-                continue;
-            }
-
-            if (columns.Count < 3)
-            {
-                throw new InvalidOperationException($"Invalid localization row at line {i + 1}.");
-            }
-
-            entries.Add(new LocalizationEntry
-            {
-                key = columns[0],
-                zhHans = NormalizeLocalizationText(columns[1]),
-                en = NormalizeLocalizationText(columns[2])
-            });
-        }
-
-        EnsureFolderExists(LocalizationOutputFolder);
-        var table = new LocalizationTable();
-        table.entries = entries.ToArray();
-        WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
-        Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
-    }
-
-    private static string NormalizeLocalizationText(string value)
-    {
-        return string.IsNullOrEmpty(value)
-            ? string.Empty
-            : value.Replace("\r\n", "\n").Replace("\r", "\n");
-    }
-
     [MenuItem("工具/配置/仅导入灵石表")]
     public static void ImportSpiritStones()
     {
         var rows = ReadRequiredRows(SpiritStoneCsvPath, "SpiritStone CSV");
         var configs = new List<SpiritStoneConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -271,12 +210,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 5)
             {
                 throw new InvalidOperationException($"Invalid spirit stone row at line {i + 1}.");
             }
-
             configs.Add(new SpiritStoneConfig
             {
                 Id = columns[0],
@@ -286,21 +223,17 @@ public static class CharacterCsvImporter
                 Notes = columns[4]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new SpiritStoneDatabase();
         database.spiritStones = configs;
         WriteJson(SpiritStoneJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
-
-
     [MenuItem("工具/配置/仅导入关卡成长表")]
     public static void ImportStageBalances()
     {
         var rows = ReadRequiredRows(StageBalanceCsvPath, "StageBalance CSV");
         var configs = new List<StageBalanceConfig>();
-
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -308,12 +241,10 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-
             if (columns.Count < 11)
             {
                 throw new InvalidOperationException($"Invalid stage balance row at line {i + 1}.");
             }
-
             configs.Add(new StageBalanceConfig
             {
                 Stage = ParseInt(columns[0], nameof(StageBalanceConfig.Stage), i + 1),
@@ -329,12 +260,124 @@ public static class CharacterCsvImporter
                 Notes = columns[10]
             });
         }
-
         EnsureFolderExists(ConfigOutputFolder);
         var database = new StageBalanceDatabase();
         database.stageBalances = configs;
         WriteJson(StageBalanceJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} stage balances to {StageBalanceJsonPath}");
+    }
+    [MenuItem("工具/配置/仅导入关卡节点表")]
+    public static void ImportStageNodes()
+    {
+        var rows = ReadRequiredRows(StageNodeCsvPath, "StageNode CSV");
+        var configs = new List<StageNodeConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 8)
+            {
+                throw new InvalidOperationException($"Invalid stage node row at line {i + 1}.");
+            }
+            configs.Add(new StageNodeConfig
+            {
+                Stage = ParseInt(columns[0], nameof(StageNodeConfig.Stage), i + 1),
+                NodeType = columns[1],
+                EventProfile = columns[2],
+                ThemeZh = columns[3],
+                ThemeEn = columns[4],
+                DetailZh = columns[5],
+                DetailEn = columns[6],
+                Notes = columns[7]
+            });
+        }
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new StageNodeDatabase();
+        database.stageNodes = configs;
+        WriteJson(StageNodeJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} stage nodes to {StageNodeJsonPath}");
+    }
+    [MenuItem("工具/配置/仅导入事件选项表")]
+    public static void ImportEventOptions()
+    {
+        var rows = ReadRequiredRows(EventOptionCsvPath, "EventOption CSV");
+        var configs = new List<EventOptionConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 18)
+            {
+                throw new InvalidOperationException($"Invalid event option row at line {i + 1}.");
+            }
+            configs.Add(new EventOptionConfig
+            {
+                Profile = columns[0],
+                OptionIndex = ParseInt(columns[1], nameof(EventOptionConfig.OptionIndex), i + 1),
+                TitleKey = columns[2],
+                RewardMode = columns[3],
+                SpiritStoneElement = columns[4],
+                ExpBase = ParseInt(columns[5], nameof(EventOptionConfig.ExpBase), i + 1),
+                ExpPerStage = ParseInt(columns[6], nameof(EventOptionConfig.ExpPerStage), i + 1),
+                SpiritStoneBase = ParseInt(columns[7], nameof(EventOptionConfig.SpiritStoneBase), i + 1),
+                SpiritStonePerStage = ParseInt(columns[8], nameof(EventOptionConfig.SpiritStonePerStage), i + 1),
+                SpiritStoneCostBase = ParseInt(columns[9], nameof(EventOptionConfig.SpiritStoneCostBase), i + 1),
+                SpiritStoneCostPerStage = ParseInt(columns[10], nameof(EventOptionConfig.SpiritStoneCostPerStage), i + 1),
+                SkillRewardNodeType = columns[11],
+                SelectionTitleKey = columns[12],
+                SelectionMessageKey = columns[13],
+                ResultTitleKey = columns[14],
+                ResultIntroKey = columns[15],
+                EmptyResultKey = columns[16],
+                Notes = columns[17]
+            });
+        }
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new EventOptionDatabase();
+        database.eventOptions = configs;
+        WriteJson(EventOptionJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} event options to {EventOptionJsonPath}");
+    }
+    [MenuItem("工具/配置/仅导入语言表")]
+    public static void ImportLocalization()
+    {
+        var rows = ReadRequiredRows(LocalizationCsvPath, "Localization CSV");
+        var entries = new List<LocalizationEntry>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 3)
+            {
+                throw new InvalidOperationException($"Invalid localization row at line {i + 1}.");
+            }
+            entries.Add(new LocalizationEntry
+            {
+                key = columns[0],
+                zhHans = NormalizeLocalizationText(columns[1]),
+                en = NormalizeLocalizationText(columns[2])
+            });
+        }
+        EnsureFolderExists(LocalizationOutputFolder);
+        var table = new LocalizationTable();
+        table.entries = entries.ToArray();
+        WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
+        Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
+    }
+    private static string NormalizeLocalizationText(string value)
+    {
+        return string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace("\r\n", "\n").Replace("\r", "\n");
     }
     private static List<List<string>> ReadRequiredRows(string relativePath, string displayName)
     {
@@ -343,29 +386,24 @@ public static class CharacterCsvImporter
         {
             throw new FileNotFoundException(displayName + " not found.", csvPath);
         }
-
         var rows = ReadCsvRows(csvPath);
         if (rows.Count <= 1)
         {
             throw new InvalidOperationException(displayName + " is empty.");
         }
-
         return rows;
     }
-
     private static string GetProjectFilePath(string relativePath)
     {
         var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         return Path.Combine(projectRoot, relativePath);
     }
-
     private static void WriteJson(string assetRelativePath, string json)
     {
         var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
         var absolutePath = Path.Combine(projectRoot, assetRelativePath);
         File.WriteAllText(absolutePath, json, new UTF8Encoding(true));
     }
-
     private static int ParseInt(string value, string fieldName, int lineNumber)
     {
         int result;
@@ -373,10 +411,8 @@ public static class CharacterCsvImporter
         {
             return result;
         }
-
         throw new FormatException($"Failed to parse {fieldName} at line {lineNumber}: {value}");
     }
-
     private static bool IsRowEmpty(List<string> columns)
     {
         for (var i = 0; i < columns.Count; i++)
@@ -386,10 +422,8 @@ public static class CharacterCsvImporter
                 return false;
             }
         }
-
         return true;
     }
-
     private static List<List<string>> ReadCsvRows(string path)
     {
         using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -398,18 +432,15 @@ public static class CharacterCsvImporter
             return ParseCsv(reader.ReadToEnd());
         }
     }
-
     private static List<List<string>> ParseCsv(string content)
     {
         var rows = new List<List<string>>();
         var row = new List<string>();
         var value = new StringBuilder();
         var inQuotes = false;
-
         for (var i = 0; i < content.Length; i++)
         {
             var ch = content[i];
-
             if (ch == '"')
             {
                 if (inQuotes && i + 1 < content.Length && content[i + 1] == '"')
@@ -421,48 +452,39 @@ public static class CharacterCsvImporter
                 {
                     inQuotes = !inQuotes;
                 }
-
                 continue;
             }
-
             if (ch == ',' && !inQuotes)
             {
                 row.Add(value.ToString());
                 value.Clear();
                 continue;
             }
-
             if ((ch == '\n' || ch == '\r') && !inQuotes)
             {
                 if (ch == '\r' && i + 1 < content.Length && content[i + 1] == '\n')
                 {
                     i++;
                 }
-
                 row.Add(value.ToString());
                 value.Clear();
                 rows.Add(row);
                 row = new List<string>();
                 continue;
             }
-
             value.Append(ch);
         }
-
         if (value.Length > 0 || row.Count > 0)
         {
             row.Add(value.ToString());
             rows.Add(row);
         }
-
         return rows;
     }
-
     private static void EnsureFolderExists(string assetFolderPath)
     {
         var parts = assetFolderPath.Split('/');
         var current = parts[0];
-
         for (var i = 1; i < parts.Length; i++)
         {
             var next = current + "/" + parts[i];
@@ -470,13 +492,7 @@ public static class CharacterCsvImporter
             {
                 AssetDatabase.CreateFolder(current, parts[i]);
             }
-
             current = next;
         }
     }
 }
-
-
-
-
-

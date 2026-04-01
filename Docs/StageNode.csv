@@ -1,0 +1,9 @@
+﻿Stage,NodeType,EventProfile,ThemeZh,ThemeEn,DetailZh,DetailEn,Notes
+1,Rest,VillageStart,山门外围,Outer Hills,安全起点，可从村中助力里拿到开局资源或功法机缘。,Safe opening area with a starter boost, supplies, or skill opportunity.,开局事件点
+2,Battle,DefaultBattle,山门外围,Outer Hills,普通战斗，可获得修为、灵石与装备掉落。,Standard battle for growth, spirit stones, and equipment drops.,基础战斗
+3,Elite,DefaultElite,焚风古道,Burning Trail,精英战斗，成长更多，掉落也更好。,Elite battle with higher growth and better loot.,第一处精英
+4,Rest,TradeMarket,焚风古道,Burning Trail,资源交易点，可换装备、功法机缘或稳健补给。,Trading stop for gear, skill opportunities, or steady supplies.,策划可自由调整到其他关卡
+5,Battle,DefaultBattle,地宫遗迹,Deep Ruins,普通战斗，可获得修为、灵石与装备掉落。,Standard battle for growth, spirit stones, and equipment drops.,中段战斗
+6,Elite,DefaultElite,地宫遗迹,Deep Ruins,精英战斗，成长更多，掉落也更好。,Elite battle with higher growth and better loot.,第二处精英
+7,Rest,InsightSanctum,登天阶,Ascension Path,高阶机缘点，适合在首领战前做最后一轮构筑抬升。,High-tier opportunity stop before the boss for one last build spike.,后段机缘点
+8,Boss,DefaultBoss,登天阶,Ascension Path,首领战斗，若能取胜，本轮路线直接完成。,Boss battle. Winning can finish the current route.,终局首领

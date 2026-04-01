@@ -224,3 +224,35 @@ map.button_previous,后退,Previous
 map.button_next,前进,Next
 map.button_skill_overview,已学功法,Run Skills
 
+map.market_title,行旅集市,Traveling Market
+map.market_message,你可以在这里拿灵石换资源，或稳稳补一轮状态。,Trade spirit stones for resources here, or take a steady refill before moving on.
+map.market_choice_relic,换购法器,Trade for Relic
+map.market_choice_manual,换购残卷,Trade for Manual
+map.market_choice_supply,补足行囊,Restock Supplies
+map.market_result_title,集市收获,Market Result
+map.market_result_relic,你用手头灵石换来一件趁手法器，顺便稳住了一截修为。,You trade your spirit stones for a fitting relic and stabilize your cultivation a bit.
+map.market_result_supply,你补足了路上的必需品，推进节奏重新平顺下来。,You restock what you need for the road and smooth out your run tempo.
+map.market_skill_title,集市残卷,Market Manual
+map.market_skill_message,从摊位上的几页残卷里挑一份带走。,Choose one manual from the incomplete pages on the stall.
+map.market_skill_intro,你从集市摊位上换来一页残卷。,You trade for a torn manual page from the market stall.
+map.market_skill_empty,你翻遍摊位，却没有遇到合适的机缘。,You search every stall, but no fitting opportunity reveals itself.
+map.insight_title,悟道静室,Insight Sanctum
+map.insight_message,首领战前的最后一站，你可以换一轮更激进的成长。,This is your last stop before the boss, a place to force one more spike in power.
+map.insight_choice_core,凝练道基,Condense Foundation
+map.insight_choice_cache,开启遗藏,Open Relic Cache
+map.insight_choice_enlighten,闭关顿悟,Seek Enlightenment
+map.insight_result_title,静室所得,Sanctum Result
+map.insight_result_core,你以灵石强行凝练道基，换来一段更扎实的修为突破。,You force your foundation tighter with spirit stones and secure a sharper cultivation jump.
+map.insight_result_cache,你开启静室遗藏，补到一份装备机缘与临战储备。,You open the sanctum cache and come away with gear and a bit of battle stock.
+map.insight_skill_title,顿悟机缘,Moment of Insight
+map.insight_skill_message,从这一次顿悟里定下一门最终要诀。,Choose the technique that crystallizes from this moment of insight.
+map.insight_skill_intro,你在静室闭关片刻，抓住了一线更高阶的功法机缘。,A brief retreat inside the sanctum reveals a higher-tier skill opportunity.
+map.insight_skill_empty,这一次闭关没有新的感悟，只留下片刻清明。,This retreat brings no new revelation, only a brief moment of clarity.
+map.choice_cost,消耗：{0} -{1},Cost: {0} -{1}
+map.choice_gain_exp,经验 +{0},Exp +{0}
+map.choice_gain_stones,{0} +{1},{0} +{1}
+map.choice_gain_equipment,装备机缘 1 次,Gain 1 equipment reward
+map.choice_gain_skill_elite,获得 1 次高阶功法机缘,Gain 1 high-tier skill reward
+map.choice_gain_skill_boss,获得 1 次顶阶功法机缘,Gain 1 boss-tier skill reward
+map.reward_equipment,装备掉落：,Equipment Drop: 
+map.choice_gain_skill,获得 1 次功法机缘,Gain 1 skill reward

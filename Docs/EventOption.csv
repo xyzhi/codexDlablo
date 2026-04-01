@@ -1,0 +1,13 @@
+Profile,OptionIndex,TitleKey,RewardMode,SpiritStoneElement,ExpBase,ExpPerStage,SpiritStoneBase,SpiritStonePerStage,SpiritStoneCostBase,SpiritStoneCostPerStage,SkillRewardNodeType,SelectionTitleKey,SelectionMessageKey,ResultTitleKey,ResultIntroKey,EmptyResultKey,Notes
+VillageStart,1,map.village_choice_elder,Progress,Stage,18,0,0,0,0,0,,,,map.village_result_title,map.village_result_elder,,Village opener exp boost
+VillageStart,2,map.village_choice_supply,Progress,Stage,6,0,18,0,0,0,,,,map.village_result_title,map.village_result_supply,,Village opener supply bundle
+VillageStart,3,map.village_choice_scripture,Skill,Stage,0,0,0,0,0,0,Battle,map.scripture_title,map.scripture_message,map.village_result_title,map.scripture_intro,map.scripture_empty,Village starter skill choice
+Rest,1,map.rest_choice_breath,Progress,Stage,14,4,0,0,0,0,,,,map.rest_result_title,map.rest_result_breath,,Rest exp focus
+Rest,2,map.rest_choice_gather,Progress,Stage,4,2,14,4,0,0,,,,map.rest_result_title,map.rest_result_gather,,Rest spirit stone focus
+Rest,3,map.rest_choice_sort,Progress,Stage,9,3,8,3,0,0,,,,map.rest_result_title,map.rest_result_sort,,Rest balanced reward
+TradeMarket,1,map.market_choice_relic,Equipment,Stage,8,2,0,0,14,2,,,,map.market_result_title,map.market_result_relic,,Market relic trade
+TradeMarket,2,map.market_choice_manual,Skill,Stage,0,0,0,0,10,2,Elite,map.market_skill_title,map.market_skill_message,map.market_result_title,map.market_skill_intro,map.market_skill_empty,Market elite skill trade
+TradeMarket,3,map.market_choice_supply,Progress,Stage,8,3,10,3,0,0,,,,map.market_result_title,map.market_result_supply,,Market balanced resupply
+InsightSanctum,1,map.insight_choice_core,Progress,Stage,22,4,0,0,14,3,,,,map.insight_result_title,map.insight_result_core,,Sanctum exp spike
+InsightSanctum,2,map.insight_choice_cache,Equipment,Stage,10,2,8,2,0,0,,,,map.insight_result_title,map.insight_result_cache,,Sanctum cache reward
+InsightSanctum,3,map.insight_choice_enlighten,Skill,Stage,0,0,0,0,0,0,Boss,map.insight_skill_title,map.insight_skill_message,map.insight_result_title,map.insight_skill_intro,map.insight_skill_empty,Sanctum boss-tier skill choice

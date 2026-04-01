@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using UnityEditor;
 
@@ -69,6 +69,8 @@ public static class ConfigAutoSync
             && IsOutputUpToDate("Docs/Equipment.csv", "Assets/Resources/Configs/EquipmentDatabase.json")
             && IsOutputUpToDate("Docs/SpiritStone.csv", "Assets/Resources/Configs/SpiritStoneDatabase.json")
             && IsOutputUpToDate("Docs/StageBalance.csv", "Assets/Resources/Configs/StageBalanceDatabase.json")
+            && IsOutputUpToDate("Docs/StageNode.csv", "Assets/Resources/Configs/StageNodeDatabase.json")
+            && IsOutputUpToDate("Docs/EventOption.csv", "Assets/Resources/Configs/EventOptionDatabase.json")
             && IsOutputUpToDate("Docs/Localization.csv", "Assets/Resources/Localization/GameText.json");
     }
 

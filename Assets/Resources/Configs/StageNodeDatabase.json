@@ -1,0 +1,84 @@
+﻿{
+    "stageNodes": [
+        {
+            "Stage": 1,
+            "NodeType": "Rest",
+            "EventProfile": "VillageStart",
+            "ThemeZh": "山门外围",
+            "ThemeEn": "Outer Hills",
+            "DetailZh": "安全起点，可从村中助力里拿到开局资源或功法机缘。",
+            "DetailEn": "Safe opening area with a starter boost, supplies, or skill opportunity.",
+            "Notes": "开局事件点"
+        },
+        {
+            "Stage": 2,
+            "NodeType": "Battle",
+            "EventProfile": "DefaultBattle",
+            "ThemeZh": "山门外围",
+            "ThemeEn": "Outer Hills",
+            "DetailZh": "普通战斗，可获得修为、灵石与装备掉落。",
+            "DetailEn": "Standard battle for growth, spirit stones, and equipment drops.",
+            "Notes": "基础战斗"
+        },
+        {
+            "Stage": 3,
+            "NodeType": "Elite",
+            "EventProfile": "DefaultElite",
+            "ThemeZh": "焚风古道",
+            "ThemeEn": "Burning Trail",
+            "DetailZh": "精英战斗，成长更多，掉落也更好。",
+            "DetailEn": "Elite battle with higher growth and better loot.",
+            "Notes": "第一处精英"
+        },
+        {
+            "Stage": 4,
+            "NodeType": "Rest",
+            "EventProfile": "TradeMarket",
+            "ThemeZh": "焚风古道",
+            "ThemeEn": "Burning Trail",
+            "DetailZh": "资源交易点，可换装备、功法机缘或稳健补给。",
+            "DetailEn": "Trading stop for gear, skill opportunities, or steady supplies.",
+            "Notes": "策划可自由调整到其他关卡"
+        },
+        {
+            "Stage": 5,
+            "NodeType": "Battle",
+            "EventProfile": "DefaultBattle",
+            "ThemeZh": "地宫遗迹",
+            "ThemeEn": "Deep Ruins",
+            "DetailZh": "普通战斗，可获得修为、灵石与装备掉落。",
+            "DetailEn": "Standard battle for growth, spirit stones, and equipment drops.",
+            "Notes": "中段战斗"
+        },
+        {
+            "Stage": 6,
+            "NodeType": "Elite",
+            "EventProfile": "DefaultElite",
+            "ThemeZh": "地宫遗迹",
+            "ThemeEn": "Deep Ruins",
+            "DetailZh": "精英战斗，成长更多，掉落也更好。",
+            "DetailEn": "Elite battle with higher growth and better loot.",
+            "Notes": "第二处精英"
+        },
+        {
+            "Stage": 7,
+            "NodeType": "Rest",
+            "EventProfile": "InsightSanctum",
+            "ThemeZh": "登天阶",
+            "ThemeEn": "Ascension Path",
+            "DetailZh": "高阶机缘点，适合在首领战前做最后一轮构筑抬升。",
+            "DetailEn": "High-tier opportunity stop before the boss for one last build spike.",
+            "Notes": "后段机缘点"
+        },
+        {
+            "Stage": 8,
+            "NodeType": "Boss",
+            "EventProfile": "DefaultBoss",
+            "ThemeZh": "登天阶",
+            "ThemeEn": "Ascension Path",
+            "DetailZh": "首领战斗，若能取胜，本轮路线直接完成。",
+            "DetailEn": "Boss battle. Winning can finish the current route.",
+            "Notes": "终局首领"
+        }
+    ]
+}
