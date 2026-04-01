@@ -295,6 +295,110 @@ namespace Wuxing.Game
             return reward;
         }
 
+        public static void DebugGrantSpiritStones(string element, int amount)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            var resolvedAmount = Mathf.Max(0, amount);
+            if (resolvedAmount <= 0)
+            {
+                return;
+            }
+
+            Instance.AddSpiritStones(element, resolvedAmount);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void DebugSetCultivationLevel(int targetLevel)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            Instance.CultivationLevel = Mathf.Max(1, targetLevel);
+            Instance.CultivationExp = 0;
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void DebugGrantEquipment(string equipmentId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(equipmentId))
+            {
+                return;
+            }
+
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null || equipmentDatabase.GetById(equipmentId) == null)
+            {
+                return;
+            }
+
+            if (!Instance.ownedEquipmentIds.Exists(id => string.Equals(id, equipmentId, StringComparison.OrdinalIgnoreCase)))
+            {
+                Instance.ownedEquipmentIds.Add(equipmentId);
+                Instance.SaveProgress();
+                ProgressChanged?.Invoke();
+            }
+        }
+
+        public static void DebugGrantSkill(string characterId, string skillId, int level)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId) || string.IsNullOrEmpty(skillId))
+            {
+                return;
+            }
+
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(characterId) : null;
+            var skill = skillDatabase != null ? skillDatabase.GetById(skillId) : null;
+            if (character == null || skill == null)
+            {
+                return;
+            }
+
+            var entry = Instance.GetOrCreateCharacterRunData(characterId);
+            if (!CharacterHasInitialSkill(character, skillId)
+                && !entry.LearnedSkillIds.Exists(id => string.Equals(id, skillId, StringComparison.OrdinalIgnoreCase)))
+            {
+                entry.LearnedSkillIds.Add(skillId);
+            }
+
+            Instance.SetSkillLevelInternal(entry, skillId, Mathf.Max(1, level));
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void DebugJumpToStage(int targetStage)
+        {
+            EnsureInstance();
+            if (Instance == null)
+            {
+                return;
+            }
+
+            var clampedStage = Mathf.Clamp(targetStage, 1, GetMaxStage());
+            if (Instance.CurrentStage <= 0)
+            {
+                Instance.CurrentStage = 1;
+            }
+
+            Instance.CurrentStage = clampedStage;
+            Instance.HighestClearedStage = Mathf.Max(Instance.HighestClearedStage, Mathf.Max(0, clampedStage - 1));
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
         public static int GetCultivationLevel()
         {
             EnsureInstance();
@@ -1948,4 +2052,5 @@ namespace Wuxing.Game
         }
     }
 }
+
 
