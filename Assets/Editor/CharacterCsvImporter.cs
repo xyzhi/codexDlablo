@@ -239,8 +239,8 @@ public static class CharacterCsvImporter
             entries.Add(new LocalizationEntry
             {
                 key = columns[0],
-                zhHans = columns[1],
-                en = columns[2]
+                zhHans = NormalizeLocalizationText(columns[1]),
+                en = NormalizeLocalizationText(columns[2])
             });
         }
 
@@ -249,6 +249,13 @@ public static class CharacterCsvImporter
         table.entries = entries.ToArray();
         WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
         Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
+    }
+
+    private static string NormalizeLocalizationText(string value)
+    {
+        return string.IsNullOrEmpty(value)
+            ? string.Empty
+            : value.Replace("\r\n", "\n").Replace("\r", "\n");
     }
 
     [MenuItem("工具/配置/仅导入灵石表")]
