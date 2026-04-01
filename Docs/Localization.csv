@@ -322,3 +322,9 @@ convert.summary_preview,"本次将消耗 {0} {1}，获得 {2} {3}。","This conv
 convert.status_select,点击任意一系灵石，按相生规则进行转换。,Select any spirit stone and convert it along the generating cycle.
 convert.status_not_enough,当前灵石不足，无法完成本次转换。,Not enough spirit stones for this conversion.
 convert.status_done,"已将 {0} {1} 炼化为 {2} {3}。","Converted {0} {1} into {2} {3}."
+"map.profile_active_effects","当前机缘：","Active Effects: "
+"map.profile_no_effects","无","None"
+"map.effect_cultivation_title","福运加身","Fortune Blessing"
+"map.effect_cultivation_desc","接下来 {0} 个月，额外获得经验 +{1}。","For the next {0} month(s), gain +{1} extra exp."
+"map.effect_stone_title","灵囊丰盈","Packed Spirit Pouch"
+"map.effect_stone_desc","接下来 {0} 个月，额外获得灵石 +{1}。","For the next {0} month(s), gain +{1} extra spirit stones."

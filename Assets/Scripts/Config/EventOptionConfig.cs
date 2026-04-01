@@ -1,4 +1,5 @@
-using System;
+﻿using System;
+
 namespace Wuxing.Config
 {
     [Serializable]
@@ -22,6 +23,12 @@ namespace Wuxing.Config
         public string ResultTitleKey;
         public string ResultIntroKey;
         public string EmptyResultKey;
+        public string BuffType;
+        public int BuffValueBase;
+        public int BuffValuePerStage;
+        public int BuffDurationMonths;
+        public string BuffTitleKey;
+        public string BuffDescriptionKey;
         public string Notes;
     }
 }

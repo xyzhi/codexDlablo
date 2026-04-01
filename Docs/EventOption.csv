@@ -1,22 +1,22 @@
-﻿Profile,OptionIndex,TitleKey,RewardMode,UtilityAction,SpiritStoneElement,ExpBase,ExpPerStage,SpiritStoneBase,SpiritStonePerStage,SpiritStoneCostBase,SpiritStoneCostPerStage,SkillRewardNodeType,SelectionTitleKey,SelectionMessageKey,ResultTitleKey,ResultIntroKey,EmptyResultKey,Notes
-VillageStart,1,map.village_choice_prepare,Utility,OpenEquipment,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_prepare,,Village service open equipment
-VillageStart,2,map.village_choice_review,Utility,OpenSkillOverview,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_review,,Village service open skill overview
-VillageStart,3,map.village_choice_route,Utility,ShowRouteBrief,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_route,,Village service route briefing
-Rest,1,map.rest_choice_breath,Progress,,Stage,14,4,0,0,0,0,,,,map.rest_result_title,map.rest_result_breath,,Rest exp focus
-Rest,2,map.rest_choice_gather,Progress,,Stage,4,2,14,4,0,0,,,,map.rest_result_title,map.rest_result_gather,,Rest spirit stone focus
-Rest,3,map.rest_choice_sort,Progress,,Stage,9,3,8,3,0,0,,,,map.rest_result_title,map.rest_result_sort,,Rest balanced reward
-TradeMarket,1,map.market_choice_relic,Equipment,,Stage,8,2,0,0,14,2,,,,map.market_result_title,map.market_result_relic,,Market relic trade
-TradeMarket,2,map.market_choice_manual,Skill,,Stage,0,0,0,0,10,2,Elite,map.market_skill_title,map.market_skill_message,map.market_result_title,map.market_skill_intro,map.market_skill_empty,Market elite skill trade
-TradeMarket,3,map.market_choice_supply,Progress,,Stage,8,3,10,3,12,2,,,,map.market_result_title,map.market_result_supply,,Market balanced resupply with stone cost
-InsightSanctum,1,map.insight_choice_core,Progress,,Stage,22,4,0,0,14,3,,,,map.insight_result_title,map.insight_result_core,,Sanctum exp spike
-InsightSanctum,2,map.insight_choice_cache,Equipment,,Stage,10,2,8,2,0,0,,,,map.insight_result_title,map.insight_result_cache,,Sanctum cache reward
-InsightSanctum,3,map.insight_choice_enlighten,Skill,,Stage,0,0,0,0,0,0,Boss,map.insight_skill_title,map.insight_skill_message,map.insight_result_title,map.insight_skill_intro,map.insight_skill_empty,Sanctum boss-tier skill choice
-SpiritBroker,1,map.broker_choice_refine,Progress,,Stage,16,3,0,0,12,2,,,,map.broker_result_title,map.broker_result_refine,,Broker convert stones to cultivation
-SpiritBroker,2,map.broker_choice_cache,Equipment,,Stage,5,1,6,2,16,2,,,,map.broker_result_title,map.broker_result_cache,,Broker cache deal
-SpiritBroker,3,map.broker_choice_manual,Skill,,Stage,0,0,0,0,12,2,Elite,map.broker_skill_title,map.broker_skill_message,map.broker_result_title,map.broker_skill_intro,map.broker_skill_empty,Broker elite skill deal
-TrialForge,1,map.forge_choice_temper,Progress,,Stage,24,4,0,0,10,2,,,,map.forge_result_title,map.forge_result_temper,,Forge cultivation tempering
-TrialForge,2,map.forge_choice_hoard,Equipment,,Stage,8,2,10,2,0,0,,,,map.forge_result_title,map.forge_result_hoard,,Forge cache reward
-TrialForge,3,map.forge_choice_secret,Skill,,Stage,0,0,0,0,0,0,Boss,map.forge_skill_title,map.forge_skill_message,map.forge_result_title,map.forge_skill_intro,map.forge_skill_empty,Forge boss-tier insight
-WanderingFortune,1,map.fortune_choice_blessing,Progress,,Stage,14,3,8,2,0,0,,,,map.fortune_result_title,map.fortune_result_blessing,,Random blessing payout
-WanderingFortune,2,map.fortune_choice_cache,Equipment,,Stage,6,1,4,2,0,0,,,,map.fortune_result_title,map.fortune_result_cache,,Random cache drop
-WanderingFortune,3,map.fortune_choice_insight,Skill,,Stage,0,0,0,0,0,0,Elite,,,map.fortune_result_title,map.fortune_skill_intro,map.fortune_skill_empty,Random elite skill insight
+﻿Profile,OptionIndex,TitleKey,RewardMode,UtilityAction,SpiritStoneElement,ExpBase,ExpPerStage,SpiritStoneBase,SpiritStonePerStage,SpiritStoneCostBase,SpiritStoneCostPerStage,SkillRewardNodeType,SelectionTitleKey,SelectionMessageKey,ResultTitleKey,ResultIntroKey,EmptyResultKey,BuffType,BuffValueBase,BuffValuePerStage,BuffDurationMonths,BuffTitleKey,BuffDescriptionKey,Notes
+VillageStart,1,map.village_choice_prepare,Utility,OpenEquipment,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_prepare,,,0,0,0,,,Village service open equipment
+VillageStart,2,map.village_choice_review,Utility,OpenSkillOverview,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_review,,,0,0,0,,,Village service open skill overview
+VillageStart,3,map.village_choice_route,Utility,ShowRouteBrief,Stage,0,0,0,0,0,0,,,,map.village_result_title,map.village_result_route,,,0,0,0,,,Village service route briefing
+Rest,1,map.rest_choice_breath,Progress,,Stage,14,4,0,0,0,0,,,,map.rest_result_title,map.rest_result_breath,,,0,0,0,,,Rest exp focus
+Rest,2,map.rest_choice_gather,Progress,,Stage,4,2,14,4,0,0,,,,map.rest_result_title,map.rest_result_gather,,,0,0,0,,,Rest spirit stone focus
+Rest,3,map.rest_choice_sort,Progress,,Stage,9,3,8,3,0,0,,,,map.rest_result_title,map.rest_result_sort,,,0,0,0,,,Rest balanced reward
+TradeMarket,1,map.market_choice_relic,Equipment,,Stage,8,2,0,0,14,2,,,,map.market_result_title,map.market_result_relic,,,0,0,0,,,Market relic trade
+TradeMarket,2,map.market_choice_manual,Skill,,Stage,0,0,0,0,10,2,Elite,map.market_skill_title,map.market_skill_message,map.market_result_title,map.market_skill_intro,map.market_skill_empty,0,0,0,0,,,Market elite skill trade
+TradeMarket,3,map.market_choice_supply,Progress,,Stage,8,3,10,3,12,2,,,,map.market_result_title,map.market_result_supply,,,0,0,0,,,Market balanced resupply with stone cost
+InsightSanctum,1,map.insight_choice_core,Progress,,Stage,22,4,0,0,14,3,,,,map.insight_result_title,map.insight_result_core,,,0,0,0,,,Sanctum exp spike
+InsightSanctum,2,map.insight_choice_cache,Equipment,,Stage,10,2,8,2,0,0,,,,map.insight_result_title,map.insight_result_cache,,,0,0,0,,,Sanctum cache reward
+InsightSanctum,3,map.insight_choice_enlighten,Skill,,Stage,0,0,0,0,0,0,Boss,map.insight_skill_title,map.insight_skill_message,map.insight_result_title,map.insight_skill_intro,map.insight_skill_empty,0,0,0,0,,,Sanctum boss-tier skill choice
+SpiritBroker,1,map.broker_choice_refine,Progress,,Stage,16,3,0,0,12,2,,,,map.broker_result_title,map.broker_result_refine,,,0,0,0,,,Broker convert stones to cultivation
+SpiritBroker,2,map.broker_choice_cache,Equipment,,Stage,5,1,6,2,16,2,,,,map.broker_result_title,map.broker_result_cache,,,0,0,0,,,Broker cache deal
+SpiritBroker,3,map.broker_choice_manual,Skill,,Stage,0,0,0,0,12,2,Elite,map.broker_skill_title,map.broker_skill_message,map.broker_result_title,map.broker_skill_intro,map.broker_skill_empty,0,0,0,0,,,Broker elite skill deal
+TrialForge,1,map.forge_choice_temper,Progress,,Stage,24,4,0,0,10,2,,,,map.forge_result_title,map.forge_result_temper,,,0,0,0,,,Forge cultivation tempering
+TrialForge,2,map.forge_choice_hoard,Equipment,,Stage,8,2,10,2,0,0,,,,map.forge_result_title,map.forge_result_hoard,,,0,0,0,,,Forge cache reward
+TrialForge,3,map.forge_choice_secret,Skill,,Stage,0,0,0,0,0,0,Boss,map.forge_skill_title,map.forge_skill_message,map.forge_result_title,map.forge_skill_intro,map.forge_skill_empty,0,0,0,0,,,Forge boss-tier insight
+WanderingFortune,1,map.fortune_choice_blessing,Progress,,Stage,14,3,8,2,0,0,,,,map.fortune_result_title,map.fortune_result_blessing,,CultivationGainFlat,10,1,4,map.effect_cultivation_title,map.effect_cultivation_desc,Random blessing payout with timed cultivation effect
+WanderingFortune,2,map.fortune_choice_cache,Equipment,,Stage,6,1,4,2,0,0,,,,map.fortune_result_title,map.fortune_result_cache,,SpiritStoneGainFlat,6,1,4,map.effect_stone_title,map.effect_stone_desc,Random cache drop with timed stone effect
+WanderingFortune,3,map.fortune_choice_insight,Skill,,Stage,0,0,0,0,0,0,Elite,,,map.fortune_result_title,map.fortune_skill_intro,map.fortune_skill_empty,0,0,0,0,,,Random elite skill insight

@@ -397,6 +397,12 @@
             "ResultTitleKey": "map.fortune_result_title",
             "ResultIntroKey": "map.fortune_result_blessing",
             "EmptyResultKey": "",
+            "BuffType": "CultivationGainFlat",
+            "BuffValueBase": 10,
+            "BuffValuePerStage": 1,
+            "BuffDurationMonths": 4,
+            "BuffTitleKey": "map.effect_cultivation_title",
+            "BuffDescriptionKey": "map.effect_cultivation_desc",
             "Notes": "Random blessing payout"
         },
         {
@@ -418,6 +424,12 @@
             "ResultTitleKey": "map.fortune_result_title",
             "ResultIntroKey": "map.fortune_result_cache",
             "EmptyResultKey": "",
+            "BuffType": "SpiritStoneGainFlat",
+            "BuffValueBase": 6,
+            "BuffValuePerStage": 1,
+            "BuffDurationMonths": 4,
+            "BuffTitleKey": "map.effect_stone_title",
+            "BuffDescriptionKey": "map.effect_stone_desc",
             "Notes": "Random cache drop"
         },
         {

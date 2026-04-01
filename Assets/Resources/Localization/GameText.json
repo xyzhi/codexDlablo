@@ -1614,6 +1614,36 @@
                         "zhHans":  "已将 {0} {1} 炼化为 {2} {3}。",
                         "key":  "convert.status_done",
                         "en":  "Converted {0} {1} into {2} {3}."
+                    },
+                    {
+                        "key":  "map.profile_active_effects",
+                        "zhHans":  "当前机缘：",
+                        "en":  "Active Effects: "
+                    },
+                    {
+                        "key":  "map.profile_no_effects",
+                        "zhHans":  "无",
+                        "en":  "None"
+                    },
+                    {
+                        "key":  "map.effect_cultivation_title",
+                        "zhHans":  "福运加身",
+                        "en":  "Fortune Blessing"
+                    },
+                    {
+                        "key":  "map.effect_cultivation_desc",
+                        "zhHans":  "接下来 {0} 个月，额外获得经验 +{1}。",
+                        "en":  "For the next {0} month(s), gain +{1} extra exp."
+                    },
+                    {
+                        "key":  "map.effect_stone_title",
+                        "zhHans":  "灵囊丰盈",
+                        "en":  "Packed Spirit Pouch"
+                    },
+                    {
+                        "key":  "map.effect_stone_desc",
+                        "zhHans":  "接下来 {0} 个月，额外获得灵石 +{1}。",
+                        "en":  "For the next {0} month(s), gain +{1} extra spirit stones."
                     }
                 ]
 }

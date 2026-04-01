@@ -29,6 +29,7 @@ namespace Wuxing.Game
         private const string PendingSkillRewardsPrefKey = "game.progress.pending_skill_rewards";
         private const string FixedStageEventsPrefKey = "game.progress.fixed_stage_events";
         private const string RandomStageEventStatesPrefKey = "game.progress.random_stage_events";
+        private const string ActiveEffectsPrefKey = "game.progress.active_effects";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
         private const int MaxStage = 100;
         private const int LifetimeMonths = 360;
@@ -68,6 +69,7 @@ namespace Wuxing.Game
         private readonly List<SkillRewardOption> pendingSkillRewards = new List<SkillRewardOption>();
         private readonly List<int> completedFixedEventStages = new List<int>();
         private readonly List<StageRandomEventState> randomStageEventStates = new List<StageRandomEventState>();
+        private readonly List<RunEffectData> activeEffects = new List<RunEffectData>();
 
         private void Awake()
         {
@@ -114,6 +116,7 @@ namespace Wuxing.Game
                 Instance.pendingSkillRewards.Clear();
                 Instance.completedFixedEventStages.Clear();
                 Instance.randomStageEventStates.Clear();
+                Instance.activeEffects.Clear();
                 Instance.SaveProgress();
                 ProgressChanged?.Invoke();
             }
@@ -189,6 +192,7 @@ namespace Wuxing.Game
             Instance.pendingSkillRewards.Clear();
             Instance.completedFixedEventStages.Clear();
             Instance.randomStageEventStates.Clear();
+            Instance.activeEffects.Clear();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
         }
@@ -203,8 +207,8 @@ namespace Wuxing.Game
             }
 
             var resolvedStage = Mathf.Max(1, stage);
-            reward.ExpGained = GetConfiguredBattleExpReward(resolvedStage);
-            reward.SpiritStonesGained = GetConfiguredBattleSpiritStoneReward(resolvedStage);
+            reward.ExpGained = Instance.ApplyExpGainModifiers(GetConfiguredBattleExpReward(resolvedStage));
+            reward.SpiritStonesGained = Instance.ApplySpiritStoneGainModifiers(GetConfiguredBattleSpiritStoneReward(resolvedStage));
             reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
@@ -245,8 +249,8 @@ namespace Wuxing.Game
             }
 
             var resolvedStage = Mathf.Max(1, stage);
-            reward.ExpGained = GetConfiguredNonBattleExpReward(resolvedStage, nodeType);
-            reward.SpiritStonesGained = GetConfiguredNonBattleSpiritStoneReward(resolvedStage, nodeType);
+            reward.ExpGained = Instance.ApplyExpGainModifiers(GetConfiguredNonBattleExpReward(resolvedStage, nodeType));
+            reward.SpiritStonesGained = Instance.ApplySpiritStoneGainModifiers(GetConfiguredNonBattleSpiritStoneReward(resolvedStage, nodeType));
             reward.SpiritStoneElement = GetSpiritStoneElementByStage(resolvedStage);
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
@@ -274,8 +278,8 @@ namespace Wuxing.Game
                 return reward;
             }
 
-            reward.ExpGained = Mathf.Max(0, expGained);
-            reward.SpiritStonesGained = Mathf.Max(0, spiritStoneCount);
+            reward.ExpGained = Instance.ApplyExpGainModifiers(expGained);
+            reward.SpiritStonesGained = Instance.ApplySpiritStoneGainModifiers(spiritStoneCount);
             reward.SpiritStoneElement = string.IsNullOrEmpty(spiritStoneElement) ? "Earth" : spiritStoneElement;
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
 
@@ -762,12 +766,12 @@ namespace Wuxing.Game
             }
 
             var resolvedStage = Mathf.Max(1, stage);
-            reward.ExpGained = Mathf.Max(0, expGained);
+            reward.ExpGained = Instance.ApplyExpGainModifiers(expGained);
             reward.SpiritStoneElement = string.IsNullOrEmpty(spiritStoneElement)
                 ? GetSpiritStoneElementByStage(resolvedStage)
                 : spiritStoneElement;
             reward.SpiritStoneName = GetSpiritStoneName(reward.SpiritStoneElement, false);
-            reward.SpiritStonesGained = Mathf.Max(0, spiritStoneCount);
+            reward.SpiritStonesGained = Instance.ApplySpiritStoneGainModifiers(spiritStoneCount);
 
             if (reward.ExpGained > 0)
             {
@@ -859,6 +863,79 @@ namespace Wuxing.Game
         {
             EnsureInstance();
             return Instance != null ? Instance.BuildRunDataSnapshot() : new RunData();
+        }
+
+        public static IReadOnlyList<RunEffectData> GetActiveEffects()
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.activeEffects.AsReadOnly() : Array.Empty<RunEffectData>();
+        }
+
+        public static RunEffectData AddTimedEffect(string effectType, int value, int durationMonths, string titleKey, string descriptionKey)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(effectType) || value <= 0 || durationMonths <= 0)
+            {
+                return null;
+            }
+
+            var effect = new RunEffectData
+            {
+                EffectType = effectType,
+                Value = Mathf.Max(1, value),
+                RemainingMonths = Mathf.Max(1, durationMonths),
+                TitleKey = titleKey ?? string.Empty,
+                DescriptionKey = descriptionKey ?? string.Empty
+            };
+
+            Instance.activeEffects.Add(effect);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+            return CloneRunEffect(effect);
+        }
+
+        public static string BuildActiveEffectsSummary(bool english)
+        {
+            EnsureInstance();
+            if (Instance == null || Instance.activeEffects.Count == 0)
+            {
+                return LocalizationManager.GetText("map.profile_active_effects") + LocalizationManager.GetText("map.profile_no_effects");
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(LocalizationManager.GetText("map.profile_active_effects"));
+            var hasAny = false;
+            for (var i = 0; i < Instance.activeEffects.Count; i++)
+            {
+                var effect = Instance.activeEffects[i];
+                if (effect == null || effect.RemainingMonths <= 0)
+                {
+                    continue;
+                }
+
+                if (hasAny)
+                {
+                    builder.Append("\n");
+                }
+                else
+                {
+                    hasAny = true;
+                }
+
+                builder.Append("- ");
+                if (!string.IsNullOrEmpty(effect.TitleKey))
+                {
+                    builder.Append(LocalizationManager.GetText(effect.TitleKey)).Append("：");
+                }
+                builder.Append(FormatEffectDescription(effect.DescriptionKey, effect.RemainingMonths, effect.Value));
+            }
+
+            if (!hasAny)
+            {
+                builder.Append(LocalizationManager.GetText("map.profile_no_effects"));
+            }
+
+            return builder.ToString();
         }
 
         public static void RecordBattleResult(bool isVictory, int stage, int rounds)
@@ -1186,7 +1263,9 @@ namespace Wuxing.Game
                 Instance.CurrentStage = 1;
             }
 
-            Instance.ElapsedMonths += Mathf.Max(1, months);
+            var monthCost = Mathf.Max(1, months);
+            Instance.ElapsedMonths += monthCost;
+            Instance.TickTimedEffects(monthCost);
             if (Instance.ElapsedMonths >= LifetimeMonths)
             {
                 Instance.CurrentStage = 0;
@@ -1225,6 +1304,7 @@ namespace Wuxing.Game
             var clampedStage = Mathf.Clamp(targetStage, 1, GetMaxReachableStage());
             var monthCost = Mathf.Abs(clampedStage - Instance.CurrentStage);
             Instance.ElapsedMonths += monthCost;
+            Instance.TickTimedEffects(monthCost);
             Instance.CurrentStage = clampedStage;
 
             if (Instance.ElapsedMonths >= LifetimeMonths)
@@ -1505,6 +1585,7 @@ namespace Wuxing.Game
             LoadPendingSkillRewards();
             LoadCompletedFixedEventStages();
             LoadRandomStageEventStates();
+            LoadActiveEffects();
         }
 
         private void SaveProgress()
@@ -1530,6 +1611,7 @@ namespace Wuxing.Game
             PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
             PlayerPrefs.SetString(FixedStageEventsPrefKey, SerializeCompletedFixedEventStages());
             PlayerPrefs.SetString(RandomStageEventStatesPrefKey, SerializeRandomStageEventStates());
+            PlayerPrefs.SetString(ActiveEffectsPrefKey, SerializeActiveEffects());
             PlayerPrefs.SetString(RunDataSnapshotPrefKey, JsonUtility.ToJson(BuildRunDataSnapshot()));
             PlayerPrefs.Save();
         }
@@ -1861,6 +1943,15 @@ namespace Wuxing.Game
                 if (pendingSkillRewards[i] != null)
                 {
                     data.PendingSkillRewards.Add(pendingSkillRewards[i]);
+                }
+            }
+
+            for (var i = 0; i < activeEffects.Count; i++)
+            {
+                var effect = activeEffects[i];
+                if (effect != null)
+                {
+                    data.ActiveEffects.Add(CloneRunEffect(effect));
                 }
             }
 
@@ -2279,6 +2370,128 @@ namespace Wuxing.Game
             return null;
         }
 
+        private int ApplyExpGainModifiers(int baseValue)
+        {
+            return Mathf.Max(0, baseValue) + GetTimedEffectValue("CultivationGainFlat");
+        }
+
+        private int ApplySpiritStoneGainModifiers(int baseValue)
+        {
+            return Mathf.Max(0, baseValue) + GetTimedEffectValue("SpiritStoneGainFlat");
+        }
+
+        private int GetTimedEffectValue(string effectType)
+        {
+            var total = 0;
+            for (var i = 0; i < activeEffects.Count; i++)
+            {
+                var effect = activeEffects[i];
+                if (effect == null || effect.RemainingMonths <= 0)
+                {
+                    continue;
+                }
+
+                if (string.Equals(effect.EffectType, effectType, StringComparison.OrdinalIgnoreCase))
+                {
+                    total += Mathf.Max(0, effect.Value);
+                }
+            }
+
+            return total;
+        }
+
+        private void TickTimedEffects(int elapsedMonths)
+        {
+            if (elapsedMonths <= 0 || activeEffects.Count == 0)
+            {
+                return;
+            }
+
+            for (var i = activeEffects.Count - 1; i >= 0; i--)
+            {
+                var effect = activeEffects[i];
+                if (effect == null)
+                {
+                    activeEffects.RemoveAt(i);
+                    continue;
+                }
+
+                effect.RemainingMonths = Mathf.Max(0, effect.RemainingMonths - elapsedMonths);
+                if (effect.RemainingMonths <= 0)
+                {
+                    activeEffects.RemoveAt(i);
+                }
+            }
+        }
+
+        private static RunEffectData CloneRunEffect(RunEffectData effect)
+        {
+            if (effect == null)
+            {
+                return null;
+            }
+
+            return new RunEffectData
+            {
+                EffectType = effect.EffectType,
+                Value = effect.Value,
+                RemainingMonths = effect.RemainingMonths,
+                TitleKey = effect.TitleKey,
+                DescriptionKey = effect.DescriptionKey
+            };
+        }
+
+        private static string FormatEffectDescription(string descriptionKey, int remainingMonths, int value)
+        {
+            if (string.IsNullOrEmpty(descriptionKey))
+            {
+                return string.Empty;
+            }
+
+            return string.Format(LocalizationManager.GetText(descriptionKey), remainingMonths, value);
+        }
+
+        private void LoadActiveEffects()
+        {
+            activeEffects.Clear();
+            var raw = PlayerPrefs.GetString(ActiveEffectsPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<RunEffectDataListWrapper>(raw);
+            if (wrapper == null || wrapper.Entries == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Entries.Count; i++)
+            {
+                var entry = wrapper.Entries[i];
+                if (entry == null || string.IsNullOrEmpty(entry.EffectType) || entry.Value <= 0 || entry.RemainingMonths <= 0)
+                {
+                    continue;
+                }
+
+                activeEffects.Add(CloneRunEffect(entry));
+            }
+        }
+
+        private string SerializeActiveEffects()
+        {
+            var wrapper = new RunEffectDataListWrapper();
+            for (var i = 0; i < activeEffects.Count; i++)
+            {
+                var effect = activeEffects[i];
+                if (effect != null && effect.RemainingMonths > 0)
+                {
+                    wrapper.Entries.Add(CloneRunEffect(effect));
+                }
+            }
+
+            return JsonUtility.ToJson(wrapper);
+        }
         private void LoadCompletedFixedEventStages()
         {
             completedFixedEventStages.Clear();
@@ -2368,6 +2581,12 @@ namespace Wuxing.Game
         }
 
         [Serializable]
+        private class RunEffectDataListWrapper
+        {
+            public List<RunEffectData> Entries = new List<RunEffectData>();
+        }
+
+[Serializable]
         private class IntListWrapper
         {
             public List<int> Values = new List<int>();
@@ -2393,6 +2612,3 @@ namespace Wuxing.Game
         }
     }
 }
-
-
-

@@ -49,7 +49,7 @@ public static class CharacterCsvImporter
             ImportEventProfiles();
             ImportLocalization();
             AssetDatabase.Refresh();
-            Debug.Log("角色、敌人、技能、装备、灵石、灵石转换、关卡成长、关卡节点、事件选项、事件配置和语言表已完成导入。");
+            Debug.Log("Imported all config CSV files successfully.");
         }
         catch (Exception exception)
         {
@@ -235,7 +235,7 @@ public static class CharacterCsvImporter
         WriteJson(SpiritStoneJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stones to {SpiritStoneJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入灵石转换表")]
+    [MenuItem("Tools/Config/Import Spirit Stone Conversion CSV")]
     public static void ImportSpiritStoneConversions()
     {
         var rows = ReadRequiredRows(SpiritStoneConversionCsvPath, "SpiritStoneConversion CSV");
@@ -266,7 +266,7 @@ public static class CharacterCsvImporter
         WriteJson(SpiritStoneConversionJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stone conversions to {SpiritStoneConversionJsonPath}");
     }
-    [MenuItem("工具/配置/仅导入关卡成长表")]
+    [MenuItem("Tools/Config/Import Stage Balance CSV")]
     public static void ImportStageBalances()
     {
         var rows = ReadRequiredRows(StageBalanceCsvPath, "StageBalance CSV");
@@ -356,7 +356,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 19)
+            if (columns.Count < 25)
             {
                 throw new InvalidOperationException($"Invalid event option row at line {i + 1}.");
             }
@@ -380,7 +380,13 @@ public static class CharacterCsvImporter
                 ResultTitleKey = columns[15],
                 ResultIntroKey = columns[16],
                 EmptyResultKey = columns[17],
-                Notes = columns[18]
+                BuffType = columns[18],
+                BuffValueBase = ParseInt(columns[19], nameof(EventOptionConfig.BuffValueBase), i + 1),
+                BuffValuePerStage = ParseInt(columns[20], nameof(EventOptionConfig.BuffValuePerStage), i + 1),
+                BuffDurationMonths = ParseInt(columns[21], nameof(EventOptionConfig.BuffDurationMonths), i + 1),
+                BuffTitleKey = columns[22],
+                BuffDescriptionKey = columns[23],
+                Notes = columns[24]
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
@@ -571,4 +577,3 @@ public static class CharacterCsvImporter
         }
     }
 }
-

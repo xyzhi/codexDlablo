@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Wuxing.Game
@@ -25,6 +25,7 @@ namespace Wuxing.Game
         public List<string> OwnedEquipmentIds = new List<string>();
         public List<CharacterRunData> Characters = new List<CharacterRunData>();
         public List<SkillRewardOption> PendingSkillRewards = new List<SkillRewardOption>();
+        public List<RunEffectData> ActiveEffects = new List<RunEffectData>();
     }
 
     [Serializable]
@@ -40,5 +41,15 @@ namespace Wuxing.Game
     {
         public string SkillId;
         public int Level;
+    }
+
+    [Serializable]
+    public class RunEffectData
+    {
+        public string EffectType;
+        public int Value;
+        public int RemainingMonths;
+        public string TitleKey;
+        public string DescriptionKey;
     }
 }

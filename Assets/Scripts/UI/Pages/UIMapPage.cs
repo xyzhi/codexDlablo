@@ -473,12 +473,14 @@ namespace Wuxing.UI
             BattleRewardResult reward = rewardMode == "Equipment"
                 ? GameProgressManager.GrantEquipmentReward(stage, exp, element, spiritStoneCount)
                 : GameProgressManager.GrantProgressReward(exp, element, spiritStoneCount);
+            var appliedEffect = ApplyConfiguredTimedEffect(option, stage);
 
             CompleteNodeRewardFlow(
                 stage,
                 LocalizationManager.GetText(option.ResultTitleKey),
                 LocalizationManager.GetText(option.ResultIntroKey),
                 reward,
+                appliedEffect,
                 isRandomEvent);
         }
 
@@ -564,13 +566,19 @@ namespace Wuxing.UI
 
         private void FinalizeConfiguredSkillReward(int stage, EventOptionConfig option, SkillRewardOption appliedOption, bool isEnglish, bool isRandomEvent)
         {
+            var appliedEffect = ApplyConfiguredTimedEffect(option, stage);
             FinalizeStageEventState(stage, isRandomEvent);
             RefreshView();
+            var message = appliedOption == null
+                ? LocalizationManager.GetText(option.EmptyResultKey)
+                : LocalizationManager.GetText(option.ResultIntroKey) + "\n\n" + BuildMapSkillRewardToast(appliedOption, isEnglish);
+            if (appliedEffect != null)
+            {
+                message += "\n\n" + BuildEffectResultText(appliedEffect);
+            }
             ShowNodeRewardPopup(
                 LocalizationManager.GetText(option.ResultTitleKey),
-                appliedOption == null
-                    ? LocalizationManager.GetText(option.EmptyResultKey)
-                    : LocalizationManager.GetText(option.ResultIntroKey) + "\n\n" + BuildMapSkillRewardToast(appliedOption, isEnglish));
+                message);
         }
 
         private static List<EventOptionConfig> GetEventOptions(string profile)
@@ -629,6 +637,12 @@ namespace Wuxing.UI
                 lines.Add(GetUtilityActionText(option.UtilityAction));
             }
 
+            var effectPreview = BuildEffectPreviewText(option, stage);
+            if (!string.IsNullOrEmpty(effectPreview))
+            {
+                lines.Add(effectPreview);
+            }
+
             return BuildChoiceLabel(title, lines.ToArray());
         }
 
@@ -645,6 +659,50 @@ namespace Wuxing.UI
         private static int ResolveScaledValue(int baseValue, int perStage, int stage)
         {
             return Mathf.Max(0, baseValue + Mathf.Max(0, stage) * perStage);
+        }
+
+        private RunEffectData ApplyConfiguredTimedEffect(EventOptionConfig option, int stage)
+        {
+            if (option == null || string.IsNullOrEmpty(option.BuffType))
+            {
+                return null;
+            }
+
+            var value = ResolveScaledValue(option.BuffValueBase, option.BuffValuePerStage, stage);
+            var duration = Mathf.Max(0, option.BuffDurationMonths);
+            return GameProgressManager.AddTimedEffect(option.BuffType, value, duration, option.BuffTitleKey, option.BuffDescriptionKey);
+        }
+
+        private string BuildEffectPreviewText(EventOptionConfig option, int stage)
+        {
+            if (option == null || string.IsNullOrEmpty(option.BuffType) || string.IsNullOrEmpty(option.BuffDescriptionKey))
+            {
+                return string.Empty;
+            }
+
+            var value = ResolveScaledValue(option.BuffValueBase, option.BuffValuePerStage, stage);
+            var duration = Mathf.Max(0, option.BuffDurationMonths);
+            if (value <= 0 || duration <= 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Format(LocalizationManager.GetText(option.BuffDescriptionKey), duration, value);
+        }
+
+        private string BuildEffectResultText(RunEffectData effect)
+        {
+            if (effect == null)
+            {
+                return string.Empty;
+            }
+
+            if (string.IsNullOrEmpty(effect.TitleKey))
+            {
+                return string.Format(LocalizationManager.GetText(effect.DescriptionKey), effect.RemainingMonths, effect.Value);
+            }
+
+            return LocalizationManager.GetText(effect.TitleKey) + "\n" + string.Format(LocalizationManager.GetText(effect.DescriptionKey), effect.RemainingMonths, effect.Value);
         }
 
         private static string ParseRewardMode(string rawValue)
@@ -705,11 +763,11 @@ namespace Wuxing.UI
             }
         }
 
-        private void CompleteNodeRewardFlow(int stage, string title, string intro, BattleRewardResult reward, bool isRandomEvent)
+        private void CompleteNodeRewardFlow(int stage, string title, string intro, BattleRewardResult reward, RunEffectData appliedEffect, bool isRandomEvent)
         {
             FinalizeStageEventState(stage, isRandomEvent);
             RefreshView();
-            ShowNodeRewardPopup(title, BuildNodeRewardMessage(intro, reward, IsEnglish()));
+            ShowNodeRewardPopup(title, BuildNodeRewardMessage(intro, reward, appliedEffect, IsEnglish()));
         }
 
         private void FinalizeStageEventState(int stage, bool isRandomEvent)
@@ -784,7 +842,7 @@ namespace Wuxing.UI
                 option.ResultLevel);
         }
 
-        private string BuildNodeRewardMessage(string intro, BattleRewardResult reward, bool isEnglish)
+        private string BuildNodeRewardMessage(string intro, BattleRewardResult reward, RunEffectData appliedEffect, bool isEnglish)
         {
             if (reward == null)
             {
@@ -814,6 +872,13 @@ namespace Wuxing.UI
                 builder.Append('\n')
                     .Append(LocalizationManager.GetText("map.reward_levelup"))
                     .Append(reward.LevelsGained);
+            }
+
+            if (appliedEffect != null)
+            {
+                builder.Append('\n')
+                    .Append('\n')
+                    .Append(BuildEffectResultText(appliedEffect));
             }
 
             return builder.ToString();
@@ -1096,6 +1161,8 @@ namespace Wuxing.UI
                 .Append(LocalizationManager.GetText("map.profile_owned_equipment"))
                 .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
                 .Append('\n')
+                .Append(GameProgressManager.BuildActiveEffectsSummary(isEnglish))
+                .Append('\n')
                 .Append('\n')
                 .Append(GameProgressManager.BuildLastBattleSummary(isEnglish));
             return builder.ToString();
@@ -1140,13 +1207,3 @@ namespace Wuxing.UI
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
