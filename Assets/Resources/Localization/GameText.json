@@ -112,8 +112,8 @@
         },
         {
             "key": "battle.player_content",
-            "zhHans": "角色甲  HP 120/120\r\n角色乙  HP 150/150",
-            "en": "Unit A  HP 120/120\r\nUnit B  HP 150/150"
+            "zhHans": "角色甲  HP 120/120\n角色乙  HP 150/150",
+            "en": "Unit A  HP 120/120\nUnit B  HP 150/150"
         },
         {
             "key": "battle.enemy_team",
@@ -122,8 +122,8 @@
         },
         {
             "key": "battle.enemy_content",
-            "zhHans": "敌人甲  HP 100/100\r\n敌人乙  HP 90/90",
-            "en": "Enemy A  HP 100/100\r\nEnemy B  HP 90/90"
+            "zhHans": "敌人甲  HP 100/100\n敌人乙  HP 90/90",
+            "en": "Enemy A  HP 100/100\nEnemy B  HP 90/90"
         },
         {
             "key": "battle.equipment_title",
@@ -259,6 +259,16 @@
             "key": "battle.button_restart",
             "zhHans": "重开",
             "en": "Restart"
+        },
+        {
+            "key": "battle.button_review",
+            "zhHans": "回顾",
+            "en": "Review"
+        },
+        {
+            "key": "battle.button_open_result",
+            "zhHans": "打开结算窗口",
+            "en": "Open Result Window"
         },
         {
             "key": "battle.button_back",

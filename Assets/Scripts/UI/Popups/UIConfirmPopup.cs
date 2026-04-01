@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -84,7 +84,7 @@ namespace Wuxing.UI
             onConfirm = null;
             onCancel = null;
 
-            var count = choiceLabels != null ? Mathf.Clamp(choiceLabels.Count, 0, 3) : 0;
+            var count = choiceLabels != null ? Mathf.Clamp(choiceLabels.Count, 0, 4) : 0;
             EnsureChoiceButtonCount(count);
             for (var i = 0; i < choiceButtons.Count; i++)
             {
@@ -368,3 +368,4 @@ namespace Wuxing.UI
         }
     }
 }
+

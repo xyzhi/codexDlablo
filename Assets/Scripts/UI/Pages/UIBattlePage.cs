@@ -56,6 +56,9 @@ namespace Wuxing.UI
         private float sharedSelectionDetailHeight;
         private readonly List<Button> equipmentSelectionButtons = new List<Button>();
         private bool openedForEquipment;
+        private BattlePlaybackResult storedBattleResultPlayback;
+        private BattleRewardResult storedBattleResultReward;
+        private bool canReopenBattleResultPopup;
 
         public override void OnOpen(object data)
         {
@@ -79,10 +82,7 @@ namespace Wuxing.UI
                 return;
             }
 
-            SetBackButtonLabel(LocalizationManager.Instance != null
-                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
-                ? "Flee"
-                : "逃跑");
+            UpdateBackButtonStateLabel();
             StartCoroutine(AutoStartBattleNextFrame());
         }
 
@@ -261,6 +261,12 @@ namespace Wuxing.UI
                 return;
             }
 
+            if (CanReopenBattleResultPopup())
+            {
+                OpenStoredBattleResultPopup();
+                return;
+            }
+
             if (battlePlaybackCoroutine != null)
             {
                 StopCoroutine(battlePlaybackCoroutine);
@@ -305,6 +311,7 @@ namespace Wuxing.UI
 
         private void OnClickRestart()
         {
+            ClearStoredBattleResult();
             GameProgressManager.ResetRun();
             UIManager.Instance.ShowPage("MainMenu");
         }
@@ -422,6 +429,7 @@ namespace Wuxing.UI
                 battlePlaybackCoroutine = null;
             }
 
+            ClearStoredBattleResult();
             RefreshPreview();
         }
 
@@ -765,15 +773,13 @@ namespace Wuxing.UI
                 return;
             }
 
-            var isEnglish = LocalizationManager.Instance != null
-                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
             BattleRewardResult reward = null;
             if (playback.IsVictory)
             {
                 reward = GameProgressManager.GrantBattleRewards(GameProgressManager.GetCurrentStage());
                 GameProgressManager.PrepareSkillRewardOptions();
                 GameProgressManager.MarkCurrentStageCleared();
-                if (!string.IsNullOrEmpty(reward.DroppedEquipmentId))
+                if (reward != null && !string.IsNullOrEmpty(reward.DroppedEquipmentId))
                 {
                     preferredSelectionEquipmentId = reward.DroppedEquipmentId;
                     EnsureSelectionFocusFromPreferredEquipment();
@@ -781,33 +787,60 @@ namespace Wuxing.UI
             }
 
             GameProgressManager.RecordBattleResult(playback.IsVictory, GameProgressManager.GetCurrentStage(), playback.TotalRounds);
+            StoreBattleResult(playback, reward);
+            OpenStoredBattleResultPopup();
+        }
 
-            if (playback.IsVictory)
+        private void OpenStoredBattleResultPopup()
+        {
+            if (storedBattleResultPlayback == null || UIManager.Instance == null)
             {
-                ShowVictoryRewardChoicePopup(playback, reward, isEnglish);
                 return;
             }
 
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            canReopenBattleResultPopup = false;
+            UpdateBackButtonStateLabel();
+
+            if (storedBattleResultPlayback.IsVictory)
+            {
+                ShowVictoryRewardChoicePopup(storedBattleResultPlayback, storedBattleResultReward, isEnglish);
+                return;
+            }
+
+            ShowDefeatResultPopup(storedBattleResultPlayback, isEnglish);
+        }
+
+        private void ShowDefeatResultPopup(BattlePlaybackResult playback, bool isEnglish)
+        {
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
                 return;
             }
 
-            var message = BuildDefeatMessage(playback, isEnglish);
-
-            popup.Setup(
+            popup.SetupChoices(
                 LocalizationManager.GetText("battle.status_defeat"),
-                message,
-                false,
-                delegate
+                BuildDefeatMessage(playback, isEnglish),
+                new List<string>
                 {
-                    GameProgressManager.ResetRun();
-                    UIManager.Instance.ShowPage("MainMenu");
+                    isEnglish ? "Back To Main Menu" : "返回主界面",
+                    LocalizationManager.GetText("battle.button_review")
                 },
-                null,
-                isEnglish ? "Back To Main Menu" : "返回主界面",
-                null);
+                new List<System.Action>
+                {
+                    delegate
+                    {
+                        ClearStoredBattleResult();
+                        GameProgressManager.ResetRun();
+                        UIManager.Instance.ShowPage("MainMenu");
+                    },
+                    delegate
+                    {
+                        MarkBattleResultAsReviewable();
+                    }
+                });
         }
 
         private void ShowVictoryRewardChoicePopup(BattlePlaybackResult playback, BattleRewardResult reward, bool isEnglish)
@@ -815,6 +848,7 @@ namespace Wuxing.UI
             var options = GameProgressManager.GetPendingSkillRewardOptions();
             if (options.Count == 0)
             {
+                ClearStoredBattleResult();
                 HandlePostVictoryNavigation(isEnglish);
                 return;
             }
@@ -822,9 +856,11 @@ namespace Wuxing.UI
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
+                ClearStoredBattleResult();
                 HandlePostVictoryNavigation(isEnglish);
                 return;
             }
+
             var labels = new List<string>();
             var actions = new List<System.Action>();
             for (var i = 0; i < options.Count && i < 3; i++)
@@ -840,9 +876,16 @@ namespace Wuxing.UI
                         UIManager.Instance.ShowToast(BuildSkillRewardToast(appliedOption, isEnglish), 1.8f);
                     }
 
+                    ClearStoredBattleResult();
                     HandlePostVictoryNavigation(isEnglish);
                 });
             }
+
+            labels.Add(LocalizationManager.GetText("battle.button_review"));
+            actions.Add(delegate
+            {
+                MarkBattleResultAsReviewable();
+            });
 
             popup.SetupChoices(
                 BuildVictoryChoiceTitle(isEnglish),
@@ -851,8 +894,36 @@ namespace Wuxing.UI
                 actions);
         }
 
+        private void StoreBattleResult(BattlePlaybackResult playback, BattleRewardResult reward)
+        {
+            storedBattleResultPlayback = playback;
+            storedBattleResultReward = reward;
+            canReopenBattleResultPopup = false;
+            UpdateBackButtonStateLabel();
+        }
+
+        private void MarkBattleResultAsReviewable()
+        {
+            canReopenBattleResultPopup = storedBattleResultPlayback != null;
+            UpdateBackButtonStateLabel();
+        }
+
+        private bool CanReopenBattleResultPopup()
+        {
+            return !openedForEquipment && canReopenBattleResultPopup && storedBattleResultPlayback != null;
+        }
+
+        private void ClearStoredBattleResult()
+        {
+            storedBattleResultPlayback = null;
+            storedBattleResultReward = null;
+            canReopenBattleResultPopup = false;
+            UpdateBackButtonStateLabel();
+        }
+
         private void HandlePostVictoryNavigation(bool isEnglish)
         {
+            ClearStoredBattleResult();
             if (GameProgressManager.GetCurrentStage() >= GameProgressManager.GetMaxStage())
             {
                 var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
@@ -1139,15 +1210,34 @@ namespace Wuxing.UI
         private void OnLanguageChanged()
         {
             RefreshPreview();
-            SetBackButtonLabel(openedForEquipment
-                ? (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Back To Map" : "返回地图")
-                : (LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Flee" : "逃跑"));
+            UpdateBackButtonStateLabel();
 
             if (equipmentPanel != null && equipmentPanel.activeSelf)
             {
                 RefreshEquipmentPanel();
                 SetEquipmentPanelVisible(true);
             }
+        }
+
+        private void UpdateBackButtonStateLabel()
+        {
+            if (openedForEquipment)
+            {
+                SetBackButtonLabel(LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                    ? "Back To Map"
+                    : "返回地图");
+                return;
+            }
+
+            if (CanReopenBattleResultPopup())
+            {
+                SetBackButtonLabel(LocalizationManager.GetText("battle.button_open_result"));
+                return;
+            }
+
+            SetBackButtonLabel(LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English
+                ? "Flee"
+                : "逃跑");
         }
 
         private void SetBackButtonLabel(string text)
@@ -1604,6 +1694,9 @@ namespace Wuxing.UI
         }
     }
 }
+
+
+
 
 
 

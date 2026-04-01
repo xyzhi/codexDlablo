@@ -55,6 +55,8 @@ battle.status_defeat,战斗失败,Battle Defeat
 battle.result_rounds,总回合数,Total Rounds
 battle.button_start,开始战斗,Start Battle
 battle.button_restart,重开,Restart
+battle.button_review,回顾,Review
+battle.button_open_result,打开结算窗口,Open Result Window
 battle.button_back,返回主菜单,Back To Main Menu
 battle.button_tip,显示提示,Show Tip
 battle.button_close_log,关闭日志,Close Log
@@ -221,3 +223,4 @@ map.status_current_position,当前位置：第 {0} 关 · {1},Current Position: 
 map.button_previous,后退,Previous
 map.button_next,前进,Next
 map.button_skill_overview,已学功法,Run Skills
+
