@@ -1,144 +1,320 @@
 ﻿{
-    "skills": [
-        {
-            "Id": "SK001",
-            "Name": "金刃术",
-            "Element": "金",
-            "Quality": "普通",
-            "Category": "主动",
-            "TargetType": "SingleEnemy",
-            "MPCost": 15,
-            "Power": 22,
-            "Duration": 0,
-            "EffectType": "Damage",
-            "Description": "对单体敌人造成金属性伤害",
-            "Notes": "前中期单体主力;适合重复升级"
-        },
-        {
-            "Id": "SK002",
-            "Name": "火球术",
-            "Element": "火",
-            "Quality": "稀有",
-            "Category": "主动",
-            "TargetType": "AllEnemies",
-            "MPCost": 20,
-            "Power": 15,
-            "Duration": 0,
-            "EffectType": "Damage",
-            "Description": "对全体敌人造成火属性伤害",
-            "Notes": "群攻核心;数值压低避免全程超模"
-        },
-        {
-            "Id": "SK003",
-            "Name": "回春术",
-            "Element": "木",
-            "Quality": "普通",
-            "Category": "主动",
-            "TargetType": "SingleAlly",
-            "MPCost": 18,
-            "Power": 24,
-            "Duration": 0,
-            "EffectType": "Heal",
-            "Description": "恢复单体友方生命值",
-            "Notes": "前中期续航核心;适合稳定升级"
-        },
-        {
-            "Id": "SK004",
-            "Name": "藤缚术",
-            "Element": "木",
-            "Quality": "普通",
-            "Category": "主动",
-            "TargetType": "SingleEnemy",
-            "MPCost": 15,
-            "Power": 12,
-            "Duration": 2,
-            "EffectType": "Dot",
-            "Description": "对单体敌人施加持续伤害",
-            "Notes": "当前版本也需保证直观伤害不刮痧"
-        },
-        {
-            "Id": "SK005",
-            "Name": "冰针术",
-            "Element": "水",
-            "Quality": "稀有",
-            "Category": "主动",
-            "TargetType": "SingleEnemy",
-            "MPCost": 13,
-            "Power": 18,
-            "Duration": 1,
-            "EffectType": "Control",
-            "Description": "对单体敌人造成伤害并附带减速",
-            "Notes": "低费压制技能;升级收益稳定"
-        },
-        {
-            "Id": "SK006",
-            "Name": "岩甲术",
-            "Element": "土",
-            "Quality": "普通",
-            "Category": "主动",
-            "TargetType": "Self",
-            "MPCost": 12,
-            "Power": 22,
-            "Duration": 2,
-            "EffectType": "Shield",
-            "Description": "为自身附加护盾效果",
-            "Notes": "基础防御技能;前期保命价值更高"
-        },
-        {
-            "Id": "SK007",
-            "Name": "地脉震",
-            "Element": "土",
-            "Quality": "绝品",
-            "Category": "主动",
-            "TargetType": "AllEnemies",
-            "MPCost": 22,
-            "Power": 17,
-            "Duration": 0,
-            "EffectType": "Damage",
-            "Description": "对全体敌人造成土属性震荡伤害",
-            "Notes": "高品质群攻;后期成长空间大"
-        },
-        {
-            "Id": "SK008",
-            "Name": "焚心诀",
-            "Element": "火",
-            "Quality": "稀有",
-            "Category": "被动",
-            "TargetType": "Self",
-            "MPCost": 0,
-            "Power": 6,
-            "Duration": 2,
-            "EffectType": "DotBoost",
-            "Description": "提升灼烧类技能伤害",
-            "Notes": "被动占位;当前不进主动释放循环"
-        },
-        {
-            "Id": "SK009",
-            "Name": "凝水盾",
-            "Element": "水",
-            "Quality": "稀有",
-            "Category": "主动",
-            "TargetType": "Self",
-            "MPCost": 15,
-            "Power": 18,
-            "Duration": 2,
-            "EffectType": "Shield",
-            "Description": "为自身施加水盾并提升续航",
-            "Notes": "法系防御技能;中期保命强"
-        },
-        {
-            "Id": "SK010",
-            "Name": "破甲诀",
-            "Element": "金",
-            "Quality": "普通",
-            "Category": "主动",
-            "TargetType": "SingleEnemy",
-            "MPCost": 12,
-            "Power": 16,
-            "Duration": 2,
-            "EffectType": "Debuff",
-            "Description": "降低目标防御并补足伤害",
-            "Notes": "主角第二输出轴;用于中段补刀与续航过渡"
-        }
-    ]
+    "skills":  [
+                   {
+                       "Id":  "SK001",
+                       "Name":  "金刃术",
+                       "Element":  "金",
+                       "Quality":  "普通",
+                       "Category":  "主动",
+                       "TargetType":  "SingleEnemy",
+                       "MPCost":  15,
+                       "Power":  22,
+                       "Duration":  0,
+                       "EffectType":  "Damage",
+                       "Description":  "对单体敌人造成金属性伤害",
+                       "Notes":  "前中期单体主力;适合重复升级",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Damage",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  22,
+                                           "ValuePerLevel":  8,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "单体主力伤害"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK002",
+                       "Name":  "火球术",
+                       "Element":  "火",
+                       "Quality":  "稀有",
+                       "Category":  "主动",
+                       "TargetType":  "AllEnemies",
+                       "MPCost":  20,
+                       "Power":  15,
+                       "Duration":  0,
+                       "EffectType":  "Damage",
+                       "Description":  "对全体敌人造成火属性伤害",
+                       "Notes":  "群攻核心;数值压低避免全程超模",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Damage",
+                                           "TargetScope":  "AllEnemies",
+                                           "Value":  15,
+                                           "ValuePerLevel":  5,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "群体火伤"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK003",
+                       "Name":  "回春术",
+                       "Element":  "木",
+                       "Quality":  "普通",
+                       "Category":  "主动",
+                       "TargetType":  "SingleAlly",
+                       "MPCost":  18,
+                       "Power":  24,
+                       "Duration":  0,
+                       "EffectType":  "Heal",
+                       "Description":  "恢复单体友方生命值",
+                       "Notes":  "前中期续航核心;适合稳定升级",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Heal",
+                                           "TargetScope":  "SingleAlly",
+                                           "Value":  24,
+                                           "ValuePerLevel":  8,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "单体治疗"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK004",
+                       "Name":  "藤缚术",
+                       "Element":  "木",
+                       "Quality":  "普通",
+                       "Category":  "主动",
+                       "TargetType":  "SingleEnemy",
+                       "MPCost":  15,
+                       "Power":  12,
+                       "Duration":  2,
+                       "EffectType":  "Dot",
+                       "Description":  "对单体敌人施加持续伤害",
+                       "Notes":  "当前版本也需保证直观伤害不刮痧",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Dot",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  12,
+                                           "ValuePerLevel":  4,
+                                           "DurationRounds":  2,
+                                           "MaxStacks":  3,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "TurnStart",
+                                           "Notes":  "持续伤害"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK005",
+                       "Name":  "冰针术",
+                       "Element":  "水",
+                       "Quality":  "稀有",
+                       "Category":  "主动",
+                       "TargetType":  "SingleEnemy",
+                       "MPCost":  13,
+                       "Power":  18,
+                       "Duration":  1,
+                       "EffectType":  "Control",
+                       "Description":  "对单体敌人造成伤害并附带减速",
+                       "Notes":  "低费压制技能;升级收益稳定",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Damage",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  18,
+                                           "ValuePerLevel":  6,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "单体冰伤"
+                                       },
+                                       {
+                                           "EffectIndex":  2,
+                                           "EffectType":  "Control",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  1,
+                                           "ValuePerLevel":  0,
+                                           "DurationRounds":  1,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Control",
+                                           "Notes":  "冻结一回合"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK006",
+                       "Name":  "岩甲术",
+                       "Element":  "土",
+                       "Quality":  "普通",
+                       "Category":  "主动",
+                       "TargetType":  "Self",
+                       "MPCost":  12,
+                       "Power":  22,
+                       "Duration":  2,
+                       "EffectType":  "Shield",
+                       "Description":  "为自身附加护盾效果",
+                       "Notes":  "基础防御技能;前期保命价值更高",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Shield",
+                                           "TargetScope":  "Self",
+                                           "Value":  22,
+                                           "ValuePerLevel":  8,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "基础护盾"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK007",
+                       "Name":  "地脉震",
+                       "Element":  "土",
+                       "Quality":  "绝品",
+                       "Category":  "主动",
+                       "TargetType":  "AllEnemies",
+                       "MPCost":  22,
+                       "Power":  17,
+                       "Duration":  0,
+                       "EffectType":  "Damage",
+                       "Description":  "对全体敌人造成土属性震荡伤害",
+                       "Notes":  "高品质群攻;后期成长空间大",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Damage",
+                                           "TargetScope":  "AllEnemies",
+                                           "Value":  17,
+                                           "ValuePerLevel":  6,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "绝品群攻"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK008",
+                       "Name":  "焚心诀",
+                       "Element":  "火",
+                       "Quality":  "稀有",
+                       "Category":  "被动",
+                       "TargetType":  "Self",
+                       "MPCost":  0,
+                       "Power":  6,
+                       "Duration":  2,
+                       "EffectType":  "DotBoost",
+                       "Description":  "提升灼烧类技能伤害",
+                       "Notes":  "被动占位;当前不进主动释放循环",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "DotBoost",
+                                           "TargetScope":  "Self",
+                                           "Value":  6,
+                                           "ValuePerLevel":  2,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Passive",
+                                           "Notes":  "提升持续伤害"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK009",
+                       "Name":  "凝水盾",
+                       "Element":  "水",
+                       "Quality":  "稀有",
+                       "Category":  "主动",
+                       "TargetType":  "Self",
+                       "MPCost":  15,
+                       "Power":  18,
+                       "Duration":  2,
+                       "EffectType":  "Shield",
+                       "Description":  "为自身施加水盾并提升续航",
+                       "Notes":  "法系防御技能;中期保命强",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Shield",
+                                           "TargetScope":  "Self",
+                                           "Value":  18,
+                                           "ValuePerLevel":  6,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "水盾"
+                                       },
+                                       {
+                                           "EffectIndex":  2,
+                                           "EffectType":  "Hot",
+                                           "TargetScope":  "Self",
+                                           "Value":  8,
+                                           "ValuePerLevel":  2,
+                                           "DurationRounds":  2,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "TurnStart",
+                                           "Notes":  "持续恢复"
+                                       }
+                                   ]
+                   },
+                   {
+                       "Id":  "SK010",
+                       "Name":  "破甲诀",
+                       "Element":  "金",
+                       "Quality":  "普通",
+                       "Category":  "主动",
+                       "TargetType":  "SingleEnemy",
+                       "MPCost":  12,
+                       "Power":  16,
+                       "Duration":  2,
+                       "EffectType":  "Debuff",
+                       "Description":  "降低目标防御并补足伤害",
+                       "Notes":  "主角第二输出轴;用于中段补刀与续航过渡",
+                       "Effects":  [
+                                       {
+                                           "EffectIndex":  1,
+                                           "EffectType":  "Damage",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  16,
+                                           "ValuePerLevel":  6,
+                                           "DurationRounds":  0,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Instant",
+                                           "Notes":  "单体伤害"
+                                       },
+                                       {
+                                           "EffectIndex":  2,
+                                           "EffectType":  "ArmorBreak",
+                                           "TargetScope":  "SingleEnemy",
+                                           "Value":  4,
+                                           "ValuePerLevel":  1,
+                                           "DurationRounds":  2,
+                                           "MaxStacks":  1,
+                                           "StackRule":  "Refresh",
+                                           "TriggerTiming":  "Duration",
+                                           "Notes":  "降低防御"
+                                       }
+                                   ]
+                   }
+               ]
 }

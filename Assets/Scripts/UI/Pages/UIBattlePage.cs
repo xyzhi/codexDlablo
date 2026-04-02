@@ -14,6 +14,9 @@ namespace Wuxing.UI
     public class UIBattlePage : UIPage
     {
         private const float AutoStartDelaySeconds = UIMapPage.MapToastDuration;
+        private const string RoundDivider = "────────────";
+        private const string EndDivider = "════════════";
+        private const string ActionPrefix = "  ▸ ";
 
         [SerializeField] private GameObject battleLogOverlay;
         [SerializeField] private Button backButton;
@@ -59,6 +62,8 @@ namespace Wuxing.UI
         private BattlePlaybackResult storedBattleResultPlayback;
         private BattleRewardResult storedBattleResultReward;
         private bool canReopenBattleResultPopup;
+        private int displayedBattleRoundCount;
+        private int displayedBattleActionCount;
 
         public override void OnOpen(object data)
         {
@@ -401,6 +406,8 @@ namespace Wuxing.UI
         {
             SetButtonsInteractable(false);
             battleLogBuilder.Length = 0;
+            displayedBattleRoundCount = 0;
+            displayedBattleActionCount = 0;
             ResetLogFollow();
             ApplyStatus(LocalizationManager.GetText("battle.status_idle"));
             ApplyBattleLog(string.Empty);
@@ -409,7 +416,7 @@ namespace Wuxing.UI
             for (var i = 0; i < playback.Events.Count; i++)
             {
                 ApplyBattleEvent(playback.Events[i]);
-                yield return new WaitForSeconds(GetEventDelay(playback.Events[i].Type));
+                yield return new WaitForSeconds(GetEventDelay(playback.Events[i]));
             }
 
             ApplyStatus(playback.IsVictory
@@ -430,6 +437,8 @@ namespace Wuxing.UI
             }
 
             ClearStoredBattleResult();
+            displayedBattleRoundCount = 0;
+            displayedBattleActionCount = 0;
             RefreshPreview();
         }
 
@@ -643,7 +652,34 @@ namespace Wuxing.UI
             formattedLog = HighlightNumbers(formattedLog, battleEvent);
             formattedLog = HighlightKnownNames(formattedLog, battleEvent);
             formattedLog = HighlightSkillNames(formattedLog);
-            return "<color=" + color + ">" + formattedLog + "</color>";
+            formattedLog = HighlightBattleMoments(formattedLog, battleEvent);
+
+            if (battleEvent == null)
+            {
+                return "<color=" + color + ">" + formattedLog + "</color>";
+            }
+
+            if (battleEvent.Type == BattleEventType.RoundStart)
+            {
+                displayedBattleRoundCount++;
+                displayedBattleActionCount = 0;
+                return "<color=" + color + ">" + RoundDivider + "</color>\n"
+                    + "<b><color=" + color + ">" + formattedLog + "</color></b>\n"
+                    + "<color=#8E8270>R" + displayedBattleRoundCount + "</color>";
+            }
+
+            if (battleEvent.Type == BattleEventType.BattleEnd)
+            {
+                return "\n<color=" + color + ">" + EndDivider + "</color>\n"
+                    + "<b><color=" + color + ">" + formattedLog + "</color></b>\n"
+                    + "<color=" + color + ">" + EndDivider + "</color>";
+            }
+
+            displayedBattleActionCount++;
+            return "<color=#7B6B57>" + displayedBattleActionCount.ToString("00") + "</color> "
+                + GetActionTag(battleEvent)
+                + ActionPrefix
+                + "<color=" + color + ">" + formattedLog + "</color>";
         }
 
         private static string GetBattleLogColor(BattleEvent battleEvent)
@@ -663,6 +699,53 @@ namespace Wuxing.UI
                 default:
                     return "#F0E6D8";
             }
+        }
+
+        private static string GetActionTag(BattleEvent battleEvent)
+        {
+            if (battleEvent == null || battleEvent.Type != BattleEventType.Action)
+            {
+                return string.Empty;
+            }
+
+            var log = battleEvent.Log ?? string.Empty;
+            var fallenToken = LocalizationManager.GetText("battle.log_fallen");
+            var castsToken = LocalizationManager.GetText("battle.log_casts");
+            var attacksToken = LocalizationManager.GetText("battle.log_attacks");
+            var healsToken = LocalizationManager.GetText("battle.log_heals");
+            var steadiesToken = LocalizationManager.GetText("battle.log_steadies");
+
+            if (!string.IsNullOrEmpty(fallenToken) && log.Contains(fallenToken))
+            {
+                return "<color=#FF8D8D>[KO]</color>";
+            }
+
+            if (!string.IsNullOrEmpty(castsToken) && log.Contains(castsToken))
+            {
+                return "<color=#C9A7FF>[SKILL]</color>";
+            }
+
+            if (!string.IsNullOrEmpty(attacksToken) && log.Contains(attacksToken))
+            {
+                return "<color=#F6D28A>[ATK]</color>";
+            }
+
+            if (!string.IsNullOrEmpty(healsToken) && log.Contains(healsToken))
+            {
+                return "<color=#7EE0A1>[HEAL]</color>";
+            }
+
+            if (!string.IsNullOrEmpty(steadiesToken) && log.Contains(steadiesToken))
+            {
+                return "<color=#8FD3FF>[SHIELD]</color>";
+            }
+
+            if (log.Contains("MP +"))
+            {
+                return "<color=#7CB8FF>[MP]</color>";
+            }
+
+            return "<color=#AFA08D>[ACT]</color>";
         }
 
         private string HighlightKnownNames(string content, BattleEvent battleEvent)
@@ -697,6 +780,48 @@ namespace Wuxing.UI
                 return right.Length.CompareTo(left.Length);
             });
             return results;
+        }
+
+        private static string HighlightBattleMoments(string content, BattleEvent battleEvent)
+        {
+            if (string.IsNullOrEmpty(content) || battleEvent == null)
+            {
+                return content;
+            }
+
+            var fallenToken = LocalizationManager.GetText("battle.log_fallen");
+            var castsToken = LocalizationManager.GetText("battle.log_casts");
+            var attacksToken = LocalizationManager.GetText("battle.log_attacks");
+            var healsToken = LocalizationManager.GetText("battle.log_heals");
+            var steadiesToken = LocalizationManager.GetText("battle.log_steadies");
+
+            if (!string.IsNullOrEmpty(fallenToken))
+            {
+                content = content.Replace(fallenToken, "<b><color=#FF8D8D>" + fallenToken + "</color></b>");
+            }
+
+            if (!string.IsNullOrEmpty(castsToken))
+            {
+                content = content.Replace(castsToken, "<b><color=#C9A7FF>" + castsToken + "</color></b>");
+            }
+
+            if (!string.IsNullOrEmpty(attacksToken))
+            {
+                content = content.Replace(attacksToken, "<b><color=#F6D28A>" + attacksToken + "</color></b>");
+            }
+
+            if (!string.IsNullOrEmpty(healsToken))
+            {
+                content = content.Replace(healsToken, "<b><color=#7EE0A1>" + healsToken + "</color></b>");
+            }
+
+            if (!string.IsNullOrEmpty(steadiesToken))
+            {
+                content = content.Replace(steadiesToken, "<b><color=#8FD3FF>" + steadiesToken + "</color></b>");
+            }
+
+            content = content.Replace("MP +", "<b><color=#7CB8FF>MP +</color></b>");
+            return content;
         }
 
         private static void CollectNamesFromSummary(List<string> results, string summary)
@@ -1006,26 +1131,12 @@ namespace Wuxing.UI
 
         private static string BuildSkillRewardOptionText(SkillRewardOption option, bool isEnglish)
         {
-            if (option == null)
-            {
-                return isEnglish ? "No reward option." : "没有可选奖励。";
-            }
-
-            return isEnglish
-                ? "Target: " + option.CharacterName + "\nSkill: " + option.SkillName + " " + BuildQualityLabel(option, true) + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\nEffect: " + option.SkillDescription
-                : "角色：" + option.CharacterName + "\n功法：" + option.SkillName + " " + BuildQualityLabel(option, false) + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n效果：" + option.SkillDescription;
+            return GameProgressManager.BuildSkillRewardDetail(option, isEnglish);
         }
 
         private static string BuildSkillRewardChoiceLabel(SkillRewardOption option, bool isEnglish)
         {
-            if (option == null)
-            {
-                return isEnglish ? "Empty" : "空白奖励";
-            }
-
-            return isEnglish
-                ? "Reward\n" + option.SkillName + "  " + BuildQualityLabel(option, true) + "\n\nTarget: " + option.CharacterName + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\n" + option.SkillDescription
-                : "功法机缘\n" + option.SkillName + "  " + BuildQualityLabel(option, false) + "\n\n角色：" + option.CharacterName + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n" + option.SkillDescription;
+            return GameProgressManager.BuildSkillRewardChoiceText(option, isEnglish);
         }
 
         private static string BuildSkillRewardToast(SkillRewardOption option, bool isEnglish)
@@ -1038,24 +1149,6 @@ namespace Wuxing.UI
             return isEnglish
                 ? option.CharacterName + (option.IsUpgrade ? " upgraded " : " learned ") + option.SkillName + " to Lv." + option.ResultLevel + "."
                 : option.CharacterName + (option.IsUpgrade ? " 将 " : " 学会了 ") + option.SkillName + (option.IsUpgrade ? " 提升至 Lv." + option.ResultLevel + "。" : "。");
-        }
-
-        private static string BuildQualityLabel(SkillRewardOption option, bool isEnglish)
-        {
-            if (option == null || string.IsNullOrEmpty(option.SkillQuality))
-            {
-                return isEnglish ? "[Common]" : "[普通]";
-            }
-
-            switch (option.SkillQuality)
-            {
-                case "绝品":
-                    return isEnglish ? "[Epic]" : "[绝品]";
-                case "稀有":
-                    return isEnglish ? "[Rare]" : "[稀有]";
-                default:
-                    return isEnglish ? "[Common]" : "[普通]";
-            }
         }
 
         private static string BuildRewardSummary(BattleRewardResult reward, bool isEnglish)
@@ -1254,17 +1347,48 @@ namespace Wuxing.UI
             }
         }
 
-        private static float GetEventDelay(BattleEventType eventType)
+        private static float GetEventDelay(BattleEvent battleEvent)
         {
-            switch (eventType)
+            if (battleEvent == null)
+            {
+                return 0.18f;
+            }
+
+            switch (battleEvent.Type)
             {
                 case BattleEventType.RoundStart:
-                    return 0.16f;
+                    return 0.42f;
                 case BattleEventType.BattleEnd:
-                    return 0.22f;
+                    return 0.72f;
                 case BattleEventType.Action:
                 default:
-                    return 0.08f;
+                    var log = battleEvent.Log ?? string.Empty;
+                    var fallenToken = LocalizationManager.GetText("battle.log_fallen");
+                    var castsToken = LocalizationManager.GetText("battle.log_casts");
+                    var healsToken = LocalizationManager.GetText("battle.log_heals");
+                    var steadiesToken = LocalizationManager.GetText("battle.log_steadies");
+
+                    if (!string.IsNullOrEmpty(fallenToken) && log.Contains(fallenToken))
+                    {
+                        return 0.42f;
+                    }
+
+                    if (!string.IsNullOrEmpty(castsToken) && log.Contains(castsToken))
+                    {
+                        return 0.28f;
+                    }
+
+                    if (!string.IsNullOrEmpty(healsToken) && log.Contains(healsToken))
+                    {
+                        return 0.24f;
+                    }
+
+                    if (!string.IsNullOrEmpty(steadiesToken) && log.Contains(steadiesToken))
+                    {
+                        return 0.24f;
+                    }
+
+                    return 0.18f;
             }
         }
 

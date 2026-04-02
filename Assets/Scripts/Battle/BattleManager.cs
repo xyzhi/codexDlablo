@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Wuxing.Config;
@@ -27,8 +28,6 @@ namespace Wuxing.Battle
         private static readonly string[] EquipmentSlots = { "Weapon", "Armor", "Accessory" };
         private const string EquipmentPresetPrefKey = "battle.equipment.preset";
         private const string EquipmentOverridePrefKey = "battle.equipment.overrides";
-        private const float TestDamageMultiplier = 2.4f;
-        private const int TestFlatDamageBonus = 8;
         private static int playerEquipmentPresetIndex;
         private static readonly Dictionary<string, Dictionary<string, string>> PlayerEquipmentOverrides = new Dictionary<string, Dictionary<string, string>>();
         private static bool equipmentSettingsLoaded;
@@ -356,10 +355,11 @@ namespace Wuxing.Battle
                 return LocalizationManager.GetText("battle.summary_no_data");
             }
 
+            var enemyIds = GetConfiguredEnemyIds();
             var builder = new StringBuilder();
-            for (var i = 0; i < DefaultEnemyIds.Length; i++)
+            for (var i = 0; i < enemyIds.Length; i++)
             {
-                var config = database.GetById(DefaultEnemyIds[i]);
+                var config = database.GetById(enemyIds[i]);
                 if (config == null)
                 {
                     continue;
@@ -741,7 +741,6 @@ namespace Wuxing.Battle
                     ApplyRunLearnedSkills(unit);
                     ApplyDefaultEquipment(unit, equipmentDatabase, loadout);
                     ApplyCultivationScaling(unit);
-                    ApplyEarlyStagePlayerSupport(unit, stage);
                     team.Units.Add(unit);
                 }
             }
@@ -764,12 +763,19 @@ namespace Wuxing.Battle
         {
             var team = new BattleTeamRuntime();
             var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
-            for (var i = 0; i < DefaultEnemyIds.Length; i++)
+            var encounter = GetCurrentEnemyEncounter();
+            var enemyIds = GetConfiguredEnemyIds(encounter);
+            for (var i = 0; i < enemyIds.Length; i++)
             {
-                var config = database.GetById(DefaultEnemyIds[i]);
+                var config = database.GetById(enemyIds[i]);
                 if (config != null)
                 {
                     var unit = BattleUnitRuntime.FromEnemy(config);
+                    if (encounter != null && !string.IsNullOrEmpty(encounter.OverrideElement))
+                    {
+                        unit.BattleElement = NormalizeBattleElement(encounter.OverrideElement);
+                    }
+
                     ApplyEnemyEquipmentByStage(unit, equipmentDatabase, stage);
                     ApplyStageScaling(unit, stage);
                     team.Units.Add(unit);
@@ -777,6 +783,85 @@ namespace Wuxing.Battle
             }
 
             return team;
+        }
+
+        private static string[] GetConfiguredEnemyIds()
+        {
+            return GetConfiguredEnemyIds(GetCurrentEnemyEncounter());
+        }
+
+        private static string[] GetConfiguredEnemyIds(EnemyEncounterConfig encounter)
+        {
+            if (encounter == null || string.IsNullOrWhiteSpace(encounter.EnemyIds))
+            {
+                return DefaultEnemyIds;
+            }
+
+            var tokens = encounter.EnemyIds.Split('|');
+            var ids = new List<string>();
+            for (var i = 0; i < tokens.Length; i++)
+            {
+                var enemyId = tokens[i].Trim();
+                if (!string.IsNullOrEmpty(enemyId))
+                {
+                    ids.Add(enemyId);
+                }
+            }
+
+            return ids.Count > 0 ? ids.ToArray() : DefaultEnemyIds;
+        }
+
+        private static EnemyEncounterConfig GetCurrentEnemyEncounter()
+        {
+            var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+            var stageNodeDatabase = StageNodeDatabaseLoader.Load();
+            var encounterDatabase = EnemyEncounterDatabaseLoader.Load();
+            if (stageNodeDatabase == null || encounterDatabase == null || encounterDatabase.Encounters == null)
+            {
+                return null;
+            }
+
+            var stageNode = stageNodeDatabase.GetByStage(stage);
+            var nodeType = stageNode != null ? stageNode.NodeType : "Battle";
+            var matches = new List<EnemyEncounterConfig>();
+            var totalWeight = 0;
+            for (var i = 0; i < encounterDatabase.Encounters.Count; i++)
+            {
+                var encounter = encounterDatabase.Encounters[i];
+                if (encounter == null
+                    || stage < encounter.StageFrom
+                    || stage > encounter.StageTo
+                    || !string.Equals(encounter.NodeType, nodeType, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                matches.Add(encounter);
+                totalWeight += Mathf.Max(1, encounter.Weight);
+            }
+
+            if (matches.Count <= 0)
+            {
+                return null;
+            }
+
+            if (matches.Count == 1)
+            {
+                return matches[0];
+            }
+
+            var roll = UnityEngine.Random.Range(0, Mathf.Max(1, totalWeight));
+            var cursor = 0;
+            for (var i = 0; i < matches.Count; i++)
+            {
+                cursor += Mathf.Max(1, matches[i].Weight);
+                if (roll < cursor)
+                {
+                    return matches[i];
+                }
+            }
+
+            return matches[0];
         }
 
         private static void ApplyDefaultEquipment(
@@ -909,26 +994,6 @@ namespace Wuxing.Battle
                 }
             }
         }
-        private static void ApplyEarlyStagePlayerSupport(BattleUnitRuntime unit, int stage)
-        {
-            if (unit == null)
-            {
-                return;
-            }
-
-            var config = GetStageBalance(stage);
-            if (config != null)
-            {
-                ApplyStatBonus(unit, config.PlayerHPBonus, config.PlayerATKBonus, config.PlayerDEFBonus, config.PlayerMPBonus);
-                return;
-            }
-
-            if (stage == 1)
-            {
-                ApplyStatBonus(unit, 20, 3, 2, 0);
-            }
-        }
-
         private static StageBalanceConfig GetStageBalance(int stage)
         {
             var database = StageBalanceDatabaseLoader.Load();
@@ -1331,10 +1396,24 @@ namespace Wuxing.Battle
                     continue;
                 }
 
+                ResolvePeriodicStatusEffects(actor, playerTeam, enemyTeam, events);
+                if (actor.IsDead)
+                {
+                    continue;
+                }
+
                 var target = targetTeam.GetFirstAlive();
                 if (target == null)
                 {
                     return;
+                }
+
+                if (actor.ConsumeControlTurn())
+                {
+                    AddEvent(events, BattleEventType.Action, actor.Name + " 本回合被控制，无法行动。", playerTeam, enemyTeam);
+                    actor.TickDurationStatusEffects();
+                    actor.CleanupExpiredStatusEffects();
+                    continue;
                 }
 
                 var skill = GetFirstCastableSkill(actor, skillDatabase);
@@ -1346,9 +1425,49 @@ namespace Wuxing.Battle
                 {
                     ResolveBasicAttack(actor, target, playerTeam, enemyTeam, events);
                 }
+
+                actor.TickDurationStatusEffects();
+                actor.CleanupExpiredStatusEffects();
             }
         }
 
+        private static void ResolvePeriodicStatusEffects(
+            BattleUnitRuntime actor,
+            BattleTeamRuntime playerTeam,
+            BattleTeamRuntime enemyTeam,
+            List<BattleEvent> events)
+        {
+            if (actor == null || actor.StatusEffects == null || actor.StatusEffects.Count == 0)
+            {
+                return;
+            }
+
+            for (var i = actor.StatusEffects.Count - 1; i >= 0; i--)
+            {
+                var effect = actor.StatusEffects[i];
+                if (effect == null || effect.RemainingRounds <= 0)
+                {
+                    continue;
+                }
+
+                if (string.Equals(effect.EffectType, "Dot", StringComparison.OrdinalIgnoreCase))
+                {
+                    var damage = CalculateFinalDamage(null, actor, effect.GetTotalValue());
+                    ApplyDamage(actor, damage);
+                    AddEvent(events, BattleEventType.Action, actor.Name + " 受到持续伤害 " + damage + "。", playerTeam, enemyTeam);
+                    AddDeathEventIfNeeded(events, actor, playerTeam, enemyTeam);
+                }
+                else if (string.Equals(effect.EffectType, "Hot", StringComparison.OrdinalIgnoreCase))
+                {
+                    var heal = Mathf.Max(1, effect.GetTotalValue());
+                    actor.CurrentHP = Clamp(actor.CurrentHP + heal, 0, actor.MaxHP);
+                    AddEvent(events, BattleEventType.Action, actor.Name + " 恢复生命 " + heal + "。", playerTeam, enemyTeam);
+                }
+            }
+
+            actor.TickPeriodicStatusEffects("TurnStart");
+            actor.CleanupExpiredStatusEffects();
+        }
         private static SkillConfig GetFirstCastableSkill(BattleUnitRuntime actor, SkillDatabase skillDatabase)
         {
             for (var i = 0; i < actor.SkillIds.Count; i++)
@@ -1370,8 +1489,9 @@ namespace Wuxing.Battle
                 return false;
             }
 
-            return skill.Category == "Passive"
-                || skill.EffectType == "DotBoost";
+            return string.Equals(skill.Category, "被动", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(skill.Category, "Passive", StringComparison.OrdinalIgnoreCase)
+                || GetSkillEffects(skill).Exists(effect => string.Equals(effect.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase));
         }
 
         private static void ResolveSkill(
@@ -1384,89 +1504,19 @@ namespace Wuxing.Battle
             SkillConfig skill,
             List<BattleEvent> events)
         {
-            actor.CurrentMP -= skill.MPCost;
-
-            if (skill.EffectType == "Heal")
-            {
-                var ally = actingTeam.GetFirstAlive();
-                if (ally == null)
-                {
-                    return;
-                }
-
-                var healValue = GetScaledSkillPower(actor, skill);
-                ally.CurrentHP = Clamp(ally.CurrentHP + healValue, 0, ally.MaxHP);
-                AddEvent(
-                    events,
-                    BattleEventType.Action,
-                    actor.Name + " " + LocalizationManager.GetText("battle.log_casts") + " " + skill.Name + ", " +
-                    LocalizationManager.GetText("battle.log_heals") + " " + ally.Name + " " +
-                    LocalizationManager.GetText("battle.log_for") + " " + healValue + ".",
-                    playerTeam,
-                    enemyTeam);
-                return;
-            }
-
-            if (skill.TargetType == "AllEnemies")
-            {
-                AddEvent(
-                    events,
-                    BattleEventType.Action,
-                    actor.Name + " " + LocalizationManager.GetText("battle.log_casts") + " " + skill.Name + ".",
-                    playerTeam,
-                    enemyTeam);
-
-                for (var i = 0; i < targetTeam.Units.Count; i++)
-                {
-                    var target = targetTeam.Units[i];
-                    if (target.IsDead)
-                    {
-                        continue;
-                    }
-
-                    var damage = CalculateSkillDamage(actor, target, skill);
-                    target.CurrentHP = Clamp(target.CurrentHP - damage, 0, target.MaxHP);
-                    AddEvent(
-                        events,
-                        BattleEventType.Action,
-                        target.Name + " " + LocalizationManager.GetText("battle.log_takes") + " " + damage + " " +
-                        LocalizationManager.GetText("battle.log_damage") + ".",
-                        playerTeam,
-                        enemyTeam);
-
-                    AddDeathEventIfNeeded(events, target, playerTeam, enemyTeam);
-                }
-
-                return;
-            }
-
-            if (skill.EffectType == "Shield")
-            {
-                var shieldGain = GetScaledSkillPower(actor, skill);
-                actor.CurrentHP = Clamp(actor.CurrentHP + shieldGain, 0, actor.MaxHP);
-                AddEvent(
-                    events,
-                    BattleEventType.Action,
-                    actor.Name + " " + LocalizationManager.GetText("battle.log_casts") + " " + skill.Name + ", " +
-                    LocalizationManager.GetText("battle.log_steadies") + " " +
-                    LocalizationManager.GetText("battle.log_for") + " " + shieldGain + ".",
-                    playerTeam,
-                    enemyTeam);
-                return;
-            }
-
-            var singleDamage = CalculateSkillDamage(actor, defaultTarget, skill);
-            defaultTarget.CurrentHP = Clamp(defaultTarget.CurrentHP - singleDamage, 0, defaultTarget.MaxHP);
+            actor.CurrentMP = Clamp(actor.CurrentMP - skill.MPCost, 0, actor.MaxMP);
             AddEvent(
                 events,
                 BattleEventType.Action,
-                actor.Name + " " + LocalizationManager.GetText("battle.log_casts") + " " + skill.Name + " " +
-                LocalizationManager.GetText("battle.log_on") + " " + defaultTarget.Name + " " +
-                LocalizationManager.GetText("battle.log_for") + " " + singleDamage + " " +
-                LocalizationManager.GetText("battle.log_damage") + ".",
+                actor.Name + " " + LocalizationManager.GetText("battle.log_casts") + " " + skill.Name + ".",
                 playerTeam,
                 enemyTeam);
-            AddDeathEventIfNeeded(events, defaultTarget, playerTeam, enemyTeam);
+
+            var effects = GetSkillEffects(skill);
+            for (var i = 0; i < effects.Count; i++)
+            {
+                ApplyConfiguredEffect(actor, actingTeam, targetTeam, playerTeam, enemyTeam, defaultTarget, skill, effects[i], events);
+            }
         }
 
         private static void ResolveBasicAttack(
@@ -1476,8 +1526,8 @@ namespace Wuxing.Battle
             BattleTeamRuntime enemyTeam,
             List<BattleEvent> events)
         {
-            var damage = ScaleDamage(actor.ATK - target.DEF);
-            target.CurrentHP = Clamp(target.CurrentHP - damage, 0, target.MaxHP);
+            var damage = CalculateBasicAttackDamage(actor, target);
+            ApplyDamage(target, damage);
             actor.CurrentMP = Clamp(actor.CurrentMP + 5, 0, actor.MaxMP);
             AddEvent(
                 events,
@@ -1490,28 +1540,407 @@ namespace Wuxing.Battle
             AddDeathEventIfNeeded(events, target, playerTeam, enemyTeam);
         }
 
-        private static int CalculateSkillDamage(BattleUnitRuntime actor, BattleUnitRuntime target, SkillConfig skill)
+        private static int CalculateBasicAttackDamage(BattleUnitRuntime actor, BattleUnitRuntime target)
         {
-            var rawDamage = actor.ATK + GetScaledSkillPower(actor, skill) - target.DEF;
-            return ScaleDamage(rawDamage);
+            var rawDamage = GetEffectiveAttack(actor) - GetEffectiveDefense(target);
+            return CalculateFinalDamage(actor, target, rawDamage);
         }
 
-        private static int GetScaledSkillPower(BattleUnitRuntime actor, SkillConfig skill)
+        private static int CalculateEffectDamage(BattleUnitRuntime actor, BattleUnitRuntime target, SkillConfig skill, SkillEffectConfig effect)
         {
-            if (skill == null)
+            var rawDamage = GetEffectiveAttack(actor) + GetScaledEffectValue(actor, skill, effect) - GetEffectiveDefense(target);
+            return CalculateFinalDamage(actor, target, rawDamage);
+        }
+
+        private static int CalculateFinalDamage(BattleUnitRuntime actor, BattleUnitRuntime target, int rawDamage)
+        {
+            var scaledDamage = ScaleDamage(rawDamage);
+            var vulnerableBonus = target != null ? Mathf.Max(0, target.GetStatusTotalValue("Vulnerable")) : 0;
+            var formula = GetBattleFormula();
+            var vulnerableMultiplier = 1f + vulnerableBonus * formula.VulnerablePerPoint;
+            var elementMultiplier = GetElementMultiplier(actor, target);
+            return Mathf.Max(Mathf.RoundToInt(formula.MinDamage), Mathf.RoundToInt(scaledDamage * vulnerableMultiplier * elementMultiplier));
+        }
+
+        private static int GetScaledEffectValue(BattleUnitRuntime actor, SkillConfig skill, SkillEffectConfig effect)
+        {
+            if (skill == null || effect == null)
             {
                 return 0;
             }
 
             var level = actor != null ? actor.GetSkillLevel(skill.Id) : 1;
-            var bonusMultiplier = 1f + Mathf.Max(0, level - 1) * 0.35f;
-            return Mathf.Max(1, Mathf.RoundToInt(skill.Power * bonusMultiplier));
+            return Mathf.Max(0, effect.Value + Mathf.Max(0, level - 1) * effect.ValuePerLevel);
         }
 
+        private static int GetEffectiveAttack(BattleUnitRuntime unit)
+        {
+            if (unit == null)
+            {
+                return 0;
+            }
+
+            return Mathf.Max(1, unit.ATK + unit.GetStatusTotalValue("AttackUp"));
+        }
+
+        private static int GetEffectiveDefense(BattleUnitRuntime unit)
+        {
+            if (unit == null)
+            {
+                return 0;
+            }
+
+            var defense = unit.DEF + unit.GetStatusTotalValue("DefenseUp") - unit.GetStatusTotalValue("ArmorBreak");
+            var formula = GetBattleFormula();
+            return Mathf.Max(0, Mathf.RoundToInt(defense * formula.DefenseMitigationFactor));
+        }
+        private static List<SkillEffectConfig> GetSkillEffects(SkillConfig skill)
+        {
+            if (skill == null)
+            {
+                return new List<SkillEffectConfig>();
+            }
+
+            if (skill.Effects != null && skill.Effects.Count > 0)
+            {
+                return skill.Effects;
+            }
+
+            return BuildLegacySkillEffects(skill);
+        }
+
+        private static List<SkillEffectConfig> BuildLegacySkillEffects(SkillConfig skill)
+        {
+            var results = new List<SkillEffectConfig>();
+            if (skill == null || string.IsNullOrEmpty(skill.EffectType))
+            {
+                return results;
+            }
+
+            results.Add(new SkillEffectConfig
+            {
+                EffectIndex = 1,
+                EffectType = skill.EffectType,
+                TargetScope = string.IsNullOrEmpty(skill.TargetType) ? "Default" : skill.TargetType,
+                Value = skill.Power,
+                ValuePerLevel = Mathf.Max(1, Mathf.RoundToInt(skill.Power * 0.35f)),
+                DurationRounds = skill.Duration,
+                MaxStacks = 1,
+                StackRule = "Refresh",
+                TriggerTiming = ResolveLegacyTriggerTiming(skill.EffectType)
+            });
+            return results;
+        }
+
+        private static string ResolveLegacyTriggerTiming(string effectType)
+        {
+            if (string.Equals(effectType, "Dot", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(effectType, "Hot", StringComparison.OrdinalIgnoreCase))
+            {
+                return "TurnStart";
+            }
+
+            if (string.Equals(effectType, "DotBoost", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Passive";
+            }
+
+            if (string.Equals(effectType, "Control", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Control";
+            }
+
+            if (string.Equals(effectType, "ArmorBreak", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(effectType, "Vulnerable", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(effectType, "AttackUp", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(effectType, "DefenseUp", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Duration";
+            }
+
+            return "Instant";
+        }
+
+        private static void ApplyConfiguredEffect(
+            BattleUnitRuntime actor,
+            BattleTeamRuntime actingTeam,
+            BattleTeamRuntime targetTeam,
+            BattleTeamRuntime playerTeam,
+            BattleTeamRuntime enemyTeam,
+            BattleUnitRuntime defaultTarget,
+            SkillConfig skill,
+            SkillEffectConfig effect,
+            List<BattleEvent> events)
+        {
+            if (effect == null)
+            {
+                return;
+            }
+
+            var targets = ResolveTargets(actor, actingTeam, targetTeam, defaultTarget, effect);
+            for (var i = 0; i < targets.Count; i++)
+            {
+                var target = targets[i];
+                if (target == null || target.IsDead)
+                {
+                    continue;
+                }
+
+                ApplyConfiguredEffectToTarget(actor, playerTeam, enemyTeam, skill, effect, target, events);
+            }
+        }
+
+        private static void ApplyConfiguredEffectToTarget(
+            BattleUnitRuntime actor,
+            BattleTeamRuntime playerTeam,
+            BattleTeamRuntime enemyTeam,
+            SkillConfig skill,
+            SkillEffectConfig effect,
+            BattleUnitRuntime target,
+            List<BattleEvent> events)
+        {
+            var effectType = effect.EffectType ?? string.Empty;
+            var scaledValue = GetScaledEffectValue(actor, skill, effect);
+
+            if (string.Equals(effectType, "Damage", StringComparison.OrdinalIgnoreCase))
+            {
+                var damage = CalculateEffectDamage(actor, target, skill, effect);
+                ApplyDamage(target, damage);
+                AddEvent(events, BattleEventType.Action, target.Name + " " + LocalizationManager.GetText("battle.log_takes") + " " + damage + " " + LocalizationManager.GetText("battle.log_damage") + ".", playerTeam, enemyTeam);
+                AddDeathEventIfNeeded(events, target, playerTeam, enemyTeam);
+                return;
+            }
+
+            if (string.Equals(effectType, "Heal", StringComparison.OrdinalIgnoreCase))
+            {
+                var healValue = Mathf.Max(1, scaledValue);
+                target.CurrentHP = Clamp(target.CurrentHP + healValue, 0, target.MaxHP);
+                AddEvent(events, BattleEventType.Action, LocalizationManager.GetText("battle.log_heals") + " " + target.Name + " " + LocalizationManager.GetText("battle.log_for") + " " + healValue + ".", playerTeam, enemyTeam);
+                return;
+            }
+
+            if (string.Equals(effectType, "Shield", StringComparison.OrdinalIgnoreCase))
+            {
+                var shieldGain = Mathf.Max(1, scaledValue);
+                target.ApplyShield(shieldGain);
+                AddEvent(events, BattleEventType.Action, target.Name + " " + LocalizationManager.GetText("battle.log_steadies") + " " + LocalizationManager.GetText("battle.log_for") + " " + shieldGain + ".", playerTeam, enemyTeam);
+                return;
+            }
+
+            if (string.Equals(effectType, "ManaGain", StringComparison.OrdinalIgnoreCase))
+            {
+                var gain = Mathf.Max(1, scaledValue);
+                target.CurrentMP = Clamp(target.CurrentMP + gain, 0, target.MaxMP);
+                AddEvent(events, BattleEventType.Action, target.Name + " MP +" + gain + ".", playerTeam, enemyTeam);
+                return;
+            }
+
+            if (string.Equals(effectType, "Dot", StringComparison.OrdinalIgnoreCase))
+            {
+                scaledValue = ApplyDotPassiveBonus(actor, scaledValue);
+            }
+
+            target.AddStatusEffect(new BattleStatusEffectRuntime
+            {
+                EffectType = effectType,
+                Value = Mathf.Max(1, scaledValue),
+                RemainingRounds = Mathf.Max(1, effect.DurationRounds),
+                MaxStacks = Mathf.Max(1, effect.MaxStacks),
+                StackCount = 1,
+                StackRule = string.IsNullOrEmpty(effect.StackRule) ? "Refresh" : effect.StackRule,
+                TriggerTiming = string.IsNullOrEmpty(effect.TriggerTiming) ? ResolveLegacyTriggerTiming(effectType) : effect.TriggerTiming,
+                SourceSkillId = skill != null ? skill.Id : string.Empty
+            });
+
+            AddEvent(events, BattleEventType.Action, BuildStatusLog(target, effectType, Mathf.Max(1, scaledValue), Mathf.Max(1, effect.DurationRounds)), playerTeam, enemyTeam);
+        }
+
+        private static int ApplyDotPassiveBonus(BattleUnitRuntime actor, int value)
+        {
+            if (actor == null)
+            {
+                return Mathf.Max(1, value);
+            }
+
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (skillDatabase == null)
+            {
+                return Mathf.Max(1, value);
+            }
+
+            var bonus = 0;
+            for (var i = 0; i < actor.SkillIds.Count; i++)
+            {
+                var skill = skillDatabase.GetById(actor.SkillIds[i]);
+                if (!IsPassiveSkill(skill))
+                {
+                    continue;
+                }
+
+                var passiveEffects = GetSkillEffects(skill);
+                for (var j = 0; j < passiveEffects.Count; j++)
+                {
+                    var effect = passiveEffects[j];
+                    if (effect != null && string.Equals(effect.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase))
+                    {
+                        bonus += GetScaledEffectValue(actor, skill, effect);
+                    }
+                }
+            }
+
+            return Mathf.Max(1, Mathf.RoundToInt(value * (1f + bonus / 100f)));
+        }
+
+        private static string BuildStatusLog(BattleUnitRuntime target, string effectType, int value, int duration)
+        {
+            if (string.Equals(effectType, "Dot", StringComparison.OrdinalIgnoreCase))
+            {
+                return target.Name + " 陷入持续伤害，持续 " + duration + " 回合。";
+            }
+
+            if (string.Equals(effectType, "Hot", StringComparison.OrdinalIgnoreCase))
+            {
+                return target.Name + " 获得持续恢复，持续 " + duration + " 回合。";
+            }
+
+            if (string.Equals(effectType, "Control", StringComparison.OrdinalIgnoreCase))
+            {
+                return target.Name + " 被控制，接下来将失去行动。";
+            }
+
+            if (string.Equals(effectType, "ArmorBreak", StringComparison.OrdinalIgnoreCase))
+            {
+                return target.Name + " 防御下降 " + value + "，持续 " + duration + " 回合。";
+            }
+
+            return target.Name + " 获得状态效果。";
+        }
+
+        private static List<BattleUnitRuntime> ResolveTargets(
+            BattleUnitRuntime actor,
+            BattleTeamRuntime actingTeam,
+            BattleTeamRuntime targetTeam,
+            BattleUnitRuntime defaultTarget,
+            SkillEffectConfig effect)
+        {
+            var results = new List<BattleUnitRuntime>();
+            var scope = effect != null && !string.IsNullOrEmpty(effect.TargetScope) ? effect.TargetScope : "Default";
+
+            switch (scope)
+            {
+                case "Self":
+                    results.Add(actor);
+                    break;
+                case "SingleAlly":
+                    results.Add(actingTeam.GetFirstAlive());
+                    break;
+                case "AllAllies":
+                    results.AddRange(GetAliveUnits(actingTeam));
+                    break;
+                case "AllEnemies":
+                    results.AddRange(GetAliveUnits(targetTeam));
+                    break;
+                default:
+                    results.Add(defaultTarget ?? targetTeam.GetFirstAlive());
+                    break;
+            }
+
+            return results;
+        }
+
+        private static List<BattleUnitRuntime> GetAliveUnits(BattleTeamRuntime team)
+        {
+            var results = new List<BattleUnitRuntime>();
+            if (team == null || team.Units == null)
+            {
+                return results;
+            }
+
+            for (var i = 0; i < team.Units.Count; i++)
+            {
+                if (team.Units[i] != null && !team.Units[i].IsDead)
+                {
+                    results.Add(team.Units[i]);
+                }
+            }
+
+            return results;
+        }
+
+        private static BattleFormulaConfig GetBattleFormula()
+        {
+            var database = BattleFormulaDatabaseLoader.Load();
+            if (database != null && database.Formula != null)
+            {
+                return database.Formula;
+            }
+
+            return new BattleFormulaConfig
+            {
+                DamageMultiplier = 1f,
+                FlatDamageBonus = 0,
+                VulnerablePerPoint = 0.01f,
+                DefenseMitigationFactor = 1f,
+                MinDamage = 1f
+            };
+        }
+
+        private static float GetElementMultiplier(BattleUnitRuntime actor, BattleUnitRuntime target)
+        {
+            var database = ElementRelationDatabaseLoader.Load();
+            if (database == null)
+            {
+                return 1f;
+            }
+
+            var attackerElement = NormalizeBattleElement(actor != null ? actor.BattleElement : string.Empty);
+            var defenderElement = NormalizeBattleElement(target != null ? target.BattleElement : string.Empty);
+            return database.GetMultiplier(attackerElement, defenderElement);
+        }
+
+        private static string NormalizeBattleElement(string element)
+        {
+            if (string.IsNullOrWhiteSpace(element))
+            {
+                return "Earth";
+            }
+
+            switch (element.Trim().ToLowerInvariant())
+            {
+                case "金":
+                case "metal":
+                    return "Metal";
+                case "木":
+                case "wood":
+                    return "Wood";
+                case "水":
+                case "water":
+                    return "Water";
+                case "火":
+                case "fire":
+                    return "Fire";
+                case "圣":
+                case "holy":
+                    return "Holy";
+                default:
+                    return "Earth";
+            }
+        }
+        private static void ApplyDamage(BattleUnitRuntime target, int damage)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            var remainingDamage = target.ConsumeShield(Mathf.Max(0, damage));
+            target.CurrentHP = Clamp(target.CurrentHP - remainingDamage, 0, target.MaxHP);
+        }
         private static int ScaleDamage(int rawDamage)
         {
-            var scaledDamage = (int)(rawDamage * TestDamageMultiplier) + TestFlatDamageBonus;
-            return Clamp(scaledDamage, 1, 9999);
+            var formula = GetBattleFormula();
+            var scaledDamage = Mathf.RoundToInt(rawDamage * formula.DamageMultiplier) + formula.FlatDamageBonus;
+            return Clamp(scaledDamage, Mathf.RoundToInt(formula.MinDamage), 9999);
         }
 
         private static void AddBattleEndEvents(
@@ -1588,6 +2017,21 @@ namespace Wuxing.Battle
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

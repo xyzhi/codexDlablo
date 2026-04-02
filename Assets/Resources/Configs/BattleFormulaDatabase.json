@@ -1,0 +1,10 @@
+﻿{
+    "Formula": {
+        "DamageMultiplier": 1.0,
+        "FlatDamageBonus": 0,
+        "VulnerablePerPoint": 0.009999999776482582,
+        "DefenseMitigationFactor": 1.0,
+        "MinDamage": 1.0,
+        "Notes": "正式默认公式参数"
+    }
+}

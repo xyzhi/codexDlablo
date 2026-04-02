@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Wuxing.Config
 {
@@ -17,6 +18,6 @@ namespace Wuxing.Config
         public string EffectType;
         public string Description;
         public string Notes;
+        public List<SkillEffectConfig> Effects = new List<SkillEffectConfig>();
     }
 }
-

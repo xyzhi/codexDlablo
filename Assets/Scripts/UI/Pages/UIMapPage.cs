@@ -819,13 +819,7 @@ namespace Wuxing.UI
                 return LocalizationManager.GetText("map.reward_choice_empty");
             }
 
-            return string.Format(
-                LocalizationManager.GetText("map.reward_choice_label"),
-                option.SkillName,
-                option.CharacterName,
-                option.ResultLevel,
-                LocalizationManager.GetText(option.IsUpgrade ? "map.reward_result_upgrade" : "map.reward_result_learn"),
-                option.SkillElement);
+            return GameProgressManager.BuildSkillRewardChoiceText(option, isEnglish);
         }
 
         private static string BuildMapSkillRewardToast(SkillRewardOption option, bool isEnglish)

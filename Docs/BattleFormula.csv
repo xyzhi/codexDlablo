@@ -1,0 +1,2 @@
+﻿DamageMultiplier,FlatDamageBonus,VulnerablePerPoint,DefenseMitigationFactor,MinDamage,Notes
+1,0,0.01,1,1,正式默认公式参数

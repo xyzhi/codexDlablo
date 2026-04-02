@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using UnityEditor;
 
@@ -66,6 +66,10 @@ public static class ConfigAutoSync
         return IsOutputUpToDate("Docs/Character.csv", "Assets/Resources/Configs/CharacterDatabase.json")
             && IsOutputUpToDate("Docs/Enemy.csv", "Assets/Resources/Configs/EnemyDatabase.json")
             && IsOutputUpToDate("Docs/Skill.csv", "Assets/Resources/Configs/SkillDatabase.json")
+            && IsOutputUpToDate("Docs/SkillEffect.csv", "Assets/Resources/Configs/SkillDatabase.json")
+            && IsOutputUpToDate("Docs/BattleFormula.csv", "Assets/Resources/Configs/BattleFormulaDatabase.json")
+            && IsOutputUpToDate("Docs/ElementRelation.csv", "Assets/Resources/Configs/ElementRelationDatabase.json")
+            && IsOutputUpToDate("Docs/EnemyEncounter.csv", "Assets/Resources/Configs/EnemyEncounterDatabase.json")
             && IsOutputUpToDate("Docs/Equipment.csv", "Assets/Resources/Configs/EquipmentDatabase.json")
             && IsOutputUpToDate("Docs/SpiritStone.csv", "Assets/Resources/Configs/SpiritStoneDatabase.json")
             && IsOutputUpToDate("Docs/StageBalance.csv", "Assets/Resources/Configs/StageBalanceDatabase.json")
@@ -129,6 +133,8 @@ public sealed class ConfigCsvAutoSyncPostprocessor : AssetPostprocessor
         return false;
     }
 }
+
+
 
 
 

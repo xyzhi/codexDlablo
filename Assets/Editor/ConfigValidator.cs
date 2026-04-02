@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -11,6 +12,10 @@ public static class ConfigValidator
     private const string CharacterCsvPath = "Docs/Character.csv";
     private const string EnemyCsvPath = "Docs/Enemy.csv";
     private const string SkillCsvPath = "Docs/Skill.csv";
+    private const string SkillEffectCsvPath = "Docs/SkillEffect.csv";
+    private const string BattleFormulaCsvPath = "Docs/BattleFormula.csv";
+    private const string ElementRelationCsvPath = "Docs/ElementRelation.csv";
+    private const string EnemyEncounterCsvPath = "Docs/EnemyEncounter.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
     private const string SpiritStoneConversionCsvPath = "Docs/SpiritStoneConversion.csv";
@@ -26,7 +31,7 @@ public static class ConfigValidator
 
     private static readonly HashSet<string> ValidElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "金", "木", "水", "火", "土", "metal", "wood", "water", "fire", "earth"
+        "金", "木", "水", "火", "土", "圣", "holy", "metal", "wood", "water", "fire", "earth"
     };
 
     private static readonly HashSet<string> ValidEquipmentSlots = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -47,6 +52,21 @@ public static class ConfigValidator
     private static readonly HashSet<string> ValidSkillRewardNodeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "Battle", "Elite", "Boss"
+    };
+
+    private static readonly HashSet<string> ValidSkillEffectTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Damage", "Heal", "Shield", "Dot", "Hot", "Control", "ArmorBreak", "Vulnerable", "ManaGain", "AttackUp", "DefenseUp", "DotBoost"
+    };
+
+    private static readonly HashSet<string> ValidSkillTargetScopes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Self", "SingleEnemy", "SingleAlly", "AllEnemies", "AllAllies", "Default"
+    };
+
+    private static readonly HashSet<string> ValidSkillTriggerTimings = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Instant", "TurnStart", "TurnEnd", "Duration", "Passive", "Control"
     };
 
     private static readonly HashSet<string> BuiltinStageEventProfiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -70,6 +90,10 @@ public static class ConfigValidator
             var characterTable = LoadTable(CharacterCsvPath, "角色表");
             var enemyTable = LoadTable(EnemyCsvPath, "敌人表");
             var skillTable = LoadTable(SkillCsvPath, "技能表");
+            var skillEffectTable = LoadTable(SkillEffectCsvPath, "技能效果表");
+            var battleFormulaTable = LoadTable(BattleFormulaCsvPath, "战斗公式表");
+            var elementRelationTable = LoadTable(ElementRelationCsvPath, "元素关系表");
+            var enemyEncounterTable = LoadTable(EnemyEncounterCsvPath, "敌方编组表");
             var equipmentTable = LoadTable(EquipmentCsvPath, "装备表");
             var spiritStoneTable = LoadTable(SpiritStoneCsvPath, "灵石表");
             var spiritStoneConversionTable = LoadTable(SpiritStoneConversionCsvPath, "灵石转换表");
@@ -80,12 +104,16 @@ public static class ConfigValidator
 
             var localizationKeys = ValidateLocalizationTable(localizationTable, items);
             var skillIds = ValidateSkillTable(skillTable, items);
+            ValidateSkillEffectTable(skillEffectTable, skillIds, items);
+            ValidateBattleFormulaTable(battleFormulaTable, items);
+            ValidateElementRelationTable(elementRelationTable, items);
             ValidateCharacterTable(characterTable, skillIds, items);
             ValidateEnemyTable(enemyTable, skillIds, items);
+            ValidateEnemyEncounterTable(enemyEncounterTable, enemyTable, stageNodeTable, items);
             ValidateEquipmentTable(equipmentTable, items);
             ValidateSpiritStoneTable(spiritStoneTable, items);
             ValidateSpiritStoneConversionTable(spiritStoneConversionTable, items);
-            ValidateStageBalanceTable(stageBalanceTable, items);
+            ValidateStageBalanceTable(stageBalanceTable, stageNodeTable, items);
             var eventProfiles = ValidateEventOptionTable(eventOptionTable, localizationKeys, items);
             ValidateStageNodeTable(stageNodeTable, eventProfiles, items);
 
@@ -170,6 +198,108 @@ public static class ConfigValidator
         return skillIds;
     }
 
+    private static void ValidateSkillEffectTable(CsvTable table, HashSet<string> skillIds, List<ValidationItem> items)
+    {
+        var skillEffectCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        var seenPairs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "SkillId", "EffectIndex", "EffectType", "TargetScope", "Value", "ValuePerLevel", "DurationRounds", "MaxStacks", "StackRule", "TriggerTiming");
+            ValidateIntegerField(row, items, "EffectIndex");
+            ValidateIntegerField(row, items, "Value");
+            ValidateIntegerField(row, items, "ValuePerLevel");
+            ValidateIntegerField(row, items, "DurationRounds");
+            ValidateIntegerField(row, items, "MaxStacks");
+
+            var skillId = row.Get("SkillId").Trim();
+            var pairKey = skillId + "#" + row.Get("EffectIndex").Trim();
+            if (!string.IsNullOrEmpty(skillId) && !seenPairs.Add(pairKey))
+            {
+                AddError(items, row, "EffectIndex", $"技能效果序号重复：'{pairKey}'。");
+            }
+
+            if (!string.IsNullOrEmpty(skillId) && skillIds != null && !skillIds.Contains(skillId))
+            {
+                AddError(items, row, "SkillId", $"技能效果引用了不存在的技能：'{skillId}'。");
+            }
+
+            if (!string.IsNullOrEmpty(skillId))
+            {
+                int effectCount;
+                skillEffectCounts.TryGetValue(skillId, out effectCount);
+                skillEffectCounts[skillId] = effectCount + 1;
+            }
+
+            var effectType = row.Get("EffectType").Trim();
+            if (!string.IsNullOrEmpty(effectType) && !ValidSkillEffectTypes.Contains(effectType))
+            {
+                AddError(items, row, "EffectType", $"技能效果类型不合法：'{effectType}'。");
+            }
+
+            var targetScope = row.Get("TargetScope").Trim();
+            if (!string.IsNullOrEmpty(targetScope) && !ValidSkillTargetScopes.Contains(targetScope))
+            {
+                AddError(items, row, "TargetScope", $"技能目标范围不合法：'{targetScope}'。");
+            }
+
+            var triggerTiming = row.Get("TriggerTiming").Trim();
+            if (!string.IsNullOrEmpty(triggerTiming) && !ValidSkillTriggerTimings.Contains(triggerTiming))
+            {
+                AddError(items, row, "TriggerTiming", $"技能触发时机不合法：'{triggerTiming}'。");
+            }
+
+            ValidateNonNegativeIntegerField(row, items, "DurationRounds");
+            ValidateNonNegativeIntegerField(row, items, "MaxStacks");
+        }
+
+        if (skillIds != null)
+        {
+            foreach (var skillId in skillIds)
+            {
+                if (!skillEffectCounts.ContainsKey(skillId))
+                {
+                    AddError(items, table.DisplayName, 0, "SkillId", $"技能 '{skillId}' 没有对应的效果配置。请在 SkillEffect.csv 中补齐。");
+                }
+            }
+        }
+    }
+
+    private static void ValidateBattleFormulaTable(CsvTable table, List<ValidationItem> items)
+    {
+        if (table.Rows.Count <= 0)
+        {
+            AddError(items, table.DisplayName, 0, "DamageMultiplier", "战斗公式表不能为空。");
+            return;
+        }
+
+        var row = table.Rows[0];
+        ValidateIntegerField(row, items, "FlatDamageBonus");
+        ValidateFloatField(row, items, "DamageMultiplier");
+        ValidateFloatField(row, items, "VulnerablePerPoint");
+        ValidateFloatField(row, items, "DefenseMitigationFactor");
+        ValidateFloatField(row, items, "MinDamage");
+    }
+
+    private static void ValidateElementRelationTable(CsvTable table, List<ValidationItem> items)
+    {
+        var seenPairs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "AttackerElement", "DefenderElement", "Multiplier");
+            ValidateFloatField(row, items, "Multiplier");
+            ValidateElementList(row, items, "AttackerElement");
+            ValidateElementList(row, items, "DefenderElement");
+
+            var pair = row.Get("AttackerElement").Trim() + "#" + row.Get("DefenderElement").Trim();
+            if (!seenPairs.Add(pair))
+            {
+                AddError(items, row, "DefenderElement", $"元素关系重复：'{pair}'。");
+            }
+        }
+    }
     private static void ValidateCharacterTable(CsvTable table, HashSet<string> skillIds, List<ValidationItem> items)
     {
         ValidateDuplicateIds(table, items);
@@ -201,6 +331,74 @@ public static class ConfigValidator
             ValidateIntegerField(row, items, "MP");
             ValidateElementList(row, items, "Element");
             ValidateSkillReferenceList(row, "Skills", skillIds, items);
+        }
+    }
+
+    private static void ValidateEnemyEncounterTable(CsvTable table, CsvTable enemyTable, CsvTable stageNodeTable, List<ValidationItem> items)
+    {
+        ValidateDuplicateIds(table, items);
+        var enemyIds = BuildIdSet(enemyTable);
+        var coveredKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "ID", "StageFrom", "StageTo", "NodeType", "EnemyIds", "Weight");
+            ValidateIntegerField(row, items, "StageFrom");
+            ValidateIntegerField(row, items, "StageTo");
+            ValidateIntegerField(row, items, "Weight");
+
+            var stageFrom = ParseOptionalInt(row.Get("StageFrom"));
+            var stageTo = ParseOptionalInt(row.Get("StageTo"));
+            if (stageFrom > 0 && stageTo > 0 && stageFrom > stageTo)
+            {
+                AddError(items, row, "StageTo", "StageTo 不能小于 StageFrom。");
+            }
+
+            var nodeType = row.Get("NodeType").Trim();
+            if (!string.IsNullOrEmpty(nodeType) && !ValidNodeTypes.Contains(nodeType))
+            {
+                AddError(items, row, "NodeType", $"节点类型不合法：'{nodeType}'。");
+            }
+
+            ValidateEnemyReferenceList(row, "EnemyIds", enemyIds, items);
+
+            var overrideElement = row.Get("OverrideElement").Trim();
+            if (!string.IsNullOrEmpty(overrideElement) && !IsValidElementToken(overrideElement))
+            {
+                AddError(items, row, "OverrideElement", $"覆写元素不合法：'{overrideElement}'。");
+            }
+
+            if (stageFrom > 0 && stageTo > 0 && !string.IsNullOrEmpty(nodeType))
+            {
+                for (var stage = stageFrom; stage <= stageTo; stage++)
+                {
+                    coveredKeys.Add(stage + "#" + nodeType);
+                }
+            }
+        }
+
+        for (var i = 0; i < stageNodeTable.Rows.Count; i++)
+        {
+            var row = stageNodeTable.Rows[i];
+            var nodeType = row.Get("NodeType").Trim();
+            if (string.IsNullOrEmpty(nodeType)
+                || string.Equals(nodeType, "Rest", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var stage = ParseOptionalInt(row.Get("Stage"));
+            if (stage <= 0)
+            {
+                continue;
+            }
+
+            var key = stage + "#" + nodeType;
+            if (!coveredKeys.Contains(key))
+            {
+                AddError(items, row, "NodeType", $"第 {stage} 关的 {nodeType} 节点没有对应的敌方编组配置。");
+            }
         }
     }
 
@@ -314,9 +512,20 @@ public static class ConfigValidator
         }
     }
 
-    private static void ValidateStageBalanceTable(CsvTable table, List<ValidationItem> items)
+
+    private static void ValidateStageBalanceTable(CsvTable table, CsvTable stageNodeTable, List<ValidationItem> items)
     {
         ValidateSequentialStageRows(table, items, true);
+
+        var configuredStageCount = GetMaxConfiguredStage(stageNodeTable);
+        if (configuredStageCount > 0)
+        {
+            var stageBalanceMaxStage = GetMaxConfiguredStage(table);
+            if (stageBalanceMaxStage != configuredStageCount)
+            {
+                AddError(items, table.DisplayName, 0, "Stage", $"StageBalance.csv 最大关卡为 {stageBalanceMaxStage}，但 StageNode.csv 最大关卡为 {configuredStageCount}。两张表需要保持一致。");
+            }
+        }
 
         for (var i = 0; i < table.Rows.Count; i++)
         {
@@ -327,10 +536,6 @@ public static class ConfigValidator
             ValidateIntegerField(row, items, "EnemyDEFBonus");
             ValidateIntegerField(row, items, "EnemyMPBonus");
             ValidateIntegerField(row, items, "EnemyEquipmentCount");
-            ValidateIntegerField(row, items, "PlayerHPBonus");
-            ValidateIntegerField(row, items, "PlayerATKBonus");
-            ValidateIntegerField(row, items, "PlayerDEFBonus");
-            ValidateIntegerField(row, items, "PlayerMPBonus");
 
             var equipmentCount = ParseIntOrNull(row.Get("EnemyEquipmentCount"));
             if (equipmentCount.HasValue)
@@ -349,16 +554,13 @@ public static class ConfigValidator
             WarnOnOutlier(row, items, "EnemyATKBonus", 50);
             WarnOnOutlier(row, items, "EnemyDEFBonus", 50);
             WarnOnOutlier(row, items, "EnemyMPBonus", 80);
-            WarnOnOutlier(row, items, "PlayerHPBonus", 200);
-            WarnOnOutlier(row, items, "PlayerATKBonus", 50);
-            WarnOnOutlier(row, items, "PlayerDEFBonus", 50);
-            WarnOnOutlier(row, items, "PlayerMPBonus", 80);
         }
     }
 
     private static void ValidateStageNodeTable(CsvTable table, HashSet<string> eventProfiles, List<ValidationItem> items)
     {
         ValidateSequentialStageRows(table, items, true);
+        var bossCount = 0;
 
         for (var i = 0; i < table.Rows.Count; i++)
         {
@@ -371,6 +573,10 @@ public static class ConfigValidator
             {
                 AddError(items, row, "NodeType", $"节点类型不合法：'{nodeType}'。当前仅支持 Battle / Elite / Rest / Boss。");
             }
+            else if (string.Equals(nodeType.Trim(), "Boss", StringComparison.OrdinalIgnoreCase))
+            {
+                bossCount++;
+            }
 
             var profile = row.Get("EventProfile").Trim();
             if (!string.IsNullOrEmpty(profile)
@@ -381,6 +587,11 @@ public static class ConfigValidator
             {
                 AddError(items, row, "EventProfile", $"引用的事件配置不存在：'{profile}'。若这是主流程内置节点，请加入内置白名单或改为事件表已有 Profile。");
             }
+        }
+
+        if (bossCount <= 0)
+        {
+            AddError(items, table.DisplayName, 0, "NodeType", "StageNode.csv 中至少需要配置 1 个 Boss 节点。");
         }
     }
 
@@ -541,6 +752,26 @@ public static class ConfigValidator
         }
     }
 
+    private static int GetMaxConfiguredStage(CsvTable table)
+    {
+        if (table == null)
+        {
+            return 0;
+        }
+
+        var maxStage = 0;
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var stage = ParseIntOrNull(table.Rows[i].Get("Stage"));
+            if (stage.HasValue && stage.Value > maxStage)
+            {
+                maxStage = stage.Value;
+            }
+        }
+
+        return maxStage;
+    }
+
     private static void ValidateSkillReferenceList(CsvRow row, string fieldName, HashSet<string> skillIds, List<ValidationItem> items)
     {
         var raw = row.Get(fieldName);
@@ -610,6 +841,7 @@ public static class ConfigValidator
         }
     }
 
+
     private static void ValidateLocalizationKeyReference(CsvRow row, List<ValidationItem> items, HashSet<string> localizationKeys, string fieldName, bool required)
     {
         var key = row.Get(fieldName).Trim();
@@ -641,6 +873,67 @@ public static class ConfigValidator
         }
     }
 
+    private static void ValidateFloatField(CsvRow row, List<ValidationItem> items, string fieldName)
+    {
+        var value = row.Get(fieldName);
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            AddError(items, row, fieldName, "数值字段为空。");
+            return;
+        }
+
+        float parsedValue;
+        if (!float.TryParse(value.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out parsedValue))
+        {
+            AddError(items, row, fieldName, $"数值字段无法解析为浮点数：'{value}'。");
+        }
+    }
+
+    private static void ValidateEnemyReferenceList(CsvRow row, string fieldName, HashSet<string> enemyIds, List<ValidationItem> items)
+    {
+        var raw = row.Get(fieldName);
+        if (string.IsNullOrWhiteSpace(raw))
+        {
+            return;
+        }
+
+        var parts = raw.Split('|');
+        for (var i = 0; i < parts.Length; i++)
+        {
+            var token = parts[i].Trim();
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                continue;
+            }
+
+            if (enemyIds != null && enemyIds.Contains(token))
+            {
+                continue;
+            }
+
+            AddError(items, row, fieldName, $"敌人引用无效：'{token}'，在 Enemy.csv 中找不到对应 ID。");
+        }
+    }
+
+    private static HashSet<string> BuildIdSet(CsvTable table)
+    {
+        var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (table == null)
+        {
+            return ids;
+        }
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var id = table.Rows[i].Get("ID").Trim();
+            if (!string.IsNullOrEmpty(id))
+            {
+                ids.Add(id);
+            }
+        }
+
+        return ids;
+    }
     private static void ValidateIntegerField(CsvRow row, List<ValidationItem> items, string fieldName)
     {
         var value = row.Get(fieldName);
@@ -736,6 +1029,11 @@ public static class ConfigValidator
     {
         int result;
         return int.TryParse((value ?? string.Empty).Trim(), out result) ? result : (int?)null;
+    }
+
+    private static int ParseOptionalInt(string value)
+    {
+        return ParseIntOrNull(value) ?? 0;
     }
 
     private static bool LooksLikeSkillId(string token)
@@ -1039,3 +1337,7 @@ public static class ConfigValidator
         public string Message { get; private set; }
     }
 }
+
+
+
+

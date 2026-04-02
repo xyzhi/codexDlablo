@@ -1,0 +1,130 @@
+﻿{
+    "Relations": [
+        {
+            "AttackerElement": "Metal",
+            "DefenderElement": "Wood",
+            "Multiplier": 1.2000000476837159,
+            "Notes": "金克木"
+        },
+        {
+            "AttackerElement": "Metal",
+            "DefenderElement": "Fire",
+            "Multiplier": 0.8500000238418579,
+            "Notes": "金被火制"
+        },
+        {
+            "AttackerElement": "Wood",
+            "DefenderElement": "Earth",
+            "Multiplier": 1.2000000476837159,
+            "Notes": "木克土"
+        },
+        {
+            "AttackerElement": "Wood",
+            "DefenderElement": "Metal",
+            "Multiplier": 0.8500000238418579,
+            "Notes": "木被金制"
+        },
+        {
+            "AttackerElement": "Water",
+            "DefenderElement": "Fire",
+            "Multiplier": 1.2000000476837159,
+            "Notes": "水克火"
+        },
+        {
+            "AttackerElement": "Water",
+            "DefenderElement": "Earth",
+            "Multiplier": 0.8500000238418579,
+            "Notes": "水被土制"
+        },
+        {
+            "AttackerElement": "Fire",
+            "DefenderElement": "Metal",
+            "Multiplier": 1.2000000476837159,
+            "Notes": "火克金"
+        },
+        {
+            "AttackerElement": "Fire",
+            "DefenderElement": "Water",
+            "Multiplier": 0.8500000238418579,
+            "Notes": "火被水制"
+        },
+        {
+            "AttackerElement": "Earth",
+            "DefenderElement": "Water",
+            "Multiplier": 1.2000000476837159,
+            "Notes": "土克水"
+        },
+        {
+            "AttackerElement": "Earth",
+            "DefenderElement": "Wood",
+            "Multiplier": 0.8500000238418579,
+            "Notes": "土被木制"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Metal",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Wood",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Water",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Fire",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Earth",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Metal",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Wood",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Water",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Fire",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Earth",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        },
+        {
+            "AttackerElement": "Holy",
+            "DefenderElement": "Holy",
+            "Multiplier": 1.0,
+            "Notes": "圣元素中性"
+        }
+    ]
+}

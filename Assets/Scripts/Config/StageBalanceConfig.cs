@@ -11,10 +11,8 @@ namespace Wuxing.Config
         public int EnemyDEFBonus;
         public int EnemyMPBonus;
         public int EnemyEquipmentCount;
-        public int PlayerHPBonus;
-        public int PlayerATKBonus;
-        public int PlayerDEFBonus;
-        public int PlayerMPBonus;
         public string Notes;
     }
 }
+
+

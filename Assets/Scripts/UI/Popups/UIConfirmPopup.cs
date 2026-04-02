@@ -37,6 +37,16 @@ namespace Wuxing.UI
 
         private void Awake()
         {
+            if (titleText != null)
+            {
+                titleText.supportRichText = true;
+            }
+
+            if (messageText != null)
+            {
+                messageText.supportRichText = true;
+            }
+
             if (confirmButton != null)
             {
                 choiceButtons.Add(confirmButton);
@@ -177,6 +187,7 @@ namespace Wuxing.UI
             var buttonText = button.GetComponentInChildren<Text>();
             if (buttonText != null)
             {
+                buttonText.supportRichText = true;
                 buttonText.text = label;
                 buttonText.alignment = multiChoiceMode ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
                 buttonText.fontSize = multiChoiceMode ? 22 : 24;
@@ -348,9 +359,28 @@ namespace Wuxing.UI
             ConfigureTopStretchRect(messageText.rectTransform, TopPadding + titleHeight + TitleSpacing, messageHeight);
 
             titleText.alignment = TextAnchor.UpperCenter;
-            messageText.alignment = TextAnchor.UpperCenter;
+            messageText.alignment = ShouldUseDenseMessageLayout(messageText.text) ? TextAnchor.UpperLeft : TextAnchor.UpperCenter;
             messageText.horizontalOverflow = HorizontalWrapMode.Wrap;
             messageText.verticalOverflow = VerticalWrapMode.Overflow;
+        }
+
+        private static bool ShouldUseDenseMessageLayout(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return false;
+            }
+
+            var lineCount = 1;
+            for (var i = 0; i < content.Length; i++)
+            {
+                if (content[i] == '\n')
+                {
+                    lineCount++;
+                }
+            }
+
+            return lineCount >= 6 || content.Length >= 120;
         }
 
         private static void ConfigureTopStretchRect(RectTransform rect, float topOffset, float height)

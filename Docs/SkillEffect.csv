@@ -1,0 +1,14 @@
+﻿SkillId,EffectIndex,EffectType,TargetScope,Value,ValuePerLevel,DurationRounds,MaxStacks,StackRule,TriggerTiming,Notes
+SK001,1,Damage,SingleEnemy,22,8,0,1,Refresh,Instant,单体主力伤害
+SK002,1,Damage,AllEnemies,15,5,0,1,Refresh,Instant,群体火伤
+SK003,1,Heal,SingleAlly,24,8,0,1,Refresh,Instant,单体治疗
+SK004,1,Dot,SingleEnemy,12,4,2,3,Refresh,TurnStart,持续伤害
+SK005,1,Damage,SingleEnemy,18,6,0,1,Refresh,Instant,单体冰伤
+SK005,2,Control,SingleEnemy,1,0,1,1,Refresh,Control,冻结一回合
+SK006,1,Shield,Self,22,8,0,1,Refresh,Instant,基础护盾
+SK007,1,Damage,AllEnemies,17,6,0,1,Refresh,Instant,绝品群攻
+SK008,1,DotBoost,Self,6,2,0,1,Refresh,Passive,提升持续伤害
+SK009,1,Shield,Self,18,6,0,1,Refresh,Instant,水盾
+SK009,2,Hot,Self,8,2,2,1,Refresh,TurnStart,持续恢复
+SK010,1,Damage,SingleEnemy,16,6,0,1,Refresh,Instant,单体伤害
+SK010,2,ArmorBreak,SingleEnemy,4,1,2,1,Refresh,Duration,降低防御

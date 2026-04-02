@@ -31,7 +31,7 @@ namespace Wuxing.Game
         private const string RandomStageEventStatesPrefKey = "game.progress.random_stage_events";
         private const string ActiveEffectsPrefKey = "game.progress.active_effects";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
-        private const int MaxStage = 100;
+        private const int DefaultMaxStage = 100;
         private const int LifetimeMonths = 360;
 
         private static readonly string[] BaseOwnedEquipmentIds =
@@ -643,13 +643,13 @@ namespace Wuxing.Game
                 var learnedSkillNames = new List<string>();
                 var knownSkillIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                AppendSkillNames(character.Id, character.InitialSkills, currentSkillNames, knownSkillIds, skillDatabase);
+                AppendSkillNames(character.Id, character.InitialSkills, currentSkillNames, knownSkillIds, skillDatabase, english);
                 for (var j = 0; j < learnedSkillIds.Count; j++)
                 {
-                    learnedSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j]));
+                    learnedSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j], english));
                     if (knownSkillIds.Add(learnedSkillIds[j]))
                     {
-                        currentSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j]));
+                        currentSkillNames.Add(GetSkillLabel(skillDatabase, character.Id, learnedSkillIds[j], english));
                     }
                 }
 
@@ -659,12 +659,12 @@ namespace Wuxing.Game
                     .Append('\n')
                     .Append(LocalizationManager.GetText("progress.skills_current"))
                     .Append(currentSkillNames.Count > 0
-                        ? string.Join(LocalizationManager.GetText("common.separator_names"), currentSkillNames.ToArray())
+                        ? "\n" + string.Join("\n\n", currentSkillNames.ToArray())
                         : LocalizationManager.GetText("progress.skills_none"))
                     .Append('\n')
                     .Append(LocalizationManager.GetText("progress.skills_new"))
                     .Append(learnedSkillNames.Count > 0
-                        ? string.Join(LocalizationManager.GetText("common.separator_names"), learnedSkillNames.ToArray())
+                        ? "\n" + string.Join("\n\n", learnedSkillNames.ToArray())
                         : LocalizationManager.GetText("progress.skills_none"));
             }
 
@@ -962,9 +962,10 @@ namespace Wuxing.Game
         public static int GetMaxStage()
         {
             var database = StageNodeDatabaseLoader.Load();
-            return database != null && database.StageNodes != null && database.StageNodes.Count > 0
-                ? database.StageNodes.Count
-                : MaxStage;
+            var configuredMaxStage = database != null ? database.GetMaxStage() : 0;
+            return configuredMaxStage > 0
+                ? configuredMaxStage
+                : DefaultMaxStage;
         }
 
         public static int GetElapsedMonths()
@@ -1990,11 +1991,28 @@ namespace Wuxing.Game
                 return true;
             }
 
-            return string.Equals(skill.Category, "Passive", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(skill.Category, "\u88ab\u52a8", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(skill.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase);
-        }
+            if (string.Equals(skill.Category, "Passive", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(skill.Category, "\u88ab\u52a8", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
 
+            if (skill.Effects == null || skill.Effects.Count == 0)
+            {
+                return string.Equals(skill.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase);
+            }
+
+            for (var i = 0; i < skill.Effects.Count; i++)
+            {
+                var effect = skill.Effects[i];
+                if (effect != null && string.Equals(effect.EffectType, "DotBoost", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         private static bool CharacterHasInitialSkill(CharacterConfig character, string skillId)
         {
             if (character == null || string.IsNullOrEmpty(character.InitialSkills) || string.IsNullOrEmpty(skillId))
@@ -2080,7 +2098,39 @@ namespace Wuxing.Game
             }
         }
 
-        private static void AppendSkillNames(string characterId, string rawSkills, List<string> targetNames, HashSet<string> knownSkillIds, SkillDatabase skillDatabase)
+        public static string BuildSkillRewardDetail(SkillRewardOption option, bool english)
+        {
+            if (option == null)
+            {
+                return english ? "No reward option." : "没有可选奖励。";
+            }
+
+            var skillDatabase = SkillDatabaseLoader.Load();
+            var skill = skillDatabase != null ? skillDatabase.GetById(option.SkillId) : null;
+            var effectSummary = skill != null ? BuildSkillEffectSummary(skill, option.ResultLevel, english) : option.SkillDescription;
+
+            return english
+                ? "Target: " + option.CharacterName + "\nSkill: " + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\nEffect: " + effectSummary
+                : "角色：" + option.CharacterName + "\n功法：" + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n效果：" + effectSummary;
+        }
+
+        public static string BuildSkillRewardChoiceText(SkillRewardOption option, bool english)
+        {
+            if (option == null)
+            {
+                return english ? "Empty" : "空白奖励";
+            }
+
+            var skillDatabase = SkillDatabaseLoader.Load();
+            var skill = skillDatabase != null ? skillDatabase.GetById(option.SkillId) : null;
+            var effectSummary = skill != null ? BuildSkillEffectSummary(skill, option.ResultLevel, english) : option.SkillDescription;
+
+            return english
+                ? "Reward\n" + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\n\nTarget: " + option.CharacterName + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\n" + effectSummary
+                : "功法机缘\n" + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\n\n角色：" + option.CharacterName + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n" + effectSummary;
+        }
+
+        private static void AppendSkillNames(string characterId, string rawSkills, List<string> targetNames, HashSet<string> knownSkillIds, SkillDatabase skillDatabase, bool english)
         {
             if (targetNames == null || string.IsNullOrEmpty(rawSkills))
             {
@@ -2097,7 +2147,7 @@ namespace Wuxing.Game
                 }
 
                 knownSkillIds?.Add(skillId);
-                targetNames.Add(GetSkillLabel(skillDatabase, characterId, skillId));
+                targetNames.Add(GetSkillLabel(skillDatabase, characterId, skillId, english));
             }
         }
 
@@ -2112,12 +2162,193 @@ namespace Wuxing.Game
             return skill != null && !string.IsNullOrEmpty(skill.Name) ? skill.Name : skillId;
         }
 
-        private static string GetSkillLabel(SkillDatabase skillDatabase, string characterId, string skillId)
+        private static string GetSkillLabel(SkillDatabase skillDatabase, string characterId, string skillId, bool english)
         {
-            return GetSkillDisplayName(skillDatabase, skillId)
-                + " "
-                + LocalizationManager.GetText("common.level_prefix")
-                + GetSkillLevel(characterId, skillId);
+            if (skillDatabase == null || string.IsNullOrEmpty(skillId))
+            {
+                return GetSkillDisplayName(skillDatabase, skillId);
+            }
+
+            var skill = skillDatabase.GetById(skillId);
+            if (skill == null)
+            {
+                return GetSkillDisplayName(skillDatabase, skillId)
+                    + " "
+                    + LocalizationManager.GetText("common.level_prefix")
+                    + GetSkillLevel(characterId, skillId);
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(WrapSkillNameWithQualityColor(skill.Name, skill.Quality))
+                .Append("  ")
+                .Append(LocalizationManager.GetText("common.level_prefix"))
+                .Append(GetSkillLevel(characterId, skillId));
+
+            if (!string.IsNullOrEmpty(skill.Element))
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("progress.skills_element"))
+                    .Append(skill.Element);
+            }
+
+            var effectSummary = BuildSkillEffectSummary(skill, GetSkillLevel(characterId, skillId), english);
+            if (!string.IsNullOrEmpty(effectSummary))
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("progress.skills_effect"))
+                    .Append(effectSummary);
+            }
+
+            return builder.ToString();
+        }
+
+        private static string BuildSkillEffectSummary(SkillConfig skill, int level, bool english)
+        {
+            if (skill == null)
+            {
+                return string.Empty;
+            }
+
+            if (skill.Effects == null || skill.Effects.Count == 0)
+            {
+                return skill.Description ?? string.Empty;
+            }
+
+            var parts = new List<string>();
+            for (var i = 0; i < skill.Effects.Count; i++)
+            {
+                var effect = skill.Effects[i];
+                if (effect == null)
+                {
+                    continue;
+                }
+
+                var value = Mathf.Max(0, effect.Value + Mathf.Max(0, level - 1) * effect.ValuePerLevel);
+                parts.Add(BuildSkillEffectLine(effect, value, english));
+            }
+
+            return parts.Count > 0 ? string.Join(english ? "; " : "；", parts.ToArray()) : (skill.Description ?? string.Empty);
+        }
+
+        private static string BuildSkillEffectLine(SkillEffectConfig effect, int value, bool english)
+        {
+            var rounds = Mathf.Max(0, effect.DurationRounds);
+            var scope = GetEffectTargetLabel(effect.TargetScope, english);
+            var type = effect.EffectType ?? string.Empty;
+
+            if (string.Equals(type, "Damage", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "deal an extra " + value + " damage" : scope + "额外造成 " + value + " 点伤害";
+            }
+
+            if (string.Equals(type, "Heal", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "heal " + value + " HP" : scope + "恢复 " + value + " 点生命";
+            }
+
+            if (string.Equals(type, "Shield", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "gain an extra " + value + " shield" : scope + "额外获得 " + value + " 点护盾";
+            }
+
+            if (string.Equals(type, "Dot", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "deal an extra " + value + " damage each round for " + rounds + " rounds" : scope + "每回合额外造成 " + value + " 点伤害，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "Hot", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "recover an extra " + value + " HP each round for " + rounds + " rounds" : scope + "每回合额外恢复 " + value + " 点生命，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "Control", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "control for " + Mathf.Max(1, rounds) + " rounds" : scope + "控制 " + Mathf.Max(1, rounds) + " 回合";
+            }
+
+            if (string.Equals(type, "ArmorBreak", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "reduce DEF by " + value + " for " + rounds + " rounds" : scope + "降低对方 " + value + " 点防御，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "Vulnerable", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "increase damage taken by " + value + "% for " + rounds + " rounds" : scope + "使目标受到伤害提高 " + value + "%，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "ManaGain", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "gain " + value + " MP" : scope + "恢复 " + value + " 点法力";
+            }
+
+            if (string.Equals(type, "AttackUp", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "gain +" + value + " ATK for " + rounds + " rounds" : scope + "提高 " + value + " 点攻击，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "DefenseUp", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? scope + "gain +" + value + " DEF for " + rounds + " rounds" : scope + "提高 " + value + " 点防御，持续 " + rounds + " 回合";
+            }
+
+            if (string.Equals(type, "DotBoost", StringComparison.OrdinalIgnoreCase))
+            {
+                return english ? "damage over time +" + value + "%" : "持续伤害提高 " + value + "%";
+            }
+
+            return english ? type + " " + value : type + " " + value;
+        }
+
+        private static string GetEffectTargetLabel(string targetScope, bool english)
+        {
+            switch ((targetScope ?? string.Empty).Trim())
+            {
+                case "Self":
+                    return english ? "Self " : "自身";
+                case "SingleEnemy":
+                    return english ? "Single enemy " : "对单体敌人";
+                case "SingleAlly":
+                    return english ? "Single ally " : "对单体友方";
+                case "AllEnemies":
+                    return english ? "All enemies " : "对全体敌人";
+                case "AllAllies":
+                    return english ? "All allies " : "对全体友方";
+                default:
+                    return english ? "Target " : "对目标";
+            }
+        }
+
+        private static string WrapSkillNameWithQualityColor(string skillName, string quality)
+        {
+            if (string.IsNullOrEmpty(skillName))
+            {
+                return string.Empty;
+            }
+
+            return "<color=" + GetQualityColor(quality) + ">" + skillName + "</color>";
+        }
+
+        private static string GetQualityColor(string quality)
+        {
+            switch ((quality ?? string.Empty).Trim())
+            {
+                case "优秀":
+                case "uncommon":
+                    return "#63D66E";
+                case "稀有":
+                case "rare":
+                    return "#5BA8FF";
+                case "史诗":
+                case "epic":
+                    return "#B77CFF";
+                case "绝品":
+                case "legendary":
+                    return "#F0D45C";
+                case "普通":
+                case "common":
+                default:
+                    return "#F2F2F2";
+            }
         }
 
         private void ResetSpiritStones()
@@ -2612,3 +2843,7 @@ namespace Wuxing.Game
         }
     }
 }
+
+
+
+

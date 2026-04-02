@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using UnityEditor;
@@ -11,6 +12,10 @@ public static class CharacterCsvImporter
     private const string CharacterCsvPath = "Docs/Character.csv";
     private const string EnemyCsvPath = "Docs/Enemy.csv";
     private const string SkillCsvPath = "Docs/Skill.csv";
+    private const string SkillEffectCsvPath = "Docs/SkillEffect.csv";
+    private const string BattleFormulaCsvPath = "Docs/BattleFormula.csv";
+    private const string ElementRelationCsvPath = "Docs/ElementRelation.csv";
+    private const string EnemyEncounterCsvPath = "Docs/EnemyEncounter.csv";
     private const string EquipmentCsvPath = "Docs/Equipment.csv";
     private const string SpiritStoneCsvPath = "Docs/SpiritStone.csv";
     private const string SpiritStoneConversionCsvPath = "Docs/SpiritStoneConversion.csv";
@@ -24,6 +29,9 @@ public static class CharacterCsvImporter
     private const string CharacterJsonPath = ConfigOutputFolder + "/CharacterDatabase.json";
     private const string EnemyJsonPath = ConfigOutputFolder + "/EnemyDatabase.json";
     private const string SkillJsonPath = ConfigOutputFolder + "/SkillDatabase.json";
+    private const string BattleFormulaJsonPath = ConfigOutputFolder + "/BattleFormulaDatabase.json";
+    private const string ElementRelationJsonPath = ConfigOutputFolder + "/ElementRelationDatabase.json";
+    private const string EnemyEncounterJsonPath = ConfigOutputFolder + "/EnemyEncounterDatabase.json";
     private const string EquipmentJsonPath = ConfigOutputFolder + "/EquipmentDatabase.json";
     private const string SpiritStoneJsonPath = ConfigOutputFolder + "/SpiritStoneDatabase.json";
     private const string SpiritStoneConversionJsonPath = ConfigOutputFolder + "/SpiritStoneConversionDatabase.json";
@@ -40,6 +48,9 @@ public static class CharacterCsvImporter
             ImportCharacters();
             ImportEnemies();
             ImportSkills();
+            ImportBattleFormula();
+            ImportElementRelations();
+            ImportEnemyEncounters();
             ImportEquipments();
             ImportSpiritStones();
             ImportSpiritStoneConversions();
@@ -136,6 +147,8 @@ public static class CharacterCsvImporter
     public static void ImportSkills()
     {
         var rows = ReadRequiredRows(SkillCsvPath, "Skill CSV");
+        var effectRows = ReadRequiredRows(SkillEffectCsvPath, "SkillEffect CSV");
+        var effectMap = BuildSkillEffectMap(effectRows);
         var configs = new List<SkillConfig>();
         for (var i = 1; i < rows.Count; i++)
         {
@@ -148,6 +161,13 @@ public static class CharacterCsvImporter
             {
                 throw new InvalidOperationException($"Invalid skill row at line {i + 1}.");
             }
+
+            List<SkillEffectConfig> effects;
+            if (!effectMap.TryGetValue(columns[0], out effects))
+            {
+                effects = new List<SkillEffectConfig>();
+            }
+
             configs.Add(new SkillConfig
             {
                 Id = columns[0],
@@ -161,7 +181,8 @@ public static class CharacterCsvImporter
                 Duration = ParseInt(columns[8], nameof(SkillConfig.Duration), i + 1),
                 EffectType = columns[9],
                 Description = columns[10],
-                Notes = columns[11]
+                Notes = columns[11],
+                Effects = effects
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
@@ -169,6 +190,101 @@ public static class CharacterCsvImporter
         database.skills = configs;
         WriteJson(SkillJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} skills to {SkillJsonPath}");
+    }
+    [MenuItem("Tools/Config/Import Battle Formula CSV")]
+    public static void ImportBattleFormula()
+    {
+        var rows = ReadRequiredRows(BattleFormulaCsvPath, "BattleFormula CSV");
+        var columns = rows[1];
+        if (columns.Count < 6)
+        {
+            throw new InvalidOperationException("Invalid battle formula row.");
+        }
+
+        var database = new BattleFormulaDatabase
+        {
+            Formula = new BattleFormulaConfig
+            {
+                DamageMultiplier = ParseFloat(columns[0], nameof(BattleFormulaConfig.DamageMultiplier), 2),
+                FlatDamageBonus = ParseInt(columns[1], nameof(BattleFormulaConfig.FlatDamageBonus), 2),
+                VulnerablePerPoint = ParseFloat(columns[2], nameof(BattleFormulaConfig.VulnerablePerPoint), 2),
+                DefenseMitigationFactor = ParseFloat(columns[3], nameof(BattleFormulaConfig.DefenseMitigationFactor), 2),
+                MinDamage = ParseFloat(columns[4], nameof(BattleFormulaConfig.MinDamage), 2),
+                Notes = columns[5]
+            }
+        };
+
+        EnsureFolderExists(ConfigOutputFolder);
+        WriteJson(BattleFormulaJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported battle formula to {BattleFormulaJsonPath}");
+    }
+
+    [MenuItem("Tools/Config/Import Element Relation CSV")]
+    public static void ImportElementRelations()
+    {
+        var rows = ReadRequiredRows(ElementRelationCsvPath, "ElementRelation CSV");
+        var relations = new List<ElementRelationConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+            if (columns.Count < 4)
+            {
+                throw new InvalidOperationException($"Invalid element relation row at line {i + 1}.");
+            }
+
+            relations.Add(new ElementRelationConfig
+            {
+                AttackerElement = columns[0],
+                DefenderElement = columns[1],
+                Multiplier = ParseFloat(columns[2], nameof(ElementRelationConfig.Multiplier), i + 1),
+                Notes = columns[3]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new ElementRelationDatabase { Relations = relations };
+        WriteJson(ElementRelationJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {relations.Count} element relations to {ElementRelationJsonPath}");
+    }
+    [MenuItem("Tools/Config/Import Enemy Encounter CSV")]
+    public static void ImportEnemyEncounters()
+    {
+        var rows = ReadRequiredRows(EnemyEncounterCsvPath, "EnemyEncounter CSV");
+        var configs = new List<EnemyEncounterConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 8)
+            {
+                throw new InvalidOperationException($"Invalid enemy encounter row at line {i + 1}.");
+            }
+
+            configs.Add(new EnemyEncounterConfig
+            {
+                Id = columns[0],
+                StageFrom = ParseInt(columns[1], nameof(EnemyEncounterConfig.StageFrom), i + 1),
+                StageTo = ParseInt(columns[2], nameof(EnemyEncounterConfig.StageTo), i + 1),
+                NodeType = columns[3],
+                EnemyIds = columns[4],
+                OverrideElement = columns[5],
+                Weight = ParseInt(columns[6], nameof(EnemyEncounterConfig.Weight), i + 1),
+                Notes = columns[7]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new EnemyEncounterDatabase { Encounters = configs };
+        WriteJson(EnemyEncounterJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} enemy encounters to {EnemyEncounterJsonPath}");
     }
     [MenuItem("Tools/Config/Import Equipment CSV")]
     public static void ImportEquipments()
@@ -278,7 +394,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 11)
+            if (columns.Count < 7)
             {
                 throw new InvalidOperationException($"Invalid stage balance row at line {i + 1}.");
             }
@@ -290,11 +406,7 @@ public static class CharacterCsvImporter
                 EnemyDEFBonus = ParseInt(columns[3], nameof(StageBalanceConfig.EnemyDEFBonus), i + 1),
                 EnemyMPBonus = ParseInt(columns[4], nameof(StageBalanceConfig.EnemyMPBonus), i + 1),
                 EnemyEquipmentCount = ParseInt(columns[5], nameof(StageBalanceConfig.EnemyEquipmentCount), i + 1),
-                PlayerHPBonus = ParseInt(columns[6], nameof(StageBalanceConfig.PlayerHPBonus), i + 1),
-                PlayerATKBonus = ParseInt(columns[7], nameof(StageBalanceConfig.PlayerATKBonus), i + 1),
-                PlayerDEFBonus = ParseInt(columns[8], nameof(StageBalanceConfig.PlayerDEFBonus), i + 1),
-                PlayerMPBonus = ParseInt(columns[9], nameof(StageBalanceConfig.PlayerMPBonus), i + 1),
-                Notes = columns[10]
+                Notes = columns[6]
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
@@ -454,6 +566,57 @@ public static class CharacterCsvImporter
         WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
         Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
     }
+    private static Dictionary<string, List<SkillEffectConfig>> BuildSkillEffectMap(List<List<string>> rows)
+    {
+        var effectMap = new Dictionary<string, List<SkillEffectConfig>>(StringComparer.OrdinalIgnoreCase);
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 7)
+            {
+                throw new InvalidOperationException($"Invalid skill effect row at line {i + 1}.");
+            }
+
+            var skillId = columns[0];
+            if (string.IsNullOrWhiteSpace(skillId))
+            {
+                throw new InvalidOperationException($"Skill effect row at line {i + 1} is missing SkillId.");
+            }
+
+            List<SkillEffectConfig> list;
+            if (!effectMap.TryGetValue(skillId, out list))
+            {
+                list = new List<SkillEffectConfig>();
+                effectMap[skillId] = list;
+            }
+
+            list.Add(new SkillEffectConfig
+            {
+                EffectIndex = ParseInt(columns[1], nameof(SkillEffectConfig.EffectIndex), i + 1),
+                EffectType = columns[2],
+                TargetScope = columns[3],
+                Value = ParseInt(columns[4], nameof(SkillEffectConfig.Value), i + 1),
+                ValuePerLevel = ParseInt(columns[5], nameof(SkillEffectConfig.ValuePerLevel), i + 1),
+                DurationRounds = ParseInt(columns[6], nameof(SkillEffectConfig.DurationRounds), i + 1),
+                MaxStacks = ParseInt(columns[7], nameof(SkillEffectConfig.MaxStacks), i + 1),
+                StackRule = columns[8],
+                TriggerTiming = columns[9],
+                Notes = columns[10]
+            });
+        }
+
+        foreach (var pair in effectMap)
+        {
+            pair.Value.Sort((left, right) => left.EffectIndex.CompareTo(right.EffectIndex));
+        }
+
+        return effectMap;
+    }
     private static string NormalizeLocalizationText(string value)
     {
         return string.IsNullOrEmpty(value)
@@ -552,6 +715,15 @@ public static class CharacterCsvImporter
         return builder.ToString();
     }
 
+    private static float ParseFloat(string value, string fieldName, int lineNumber)
+    {
+        float result;
+        if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result))
+        {
+            return result;
+        }
+        throw new FormatException($"Failed to parse {fieldName} at line {lineNumber}: {value}");
+    }
     private static int ParseInt(string value, string fieldName, int lineNumber)
     {
         int result;
@@ -644,3 +816,8 @@ public static class CharacterCsvImporter
         }
     }
 }
+
+
+
+
+

@@ -1,0 +1,154 @@
+{
+  "Encounters": [
+    {
+      "Id": "ENC_BATTLE_1",
+      "StageFrom": 1,
+      "StageTo": 20,
+      "NodeType": "Battle",
+      "EnemyIds": "E001|E004",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第一章普通战"
+    },
+    {
+      "Id": "ENC_ELITE_1",
+      "StageFrom": 1,
+      "StageTo": 20,
+      "NodeType": "Elite",
+      "EnemyIds": "E006|E007",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第一章精英战"
+    },
+    {
+      "Id": "ENC_BOSS_1",
+      "StageFrom": 1,
+      "StageTo": 20,
+      "NodeType": "Boss",
+      "EnemyIds": "E008",
+      "OverrideElement": "Holy",
+      "Weight": 100,
+      "Notes": "第一章Boss"
+    },
+    {
+      "Id": "ENC_BATTLE_2",
+      "StageFrom": 21,
+      "StageTo": 40,
+      "NodeType": "Battle",
+      "EnemyIds": "E002|E004",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第二章普通战"
+    },
+    {
+      "Id": "ENC_ELITE_2",
+      "StageFrom": 21,
+      "StageTo": 40,
+      "NodeType": "Elite",
+      "EnemyIds": "E006|E003",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第二章精英战"
+    },
+    {
+      "Id": "ENC_BOSS_2",
+      "StageFrom": 21,
+      "StageTo": 40,
+      "NodeType": "Boss",
+      "EnemyIds": "E008",
+      "OverrideElement": "Holy",
+      "Weight": 100,
+      "Notes": "第二章Boss"
+    },
+    {
+      "Id": "ENC_BATTLE_3",
+      "StageFrom": 41,
+      "StageTo": 60,
+      "NodeType": "Battle",
+      "EnemyIds": "E002|E003",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第三章普通战"
+    },
+    {
+      "Id": "ENC_ELITE_3",
+      "StageFrom": 41,
+      "StageTo": 60,
+      "NodeType": "Elite",
+      "EnemyIds": "E007|E003",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第三章精英战"
+    },
+    {
+      "Id": "ENC_BOSS_3",
+      "StageFrom": 41,
+      "StageTo": 60,
+      "NodeType": "Boss",
+      "EnemyIds": "E008",
+      "OverrideElement": "Holy",
+      "Weight": 100,
+      "Notes": "第三章Boss"
+    },
+    {
+      "Id": "ENC_BATTLE_4",
+      "StageFrom": 61,
+      "StageTo": 80,
+      "NodeType": "Battle",
+      "EnemyIds": "E001|E005",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第四章普通战"
+    },
+    {
+      "Id": "ENC_ELITE_4",
+      "StageFrom": 61,
+      "StageTo": 80,
+      "NodeType": "Elite",
+      "EnemyIds": "E006|E005",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第四章精英战"
+    },
+    {
+      "Id": "ENC_BOSS_4",
+      "StageFrom": 61,
+      "StageTo": 80,
+      "NodeType": "Boss",
+      "EnemyIds": "E008",
+      "OverrideElement": "Holy",
+      "Weight": 100,
+      "Notes": "第四章Boss"
+    },
+    {
+      "Id": "ENC_BATTLE_5",
+      "StageFrom": 81,
+      "StageTo": 100,
+      "NodeType": "Battle",
+      "EnemyIds": "E004|E005",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第五章普通战"
+    },
+    {
+      "Id": "ENC_ELITE_5",
+      "StageFrom": 81,
+      "StageTo": 100,
+      "NodeType": "Elite",
+      "EnemyIds": "E006|E007",
+      "OverrideElement": "",
+      "Weight": 100,
+      "Notes": "第五章精英战"
+    },
+    {
+      "Id": "ENC_BOSS_5",
+      "StageFrom": 81,
+      "StageTo": 100,
+      "NodeType": "Boss",
+      "EnemyIds": "E008",
+      "OverrideElement": "Holy",
+      "Weight": 100,
+      "Notes": "第五章Boss"
+    }
+  ]
+}
