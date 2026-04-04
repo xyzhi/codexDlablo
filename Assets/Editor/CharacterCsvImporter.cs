@@ -412,7 +412,12 @@ public static class CharacterCsvImporter
         EnsureFolderExists(ConfigOutputFolder);
         var database = new StageBalanceDatabase();
         database.stageBalances = configs;
-        WriteJson(StageBalanceJsonPath, JsonUtility.ToJson(database, true));
+        if (!TryWriteStageBalanceJson(database))
+        {
+            Debug.Log($"Stage balances unchanged, skipped writing {StageBalanceJsonPath}");
+            return;
+        }
+
         Debug.Log($"Imported {configs.Count} stage balances to {StageBalanceJsonPath}");
     }
     [MenuItem("Tools/Config/Import Stage Nodes CSV")]
@@ -656,6 +661,62 @@ public static class CharacterCsvImporter
         }
 
         File.WriteAllText(absolutePath, json, new UTF8Encoding(true));
+    }
+
+    private static bool TryWriteStageBalanceJson(StageBalanceDatabase database)
+    {
+        var projectRoot = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+        var absolutePath = Path.Combine(projectRoot, StageBalanceJsonPath);
+        if (File.Exists(absolutePath))
+        {
+            var existingJson = File.ReadAllText(absolutePath, Encoding.UTF8);
+            var existingDatabase = JsonUtility.FromJson<StageBalanceDatabase>(existingJson);
+            if (AreStageBalanceDatabasesEquivalent(existingDatabase, database))
+            {
+                return false;
+            }
+        }
+
+        File.WriteAllText(absolutePath, JsonUtility.ToJson(database, true), new UTF8Encoding(true));
+        return true;
+    }
+
+    private static bool AreStageBalanceDatabasesEquivalent(StageBalanceDatabase left, StageBalanceDatabase right)
+    {
+        var leftItems = left != null && left.stageBalances != null ? left.stageBalances : new List<StageBalanceConfig>();
+        var rightItems = right != null && right.stageBalances != null ? right.stageBalances : new List<StageBalanceConfig>();
+        if (leftItems.Count != rightItems.Count)
+        {
+            return false;
+        }
+
+        for (var i = 0; i < leftItems.Count; i++)
+        {
+            var leftItem = leftItems[i];
+            var rightItem = rightItems[i];
+            if (leftItem == null || rightItem == null)
+            {
+                if (leftItem != rightItem)
+                {
+                    return false;
+                }
+
+                continue;
+            }
+
+            if (leftItem.Stage != rightItem.Stage
+                || leftItem.EnemyHPBonus != rightItem.EnemyHPBonus
+                || leftItem.EnemyATKBonus != rightItem.EnemyATKBonus
+                || leftItem.EnemyDEFBonus != rightItem.EnemyDEFBonus
+                || leftItem.EnemyMPBonus != rightItem.EnemyMPBonus
+                || leftItem.EnemyEquipmentCount != rightItem.EnemyEquipmentCount
+                || !string.Equals(leftItem.Notes ?? string.Empty, rightItem.Notes ?? string.Empty, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static bool AreJsonContentsEquivalent(string left, string right)
