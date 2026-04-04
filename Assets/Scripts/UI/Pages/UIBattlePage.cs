@@ -1861,7 +1861,8 @@ namespace Wuxing.UI
                 return;
             }
 
-            var equipment = equipmentDatabase.GetById(preferredSelectionEquipmentId);
+            var equipment = BattleManager.GetOwnedEquipmentConfigByInstance(preferredSelectionEquipmentId)
+                ?? equipmentDatabase.GetById(preferredSelectionEquipmentId);
             if (equipment != null && !string.IsNullOrEmpty(equipment.Slot))
             {
                 selectingSlot = equipment.Slot;
@@ -1882,31 +1883,34 @@ namespace Wuxing.UI
             return GetSlotDisplayName(slot) + " " + suffix + " (" + count + ")";
         }
 
-        private void SortEquipmentsForDisplay(List<EquipmentConfig> equipments)
+        private void SortEquipmentsForDisplay(List<EquipmentInstanceData> equipments)
         {
             if (equipments == null || equipments.Count <= 1)
             {
                 return;
             }
 
-            equipments.Sort(delegate(EquipmentConfig left, EquipmentConfig right)
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            equipments.Sort(delegate(EquipmentInstanceData left, EquipmentInstanceData right)
             {
-                var leftIsPreferred = left != null && left.Id == preferredSelectionEquipmentId;
-                var rightIsPreferred = right != null && right.Id == preferredSelectionEquipmentId;
+                var leftIsPreferred = left != null && left.InstanceId == preferredSelectionEquipmentId;
+                var rightIsPreferred = right != null && right.InstanceId == preferredSelectionEquipmentId;
                 if (leftIsPreferred != rightIsPreferred)
                 {
                     return leftIsPreferred ? -1 : 1;
                 }
 
-                var leftScore = GetEquipmentDisplayScore(left);
-                var rightScore = GetEquipmentDisplayScore(right);
+                var leftConfig = left != null && equipmentDatabase != null ? equipmentDatabase.GetById(left.EquipmentId) : null;
+                var rightConfig = right != null && equipmentDatabase != null ? equipmentDatabase.GetById(right.EquipmentId) : null;
+                var leftScore = GetEquipmentDisplayScore(leftConfig);
+                var rightScore = GetEquipmentDisplayScore(rightConfig);
                 if (leftScore != rightScore)
                 {
                     return rightScore.CompareTo(leftScore);
                 }
 
-                var leftName = left != null ? left.Name : string.Empty;
-                var rightName = right != null ? right.Name : string.Empty;
+                var leftName = leftConfig != null ? leftConfig.Name : string.Empty;
+                var rightName = rightConfig != null ? rightConfig.Name : string.Empty;
                 return string.Compare(leftName, rightName, System.StringComparison.OrdinalIgnoreCase);
             });
         }
@@ -1967,7 +1971,8 @@ namespace Wuxing.UI
 
             var slot = ResolveSelectionSlot();
 
-            var equipments = BattleManager.GetOwnedEquipmentsForSlot(slot);
+            var equipments = BattleManager.GetOwnedEquipmentInstancesForSlot(slot);
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
             SortEquipmentsForDisplay(equipments);
             equipmentSelectionTitleText.text = BuildSelectionTitle(slot, equipments.Count);
             RefreshEquipmentSelectionViewportLayout(equipments.Count + 7);
@@ -2052,7 +2057,8 @@ namespace Wuxing.UI
 
             for (var i = 0; i < equipments.Count; i++)
             {
-                var equipment = equipments[i];
+                var equipmentInstance = equipments[i];
+                var equipment = equipmentInstance != null && equipmentDatabase != null ? equipmentDatabase.GetById(equipmentInstance.EquipmentId) : null;
                 if (equipment == null)
                 {
                     continue;
@@ -2073,7 +2079,7 @@ namespace Wuxing.UI
                             : fourthColumnX;
                 ConfigureEquipmentSelectionButtonRect(rect, leftOffset, row * cardStepY);
 
-                var capturedEquipmentId = equipment.Id;
+                var capturedEquipmentId = equipmentInstance.InstanceId;
                 button.onClick.RemoveAllListeners();
                 button.onClick.AddListener(delegate
                 {
@@ -2117,23 +2123,8 @@ namespace Wuxing.UI
         private string BuildSelectedEquipmentDetailText()
         {
             var slot = ResolveSelectionSlot();
-            var equipmentName = BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slot);
-            var equipmentDatabase = EquipmentDatabaseLoader.Load();
-            if (equipmentDatabase == null)
-            {
-                return equipmentName;
-            }
-
-            EquipmentConfig equipment = null;
-            var owned = BattleManager.GetOwnedEquipmentsForSlot(slot);
-            for (var i = 0; i < owned.Count; i++)
-            {
-                if (owned[i] != null && string.Equals(owned[i].Name, equipmentName, System.StringComparison.Ordinal))
-                {
-                    equipment = owned[i];
-                    break;
-                }
-            }
+            var equippedInstanceId = BattleManager.GetEquippedPlayerEquipmentInstanceId(selectedEquipmentUnitIndex, slot);
+            var equipment = BattleManager.GetOwnedEquipmentConfigByInstance(equippedInstanceId);
 
             if (equipment == null)
             {
