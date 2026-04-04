@@ -189,6 +189,20 @@ namespace Wuxing.Battle
             SaveEquipmentSettings();
         }
 
+        public static void UnequipPlayerEquipmentForUnitIndexSlot(int unitIndex, string slot)
+        {
+            EnsureEquipmentSettingsLoaded();
+
+            var config = GetPlayerCharacterConfig(unitIndex);
+            if (config == null || string.IsNullOrEmpty(slot))
+            {
+                return;
+            }
+
+            SetPlayerEquipmentOverride(config.Id, slot, string.Empty);
+            SaveEquipmentSettings();
+        }
+
         public static List<EquipmentConfig> GetOwnedEquipmentsForSlot(string slot)
         {
             var equipmentDatabase = EquipmentDatabaseLoader.Load();

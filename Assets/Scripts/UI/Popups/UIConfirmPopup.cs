@@ -19,9 +19,11 @@ namespace Wuxing.UI
         private const float BottomPadding = 48f;
         private const float TitleSpacing = 20f;
         private const float ButtonAreaHeight = 120f;
-        private const float MultiChoiceButtonAreaHeight = 360f;
+        private const float MultiChoiceButtonAreaHeight = 560f;
         private const float ButtonMessageSpacing = 28f;
         private const float HorizontalPadding = 48f;
+        private const float ChoiceCardSpacingX = 12f;
+        private const float ChoiceCardSpacingY = 16f;
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text messageText;
@@ -45,6 +47,7 @@ namespace Wuxing.UI
             if (messageText != null)
             {
                 messageText.supportRichText = true;
+                messageText.fontSize = 16;
             }
 
             if (confirmButton != null)
@@ -190,10 +193,10 @@ namespace Wuxing.UI
                 buttonText.supportRichText = true;
                 buttonText.text = label;
                 buttonText.alignment = multiChoiceMode ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
-                buttonText.fontSize = multiChoiceMode ? 22 : 24;
+                buttonText.fontSize = multiChoiceMode ? 20 : 24;
                 buttonText.resizeTextForBestFit = multiChoiceMode;
-                buttonText.resizeTextMinSize = multiChoiceMode ? 18 : 24;
-                buttonText.resizeTextMaxSize = multiChoiceMode ? 26 : 24;
+                buttonText.resizeTextMinSize = multiChoiceMode ? 16 : 24;
+                buttonText.resizeTextMaxSize = multiChoiceMode ? 22 : 24;
                 buttonText.lineSpacing = multiChoiceMode ? 1.15f : 1f;
                 buttonText.horizontalOverflow = HorizontalWrapMode.Wrap;
                 buttonText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -204,12 +207,18 @@ namespace Wuxing.UI
                 }
             }
 
-            var image = button.GetComponent<Image>();
-            if (image != null)
+            if (multiChoiceMode)
             {
-                image.color = multiChoiceMode
-                    ? new Color(0.18f, 0.2f, 0.28f, 0.98f)
-                    : new Color(0.16f, 0.18f, 0.24f, 0.95f);
+                UICardChromeUtility.Apply(button, Color.white, false);
+            }
+            else
+            {
+                UIFactory.ApplyStandardButtonChrome(button);
+                var rect = button.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64f);
+                }
             }
         }
 
@@ -250,14 +259,6 @@ namespace Wuxing.UI
 
         private void ApplyMultiChoiceLayout(int count)
         {
-            var left = 0.05f;
-            var right = 0.95f;
-            var bottom = 0.08f;
-            var top = 0.43f;
-            var spacing = 0.02f;
-            var availableWidth = right - left;
-            var buttonWidth = count > 0 ? (availableWidth - spacing * Mathf.Max(0, count - 1)) / Mathf.Max(1, count) : availableWidth;
-
             for (var i = 0; i < count; i++)
             {
                 var button = choiceButtons[i];
@@ -272,12 +273,16 @@ namespace Wuxing.UI
                     continue;
                 }
 
-                var anchorMinX = left + i * (buttonWidth + spacing);
-                var anchorMaxX = anchorMinX + buttonWidth;
-                rect.anchorMin = new Vector2(anchorMinX, bottom);
-                rect.anchorMax = new Vector2(anchorMaxX, top);
-                rect.offsetMin = Vector2.zero;
-                rect.offsetMax = Vector2.zero;
+                var totalRowWidth = count * UICardChromeUtility.StandardCardWidth + Mathf.Max(0, count - 1) * ChoiceCardSpacingX;
+                var startX = -totalRowWidth * 0.5f + UICardChromeUtility.StandardCardWidth * 0.5f;
+                var x = startX + i * (UICardChromeUtility.StandardCardWidth + ChoiceCardSpacingX);
+                var y = BottomPadding;
+
+                rect.anchorMin = new Vector2(0.5f, 0f);
+                rect.anchorMax = new Vector2(0.5f, 0f);
+                rect.pivot = new Vector2(0.5f, 0f);
+                rect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
+                rect.anchoredPosition = new Vector2(x, y);
             }
         }
 
@@ -293,9 +298,26 @@ namespace Wuxing.UI
 
             var parentRect = panelRect.parent as RectTransform;
             var parentHeight = parentRect != null ? parentRect.rect.height : Screen.height;
+            var parentWidth = parentRect != null ? parentRect.rect.width : Screen.width;
             if (parentHeight <= 0f)
             {
                 parentHeight = 1920f;
+            }
+            if (parentWidth <= 0f)
+            {
+                parentWidth = 1080f;
+            }
+
+            if (multiChoiceMode)
+            {
+                panelRect.anchorMin = new Vector2(0.03f, 0.2f);
+                panelRect.anchorMax = new Vector2(0.97f, 0.8f);
+                panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, parentWidth * 0.94f);
+            }
+            else
+            {
+                panelRect.anchorMin = new Vector2(0.12f, 0.32f);
+                panelRect.anchorMax = new Vector2(0.88f, 0.68f);
             }
 
             var messageWidth = GetMessageWidth(panelRect);
@@ -308,7 +330,12 @@ namespace Wuxing.UI
 
             var titleHeight = Mathf.Max(52f, titleText.preferredHeight);
             var messageHeight = Mathf.Max(96f, messageText.preferredHeight);
-            var buttonHeight = multiChoiceMode ? MultiChoiceButtonAreaHeight : ButtonAreaHeight;
+            if (multiChoiceMode)
+            {
+                messageHeight = Mathf.Clamp(messageHeight, 96f, 220f);
+            }
+
+            var buttonHeight = multiChoiceMode ? 320f : ButtonAreaHeight;
             var desiredHeight = TopPadding
                 + titleHeight
                 + TitleSpacing

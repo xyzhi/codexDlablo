@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
@@ -7,6 +7,7 @@ namespace Wuxing.UI
     public static class UIFactory
     {
         private static Font defaultFont;
+        private static readonly Color StandardButtonBorderColor = new Color(0.54f, 0.4f, 0.25f, 1f);
 
         public static GameObject CreatePanel(Transform parent, string name, Color color)
         {
@@ -71,20 +72,33 @@ namespace Wuxing.UI
             var buttonObject = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
             buttonObject.transform.SetParent(parent, false);
 
-            var image = buttonObject.GetComponent<Image>();
-            image.color = new Color(0.16f, 0.18f, 0.24f, 0.95f);
-
             var button = buttonObject.GetComponent<Button>();
-            button.targetGraphic = image;
+            button.targetGraphic = buttonObject.GetComponent<Image>();
             button.onClick.AddListener(onClick);
+            ApplyStandardButtonChrome(button);
 
-            AddOutlineBox(buttonObject.transform, "Outline", new Color(0.85f, 0.88f, 0.93f, 0.8f), 1f);
-
-            var text = CreateText(buttonObject.transform, "Label", label, 24, TextAnchor.MiddleCenter, Color.white);
-            text.rectTransform.offsetMin = new Vector2(12f, 8f);
-            text.rectTransform.offsetMax = new Vector2(-12f, -8f);
+            var text = CreateText(buttonObject.transform, "Label", label, 22, TextAnchor.MiddleCenter, new Color(0.96f, 0.92f, 0.84f, 1f));
+            text.rectTransform.offsetMin = new Vector2(14f, 10f);
+            text.rectTransform.offsetMax = new Vector2(-14f, -10f);
 
             return button;
+        }
+
+        public static void ApplyStandardButtonChrome(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                image.color = new Color(StandardButtonBorderColor.r, StandardButtonBorderColor.g, StandardButtonBorderColor.b, 0.95f);
+                button.targetGraphic = image;
+            }
+
+            UICardChromeUtility.ApplySimple(button, StandardButtonBorderColor, false);
         }
 
         public static Button CreateListButton(Transform parent, string name, string label, UnityAction onClick)
@@ -93,12 +107,12 @@ namespace Wuxing.UI
             var labelText = button.GetComponentInChildren<Text>();
             if (labelText != null)
             {
-                labelText.alignment = TextAnchor.MiddleLeft;
-                labelText.fontSize = 20;
+                labelText.alignment = TextAnchor.UpperLeft;
+                labelText.fontSize = 18;
                 labelText.horizontalOverflow = HorizontalWrapMode.Wrap;
                 labelText.verticalOverflow = VerticalWrapMode.Truncate;
-                labelText.rectTransform.offsetMin = new Vector2(18f, 6f);
-                labelText.rectTransform.offsetMax = new Vector2(-18f, -6f);
+                labelText.rectTransform.offsetMin = new Vector2(16f, 14f);
+                labelText.rectTransform.offsetMax = new Vector2(-16f, -14f);
             }
 
             return button;
@@ -283,4 +297,6 @@ namespace Wuxing.UI
         }
     }
 }
+
+
 

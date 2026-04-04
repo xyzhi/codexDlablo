@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -28,7 +28,7 @@ public static class UIPrefabBuilder
         var inputHash = ComputeBuildInputHash();
         if (!forceRebuild && AreAllGeneratedPrefabsPresent() && string.Equals(ReadLastBuildHash(), inputHash, System.StringComparison.Ordinal))
         {
-            Debug.Log("UI 相关代码未变化，跳过预设重建。");
+            Debug.Log("UI prefabs are up to date. Skip rebuild.");
             return;
         }
 
@@ -38,13 +38,15 @@ public static class UIPrefabBuilder
         BuildMapPagePrefab();
         BuildBattlePagePrefab();
         BuildConfirmPopupPrefab();
+        BuildCardBrowserPopupPrefab();
+        BuildEquipmentPopupPrefab();
         BuildSpiritStoneConvertPopupPrefab();
         BuildToastPopupPrefab();
 
         WriteLastBuildHash(inputHash);
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("已生成 UI 预设到 Assets/Resources/Prefabs/UI");
+        Debug.Log("UI prefabs rebuilt at Assets/Resources/Prefabs/UI");
     }
 
     private static void BuildCanvasRootPrefab()
@@ -130,14 +132,14 @@ public static class UIPrefabBuilder
         orbitGlowRect.sizeDelta = new Vector2(20f, 20f);
 
         var titleBlock = UIFactory.CreateContainer(root.transform, "TitleBlock", new Vector2(0.14f, 0.5f), new Vector2(0.86f, 0.71f), Vector2.zero, Vector2.zero);
-        var titleText = UIFactory.CreateText(titleBlock, "Title", "五行行者", 90, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.84f, 1f));
+        var titleText = UIFactory.CreateText(titleBlock, "Title", "\u4e94\u884c\u884c\u8005", 90, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.84f, 1f));
         titleText.rectTransform.anchorMin = new Vector2(0f, 0.34f);
         titleText.rectTransform.anchorMax = new Vector2(1f, 0.8f);
         titleText.rectTransform.offsetMin = Vector2.zero;
         titleText.rectTransform.offsetMax = Vector2.zero;
         AddLocalizedText(titleText, "landing.title");
 
-        var subtitleText = UIFactory.CreateText(titleBlock, "Subtitle", "以寿元为火，以五行为刃。", 20, TextAnchor.LowerCenter, new Color(0.92f, 0.93f, 0.95f, 0.58f));
+        var subtitleText = UIFactory.CreateText(titleBlock, "Subtitle", "\u5355\u673a\u8089\u9e3d\u4fee\u4ed9\u4e4b\u65c5", 20, TextAnchor.LowerCenter, new Color(0.92f, 0.93f, 0.95f, 0.58f));
         subtitleText.rectTransform.anchorMin = new Vector2(0.22f, 0.04f);
         subtitleText.rectTransform.anchorMax = new Vector2(0.78f, 0.2f);
         subtitleText.rectTransform.offsetMin = Vector2.zero;
@@ -152,7 +154,7 @@ public static class UIPrefabBuilder
         actionPanelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(actionPanel.transform, "ActionOutline", new Color(1f, 0.86f, 0.62f, 0.08f), 1f);
 
-        var enterButton = UIFactory.CreateButton(actionPanel.transform, "EnterButton", "开始游戏", delegate { });
+        var enterButton = UIFactory.CreateButton(actionPanel.transform, "EnterButton", "\u8fdb\u5165\u6e38\u620f", delegate { });
         var enterButtonRect = enterButton.GetComponent<RectTransform>();
         enterButtonRect.anchorMin = new Vector2(0.08f, 0.42f);
         enterButtonRect.anchorMax = new Vector2(0.92f, 0.8f);
@@ -161,7 +163,7 @@ public static class UIPrefabBuilder
         enterButton.GetComponent<Image>().color = new Color(0.46f, 0.2f, 0.12f, 0.9f);
         AddLocalizedText(enterButton.GetComponentInChildren<Text>(), "landing.button_enter");
 
-        var languageButton = UIFactory.CreateButton(actionPanel.transform, "LanguageButton", "切换语言", delegate { });
+        var languageButton = UIFactory.CreateButton(actionPanel.transform, "LanguageButton", "\u8bed\u8a00\u5207\u6362", delegate { });
         var languageButtonRect = languageButton.GetComponent<RectTransform>();
         languageButtonRect.anchorMin = new Vector2(0.08f, 0.1f);
         languageButtonRect.anchorMax = new Vector2(0.34f, 0.24f);
@@ -170,7 +172,7 @@ public static class UIPrefabBuilder
         languageButton.GetComponent<Image>().color = new Color(0.14f, 0.2f, 0.26f, 0.72f);
         AddLocalizedText(languageButton.GetComponentInChildren<Text>(), "menu.button_language");
 
-        var languageStateText = UIFactory.CreateText(actionPanel.transform, "LanguageStateText", "当前语言：简体中文", 17, TextAnchor.MiddleRight, new Color(0.82f, 0.89f, 0.95f, 0.68f));
+        var languageStateText = UIFactory.CreateText(actionPanel.transform, "LanguageStateText", "\u5f53\u524d\u8bed\u8a00", 17, TextAnchor.MiddleRight, new Color(0.82f, 0.89f, 0.95f, 0.68f));
         languageStateText.rectTransform.anchorMin = new Vector2(0.42f, 0.08f);
         languageStateText.rectTransform.anchorMax = new Vector2(0.92f, 0.26f);
         languageStateText.rectTransform.offsetMin = Vector2.zero;
@@ -343,14 +345,14 @@ public static class UIPrefabBuilder
         equipmentRect.offsetMin = Vector2.zero;
         equipmentRect.offsetMax = new Vector2(-6f, 0f);
 
-        var spiritConvertButton = UIFactory.CreateButton(actionRow, "SpiritConvertButton", "灵石转换", delegate { });
+        var spiritConvertButton = UIFactory.CreateButton(actionRow, "SpiritConvertButton", "\u7075\u77f3\u8f6c\u6362", delegate { });
         var spiritConvertRect = spiritConvertButton.GetComponent<RectTransform>();
         spiritConvertRect.anchorMin = new Vector2(0.2f, 0f);
         spiritConvertRect.anchorMax = new Vector2(0.38f, 1f);
         spiritConvertRect.offsetMin = Vector2.zero;
         spiritConvertRect.offsetMax = new Vector2(-4f, 0f);
 
-        var skillOverviewButton = UIFactory.CreateButton(actionRow, "SkillOverviewButton", "已学功法", delegate { });
+        var skillOverviewButton = UIFactory.CreateButton(actionRow, "SkillOverviewButton", "\u5df2\u5b66\u529f\u6cd5", delegate { });
         var skillOverviewRect = skillOverviewButton.GetComponent<RectTransform>();
         skillOverviewRect.anchorMin = new Vector2(0.4f, 0f);
         skillOverviewRect.anchorMax = new Vector2(0.58f, 1f);
@@ -471,7 +473,7 @@ public static class UIPrefabBuilder
         var equipmentTitleText = UIFactory.CreateText(equipmentTitle, "EquipmentTitleText", "Equipment Detail", 30, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(equipmentTitleText, "battle.equipment_detail_title");
 
-        var controlsRoot = UIFactory.CreateContainer(equipmentContent.transform, "ControlsRoot", new Vector2(0.05f, 0.55f), new Vector2(0.95f, 0.86f), Vector2.zero, Vector2.zero);
+        var controlsRoot = UIFactory.CreateContainer(equipmentContent.transform, "ControlsRoot", new Vector2(0.05f, 0.44f), new Vector2(0.95f, 0.86f), Vector2.zero, Vector2.zero);
 
         var cycleEquipmentButton = UIFactory.CreateButton(controlsRoot, "CycleEquipmentButton", "Switch Preset", delegate { });
         AddLocalizedText(cycleEquipmentButton.GetComponentInChildren<Text>(), "battle.button_cycle_equipment");
@@ -483,50 +485,50 @@ public static class UIPrefabBuilder
 
         var cycleEquipmentUnitButton = UIFactory.CreateButton(controlsRoot, "CycleEquipmentUnitButton", "Unit", delegate { });
         var cycleEquipmentUnitRect = cycleEquipmentUnitButton.GetComponent<RectTransform>();
-        cycleEquipmentUnitRect.anchorMin = new Vector2(0.47f, 0.76f);
-        cycleEquipmentUnitRect.anchorMax = new Vector2(1f, 0.94f);
+        cycleEquipmentUnitRect.anchorMin = new Vector2(0f, 0.72f);
+        cycleEquipmentUnitRect.anchorMax = new Vector2(0.48f, 0.98f);
         cycleEquipmentUnitRect.offsetMin = Vector2.zero;
         cycleEquipmentUnitRect.offsetMax = Vector2.zero;
 
         var cycleWeaponButton = UIFactory.CreateButton(controlsRoot, "CycleWeaponButton", "Weapon", delegate { });
         var cycleWeaponRect = cycleWeaponButton.GetComponent<RectTransform>();
-        cycleWeaponRect.anchorMin = new Vector2(0f, 0.5f);
-        cycleWeaponRect.anchorMax = new Vector2(0.3f, 0.7f);
+        cycleWeaponRect.anchorMin = new Vector2(0f, 0.38f);
+        cycleWeaponRect.anchorMax = new Vector2(0.31f, 0.66f);
         cycleWeaponRect.offsetMin = Vector2.zero;
         cycleWeaponRect.offsetMax = Vector2.zero;
 
         var cycleArmorButton = UIFactory.CreateButton(controlsRoot, "CycleArmorButton", "Armor", delegate { });
         var cycleArmorRect = cycleArmorButton.GetComponent<RectTransform>();
-        cycleArmorRect.anchorMin = new Vector2(0.35f, 0.5f);
-        cycleArmorRect.anchorMax = new Vector2(0.65f, 0.7f);
+        cycleArmorRect.anchorMin = new Vector2(0.345f, 0.38f);
+        cycleArmorRect.anchorMax = new Vector2(0.655f, 0.66f);
         cycleArmorRect.offsetMin = Vector2.zero;
         cycleArmorRect.offsetMax = Vector2.zero;
 
         var cycleAccessoryButton = UIFactory.CreateButton(controlsRoot, "CycleAccessoryButton", "Accessory", delegate { });
         var cycleAccessoryRect = cycleAccessoryButton.GetComponent<RectTransform>();
-        cycleAccessoryRect.anchorMin = new Vector2(0.7f, 0.5f);
-        cycleAccessoryRect.anchorMax = new Vector2(1f, 0.7f);
+        cycleAccessoryRect.anchorMin = new Vector2(0.69f, 0.38f);
+        cycleAccessoryRect.anchorMax = new Vector2(1f, 0.66f);
         cycleAccessoryRect.offsetMin = Vector2.zero;
         cycleAccessoryRect.offsetMax = Vector2.zero;
 
         var autoOffenseButton = UIFactory.CreateButton(controlsRoot, "AutoOffenseButton", "Auto Offense", delegate { });
         var autoOffenseRect = autoOffenseButton.GetComponent<RectTransform>();
-        autoOffenseRect.anchorMin = new Vector2(0f, 0.24f);
-        autoOffenseRect.anchorMax = new Vector2(0.47f, 0.44f);
+        autoOffenseRect.anchorMin = new Vector2(0f, 0.02f);
+        autoOffenseRect.anchorMax = new Vector2(0.48f, 0.26f);
         autoOffenseRect.offsetMin = Vector2.zero;
         autoOffenseRect.offsetMax = Vector2.zero;
 
         var autoDefenseButton = UIFactory.CreateButton(controlsRoot, "AutoDefenseButton", "Auto Defense", delegate { });
         var autoDefenseRect = autoDefenseButton.GetComponent<RectTransform>();
-        autoDefenseRect.anchorMin = new Vector2(0.53f, 0.24f);
-        autoDefenseRect.anchorMax = new Vector2(1f, 0.44f);
+        autoDefenseRect.anchorMin = new Vector2(0.52f, 0.02f);
+        autoDefenseRect.anchorMax = new Vector2(1f, 0.26f);
         autoDefenseRect.offsetMin = Vector2.zero;
         autoDefenseRect.offsetMax = Vector2.zero;
 
         var resetEquipmentButton = UIFactory.CreateButton(controlsRoot, "ResetEquipmentButton", "Reset", delegate { });
         var resetEquipmentRect = resetEquipmentButton.GetComponent<RectTransform>();
-        resetEquipmentRect.anchorMin = new Vector2(0f, 0f);
-        resetEquipmentRect.anchorMax = new Vector2(1f, 0.18f);
+        resetEquipmentRect.anchorMin = new Vector2(0.52f, 0.72f);
+        resetEquipmentRect.anchorMax = new Vector2(1f, 0.98f);
         resetEquipmentRect.offsetMin = Vector2.zero;
         resetEquipmentRect.offsetMax = Vector2.zero;
 
@@ -539,13 +541,13 @@ public static class UIPrefabBuilder
         closeEquipmentRect.offsetMax = Vector2.zero;
 
         var selectionTitle = UIFactory.CreateContainer(equipmentContent.transform, "SelectionTitle", new Vector2(0.05f, 0.48f), new Vector2(0.95f, 0.54f), Vector2.zero, Vector2.zero);
-        var selectionTitleText = UIFactory.CreateText(selectionTitle, "SelectionTitleText", "武器列表", 22, TextAnchor.MiddleLeft, new Color(0.95f, 0.86f, 0.74f, 1f));
+        var selectionTitleText = UIFactory.CreateText(selectionTitle, "SelectionTitleText", "\u88c5\u5907\u5217\u8868", 22, TextAnchor.MiddleLeft, new Color(0.95f, 0.86f, 0.74f, 1f));
 
-        var selectionScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "SelectionScrollRoot", new Vector2(0.05f, 0.28f), new Vector2(0.95f, 0.47f), Vector2.zero, Vector2.zero);
+        var selectionScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "SelectionScrollRoot", new Vector2(0.05f, 0.2f), new Vector2(0.95f, 0.41f), Vector2.zero, Vector2.zero);
         var selectionScrollRect = UIFactory.CreateScrollRect(selectionScrollRoot, "SelectionScroll", new Color(0f, 0f, 0f, 0.18f));
         UIFactory.Stretch(selectionScrollRect.GetComponent<RectTransform>());
 
-        var equipmentScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentScrollRoot", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.25f), Vector2.zero, Vector2.zero);
+        var equipmentScrollRoot = UIFactory.CreateContainer(equipmentContent.transform, "EquipmentScrollRoot", new Vector2(0.05f, 0.06f), new Vector2(0.95f, 0.17f), Vector2.zero, Vector2.zero);
         var equipmentScrollRect = UIFactory.CreateScrollRect(equipmentScrollRoot, "EquipmentDetailScroll", new Color(0f, 0f, 0f, 0.18f));
         UIFactory.Stretch(equipmentScrollRect.GetComponent<RectTransform>());
         var equipmentDetailText = UIFactory.CreateText(equipmentScrollRect.content, "EquipmentDetailText", "Equipment detail", 22, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
@@ -582,6 +584,10 @@ public static class UIPrefabBuilder
         BindSerializedProperty(page, "statusText", statusText);
         BindSerializedProperty(page, "playerTeamText", playerPanel.BodyText);
         BindSerializedProperty(page, "enemyTeamText", enemyPanel.BodyText);
+        BindSerializedProperty(page, "playerCardRoot", playerPanel.CardRoot);
+        BindSerializedProperty(page, "playerCardTemplate", playerPanel.CardTemplate);
+        BindSerializedProperty(page, "enemyCardRoot", enemyPanel.CardRoot);
+        BindSerializedProperty(page, "enemyCardTemplate", enemyPanel.CardTemplate);
         BindSerializedProperty(page, "playerEquipmentText", playerPanel.EquipmentText);
         BindSerializedProperty(page, "enemyEquipmentText", enemyPanel.EquipmentText);
         BindSerializedProperty(page, "battleLogText", logBodyText);
@@ -595,8 +601,8 @@ public static class UIPrefabBuilder
         var root = UIFactory.CreatePanel(null, "ConfirmPopup", new Color(0f, 0f, 0f, 0.6f));
         var panel = UIFactory.CreatePanel(root.transform, "Panel", new Color(0.15f, 0.16f, 0.2f, 1f));
         var panelRect = panel.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.12f, 0.32f);
-        panelRect.anchorMax = new Vector2(0.88f, 0.68f);
+        panelRect.anchorMin = new Vector2(0.08f, 0.24f);
+        panelRect.anchorMax = new Vector2(0.92f, 0.76f);
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
@@ -608,24 +614,24 @@ public static class UIPrefabBuilder
         title.rectTransform.offsetMax = Vector2.zero;
 
         var message = UIFactory.CreateText(panel.transform, "Message", "Message", 28, TextAnchor.MiddleCenter, new Color(0.93f, 0.93f, 0.93f, 1f));
-        message.rectTransform.anchorMin = new Vector2(0.08f, 0.32f);
-        message.rectTransform.anchorMax = new Vector2(0.92f, 0.68f);
+        message.rectTransform.anchorMin = new Vector2(0.08f, 0.34f);
+        message.rectTransform.anchorMax = new Vector2(0.92f, 0.7f);
         message.rectTransform.offsetMin = Vector2.zero;
         message.rectTransform.offsetMax = Vector2.zero;
 
         var confirmButton = UIFactory.CreateButton(panel.transform, "ConfirmButton", "Confirm", delegate { });
         AddLocalizedText(confirmButton.GetComponentInChildren<Text>(), "popup.confirm_button");
         var confirmRect = confirmButton.GetComponent<RectTransform>();
-        confirmRect.anchorMin = new Vector2(0.1f, 0.08f);
-        confirmRect.anchorMax = new Vector2(0.44f, 0.24f);
+        confirmRect.anchorMin = new Vector2(0.12f, 0.1f);
+        confirmRect.anchorMax = new Vector2(0.44f, 0.2f);
         confirmRect.offsetMin = Vector2.zero;
         confirmRect.offsetMax = Vector2.zero;
 
         var cancelButton = UIFactory.CreateButton(panel.transform, "CancelButton", "Cancel", delegate { });
         AddLocalizedText(cancelButton.GetComponentInChildren<Text>(), "popup.cancel_button");
         var cancelRect = cancelButton.GetComponent<RectTransform>();
-        cancelRect.anchorMin = new Vector2(0.56f, 0.08f);
-        cancelRect.anchorMax = new Vector2(0.9f, 0.24f);
+        cancelRect.anchorMin = new Vector2(0.56f, 0.1f);
+        cancelRect.anchorMax = new Vector2(0.88f, 0.2f);
         cancelRect.offsetMin = Vector2.zero;
         cancelRect.offsetMax = Vector2.zero;
 
@@ -640,6 +646,250 @@ public static class UIPrefabBuilder
         SavePrefab(root, PopupsFolder + "/ConfirmPopup.prefab");
     }
 
+    private static void BuildCardBrowserPopupPrefab()
+    {
+        var root = UIFactory.CreatePanel(null, "CardBrowserPopup", new Color(0f, 0f, 0f, 0.72f));
+        var panel = UIFactory.CreatePanel(root.transform, "Panel", new Color(0.06f, 0.06f, 0.07f, 0.985f));
+        var panelRect = panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.05f, 0.08f);
+        panelRect.anchorMax = new Vector2(0.95f, 0.9f);
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.76f, 0.46f, 0.18f, 0.95f), 2f);
+
+        var title = UIFactory.CreateText(panel.transform, "Title", "\u5361\u724c\u603b\u89c8", 36, TextAnchor.MiddleLeft, Color.white);
+        title.rectTransform.anchorMin = new Vector2(0.04f, 0.91f);
+        title.rectTransform.anchorMax = new Vector2(0.7f, 0.98f);
+        title.rectTransform.offsetMin = Vector2.zero;
+        title.rectTransform.offsetMax = Vector2.zero;
+
+        var subtitle = UIFactory.CreateText(panel.transform, "Subtitle", string.Empty, 18, TextAnchor.MiddleLeft, new Color(0.82f, 0.88f, 0.95f, 0f));
+        subtitle.rectTransform.anchorMin = new Vector2(0.04f, 0.89f);
+        subtitle.rectTransform.anchorMax = new Vector2(0.7f, 0.9f);
+        subtitle.rectTransform.offsetMin = Vector2.zero;
+        subtitle.rectTransform.offsetMax = Vector2.zero;
+
+        var closeButton = UIFactory.CreateButton(panel.transform, "CloseButton", "\u5173\u95ed", delegate { });
+        var closeRect = closeButton.GetComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(0.86f, 0.915f);
+        closeRect.anchorMax = new Vector2(0.96f, 0.972f);
+        closeRect.offsetMin = Vector2.zero;
+        closeRect.offsetMax = Vector2.zero;
+        var closeLabel = closeButton.GetComponentInChildren<Text>();
+        if (closeLabel != null)
+        {
+            closeLabel.fontSize = 18;
+        }
+
+        var leftScrollRoot = UIFactory.CreateContainer(panel.transform, "CardScrollRoot", new Vector2(0.04f, 0.36f), new Vector2(0.96f, 0.84f), Vector2.zero, Vector2.zero);
+        var cardScrollRect = UIFactory.CreateScrollRect(leftScrollRoot, "CardScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(cardScrollRect.GetComponent<RectTransform>());
+
+        var detailPanel = UIFactory.CreatePanel(panel.transform, "DetailPanel", new Color(0.05f, 0.05f, 0.06f, 0.985f));
+        var detailRect = detailPanel.GetComponent<RectTransform>();
+        detailRect.anchorMin = new Vector2(0.04f, 0.08f);
+        detailRect.anchorMax = new Vector2(0.96f, 0.29f);
+        detailRect.offsetMin = Vector2.zero;
+        detailRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(detailPanel.transform, "DetailOutline", new Color(0.76f, 0.46f, 0.18f, 0.8f), 2f);
+
+        var detailTitle = UIFactory.CreateText(detailPanel.transform, "DetailTitle", "\u8be6\u60c5", 28, TextAnchor.UpperLeft, Color.white);
+        detailTitle.rectTransform.anchorMin = new Vector2(0.04f, 0.66f);
+        detailTitle.rectTransform.anchorMax = new Vector2(0.96f, 0.92f);
+        detailTitle.rectTransform.offsetMin = Vector2.zero;
+        detailTitle.rectTransform.offsetMax = Vector2.zero;
+
+        var detailBody = UIFactory.CreateText(detailPanel.transform, "DetailBody", string.Empty, 18, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        detailBody.rectTransform.anchorMin = new Vector2(0.04f, 0.08f);
+        detailBody.rectTransform.anchorMax = new Vector2(0.96f, 0.6f);
+        detailBody.rectTransform.offsetMin = Vector2.zero;
+        detailBody.rectTransform.offsetMax = Vector2.zero;
+        detailBody.supportRichText = true;
+
+        var template = UIFactory.CreateButton(cardScrollRect.content, "CardTemplate", "\u5361\u724c", delegate { });
+        var templateRect = template.GetComponent<RectTransform>();
+        templateRect.anchorMin = new Vector2(0f, 1f);
+        templateRect.anchorMax = new Vector2(0f, 1f);
+        templateRect.pivot = new Vector2(0f, 1f);
+        templateRect.sizeDelta = new Vector2(0f, 118f);
+        templateRect.anchoredPosition = Vector2.zero;
+        templateRect.sizeDelta = new Vector2(180f, 260f);
+        var templateImage = template.GetComponent<Image>();
+        if (templateImage != null)
+        {
+            templateImage.color = new Color(0.03f, 0.03f, 0.035f, 0.99f);
+        }
+        UIFactory.AddOutlineBox(template.transform, "OuterFrame", new Color(0.78f, 0.48f, 0.2f, 0.98f), 3f);
+        var innerFrame = UIFactory.AddOutlineBox(template.transform, "InnerFrame", new Color(0.78f, 0.48f, 0.2f, 0.45f), 1f);
+        if (innerFrame != null)
+        {
+            var innerRect = innerFrame.GetComponent<RectTransform>();
+            innerRect.offsetMin = new Vector2(6f, 6f);
+            innerRect.offsetMax = new Vector2(-6f, -6f);
+        }
+        var selectedFrame = UIFactory.AddOutlineBox(template.transform, "SelectedFrame", new Color(1f, 0.95f, 0.78f, 0.95f), 2f);
+        if (selectedFrame != null)
+        {
+            var selectedRect = selectedFrame.GetComponent<RectTransform>();
+            selectedRect.offsetMin = new Vector2(2f, 2f);
+            selectedRect.offsetMax = new Vector2(-2f, -2f);
+            selectedFrame.gameObject.SetActive(false);
+        }
+        var templateText = template.GetComponentInChildren<Text>();
+        if (templateText != null)
+        {
+            templateText.text = string.Empty;
+            templateText.gameObject.SetActive(false);
+        }
+        var titleText = UIFactory.CreateText(template.transform, "TitleText", "\u6807\u9898", 22, TextAnchor.UpperLeft, new Color(0.96f, 0.92f, 0.84f, 1f));
+        titleText.rectTransform.anchorMin = new Vector2(0.08f, 0.72f);
+        titleText.rectTransform.anchorMax = new Vector2(0.92f, 0.9f);
+        titleText.rectTransform.offsetMin = Vector2.zero;
+        titleText.rectTransform.offsetMax = Vector2.zero;
+        titleText.supportRichText = true;
+        var subText = UIFactory.CreateText(template.transform, "SubtitleText", "\u526f\u6807\u9898", 18, TextAnchor.UpperLeft, new Color(0.72f, 0.78f, 0.84f, 0.92f));
+        subText.rectTransform.anchorMin = new Vector2(0.08f, 0.52f);
+        subText.rectTransform.anchorMax = new Vector2(0.92f, 0.68f);
+        subText.rectTransform.offsetMin = Vector2.zero;
+        subText.rectTransform.offsetMax = Vector2.zero;
+        subText.supportRichText = true;
+        var progressRoot = UIFactory.CreatePanel(template.transform, "ProgressRoot", new Color(1f, 1f, 1f, 0.03f));
+        var progressRootRect = progressRoot.GetComponent<RectTransform>();
+        progressRootRect.anchorMin = new Vector2(0.08f, 0.1f);
+        progressRootRect.anchorMax = new Vector2(0.92f, 0.18f);
+        progressRootRect.offsetMin = Vector2.zero;
+        progressRootRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(progressRoot.transform, "ProgressOutline", new Color(0.76f, 0.46f, 0.18f, 0.55f), 1f);
+        var fill = UIFactory.CreatePanel(progressRoot.transform, "Fill", new Color(0.9f, 0.9f, 0.9f, 0.9f));
+        fill.GetComponent<Image>().type = Image.Type.Filled;
+        fill.GetComponent<Image>().fillMethod = Image.FillMethod.Horizontal;
+        fill.GetComponent<Image>().fillOrigin = 0;
+        fill.GetComponent<Image>().fillAmount = 0.5f;
+        var fillRect = fill.GetComponent<RectTransform>();
+        fillRect.anchorMin = new Vector2(0f, 0f);
+        fillRect.anchorMax = new Vector2(1f, 1f);
+        fillRect.offsetMin = Vector2.zero;
+        fillRect.offsetMax = Vector2.zero;
+        var progressLabel = UIFactory.CreateText(progressRoot.transform, "ProgressLabel", "HP 0/0", 16, TextAnchor.MiddleCenter, new Color(0.96f, 0.96f, 0.96f, 1f));
+        progressLabel.supportRichText = false;
+        template.gameObject.SetActive(false);
+
+        var popup = root.AddComponent<UICardBrowserPopup>();
+        BindSerializedProperty(popup, "titleText", title);
+        BindSerializedProperty(popup, "subtitleText", subtitle);
+        BindSerializedProperty(popup, "cardContentRoot", cardScrollRect.content);
+        BindSerializedProperty(popup, "cardTemplateButton", template);
+        BindSerializedProperty(popup, "detailTitleText", detailTitle);
+        BindSerializedProperty(popup, "detailBodyText", detailBody);
+        BindSerializedProperty(popup, "closeButton", closeButton);
+
+        SavePrefab(root, PopupsFolder + "/CardBrowserPopup.prefab");
+    }
+
+    private static void BuildEquipmentPopupPrefab()
+    {
+        var root = UIFactory.CreatePanel(null, "EquipmentPopup", new Color(0f, 0f, 0f, 0.72f));
+        var panel = UIFactory.CreatePanel(root.transform, "Panel", new Color(0.06f, 0.06f, 0.07f, 0.985f));
+        var panelRect = panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.05f, 0.08f);
+        panelRect.anchorMax = new Vector2(0.95f, 0.9f);
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.76f, 0.46f, 0.18f, 0.95f), 2f);
+
+        var title = UIFactory.CreateText(panel.transform, "Title", "\u88c5\u5907", 36, TextAnchor.UpperLeft, Color.white);
+        title.rectTransform.anchorMin = new Vector2(0.04f, 0.91f);
+        title.rectTransform.anchorMax = new Vector2(0.6f, 0.98f);
+        title.rectTransform.offsetMin = Vector2.zero;
+        title.rectTransform.offsetMax = Vector2.zero;
+
+        var closeButton = UIFactory.CreateButton(panel.transform, "CloseButton", "\u5173\u95ed", delegate { });
+        var closeRect = closeButton.GetComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(0.86f, 0.915f);
+        closeRect.anchorMax = new Vector2(0.96f, 0.972f);
+        closeRect.offsetMin = Vector2.zero;
+        closeRect.offsetMax = Vector2.zero;
+        var closeLabel = closeButton.GetComponentInChildren<Text>();
+        if (closeLabel != null)
+        {
+            closeLabel.fontSize = 18;
+        }
+
+        var slotScrollRoot = UIFactory.CreateContainer(panel.transform, "SlotScrollRoot", new Vector2(0.04f, 0.64f), new Vector2(0.96f, 0.86f), Vector2.zero, Vector2.zero);
+        var slotScrollRect = UIFactory.CreateScrollRect(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(slotScrollRect.GetComponent<RectTransform>());
+
+        var inventoryScrollRoot = UIFactory.CreateContainer(panel.transform, "InventoryScrollRoot", new Vector2(0.04f, 0.28f), new Vector2(0.96f, 0.6f), Vector2.zero, Vector2.zero);
+        var inventoryScrollRect = UIFactory.CreateScrollRect(inventoryScrollRoot, "InventoryScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(inventoryScrollRect.GetComponent<RectTransform>());
+
+        var detailPanel = UIFactory.CreatePanel(panel.transform, "DetailPanel", new Color(0.05f, 0.05f, 0.06f, 0.985f));
+        var detailRect = detailPanel.GetComponent<RectTransform>();
+        detailRect.anchorMin = new Vector2(0.04f, 0.08f);
+        detailRect.anchorMax = new Vector2(0.96f, 0.23f);
+        detailRect.offsetMin = Vector2.zero;
+        detailRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(detailPanel.transform, "DetailOutline", new Color(0.76f, 0.46f, 0.18f, 0.8f), 2f);
+
+        var detailTitle = UIFactory.CreateText(detailPanel.transform, "DetailTitle", "\u88c5\u5907\u8be6\u60c5", 24, TextAnchor.UpperLeft, Color.white);
+        detailTitle.rectTransform.anchorMin = new Vector2(0.04f, 0.66f);
+        detailTitle.rectTransform.anchorMax = new Vector2(0.96f, 0.92f);
+        detailTitle.rectTransform.offsetMin = Vector2.zero;
+        detailTitle.rectTransform.offsetMax = Vector2.zero;
+
+        var detailBody = UIFactory.CreateText(detailPanel.transform, "DetailBody", string.Empty, 18, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        detailBody.rectTransform.anchorMin = new Vector2(0.04f, 0.08f);
+        detailBody.rectTransform.anchorMax = new Vector2(0.96f, 0.6f);
+        detailBody.rectTransform.offsetMin = Vector2.zero;
+        detailBody.rectTransform.offsetMax = Vector2.zero;
+
+        var slotTemplate = UIFactory.CreateButton(slotScrollRect.content, "SlotTemplate", string.Empty, delegate { });
+        var slotTemplateRect = slotTemplate.GetComponent<RectTransform>();
+        slotTemplateRect.anchorMin = new Vector2(0f, 1f);
+        slotTemplateRect.anchorMax = new Vector2(0f, 1f);
+        slotTemplateRect.pivot = new Vector2(0f, 1f);
+        slotTemplateRect.anchoredPosition = Vector2.zero;
+        slotTemplateRect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
+        var slotLabel = slotTemplate.GetComponentInChildren<Text>();
+        if (slotLabel != null)
+        {
+            slotLabel.text = string.Empty;
+            slotLabel.gameObject.SetActive(false);
+        }
+        var slotTitle = UIFactory.CreateText(slotTemplate.transform, "TitleText", "\u6b66\u5668", 22, TextAnchor.UpperLeft, new Color(0.96f, 0.92f, 0.84f, 1f));
+        slotTitle.rectTransform.anchorMin = new Vector2(0.08f, 0.72f);
+        slotTitle.rectTransform.anchorMax = new Vector2(0.92f, 0.9f);
+        slotTitle.rectTransform.offsetMin = Vector2.zero;
+        slotTitle.rectTransform.offsetMax = Vector2.zero;
+        var slotSubtitle = UIFactory.CreateText(slotTemplate.transform, "SubtitleText", "\u65e0\u88c5\u5907", 18, TextAnchor.UpperLeft, new Color(0.72f, 0.78f, 0.84f, 0.92f));
+        slotSubtitle.rectTransform.anchorMin = new Vector2(0.08f, 0.52f);
+        slotSubtitle.rectTransform.anchorMax = new Vector2(0.92f, 0.68f);
+        slotSubtitle.rectTransform.offsetMin = Vector2.zero;
+        slotSubtitle.rectTransform.offsetMax = Vector2.zero;
+        var slotProgressRoot = UIFactory.CreatePanel(slotTemplate.transform, "ProgressRoot", new Color(1f, 1f, 1f, 0.03f));
+        slotProgressRoot.GetComponent<RectTransform>().anchorMin = new Vector2(0.08f, 0.1f);
+        slotProgressRoot.GetComponent<RectTransform>().anchorMax = new Vector2(0.92f, 0.18f);
+        slotProgressRoot.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+        slotProgressRoot.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+        slotProgressRoot.SetActive(false);
+        slotTemplate.gameObject.SetActive(false);
+
+        var inventoryTemplate = Object.Instantiate(slotTemplate.gameObject, inventoryScrollRect.content, false);
+        inventoryTemplate.name = "InventoryTemplate";
+        inventoryTemplate.SetActive(false);
+
+        var popup = root.AddComponent<UIEquipmentPopup>();
+        BindSerializedProperty(popup, "titleText", title);
+        BindSerializedProperty(popup, "closeButton", closeButton);
+        BindSerializedProperty(popup, "slotContentRoot", slotScrollRect.content);
+        BindSerializedProperty(popup, "slotTemplateButton", slotTemplate);
+        BindSerializedProperty(popup, "inventoryContentRoot", inventoryScrollRect.content);
+        BindSerializedProperty(popup, "inventoryTemplateButton", inventoryTemplate.GetComponent<Button>());
+        BindSerializedProperty(popup, "detailTitleText", detailTitle);
+        BindSerializedProperty(popup, "detailBodyText", detailBody);
+
+        SavePrefab(root, PopupsFolder + "/EquipmentPopup.prefab");
+    }
     private static void BuildSpiritStoneConvertPopupPrefab()
     {
         var root = UIFactory.CreatePanel(null, "SpiritStoneConvertPopup", new Color(0f, 0f, 0f, 0.74f));
@@ -651,13 +901,13 @@ public static class UIPrefabBuilder
         panelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.94f, 0.84f, 0.6f, 0.66f), 1f);
 
-        var titleText = UIFactory.CreateText(panel.transform, "TitleText", "灵石转换", 40, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f, 1f));
+        var titleText = UIFactory.CreateText(panel.transform, "TitleText", "\u7075\u77f3\u8f6c\u6362", 40, TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f, 1f));
         titleText.rectTransform.anchorMin = new Vector2(0.08f, 0.9f);
         titleText.rectTransform.anchorMax = new Vector2(0.92f, 0.97f);
         titleText.rectTransform.offsetMin = Vector2.zero;
         titleText.rectTransform.offsetMax = Vector2.zero;
 
-        var introText = UIFactory.CreateText(panel.transform, "IntroText", "按五行相生，将一种灵石炼化为下一相灵石。", 20, TextAnchor.MiddleCenter, new Color(0.84f, 0.9f, 0.96f, 0.82f));
+        var introText = UIFactory.CreateText(panel.transform, "IntroText", "\u6309\u4e94\u884c\u76f8\u751f\uff0c\u5c06\u4e00\u79cd\u7075\u77f3\u70bc\u5316\u4e3a\u4e0b\u4e00\u76f8\u7075\u77f3\u3002", 20, TextAnchor.MiddleCenter, new Color(0.84f, 0.9f, 0.96f, 0.82f));
         introText.rectTransform.anchorMin = new Vector2(0.08f, 0.82f);
         introText.rectTransform.anchorMax = new Vector2(0.92f, 0.89f);
         introText.rectTransform.offsetMin = Vector2.zero;
@@ -705,13 +955,13 @@ public static class UIPrefabBuilder
         CreateSpiritStoneNode(sigilArea, "Fire", p4);
         CreateSpiritStoneNode(sigilArea, "Earth", p5);
 
-        var summaryText = UIFactory.CreateText(panel.transform, "SummaryText", "2 金灵石 -> 1 水灵石", 22, TextAnchor.MiddleCenter, new Color(0.96f, 0.94f, 0.88f, 1f));
+        var summaryText = UIFactory.CreateText(panel.transform, "SummaryText", "2 \u91d1\u7075\u77f3 -> 1 \u6c34\u7075\u77f3", 22, TextAnchor.MiddleCenter, new Color(0.96f, 0.94f, 0.88f, 1f));
         summaryText.rectTransform.anchorMin = new Vector2(0.1f, 0.24f);
         summaryText.rectTransform.anchorMax = new Vector2(0.9f, 0.33f);
         summaryText.rectTransform.offsetMin = Vector2.zero;
         summaryText.rectTransform.offsetMax = Vector2.zero;
 
-        var quantityLabelText = UIFactory.CreateText(panel.transform, "QuantityLabelText", "转换次数", 20, TextAnchor.MiddleLeft, new Color(0.84f, 0.9f, 0.96f, 0.82f));
+        var quantityLabelText = UIFactory.CreateText(panel.transform, "QuantityLabelText", "\u8f6c\u6362\u6b21\u6570", 20, TextAnchor.MiddleLeft, new Color(0.84f, 0.9f, 0.96f, 0.82f));
         quantityLabelText.rectTransform.anchorMin = new Vector2(0.1f, 0.18f);
         quantityLabelText.rectTransform.anchorMax = new Vector2(0.32f, 0.22f);
         quantityLabelText.rectTransform.offsetMin = Vector2.zero;
@@ -746,7 +996,7 @@ public static class UIPrefabBuilder
         maxRect.offsetMax = Vector2.zero;
 
         var actionRow = UIFactory.CreateContainer(panel.transform, "ActionRow", new Vector2(0.1f, 0.02f), new Vector2(0.9f, 0.07f), Vector2.zero, Vector2.zero);
-        var convertButton = UIFactory.CreateButton(actionRow, "ConvertButton", "开始转换", delegate { });
+        var convertButton = UIFactory.CreateButton(actionRow, "ConvertButton", "\u5f00\u59cb\u8f6c\u6362", delegate { });
         var convertRect = convertButton.GetComponent<RectTransform>();
         convertRect.anchorMin = new Vector2(0f, 0f);
         convertRect.anchorMax = new Vector2(0.62f, 1f);
@@ -754,14 +1004,14 @@ public static class UIPrefabBuilder
         convertRect.offsetMax = new Vector2(-6f, 0f);
         convertButton.GetComponent<Image>().color = new Color(0.42f, 0.22f, 0.12f, 0.94f);
 
-        var closeButton = UIFactory.CreateButton(actionRow, "CloseButton", "关闭", delegate { });
+        var closeButton = UIFactory.CreateButton(actionRow, "CloseButton", "\u5173\u95ed", delegate { });
         var closeRect = closeButton.GetComponent<RectTransform>();
         closeRect.anchorMin = new Vector2(0.66f, 0f);
         closeRect.anchorMax = new Vector2(1f, 1f);
         closeRect.offsetMin = Vector2.zero;
         closeRect.offsetMax = Vector2.zero;
 
-        var resultText = UIFactory.CreateText(panel.transform, "ResultText", "点击任意一系灵石，按相生规则进行转换。", 18, TextAnchor.MiddleCenter, new Color(0.92f, 0.84f, 0.72f, 0.9f));
+        var resultText = UIFactory.CreateText(panel.transform, "ResultText", "\u70b9\u51fb\u4efb\u610f\u4e00\u7cfb\u7075\u77f3\uff0c\u6309\u76f8\u751f\u89c4\u5219\u8fdb\u884c\u8f6c\u6362\u3002", 18, TextAnchor.MiddleCenter, new Color(0.92f, 0.84f, 0.72f, 0.9f));
         resultText.rectTransform.anchorMin = new Vector2(0.08f, 0.07f);
         resultText.rectTransform.anchorMax = new Vector2(0.92f, 0.12f);
         resultText.rectTransform.offsetMin = Vector2.zero;
@@ -808,25 +1058,68 @@ public static class UIPrefabBuilder
 
         UIFactory.AddOutlineBox(panel.transform, objectName + "Outline", new Color(0.86f, 0.78f, 0.72f, 0.7f), 1f);
 
-        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.78f), new Vector2(0.96f, 0.94f), Vector2.zero, Vector2.zero);
+        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.8f), new Vector2(0.96f, 0.94f), Vector2.zero, Vector2.zero);
         var titleText = UIFactory.CreateText(titleRect, "TitleText", title, 26, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(titleText, titleKey);
 
-        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.04f, 0.42f), new Vector2(0.96f, 0.76f), Vector2.zero, Vector2.zero);
-        var bodyText = UIFactory.CreateText(bodyRect, "BodyText", content, 20, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 1f));
-        AddLocalizedText(bodyText, contentKey);
+        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.78f), Vector2.zero, Vector2.zero);
+        var cardRoot = UIFactory.CreateContainer(bodyRect, "CardRoot", new Vector2(0f, 0f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
+        var bodyText = UIFactory.CreateText(bodyRect, "BodyText", string.Empty, 20, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 0f));
+        bodyText.raycastTarget = false;
 
-        var equipmentTitleRect = UIFactory.CreateContainer(panel.transform, "EquipmentTitle", new Vector2(0.04f, 0.26f), new Vector2(0.96f, 0.4f), Vector2.zero, Vector2.zero);
+        var cardTemplate = UIFactory.CreateButton(cardRoot, "CardTemplate", string.Empty, delegate { });
+        var cardTemplateRect = cardTemplate.GetComponent<RectTransform>();
+        cardTemplateRect.anchorMin = new Vector2(0f, 1f);
+        cardTemplateRect.anchorMax = new Vector2(0f, 1f);
+        cardTemplateRect.pivot = new Vector2(0f, 1f);
+        cardTemplateRect.anchoredPosition = Vector2.zero;
+        cardTemplateRect.sizeDelta = new Vector2(180f, 260f);
+        var cardTemplateLabel = cardTemplate.GetComponentInChildren<Text>();
+        if (cardTemplateLabel != null)
+        {
+            cardTemplateLabel.text = string.Empty;
+            cardTemplateLabel.gameObject.SetActive(false);
+        }
+        var cardTitleText = UIFactory.CreateText(cardTemplate.transform, "TitleText", "\u89d2\u8272", 20, TextAnchor.UpperLeft, new Color(0.96f, 0.92f, 0.84f, 1f));
+        cardTitleText.rectTransform.anchorMin = new Vector2(0.08f, 0.72f);
+        cardTitleText.rectTransform.anchorMax = new Vector2(0.92f, 0.9f);
+        cardTitleText.rectTransform.offsetMin = Vector2.zero;
+        cardTitleText.rectTransform.offsetMax = Vector2.zero;
+        cardTitleText.supportRichText = true;
+        var cardSubtitleText = UIFactory.CreateText(cardTemplate.transform, "SubtitleText", "Lv.1", 18, TextAnchor.UpperLeft, new Color(0.72f, 0.78f, 0.84f, 0.92f));
+        cardSubtitleText.rectTransform.anchorMin = new Vector2(0.08f, 0.52f);
+        cardSubtitleText.rectTransform.anchorMax = new Vector2(0.92f, 0.7f);
+        cardSubtitleText.rectTransform.offsetMin = Vector2.zero;
+        cardSubtitleText.rectTransform.offsetMax = Vector2.zero;
+        var cardProgressRoot = UIFactory.CreatePanel(cardTemplate.transform, "ProgressRoot", new Color(1f, 1f, 1f, 0.03f));
+        var cardProgressRect = cardProgressRoot.GetComponent<RectTransform>();
+        cardProgressRect.anchorMin = new Vector2(0.08f, 0.12f);
+        cardProgressRect.anchorMax = new Vector2(0.92f, 0.2f);
+        cardProgressRect.offsetMin = Vector2.zero;
+        cardProgressRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(cardProgressRoot.transform, "ProgressOutline", new Color(0.76f, 0.46f, 0.18f, 0.55f), 1f);
+        var cardFill = UIFactory.CreatePanel(cardProgressRoot.transform, "Fill", new Color(0.9f, 0.9f, 0.9f, 0.9f));
+        cardFill.GetComponent<Image>().type = Image.Type.Filled;
+        cardFill.GetComponent<Image>().fillMethod = Image.FillMethod.Horizontal;
+        cardFill.GetComponent<Image>().fillOrigin = 0;
+        cardFill.GetComponent<Image>().fillAmount = 0.5f;
+        var cardProgressLabel = UIFactory.CreateText(cardProgressRoot.transform, "ProgressLabel", "HP 0/0", 15, TextAnchor.MiddleCenter, new Color(0.96f, 0.96f, 0.96f, 1f));
+
+        var equipmentTitleRect = UIFactory.CreateContainer(panel.transform, "EquipmentTitle", new Vector2(0.04f, 0.16f), new Vector2(0.96f, 0.22f), Vector2.zero, Vector2.zero);
         var equipmentTitleText = UIFactory.CreateText(equipmentTitleRect, "EquipmentTitleText", "Equipment", 20, TextAnchor.MiddleLeft, new Color(0.95f, 0.86f, 0.74f, 1f));
         AddLocalizedText(equipmentTitleText, "battle.equipment_title");
+        equipmentTitleRect.gameObject.SetActive(false);
 
-        var equipmentBodyRect = UIFactory.CreateContainer(panel.transform, "EquipmentBody", new Vector2(0.04f, 0.08f), new Vector2(0.96f, 0.26f), Vector2.zero, Vector2.zero);
+        var equipmentBodyRect = UIFactory.CreateContainer(panel.transform, "EquipmentBody", new Vector2(0.04f, 0.04f), new Vector2(0.96f, 0.16f), Vector2.zero, Vector2.zero);
         var equipmentBodyText = UIFactory.CreateText(equipmentBodyRect, "EquipmentBodyText", "No equipment", 16, TextAnchor.UpperLeft, new Color(0.82f, 0.84f, 0.86f, 1f));
         AddLocalizedText(equipmentBodyText, "battle.equipment_none");
+        equipmentBodyRect.gameObject.SetActive(false);
 
         return new TeamInfoPanelRefs
         {
             BodyText = bodyText,
+            CardRoot = cardRoot,
+            CardTemplate = cardTemplate,
             EquipmentText = equipmentBodyText
         };
     }
@@ -944,6 +1237,8 @@ public static class UIPrefabBuilder
     private sealed class TeamInfoPanelRefs
     {
         public Text BodyText;
+        public RectTransform CardRoot;
+        public Button CardTemplate;
         public Text EquipmentText;
     }
 
@@ -974,6 +1269,8 @@ public static class UIPrefabBuilder
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MapPage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/BattlePage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ConfirmPopup.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/CardBrowserPopup.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/EquipmentPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/SpiritStoneConvertPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ToastPopup.prefab"));
     }
@@ -1082,6 +1379,14 @@ public static class UIPrefabBuilder
         serializedObject.ApplyModifiedPropertiesWithoutUndo();
     }
 }
+
+
+
+
+
+
+
+
 
 
 

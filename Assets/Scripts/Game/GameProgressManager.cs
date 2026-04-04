@@ -4,6 +4,7 @@ using System.Text;
 using UnityEngine;
 using Wuxing.Config;
 using Wuxing.Localization;
+using Wuxing.UI;
 
 namespace Wuxing.Game
 {
@@ -671,6 +672,122 @@ namespace Wuxing.Game
             return builder.ToString();
         }
 
+        public static List<UICardData> BuildLearnedSkillCards(bool english)
+        {
+            EnsureInstance();
+
+            var result = new List<UICardData>();
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (characterDatabase == null || skillDatabase == null)
+            {
+                return result;
+            }
+
+            for (var i = 0; i < BasePlayerCharacterIds.Length; i++)
+            {
+                var characterId = BasePlayerCharacterIds[i];
+                var character = characterDatabase.GetById(characterId);
+                if (character == null)
+                {
+                    continue;
+                }
+
+                var knownSkillIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                CollectKnownSkillIds(character.InitialSkills, knownSkillIds);
+                var learnedSkillIds = GetLearnedSkillIds(characterId);
+                for (var j = 0; j < learnedSkillIds.Count; j++)
+                {
+                    if (!string.IsNullOrWhiteSpace(learnedSkillIds[j]))
+                    {
+                        knownSkillIds.Add(learnedSkillIds[j].Trim());
+                    }
+                }
+
+                foreach (var skillId in knownSkillIds)
+                {
+                    var skill = skillDatabase.GetById(skillId);
+                    if (skill == null)
+                    {
+                        continue;
+                    }
+
+                    var level = GetSkillLevel(characterId, skillId);
+                    var detail = new StringBuilder();
+                    detail.Append(english ? "Character: " : "角色：")
+                        .Append(character.Name)
+                        .Append('\n')
+                        .Append(english ? "Element: " : "五行：")
+                        .Append(skill.Element)
+                        .Append('\n')
+                        .Append(english ? "Effect: " : "效果：")
+                        .Append(BuildSkillEffectSummary(skill, level, english));
+
+                    result.Add(new UICardData
+                    {
+                        Id = characterId + ":" + skillId,
+                        Title = WrapSkillNameWithQualityColor(skill.Name, skill.Quality),
+                        Subtitle = LocalizationManager.GetText("common.level_prefix") + level,
+                        DetailTitle = skill.Name + "  " + LocalizationManager.GetText("common.level_prefix") + level,
+                        DetailBody = detail.ToString(),
+                        BorderColor = UIElementPalette.GetBorderColor(skill.Element)
+                    });
+                }
+            }
+
+            return result;
+        }
+
+        public static List<UICardData> BuildOwnedEquipmentCards(bool english)
+        {
+            EnsureInstance();
+
+            var result = new List<UICardData>();
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null)
+            {
+                return result;
+            }
+
+            var ownedIds = GetOwnedEquipmentIds();
+            for (var i = 0; i < ownedIds.Count; i++)
+            {
+                var equipment = equipmentDatabase.GetById(ownedIds[i]);
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                var detail = new StringBuilder();
+                detail.Append(english ? "Slot: " : "部位：")
+                    .Append(GetEquipmentSlotLabel(equipment.Slot, english));
+
+                var stats = BuildEquipmentStatCardLines(equipment, english);
+                if (!string.IsNullOrEmpty(stats))
+                {
+                    detail.Append('\n').Append(stats);
+                }
+
+                if (!string.IsNullOrEmpty(equipment.Notes))
+                {
+                    detail.Append('\n')
+                        .Append(english ? "Notes: " : "说明：")
+                        .Append(equipment.Notes);
+                }
+
+                result.Add(new UICardData
+                {
+                    Id = equipment.Id,
+                    Title = equipment.Name,
+                    Subtitle = GetEquipmentSlotLabel(equipment.Slot, english),
+                    DetailTitle = equipment.Name,
+                    DetailBody = detail.ToString(),
+                    BorderColor = UIElementPalette.GetBorderColor("None")
+                });
+            }
+
+            return result;
+        }
         public static void PrepareSkillRewardOptions()
         {
             PrepareSkillRewardOptions(GetNodeType(GetCurrentStage()));
@@ -2121,13 +2238,9 @@ namespace Wuxing.Game
                 return english ? "Empty" : "空白奖励";
             }
 
-            var skillDatabase = SkillDatabaseLoader.Load();
-            var skill = skillDatabase != null ? skillDatabase.GetById(option.SkillId) : null;
-            var effectSummary = skill != null ? BuildSkillEffectSummary(skill, option.ResultLevel, english) : option.SkillDescription;
-
             return english
-                ? "Reward\n" + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\n\nTarget: " + option.CharacterName + "\nResult: Lv." + option.ResultLevel + (option.IsUpgrade ? " Upgrade" : " Learn") + "\nElement: " + option.SkillElement + "\n" + effectSummary
-                : "功法机缘\n" + WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\n\n角色：" + option.CharacterName + "\n结果：Lv." + option.ResultLevel + (option.IsUpgrade ? " 升级" : " 习得") + "\n五行：" + option.SkillElement + "\n" + effectSummary;
+                ? WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\nLv." + option.ResultLevel + "\n" + option.CharacterName
+                : WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\nLv." + option.ResultLevel + "\n" + option.CharacterName;
         }
 
         private static void AppendSkillNames(string characterId, string rawSkills, List<string> targetNames, HashSet<string> knownSkillIds, SkillDatabase skillDatabase, bool english)
@@ -2200,6 +2313,59 @@ namespace Wuxing.Game
             }
 
             return builder.ToString();
+        }
+
+        private static string GetEquipmentSlotLabel(string slot, bool english)
+        {
+            switch ((slot ?? string.Empty).Trim())
+            {
+                case "Weapon":
+                    return english ? "Weapon" : "武器";
+                case "Armor":
+                    return english ? "Armor" : "护甲";
+                case "Accessory":
+                    return english ? "Accessory" : "饰品";
+                default:
+                    return string.IsNullOrEmpty(slot)
+                        ? (english ? "Unknown" : "未知")
+                        : slot;
+            }
+        }
+
+        private static string BuildEquipmentStatCardLines(EquipmentConfig equipment, bool english)
+        {
+            if (equipment == null)
+            {
+                return string.Empty;
+            }
+
+            var parts = new List<string>();
+            if (equipment.HP != 0)
+            {
+                parts.Add((english ? "生命 " : "生命 ") + FormatSignedValue(equipment.HP));
+            }
+
+            if (equipment.ATK != 0)
+            {
+                parts.Add((english ? "攻击 " : "攻击 ") + FormatSignedValue(equipment.ATK));
+            }
+
+            if (equipment.DEF != 0)
+            {
+                parts.Add((english ? "防御 " : "防御 ") + FormatSignedValue(equipment.DEF));
+            }
+
+            if (equipment.MP != 0)
+            {
+                parts.Add((english ? "法力 " : "法力 ") + FormatSignedValue(equipment.MP));
+            }
+
+            return parts.Count > 0 ? string.Join(english ? "\n" : "\n", parts.ToArray()) : (english ? "No stat bonus" : "暂无属性加成");
+        }
+
+        private static string FormatSignedValue(int value)
+        {
+            return value > 0 ? "+" + value : value.ToString();
         }
 
         private static string BuildSkillEffectSummary(SkillConfig skill, int level, bool english)
@@ -2843,6 +3009,10 @@ namespace Wuxing.Game
         }
     }
 }
+
+
+
+
 
 
 

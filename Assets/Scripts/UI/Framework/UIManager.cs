@@ -140,6 +140,8 @@ namespace Wuxing.UI
             _pagePrefabPaths["Map"] = "Prefabs/UI/Pages/MapPage";
             _pagePrefabPaths["Battle"] = "Prefabs/UI/Pages/BattlePage";
             _popupPrefabPaths["Confirm"] = "Prefabs/UI/Popups/ConfirmPopup";
+            _popupPrefabPaths["CardBrowser"] = "Prefabs/UI/Popups/CardBrowserPopup";
+            _popupPrefabPaths["Equipment"] = "Prefabs/UI/Popups/EquipmentPopup";
             _popupPrefabPaths["SpiritConvert"] = "Prefabs/UI/Popups/SpiritStoneConvertPopup";
         }
 
@@ -182,7 +184,3 @@ namespace Wuxing.UI
         }
     }
 }
-
-
-
-

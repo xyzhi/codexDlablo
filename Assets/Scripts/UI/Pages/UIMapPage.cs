@@ -131,7 +131,8 @@ namespace Wuxing.UI
         private void OnClickEquipment()
         {
             if (isMoving) return;
-            UIManager.Instance.ShowPage("Battle", "equipment");
+
+            UIManager.Instance.ShowPopup<UIEquipmentPopup>("Equipment");
         }
 
         private void OnClickSpiritConvert()
@@ -143,7 +144,7 @@ namespace Wuxing.UI
         {
             if (isMoving) return;
 
-            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            var popup = UIManager.Instance.ShowPopup<UICardBrowserPopup>("CardBrowser");
             if (popup == null)
             {
                 return;
@@ -151,19 +152,33 @@ namespace Wuxing.UI
 
             popup.Setup(
                 LocalizationManager.GetText("map.skill_overview_title"),
-                GameProgressManager.BuildLearnedSkillsOverview(IsEnglish()),
-                false,
-                null,
-                null,
-                LocalizationManager.GetText("common.button_close"),
-                null);
+                string.Empty,
+                GameProgressManager.BuildLearnedSkillCards(IsEnglish()));
         }
 
         private void OnClickReset()
         {
             if (isMoving) return;
-            GameProgressManager.ResetRun();
-            UIManager.Instance.ShowPage("MainMenu");
+            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            if (popup == null)
+            {
+                GameProgressManager.ResetRun();
+                UIManager.Instance.ShowPage("MainMenu");
+                return;
+            }
+
+            popup.Setup(
+                IsEnglish() ? "Reset Run" : "\u91cd\u7f6e\u672c\u8f6e",
+                IsEnglish() ? "Return to the main menu and reset current progress?" : "\u56de\u5230\u4e3b\u83dc\u5355\uff0c\u5e76\u5c06\u5f53\u524d\u8fdb\u5ea6\u91cd\u7f6e\u4e3a 0 \u5417\uff1f",
+                false,
+                delegate
+                {
+                    GameProgressManager.ResetRun();
+                    UIManager.Instance.ShowPage("MainMenu");
+                },
+                delegate { },
+                IsEnglish() ? "Confirm" : "\u786e\u8ba4",
+                IsEnglish() ? "Cancel" : "\u53d6\u6d88");
         }
 
         private void OnClickBack()
@@ -492,23 +507,19 @@ namespace Wuxing.UI
             var action = option.UtilityAction ?? string.Empty;
             if (string.Equals(action, "OpenEquipment", StringComparison.OrdinalIgnoreCase))
             {
-                UIManager.Instance.ShowPage("Battle", "equipment");
+                UIManager.Instance.ShowPopup<UIEquipmentPopup>("Equipment");
                 return;
             }
 
             if (string.Equals(action, "OpenSkillOverview", StringComparison.OrdinalIgnoreCase))
             {
-                var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+                var popup = UIManager.Instance.ShowPopup<UICardBrowserPopup>("CardBrowser");
                 if (popup != null)
                 {
                     popup.Setup(
                         LocalizationManager.GetText("map.skill_overview_title"),
-                        GameProgressManager.BuildLearnedSkillsOverview(IsEnglish()),
-                        false,
-                        null,
-                        null,
-                        LocalizationManager.GetText("map.button_continue"),
-                        null);
+                        string.Empty,
+                        GameProgressManager.BuildLearnedSkillCards(IsEnglish()));
                 }
                 return;
             }
@@ -1201,3 +1212,7 @@ namespace Wuxing.UI
         }
     }
 }
+
+
+
+
