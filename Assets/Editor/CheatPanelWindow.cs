@@ -63,7 +63,7 @@ public class CheatPanelWindow : EditorWindow
         EditorGUILayout.LabelField("修为等级", runData.CultivationLevel.ToString());
         EditorGUILayout.LabelField("修为经验", runData.CultivationExp + " / " + GameProgressManager.GetRequiredExpForNextLevel());
         EditorGUILayout.LabelField("灵石总量", runData.SpiritStones.ToString());
-        EditorGUILayout.LabelField("已拥有装备", runData.OwnedEquipmentIds.Count.ToString());
+        EditorGUILayout.LabelField("已拥有装备", runData.OwnedEquipments.Count.ToString());
         EditorGUILayout.EndVertical();
     }
 
