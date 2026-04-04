@@ -11,6 +11,7 @@ namespace Wuxing.Game
         public string SpiritStoneName;
         public int LevelsGained;
         public string DroppedEquipmentId;
+        public string DroppedEquipmentInstanceId;
         public string DroppedEquipmentName;
     }
 }

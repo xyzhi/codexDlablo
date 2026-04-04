@@ -32,6 +32,7 @@ namespace Wuxing.Game
         private const string RandomStageEventStatesPrefKey = "game.progress.random_stage_events";
         private const string ActiveEffectsPrefKey = "game.progress.active_effects";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
+        private const string EquipmentInstanceCounterPrefKey = "game.progress.equipment_instance_counter";
         private const int DefaultMaxStage = 100;
         private const int LifetimeMonths = 360;
 
@@ -65,12 +66,13 @@ namespace Wuxing.Game
         public int FireSpiritStones { get; private set; }
         public int EarthSpiritStones { get; private set; }
 
-        private readonly List<string> ownedEquipmentIds = new List<string>();
+        private readonly List<EquipmentInstanceData> ownedEquipments = new List<EquipmentInstanceData>();
         private readonly List<CharacterRunData> characterRunData = new List<CharacterRunData>();
         private readonly List<SkillRewardOption> pendingSkillRewards = new List<SkillRewardOption>();
         private readonly List<int> completedFixedEventStages = new List<int>();
         private readonly List<StageRandomEventState> randomStageEventStates = new List<StageRandomEventState>();
         private readonly List<RunEffectData> activeEffects = new List<RunEffectData>();
+        private int equipmentInstanceCounter;
 
         private void Awake()
         {
@@ -229,8 +231,9 @@ namespace Wuxing.Game
                 var drop = Instance.RollEquipmentDrop(equipmentDatabase, resolvedStage);
                 if (drop != null)
                 {
-                    Instance.ownedEquipmentIds.Add(drop.Id);
+                    var instance = Instance.AddOwnedEquipmentInstance(drop.Id);
                     reward.DroppedEquipmentId = drop.Id;
+                    reward.DroppedEquipmentInstanceId = instance != null ? instance.InstanceId : string.Empty;
                     reward.DroppedEquipmentName = drop.Name;
                 }
             }
@@ -346,12 +349,9 @@ namespace Wuxing.Game
                 return;
             }
 
-            if (!Instance.ownedEquipmentIds.Exists(id => string.Equals(id, equipmentId, StringComparison.OrdinalIgnoreCase)))
-            {
-                Instance.ownedEquipmentIds.Add(equipmentId);
-                Instance.SaveProgress();
-                ProgressChanged?.Invoke();
-            }
+            Instance.AddOwnedEquipmentInstance(equipmentId);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
         }
 
         public static void DebugGrantSkill(string characterId, string skillId, int level)
@@ -575,9 +575,10 @@ namespace Wuxing.Game
         public static bool OwnsEquipment(string equipmentId)
         {
             EnsureInstance();
-            return Instance != null && Instance.ownedEquipmentIds.Exists(delegate(string id)
+            return Instance != null && Instance.ownedEquipments.Exists(delegate(EquipmentInstanceData entry)
             {
-                return string.Equals(id, equipmentId, StringComparison.OrdinalIgnoreCase);
+                return entry != null
+                    && string.Equals(entry.EquipmentId, equipmentId, StringComparison.OrdinalIgnoreCase);
             });
         }
 
@@ -589,9 +590,88 @@ namespace Wuxing.Game
                 return new List<string>();
             }
 
-            var results = new List<string>(Instance.ownedEquipmentIds);
+            var results = new List<string>();
+            for (var i = 0; i < Instance.ownedEquipments.Count; i++)
+            {
+                var entry = Instance.ownedEquipments[i];
+                if (entry != null && !string.IsNullOrWhiteSpace(entry.EquipmentId))
+                {
+                    results.Add(entry.EquipmentId);
+                }
+            }
             results.Sort(StringComparer.OrdinalIgnoreCase);
             return results;
+        }
+
+        public static bool OwnsEquipmentInstance(string instanceId)
+        {
+            EnsureInstance();
+            return Instance != null && Instance.ownedEquipments.Exists(delegate(EquipmentInstanceData entry)
+            {
+                return entry != null
+                    && string.Equals(entry.InstanceId, instanceId, StringComparison.OrdinalIgnoreCase);
+            });
+        }
+
+        public static EquipmentInstanceData GetOwnedEquipmentInstance(string instanceId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrWhiteSpace(instanceId))
+            {
+                return null;
+            }
+
+            for (var i = 0; i < Instance.ownedEquipments.Count; i++)
+            {
+                var entry = Instance.ownedEquipments[i];
+                if (entry != null && string.Equals(entry.InstanceId, instanceId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return CloneEquipmentInstance(entry);
+                }
+            }
+
+            return null;
+        }
+
+        public static List<EquipmentInstanceData> GetOwnedEquipmentInstances()
+        {
+            EnsureInstance();
+            var results = new List<EquipmentInstanceData>();
+            if (Instance == null)
+            {
+                return results;
+            }
+
+            for (var i = 0; i < Instance.ownedEquipments.Count; i++)
+            {
+                var entry = Instance.ownedEquipments[i];
+                if (entry != null)
+                {
+                    results.Add(CloneEquipmentInstance(entry));
+                }
+            }
+
+            return results;
+        }
+
+        public static string GetFirstOwnedEquipmentInstanceIdByEquipmentId(string equipmentId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrWhiteSpace(equipmentId))
+            {
+                return string.Empty;
+            }
+
+            for (var i = 0; i < Instance.ownedEquipments.Count; i++)
+            {
+                var entry = Instance.ownedEquipments[i];
+                if (entry != null && string.Equals(entry.EquipmentId, equipmentId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return entry.InstanceId ?? string.Empty;
+                }
+            }
+
+            return string.Empty;
         }
 
         public static List<string> GetLearnedSkillIds(string characterId)
@@ -749,10 +829,11 @@ namespace Wuxing.Game
                 return result;
             }
 
-            var ownedIds = GetOwnedEquipmentIds();
-            for (var i = 0; i < ownedIds.Count; i++)
+            var ownedEntries = GetOwnedEquipmentInstances();
+            for (var i = 0; i < ownedEntries.Count; i++)
             {
-                var equipment = equipmentDatabase.GetById(ownedIds[i]);
+                var entry = ownedEntries[i];
+                var equipment = entry != null ? equipmentDatabase.GetById(entry.EquipmentId) : null;
                 if (equipment == null)
                 {
                     continue;
@@ -777,7 +858,7 @@ namespace Wuxing.Game
 
                 result.Add(new UICardData
                 {
-                    Id = equipment.Id,
+                    Id = entry.InstanceId,
                     Title = equipment.Name,
                     Subtitle = GetEquipmentSlotLabel(equipment.Slot, english),
                     DetailTitle = equipment.Name,
@@ -913,8 +994,9 @@ namespace Wuxing.Game
                 var drop = Instance.RollEquipmentDrop(equipmentDatabase, resolvedStage);
                 if (drop != null)
                 {
-                    Instance.ownedEquipmentIds.Add(drop.Id);
+                    var instance = Instance.AddOwnedEquipmentInstance(drop.Id);
                     reward.DroppedEquipmentId = drop.Id;
+                    reward.DroppedEquipmentInstanceId = instance != null ? instance.InstanceId : string.Empty;
                     reward.DroppedEquipmentName = drop.Name;
                 }
             }
@@ -1692,6 +1774,7 @@ namespace Wuxing.Game
             WaterSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(WaterSpiritStonesPrefKey, 0));
             FireSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(FireSpiritStonesPrefKey, 0));
             EarthSpiritStones = Mathf.Max(0, PlayerPrefs.GetInt(EarthSpiritStonesPrefKey, 0));
+            equipmentInstanceCounter = Mathf.Max(0, PlayerPrefs.GetInt(EquipmentInstanceCounterPrefKey, 0));
             if (MetalSpiritStones + WoodSpiritStones + WaterSpiritStones + FireSpiritStones + EarthSpiritStones <= 0
                 && SpiritStones > 0)
             {
@@ -1724,6 +1807,7 @@ namespace Wuxing.Game
             PlayerPrefs.SetInt(WaterSpiritStonesPrefKey, WaterSpiritStones);
             PlayerPrefs.SetInt(FireSpiritStonesPrefKey, FireSpiritStones);
             PlayerPrefs.SetInt(EarthSpiritStonesPrefKey, EarthSpiritStones);
+            PlayerPrefs.SetInt(EquipmentInstanceCounterPrefKey, equipmentInstanceCounter);
             PlayerPrefs.SetString(OwnedEquipmentPrefKey, SerializeOwnedEquipment());
             PlayerPrefs.SetString(LearnedSkillsPrefKey, SerializeLearnedSkills());
             PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
@@ -1795,20 +1879,47 @@ namespace Wuxing.Game
 
         private void ResetOwnedEquipmentToBase()
         {
-            ownedEquipmentIds.Clear();
+            ownedEquipments.Clear();
             for (var i = 0; i < BaseOwnedEquipmentIds.Length; i++)
             {
-                ownedEquipmentIds.Add(BaseOwnedEquipmentIds[i]);
+                AddOwnedEquipmentInstance(BaseOwnedEquipmentIds[i]);
             }
         }
 
         private void LoadOwnedEquipment()
         {
-            ResetOwnedEquipmentToBase();
+            ownedEquipments.Clear();
             var raw = PlayerPrefs.GetString(OwnedEquipmentPrefKey, string.Empty);
             if (string.IsNullOrEmpty(raw))
             {
+                ResetOwnedEquipmentToBase();
                 return;
+            }
+
+            if (raw.TrimStart().StartsWith("{", StringComparison.Ordinal))
+            {
+                var wrapper = JsonUtility.FromJson<EquipmentInstanceListWrapper>(raw);
+                if (wrapper != null && wrapper.Entries != null && wrapper.Entries.Count > 0)
+                {
+                    for (var i = 0; i < wrapper.Entries.Count; i++)
+                    {
+                        var entry = wrapper.Entries[i];
+                        if (entry == null || string.IsNullOrWhiteSpace(entry.EquipmentId))
+                        {
+                            continue;
+                        }
+
+                        if (string.IsNullOrWhiteSpace(entry.InstanceId))
+                        {
+                            entry.InstanceId = GenerateEquipmentInstanceId();
+                        }
+
+                        ownedEquipments.Add(entry);
+                    }
+
+                    SyncEquipmentInstanceCounterFromOwnedEquipments();
+                    return;
+                }
             }
 
             var parts = raw.Split('|');
@@ -1816,16 +1927,95 @@ namespace Wuxing.Game
             {
                 if (!string.IsNullOrWhiteSpace(parts[i]))
                 {
-                    ownedEquipmentIds.Add(parts[i]);
+                    AddOwnedEquipmentInstance(parts[i].Trim());
                 }
             }
         }
 
         private string SerializeOwnedEquipment()
         {
-            var ordered = new List<string>(ownedEquipmentIds);
-            ordered.Sort(StringComparer.OrdinalIgnoreCase);
-            return string.Join("|", ordered.ToArray());
+            var ordered = new List<EquipmentInstanceData>();
+            for (var i = 0; i < ownedEquipments.Count; i++)
+            {
+                if (ownedEquipments[i] != null && !string.IsNullOrWhiteSpace(ownedEquipments[i].EquipmentId))
+                {
+                    ordered.Add(CloneEquipmentInstance(ownedEquipments[i]));
+                }
+            }
+
+            ordered.Sort(delegate(EquipmentInstanceData left, EquipmentInstanceData right)
+            {
+                var leftKey = (left != null ? left.EquipmentId : string.Empty) + "|" + (left != null ? left.InstanceId : string.Empty);
+                var rightKey = (right != null ? right.EquipmentId : string.Empty) + "|" + (right != null ? right.InstanceId : string.Empty);
+                return string.Compare(leftKey, rightKey, StringComparison.OrdinalIgnoreCase);
+            });
+
+            return JsonUtility.ToJson(new EquipmentInstanceListWrapper
+            {
+                Entries = ordered
+            });
+        }
+
+        private EquipmentInstanceData AddOwnedEquipmentInstance(string equipmentId)
+        {
+            if (string.IsNullOrWhiteSpace(equipmentId))
+            {
+                return null;
+            }
+
+            var created = new EquipmentInstanceData
+            {
+                InstanceId = GenerateEquipmentInstanceId(),
+                EquipmentId = equipmentId.Trim()
+            };
+            ownedEquipments.Add(created);
+            return created;
+        }
+
+        private string GenerateEquipmentInstanceId()
+        {
+            equipmentInstanceCounter = Mathf.Max(0, equipmentInstanceCounter) + 1;
+            return "EI" + equipmentInstanceCounter.ToString("D6");
+        }
+
+        private void SyncEquipmentInstanceCounterFromOwnedEquipments()
+        {
+            var maxCounter = equipmentInstanceCounter;
+            for (var i = 0; i < ownedEquipments.Count; i++)
+            {
+                var entry = ownedEquipments[i];
+                if (entry == null || string.IsNullOrWhiteSpace(entry.InstanceId) || entry.InstanceId.Length <= 2)
+                {
+                    continue;
+                }
+
+                if (!entry.InstanceId.StartsWith("EI", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                int parsedValue;
+                if (int.TryParse(entry.InstanceId.Substring(2), out parsedValue))
+                {
+                    maxCounter = Mathf.Max(maxCounter, parsedValue);
+                }
+            }
+
+            equipmentInstanceCounter = maxCounter;
+        }
+
+        private static EquipmentInstanceData CloneEquipmentInstance(EquipmentInstanceData source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            return new EquipmentInstanceData
+            {
+                InstanceId = source.InstanceId,
+                EquipmentId = source.EquipmentId
+            };
         }
 
         private void LoadLearnedSkills()
@@ -2039,7 +2229,13 @@ namespace Wuxing.Game
                 LastBattleVictory = LastBattleVictory
             };
 
-            data.OwnedEquipmentIds.AddRange(ownedEquipmentIds);
+            for (var i = 0; i < ownedEquipments.Count; i++)
+            {
+                if (ownedEquipments[i] != null)
+                {
+                    data.OwnedEquipments.Add(CloneEquipmentInstance(ownedEquipments[i]));
+                }
+            }
             for (var i = 0; i < characterRunData.Count; i++)
             {
                 var entry = characterRunData[i];
@@ -2981,6 +3177,12 @@ namespace Wuxing.Game
         private class RunEffectDataListWrapper
         {
             public List<RunEffectData> Entries = new List<RunEffectData>();
+        }
+
+        [Serializable]
+        private class EquipmentInstanceListWrapper
+        {
+            public List<EquipmentInstanceData> Entries = new List<EquipmentInstanceData>();
         }
 
 [Serializable]

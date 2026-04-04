@@ -22,7 +22,7 @@ namespace Wuxing.Game
         public int LastBattleStage;
         public int LastBattleRounds;
         public bool LastBattleVictory;
-        public List<string> OwnedEquipmentIds = new List<string>();
+        public List<EquipmentInstanceData> OwnedEquipments = new List<EquipmentInstanceData>();
         public List<CharacterRunData> Characters = new List<CharacterRunData>();
         public List<SkillRewardOption> PendingSkillRewards = new List<SkillRewardOption>();
         public List<RunEffectData> ActiveEffects = new List<RunEffectData>();

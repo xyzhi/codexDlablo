@@ -28,8 +28,7 @@ namespace Wuxing.UI
         private readonly List<Button> inventoryButtons = new List<Button>();
 
         private string selectedSlot = "Weapon";
-        private string selectedEquipmentId = string.Empty;
-        private string selectedInventoryKey = string.Empty;
+        private string selectedEquipmentInstanceId = string.Empty;
 
         private void Awake()
         {
@@ -71,7 +70,7 @@ namespace Wuxing.UI
 
         private void RefreshAll()
         {
-            selectedEquipmentId = ResolveEquippedEquipmentId(selectedSlot) ?? string.Empty;
+            selectedEquipmentInstanceId = BattleManager.GetEquippedPlayerEquipmentInstanceId(PlayerUnitIndex, selectedSlot) ?? string.Empty;
             RefreshSlotButtons();
             RefreshInventoryButtons();
             RefreshDetail();
@@ -136,15 +135,14 @@ namespace Wuxing.UI
                 return;
             }
 
-            if (string.IsNullOrEmpty(selectedEquipmentId))
+            if (string.IsNullOrEmpty(selectedEquipmentInstanceId))
             {
                 detailTitleText.text = LocalizationManager.GetText("battle.equipment_none");
                 detailBodyText.text = BuildEmptySlotDetail();
                 return;
             }
 
-            var database = EquipmentDatabaseLoader.Load();
-            var equipment = database != null ? database.GetById(selectedEquipmentId) : null;
+            var equipment = BattleManager.GetOwnedEquipmentConfigByInstance(selectedEquipmentInstanceId);
             if (equipment == null)
             {
                 detailTitleText.text = LocalizationManager.GetText("battle.equipment_none");
@@ -197,8 +195,7 @@ namespace Wuxing.UI
             button.onClick.AddListener(delegate
             {
                 selectedSlot = slot;
-                selectedEquipmentId = ResolveEquippedEquipmentId(slot) ?? string.Empty;
-                selectedInventoryKey = string.Empty;
+                selectedEquipmentInstanceId = BattleManager.GetEquippedPlayerEquipmentInstanceId(PlayerUnitIndex, slot) ?? string.Empty;
                 RefreshAll();
             });
         }
@@ -210,7 +207,9 @@ namespace Wuxing.UI
                 return;
             }
 
-            var isSelected = string.Equals(selectedInventoryKey, card.SelectionKey, StringComparison.OrdinalIgnoreCase);
+            var isSelected = card.IsUnequip
+                ? string.IsNullOrEmpty(selectedEquipmentInstanceId)
+                : string.Equals(selectedEquipmentInstanceId, card.EquipmentInstanceId, StringComparison.OrdinalIgnoreCase);
             UICardChromeUtility.Apply(button, card.BorderColor, isSelected);
             SetCardTexts(button, card.Title, card.Subtitle);
 
@@ -220,15 +219,14 @@ namespace Wuxing.UI
                 if (card.IsUnequip)
                 {
                     BattleManager.UnequipPlayerEquipmentForUnitIndexSlot(PlayerUnitIndex, selectedSlot);
-                    selectedEquipmentId = string.Empty;
+                    selectedEquipmentInstanceId = string.Empty;
                 }
-                else if (!string.IsNullOrEmpty(card.EquipmentId))
+                else if (!string.IsNullOrEmpty(card.EquipmentInstanceId))
                 {
-                    BattleManager.EquipOwnedItemForUnitIndex(PlayerUnitIndex, card.EquipmentId);
-                    selectedEquipmentId = card.EquipmentId;
+                    BattleManager.EquipOwnedItemForUnitIndex(PlayerUnitIndex, card.EquipmentInstanceId);
+                    selectedEquipmentInstanceId = card.EquipmentInstanceId;
                 }
 
-                selectedInventoryKey = card.SelectionKey;
                 RefreshAll();
             });
         }
@@ -240,16 +238,22 @@ namespace Wuxing.UI
             {
                 Title = "\u5378\u4e0b\u88c5\u5907",
                 Subtitle = GetSlotDisplayName(selectedSlot),
-                EquipmentId = string.Empty,
-                SelectionKey = "unequip",
+                EquipmentInstanceId = string.Empty,
                 BorderColor = new Color(0.88f, 0.82f, 0.76f, 1f),
                 IsUnequip = true
             });
 
-            var equipments = BattleManager.GetOwnedEquipmentsForSlot(selectedSlot);
-            for (var i = 0; i < equipments.Count; i++)
+            var instances = BattleManager.GetOwnedEquipmentInstancesForSlot(selectedSlot);
+            var database = EquipmentDatabaseLoader.Load();
+            for (var i = 0; i < instances.Count; i++)
             {
-                var equipment = equipments[i];
+                var instance = instances[i];
+                if (instance == null || database == null)
+                {
+                    continue;
+                }
+
+                var equipment = database.GetById(instance.EquipmentId);
                 if (equipment == null)
                 {
                     continue;
@@ -259,58 +263,13 @@ namespace Wuxing.UI
                 {
                     Title = equipment.Name,
                     Subtitle = GetSlotDisplayName(equipment.Slot),
-                    EquipmentId = equipment.Id,
-                    SelectionKey = equipment.Id + "#" + i,
+                    EquipmentInstanceId = instance.InstanceId,
                     BorderColor = UIElementPalette.GetBorderColor(GetSlotElement(equipment.Slot)),
                     IsUnequip = false
                 });
             }
 
-            if (string.IsNullOrEmpty(selectedInventoryKey))
-            {
-                selectedInventoryKey = string.IsNullOrEmpty(selectedEquipmentId)
-                    ? "unequip"
-                    : FindFirstSelectionKeyByEquipmentId(result, selectedEquipmentId);
-            }
-
             return result;
-        }
-
-        private static string FindFirstSelectionKeyByEquipmentId(List<EquipmentCardData> cards, string equipmentId)
-        {
-            for (var i = 0; i < cards.Count; i++)
-            {
-                if (string.Equals(cards[i].EquipmentId, equipmentId, StringComparison.OrdinalIgnoreCase))
-                {
-                    return cards[i].SelectionKey;
-                }
-            }
-
-            return "unequip";
-        }
-
-        private string ResolveEquippedEquipmentId(string slot)
-        {
-            var ownedIds = GameProgressManager.GetOwnedEquipmentIds();
-            var database = EquipmentDatabaseLoader.Load();
-            if (database == null)
-            {
-                return null;
-            }
-
-            var equippedName = BattleManager.GetPlayerEquipmentName(PlayerUnitIndex, slot);
-            for (var i = 0; i < ownedIds.Count; i++)
-            {
-                var config = database.GetById(ownedIds[i]);
-                if (config != null
-                    && string.Equals(config.Slot, slot, StringComparison.OrdinalIgnoreCase)
-                    && string.Equals(config.Name, equippedName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return config.Id;
-                }
-            }
-
-            return null;
         }
 
         private static void SetCardTexts(Button button, string title, string subtitle)
@@ -442,8 +401,7 @@ namespace Wuxing.UI
         {
             public string Title;
             public string Subtitle;
-            public string EquipmentId;
-            public string SelectionKey;
+            public string EquipmentInstanceId;
             public Color BorderColor;
             public bool IsUnequip;
         }

@@ -96,20 +96,25 @@ namespace Wuxing.Battle
                 return LocalizationManager.GetText("battle.equipment_none");
             }
 
-            string[] equipmentIds;
-            if (!GetCurrentPlayerEquipmentPreset().TryGetValue(config.Id, out equipmentIds))
+            var equipmentInstanceId = GetEquippedPlayerEquipmentInstanceId(config.Id, slot, equipmentDatabase);
+            if (string.IsNullOrEmpty(equipmentInstanceId))
             {
                 return LocalizationManager.GetText("battle.equipment_none");
             }
 
-            var equipmentId = GetOwnedEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
-            if (string.IsNullOrEmpty(equipmentId))
-            {
-                return LocalizationManager.GetText("battle.equipment_none");
-            }
-
-            var equipment = equipmentDatabase.GetById(equipmentId);
+            var equipment = GetEquipmentConfigByInstanceId(equipmentDatabase, equipmentInstanceId);
             return equipment != null ? equipment.Name : LocalizationManager.GetText("battle.equipment_none");
+        }
+
+        public static string GetEquippedPlayerEquipmentInstanceId(int unitIndex, string slot)
+        {
+            var config = GetPlayerCharacterConfig(unitIndex);
+            if (config == null)
+            {
+                return string.Empty;
+            }
+
+            return GetEquippedPlayerEquipmentInstanceId(config.Id, slot, EquipmentDatabaseLoader.Load()) ?? string.Empty;
         }
 
         public static void CyclePlayerEquipmentForUnitSlot(string unitId, string slot)
@@ -126,21 +131,17 @@ namespace Wuxing.Battle
                 return;
             }
 
-            var candidates = GetOwnedEquipmentCandidates(equipmentDatabase, slot);
+            var candidates = GetOwnedEquipmentInstanceCandidates(equipmentDatabase, slot);
             if (candidates.Count == 0)
             {
                 return;
             }
 
-            var currentLoadout = GetCurrentPlayerEquipmentPreset();
-            string[] equipmentIds;
-            currentLoadout.TryGetValue(unitId, out equipmentIds);
-
-            var currentEquipmentId = GetOwnedEquipmentIdBySlot(equipmentIds, slot, equipmentDatabase);
+            var currentEquipmentId = GetEquippedPlayerEquipmentInstanceId(unitId, slot, equipmentDatabase);
             var currentIndex = -1;
             for (var i = 0; i < candidates.Count; i++)
             {
-                if (candidates[i] != null && candidates[i].Id == currentEquipmentId)
+                if (candidates[i] != null && candidates[i].InstanceId == currentEquipmentId)
                 {
                     currentIndex = i;
                     break;
@@ -148,7 +149,7 @@ namespace Wuxing.Battle
             }
 
             var nextEquipment = candidates[(currentIndex + 1 + candidates.Count) % candidates.Count];
-            SetPlayerEquipmentOverride(unitId, slot, nextEquipment != null ? nextEquipment.Id : string.Empty);
+            SetPlayerEquipmentOverride(unitId, slot, nextEquipment != null ? nextEquipment.InstanceId : string.Empty);
             SaveEquipmentSettings();
         }
 
@@ -163,12 +164,12 @@ namespace Wuxing.Battle
             CyclePlayerEquipmentForUnitSlot(config.Id, slot);
         }
 
-        public static void EquipOwnedItemForUnitIndex(int unitIndex, string equipmentId)
+        public static void EquipOwnedItemForUnitIndex(int unitIndex, string equipmentInstanceId)
         {
             EnsureEquipmentSettingsLoaded();
 
             var config = GetPlayerCharacterConfig(unitIndex);
-            if (config == null || string.IsNullOrEmpty(equipmentId) || !GameProgressManager.OwnsEquipment(equipmentId))
+            if (config == null || string.IsNullOrEmpty(equipmentInstanceId) || !GameProgressManager.OwnsEquipmentInstance(equipmentInstanceId))
             {
                 return;
             }
@@ -179,13 +180,13 @@ namespace Wuxing.Battle
                 return;
             }
 
-            var equipment = equipmentDatabase.GetById(equipmentId);
+            var equipment = GetEquipmentConfigByInstanceId(equipmentDatabase, equipmentInstanceId);
             if (equipment == null || string.IsNullOrEmpty(equipment.Slot))
             {
                 return;
             }
 
-            SetPlayerEquipmentOverride(config.Id, equipment.Slot, equipment.Id);
+            SetPlayerEquipmentOverride(config.Id, equipment.Slot, equipmentInstanceId);
             SaveEquipmentSettings();
         }
 
@@ -211,7 +212,34 @@ namespace Wuxing.Battle
                 return new List<EquipmentConfig>();
             }
 
-            return GetOwnedEquipmentCandidates(equipmentDatabase, slot);
+            var instances = GetOwnedEquipmentInstanceCandidates(equipmentDatabase, slot);
+            var results = new List<EquipmentConfig>();
+            for (var i = 0; i < instances.Count; i++)
+            {
+                var config = equipmentDatabase.GetById(instances[i].EquipmentId);
+                if (config != null)
+                {
+                    results.Add(config);
+                }
+            }
+
+            return results;
+        }
+
+        public static List<EquipmentInstanceData> GetOwnedEquipmentInstancesForSlot(string slot)
+        {
+            var equipmentDatabase = EquipmentDatabaseLoader.Load();
+            if (equipmentDatabase == null || string.IsNullOrEmpty(slot))
+            {
+                return new List<EquipmentInstanceData>();
+            }
+
+            return GetOwnedEquipmentInstanceCandidates(equipmentDatabase, slot);
+        }
+
+        public static EquipmentConfig GetOwnedEquipmentConfigByInstance(string equipmentInstanceId)
+        {
+            return GetEquipmentConfigByInstanceId(EquipmentDatabaseLoader.Load(), equipmentInstanceId);
         }
 
         public static void AutoEquipPlayerUnitOffense(int unitIndex)
@@ -744,7 +772,6 @@ namespace Wuxing.Battle
         private static BattleTeamRuntime BuildPlayerTeam(CharacterDatabase database, EquipmentDatabase equipmentDatabase)
         {
             var team = new BattleTeamRuntime();
-            var loadout = GetCurrentPlayerEquipmentPreset();
             var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             for (var i = 0; i < DefaultPlayerIds.Length; i++)
             {
@@ -753,7 +780,7 @@ namespace Wuxing.Battle
                 {
                     var unit = BattleUnitRuntime.FromCharacter(config);
                     ApplyRunLearnedSkills(unit);
-                    ApplyDefaultEquipment(unit, equipmentDatabase, loadout);
+                    ApplyDefaultEquipment(unit, equipmentDatabase);
                     ApplyCultivationScaling(unit);
                     team.Units.Add(unit);
                 }
@@ -880,24 +907,18 @@ namespace Wuxing.Battle
 
         private static void ApplyDefaultEquipment(
             BattleUnitRuntime unit,
-            EquipmentDatabase equipmentDatabase,
-            Dictionary<string, string[]> loadoutMap)
+            EquipmentDatabase equipmentDatabase)
         {
-            if (unit == null || equipmentDatabase == null || loadoutMap == null)
+            if (unit == null || equipmentDatabase == null)
             {
                 return;
             }
 
-            string[] equipmentIds;
-            if (!loadoutMap.TryGetValue(unit.Id, out equipmentIds) || equipmentIds == null)
+            for (var i = 0; i < EquipmentSlots.Length; i++)
             {
-                return;
-            }
-
-            for (var i = 0; i < equipmentIds.Length; i++)
-            {
-                var equipment = equipmentDatabase.GetById(equipmentIds[i]);
-                if (equipment != null && GameProgressManager.OwnsEquipment(equipment.Id))
+                var instanceId = GetEquippedPlayerEquipmentInstanceId(unit.Id, EquipmentSlots[i], equipmentDatabase);
+                var equipment = GetEquipmentConfigByInstanceId(equipmentDatabase, instanceId);
+                if (equipment != null)
                 {
                     unit.ApplyEquipment(equipment);
                 }
@@ -1028,62 +1049,52 @@ namespace Wuxing.Battle
             unit.MaxMP += mpBonus;
             unit.CurrentMP += mpBonus;
         }
-        private static Dictionary<string, string[]> GetCurrentPlayerEquipmentPreset()
+        private static string GetEquippedPlayerEquipmentInstanceId(string unitId, string slot, EquipmentDatabase equipmentDatabase)
         {
             EnsureEquipmentSettingsLoaded();
-            var basePreset = playerEquipmentPresetIndex == 0 ? PlayerEquipmentPresetA : PlayerEquipmentPresetB;
-            var mergedPreset = new Dictionary<string, string[]>();
-
-            foreach (var pair in basePreset)
-            {
-                var values = new string[pair.Value.Length];
-                for (var i = 0; i < pair.Value.Length; i++)
-                {
-                    values[i] = pair.Value[i];
-                }
-
-                mergedPreset[pair.Key] = values;
-            }
-
-            foreach (var overridePair in PlayerEquipmentOverrides)
-            {
-                string[] equipmentIds;
-                if (!mergedPreset.TryGetValue(overridePair.Key, out equipmentIds))
-                {
-                    equipmentIds = new string[EquipmentSlots.Length];
-                    mergedPreset[overridePair.Key] = equipmentIds;
-                }
-
-                for (var i = 0; i < EquipmentSlots.Length; i++)
-                {
-                    string overrideId;
-                    if (!overridePair.Value.TryGetValue(EquipmentSlots[i], out overrideId)
-                        || string.IsNullOrEmpty(overrideId)
-                        || !GameProgressManager.OwnsEquipment(overrideId))
-                    {
-                        continue;
-                    }
-
-                    equipmentIds[i] = overrideId;
-                }
-            }
-
-            return mergedPreset;
-        }
-
-        private static string GetOwnedEquipmentIdBySlot(string[] equipmentIds, string slot, EquipmentDatabase equipmentDatabase)
-        {
-            if (equipmentIds == null || equipmentDatabase == null)
+            if (string.IsNullOrEmpty(unitId) || string.IsNullOrEmpty(slot) || equipmentDatabase == null)
             {
                 return null;
             }
 
-            for (var i = 0; i < equipmentIds.Length; i++)
+            Dictionary<string, string> slotOverrides;
+            if (PlayerEquipmentOverrides.TryGetValue(unitId, out slotOverrides))
             {
-                var equipment = equipmentDatabase.GetById(equipmentIds[i]);
-                if (equipment != null
-                    && equipment.Slot == slot
-                    && GameProgressManager.OwnsEquipment(equipment.Id))
+                string overrideInstanceId;
+                if (slotOverrides.TryGetValue(slot, out overrideInstanceId)
+                    && !string.IsNullOrEmpty(overrideInstanceId)
+                    && GameProgressManager.OwnsEquipmentInstance(overrideInstanceId))
+                {
+                    var overrideEquipment = GetEquipmentConfigByInstanceId(equipmentDatabase, overrideInstanceId);
+                    if (overrideEquipment != null && string.Equals(overrideEquipment.Slot, slot, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return overrideInstanceId;
+                    }
+                }
+            }
+
+            var presetConfigId = GetPresetEquipmentConfigId(unitId, slot, equipmentDatabase);
+            if (string.IsNullOrEmpty(presetConfigId))
+            {
+                return null;
+            }
+
+            return GameProgressManager.GetFirstOwnedEquipmentInstanceIdByEquipmentId(presetConfigId);
+        }
+
+        private static string GetPresetEquipmentConfigId(string unitId, string slot, EquipmentDatabase equipmentDatabase)
+        {
+            var basePreset = playerEquipmentPresetIndex == 0 ? PlayerEquipmentPresetA : PlayerEquipmentPresetB;
+            string[] presetIds;
+            if (!basePreset.TryGetValue(unitId, out presetIds) || presetIds == null)
+            {
+                return null;
+            }
+
+            for (var i = 0; i < presetIds.Length; i++)
+            {
+                var equipment = equipmentDatabase.GetById(presetIds[i]);
+                if (equipment != null && string.Equals(equipment.Slot, slot, StringComparison.OrdinalIgnoreCase))
                 {
                     return equipment.Id;
                 }
@@ -1124,21 +1135,21 @@ namespace Wuxing.Battle
                     continue;
                 }
 
-                SetPlayerEquipmentOverride(config.Id, slot, bestEquipment.Id);
+                SetPlayerEquipmentOverride(config.Id, slot, bestEquipment.InstanceId);
             }
 
             SaveEquipmentSettings();
         }
 
-        private static EquipmentConfig GetBestEquipmentForSlot(EquipmentDatabase equipmentDatabase, string slot, bool offenseFocus)
+        private static EquipmentInstanceData GetBestEquipmentForSlot(EquipmentDatabase equipmentDatabase, string slot, bool offenseFocus)
         {
             if (equipmentDatabase == null || string.IsNullOrEmpty(slot))
             {
                 return null;
             }
 
-            var candidates = GetOwnedEquipmentCandidates(equipmentDatabase, slot);
-            EquipmentConfig bestEquipment = null;
+            var candidates = GetOwnedEquipmentInstanceCandidates(equipmentDatabase, slot);
+            EquipmentInstanceData bestEquipment = null;
             var bestScore = int.MinValue;
 
             for (var i = 0; i < candidates.Count; i++)
@@ -1149,7 +1160,7 @@ namespace Wuxing.Battle
                     continue;
                 }
 
-                var score = CalculateEquipmentScore(candidate, offenseFocus);
+                var score = CalculateEquipmentScore(equipmentDatabase.GetById(candidate.EquipmentId), offenseFocus);
                 if (bestEquipment == null || score > bestScore)
                 {
                     bestEquipment = candidate;
@@ -1160,16 +1171,22 @@ namespace Wuxing.Battle
             return bestEquipment;
         }
 
-        private static List<EquipmentConfig> GetOwnedEquipmentCandidates(EquipmentDatabase equipmentDatabase, string slot)
+        private static List<EquipmentInstanceData> GetOwnedEquipmentInstanceCandidates(EquipmentDatabase equipmentDatabase, string slot)
         {
-            var results = new List<EquipmentConfig>();
-            var ownedIds = GameProgressManager.GetOwnedEquipmentIds();
-            for (var i = 0; i < ownedIds.Count; i++)
+            var results = new List<EquipmentInstanceData>();
+            var ownedEntries = GameProgressManager.GetOwnedEquipmentInstances();
+            for (var i = 0; i < ownedEntries.Count; i++)
             {
-                var equipment = equipmentDatabase.GetById(ownedIds[i]);
+                var entry = ownedEntries[i];
+                if (entry == null)
+                {
+                    continue;
+                }
+
+                var equipment = equipmentDatabase.GetById(entry.EquipmentId);
                 if (equipment != null && equipment.Slot == slot)
                 {
-                    results.Add(equipment);
+                    results.Add(entry);
                 }
             }
 
@@ -1222,8 +1239,28 @@ namespace Wuxing.Battle
                     continue;
                 }
 
-                SetPlayerEquipmentOverride(parts[0], parts[1], parts[2]);
+                var overrideValue = parts[2];
+                if (!GameProgressManager.OwnsEquipmentInstance(overrideValue))
+                {
+                    overrideValue = GameProgressManager.GetFirstOwnedEquipmentInstanceIdByEquipmentId(parts[2]);
+                }
+
+                if (!string.IsNullOrEmpty(overrideValue))
+                {
+                    SetPlayerEquipmentOverride(parts[0], parts[1], overrideValue);
+                }
             }
+        }
+
+        private static EquipmentConfig GetEquipmentConfigByInstanceId(EquipmentDatabase equipmentDatabase, string equipmentInstanceId)
+        {
+            if (equipmentDatabase == null || string.IsNullOrWhiteSpace(equipmentInstanceId))
+            {
+                return null;
+            }
+
+            var instance = GameProgressManager.GetOwnedEquipmentInstance(equipmentInstanceId);
+            return instance != null ? equipmentDatabase.GetById(instance.EquipmentId) : null;
         }
 
         private static void SaveEquipmentSettings()
