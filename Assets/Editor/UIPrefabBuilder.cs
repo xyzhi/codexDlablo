@@ -16,6 +16,7 @@ public static class UIPrefabBuilder
     private const string PopupsFolder = RootFolder + "/Popups";
     private const string BuildStateFolder = "Library/Codex";
     private const string BuildStatePath = BuildStateFolder + "/ui_prefab_build_hash.txt";
+    private const string TempPrefabFolder = "Assets/__UIPrefabBuilderTemp";
 
     public static void BuildPrefabs(bool forceRebuild = false)
     {
@@ -1257,8 +1258,51 @@ public static class UIPrefabBuilder
             EnsureFolder(directory.Replace("\\", "/"));
         }
 
-        PrefabUtility.SaveAsPrefabAsset(root, path);
+        EnsureFolder(TempPrefabFolder);
+        var tempPath = TempPrefabFolder + "/" + Path.GetFileName(path);
+        var absoluteTargetPath = GetProjectAbsolutePath(path);
+        var absoluteTempPath = GetProjectAbsolutePath(tempPath);
+
+        if (AssetDatabase.LoadAssetAtPath<Object>(tempPath) != null)
+        {
+            AssetDatabase.DeleteAsset(tempPath);
+        }
+
+        PrefabUtility.SaveAsPrefabAsset(root, tempPath);
         Object.DestroyImmediate(root);
+        AssetDatabase.SaveAssets();
+
+        var shouldReplace = !File.Exists(absoluteTargetPath) || !AreTextFilesEquivalent(absoluteTargetPath, absoluteTempPath);
+        if (shouldReplace)
+        {
+            if (AssetDatabase.LoadAssetAtPath<Object>(path) != null)
+            {
+                AssetDatabase.DeleteAsset(path);
+            }
+
+            AssetDatabase.MoveAsset(tempPath, path);
+        }
+        else
+        {
+            AssetDatabase.DeleteAsset(tempPath);
+        }
+    }
+
+    private static bool AreTextFilesEquivalent(string leftPath, string rightPath)
+    {
+        if (!File.Exists(leftPath) || !File.Exists(rightPath))
+        {
+            return false;
+        }
+
+        var left = NormalizeText(File.ReadAllText(leftPath));
+        var right = NormalizeText(File.ReadAllText(rightPath));
+        return string.Equals(left, right, System.StringComparison.Ordinal);
+    }
+
+    private static string NormalizeText(string value)
+    {
+        return (value ?? string.Empty).Replace("\r\n", "\n").Replace("\r", "\n");
     }
 
     private static bool AreAllGeneratedPrefabsPresent()
