@@ -1381,21 +1381,6 @@
             "en": "None"
         },
         {
-            "key": "progress.skills_quality",
-            "zhHans": "品质：",
-            "en": "Quality: "
-        },
-        {
-            "key": "progress.skills_element",
-            "zhHans": "五行：",
-            "en": "Element: "
-        },
-        {
-            "key": "progress.skills_effect",
-            "zhHans": "效果：",
-            "en": "Effect: "
-        },
-        {
             "key": "progress.last_battle_none",
             "zhHans": "上一场：暂无战斗记录",
             "en": "Last Battle: None yet"
@@ -1631,34 +1616,129 @@
             "en": "Converted {0} {1} into {2} {3}."
         },
         {
-            "key": "map.profile_active_effects",
-            "zhHans": "当前机缘：",
-            "en": "Active Effects: "
+            "key": "cheat.title",
+            "zhHans": "调试面板",
+            "en": "Debug Panel"
         },
         {
-            "key": "map.profile_no_effects",
-            "zhHans": "无",
-            "en": "None"
+            "key": "cheat.summary",
+            "zhHans": "当前关卡：{0} / 已通关：{1}\n修为：Lv.{2}（{3}/{4}）\n灵石总量：{5}",
+            "en": "Stage: {0} / Cleared: {1}\nCultivation: Lv.{2} ({3}/{4})\nSpirit Stones: {5}"
         },
         {
-            "key": "map.effect_cultivation_title",
-            "zhHans": "福运加身",
-            "en": "Fortune Blessing"
+            "key": "cheat.button_start_run",
+            "zhHans": "开始新的一局",
+            "en": "Start New Run"
         },
         {
-            "key": "map.effect_cultivation_desc",
-            "zhHans": "接下来 {0} 个月，额外获得经验 +{1}。",
-            "en": "For the next {0} month(s), gain +{1} extra exp."
+            "key": "cheat.button_reset_run",
+            "zhHans": "重置当前局",
+            "en": "Reset Current Run"
         },
         {
-            "key": "map.effect_stone_title",
-            "zhHans": "灵囊丰盈",
-            "en": "Packed Spirit Pouch"
+            "key": "cheat.label_amount",
+            "zhHans": "数量",
+            "en": "Amount"
         },
         {
-            "key": "map.effect_stone_desc",
-            "zhHans": "接下来 {0} 个月，额外获得灵石 +{1}。",
-            "en": "For the next {0} month(s), gain +{1} extra spirit stones."
+            "key": "cheat.label_level",
+            "zhHans": "等级",
+            "en": "Level"
+        },
+        {
+            "key": "cheat.label_stage",
+            "zhHans": "关卡",
+            "en": "Stage"
+        },
+        {
+            "key": "cheat.label_skill_level",
+            "zhHans": "功法等级",
+            "en": "Skill Lv"
+        },
+        {
+            "key": "cheat.button_grant_current_stone",
+            "zhHans": "增加当前灵石",
+            "en": "Grant Current Stone"
+        },
+        {
+            "key": "cheat.button_grant_all_500",
+            "zhHans": "五系各+500",
+            "en": "All +500"
+        },
+        {
+            "key": "cheat.button_grant_all_5000",
+            "zhHans": "五系各+5000",
+            "en": "All +5000"
+        },
+        {
+            "key": "cheat.button_apply_level",
+            "zhHans": "应用等级",
+            "en": "Apply Level"
+        },
+        {
+            "key": "cheat.button_jump_stage",
+            "zhHans": "跳到该关",
+            "en": "Jump To Stage"
+        },
+        {
+            "key": "cheat.button_jump_last",
+            "zhHans": "跳到最后一关",
+            "en": "Jump To Last"
+        },
+        {
+            "key": "cheat.button_grant_equipment",
+            "zhHans": "获得这件装备",
+            "en": "Grant Equipment"
+        },
+        {
+            "key": "cheat.button_grant_all_equipment",
+            "zhHans": "获得全部装备",
+            "en": "Grant All Equipment"
+        },
+        {
+            "key": "cheat.button_grant_skill",
+            "zhHans": "获得这门功法",
+            "en": "Grant Skill"
+        },
+        {
+            "key": "cheat.button_grant_all_skill_lv1",
+            "zhHans": "全功法 Lv1",
+            "en": "All Skills Lv1"
+        },
+        {
+            "key": "cheat.button_grant_all_skill_lv5",
+            "zhHans": "全功法 Lv5",
+            "en": "All Skills Lv5"
+        },
+        {
+            "key": "cheat.empty_equipment",
+            "zhHans": "暂无装备配置",
+            "en": "No equipment data"
+        },
+        {
+            "key": "cheat.empty_character",
+            "zhHans": "暂无角色配置",
+            "en": "No character data"
+        },
+        {
+            "key": "cheat.empty_skill",
+            "zhHans": "暂无功法配置",
+            "en": "No skill data"
+        },
+        {
+            "key": "cheat.section_stones",
+            "zhHans": "灵石",
+            "en": "Spirit Stones"
+        },
+        {
+            "key": "cheat.section_progress",
+            "zhHans": "修为 / 关卡",
+            "en": "Cultivation / Stage"
+        },
+        {
+            "key": "cheat.section_loadout",
+            "zhHans": "装备 / 功法",
+            "en": "Equipment / Skills"
         }
     ]
 }
