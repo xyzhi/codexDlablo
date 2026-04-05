@@ -400,33 +400,33 @@ public static class UIPrefabBuilder
         var root = UIFactory.CreatePanel(null, "BattlePage", new Color(0.12f, 0.08f, 0.08f, 1f));
         UIFactory.AddOutlineBox(root.transform, "BattleFrame", new Color(0.86f, 0.78f, 0.72f, 0.8f), 2f);
 
-        var title = UIFactory.CreateContainer(root.transform, "Title", new Vector2(0.06f, 0.9f), new Vector2(0.94f, 0.97f), Vector2.zero, Vector2.zero);
+        var title = UIFactory.CreateContainer(root.transform, "Title", new Vector2(0.06f, 0.92f), new Vector2(0.94f, 0.98f), Vector2.zero, Vector2.zero);
         var titleText = UIFactory.CreateText(title, "Label", "Battle", 42, TextAnchor.MiddleCenter, Color.white);
         AddLocalizedText(titleText, "battle.title");
 
-        var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.12f, 0.85f), new Vector2(0.88f, 0.9f), Vector2.zero, Vector2.zero);
+        var status = UIFactory.CreateContainer(root.transform, "Status", new Vector2(0.12f, 0.87f), new Vector2(0.88f, 0.915f), Vector2.zero, Vector2.zero);
         var statusText = UIFactory.CreateText(status, "StatusText", "Waiting", 24, TextAnchor.MiddleCenter, new Color(0.95f, 0.9f, 0.75f, 1f));
         AddLocalizedText(statusText, "battle.status_idle");
 
-        var stageInfo = UIFactory.CreateContainer(root.transform, "StageInfo", new Vector2(0.2f, 0.81f), new Vector2(0.8f, 0.85f), Vector2.zero, Vector2.zero);
+        var stageInfo = UIFactory.CreateContainer(root.transform, "StageInfo", new Vector2(0.18f, 0.885f), new Vector2(0.82f, 0.925f), Vector2.zero, Vector2.zero);
         var stageInfoText = UIFactory.CreateText(stageInfo, "StageInfoText", "Stage 1", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.88f, 0.96f, 1f));
 
         var overlay = UIFactory.CreatePanel(root.transform, "CombatOverlay", new Color(0.18f, 0.12f, 0.12f, 0.94f));
         var overlayRect = overlay.GetComponent<RectTransform>();
         overlayRect.anchorMin = new Vector2(0.03f, 0.03f);
-        overlayRect.anchorMax = new Vector2(0.97f, 0.83f);
+        overlayRect.anchorMax = new Vector2(0.97f, 0.88f);
         overlayRect.offsetMin = Vector2.zero;
         overlayRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(overlay.transform, "OverlayOutline", new Color(0.9f, 0.82f, 0.74f, 0.7f), 1f);
 
-        var summaryBar = UIFactory.CreateContainer(overlay.transform, "SummaryBar", new Vector2(0.03f, 0.74f), new Vector2(0.97f, 0.96f), Vector2.zero, Vector2.zero);
+        var summaryBar = UIFactory.CreateContainer(overlay.transform, "SummaryBar", new Vector2(0.02f, 0.57f), new Vector2(0.97f, 0.96f), Vector2.zero, Vector2.zero);
         var playerPanel = CreateTeamInfoPanel(summaryBar, "PlayerTeam", new Vector2(0f, 0f), new Vector2(0.48f, 1f), "Player", "Unit A  HP 120/120\nUnit B  HP 150/150", "battle.player_team", "battle.player_content");
         var enemyPanel = CreateTeamInfoPanel(summaryBar, "EnemyTeam", new Vector2(0.52f, 0f), new Vector2(1f, 1f), "Enemy", "Enemy A  HP 100/100\nEnemy B  HP 90/90", "battle.enemy_team", "battle.enemy_content");
 
         var logPanel = UIFactory.CreatePanel(overlay.transform, "LogPanel", new Color(0.13f, 0.09f, 0.09f, 0.96f));
         var logPanelRect = logPanel.GetComponent<RectTransform>();
-        logPanelRect.anchorMin = new Vector2(0.03f, 0.2f);
-        logPanelRect.anchorMax = new Vector2(0.97f, 0.71f);
+        logPanelRect.anchorMin = new Vector2(0.03f, 0.12f);
+        logPanelRect.anchorMax = new Vector2(0.97f, 0.54f);
         logPanelRect.offsetMin = Vector2.zero;
         logPanelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(logPanel.transform, "LogOutline", new Color(0.88f, 0.8f, 0.72f, 0.6f), 1f);
@@ -453,7 +453,7 @@ public static class UIPrefabBuilder
         fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
         AddLocalizedText(logBodyText, "battle.log_content");
 
-        var footer = UIFactory.CreateContainer(overlay.transform, "Footer", new Vector2(0.24f, 0.03f), new Vector2(0.76f, 0.1f), Vector2.zero, Vector2.zero);
+        var footer = UIFactory.CreateContainer(overlay.transform, "Footer", new Vector2(0.24f, 0.03f), new Vector2(0.76f, 0.11f), Vector2.zero, Vector2.zero);
         var backButton = UIFactory.CreateButton(footer, "BackButton", "Flee", delegate { });
         UIFactory.Stretch(backButton.GetComponent<RectTransform>());
 
@@ -1166,11 +1166,11 @@ public static class UIPrefabBuilder
 
         UIFactory.AddOutlineBox(panel.transform, objectName + "Outline", new Color(0.86f, 0.78f, 0.72f, 0.7f), 1f);
 
-        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.8f), new Vector2(0.96f, 0.94f), Vector2.zero, Vector2.zero);
+        var titleRect = UIFactory.CreateContainer(panel.transform, "Title", new Vector2(0.04f, 0.89f), new Vector2(0.96f, 0.98f), Vector2.zero, Vector2.zero);
         var titleText = UIFactory.CreateText(titleRect, "TitleText", title, 26, TextAnchor.MiddleLeft, Color.white);
         AddLocalizedText(titleText, titleKey);
 
-        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.04f, 0.06f), new Vector2(0.96f, 0.78f), Vector2.zero, Vector2.zero);
+        var bodyRect = UIFactory.CreateContainer(panel.transform, "Body", new Vector2(0.02f, 0.14f), new Vector2(0.98f, 0.82f), Vector2.zero, Vector2.zero);
         var cardRoot = UIFactory.CreateContainer(bodyRect, "CardRoot", new Vector2(0f, 0f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero);
         var bodyText = UIFactory.CreateText(bodyRect, "BodyText", string.Empty, 20, TextAnchor.UpperLeft, new Color(0.92f, 0.92f, 0.92f, 0f));
         bodyText.raycastTarget = false;
@@ -1181,7 +1181,7 @@ public static class UIPrefabBuilder
         cardTemplateRect.anchorMax = new Vector2(0f, 1f);
         cardTemplateRect.pivot = new Vector2(0f, 1f);
         cardTemplateRect.anchoredPosition = Vector2.zero;
-        cardTemplateRect.sizeDelta = new Vector2(180f, 260f);
+        cardTemplateRect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
         var cardTemplateLabel = cardTemplate.GetComponentInChildren<Text>();
         if (cardTemplateLabel != null)
         {
