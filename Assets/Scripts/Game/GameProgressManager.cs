@@ -2386,6 +2386,7 @@ namespace Wuxing.Game
                 return;
             }
 
+            var wasUninitialized = entry.EquippedActiveSkillIds == null || entry.EquippedActiveSkillIds.Count == 0;
             if (entry.EquippedActiveSkillIds == null)
             {
                 entry.EquippedActiveSkillIds = new List<string>();
@@ -2405,6 +2406,11 @@ namespace Wuxing.Game
             for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
             {
                 var equippedSkillId = entry.EquippedActiveSkillIds[i];
+                if (string.IsNullOrWhiteSpace(equippedSkillId))
+                {
+                    continue;
+                }
+
                 if (CharacterCanEquipActiveSkill(entry.CharacterId, equippedSkillId))
                 {
                     continue;
@@ -2426,6 +2432,11 @@ namespace Wuxing.Game
                 {
                     entry.EquippedActiveSkillIds[i] = string.Empty;
                 }
+            }
+
+            if (!wasUninitialized)
+            {
+                return;
             }
 
             for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)

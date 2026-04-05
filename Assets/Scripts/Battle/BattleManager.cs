@@ -28,6 +28,7 @@ namespace Wuxing.Battle
         private static readonly string[] EquipmentSlots = { "Weapon", "Armor", "Accessory" };
         private const string EquipmentPresetPrefKey = "battle.equipment.preset";
         private const string EquipmentOverridePrefKey = "battle.equipment.overrides";
+        private const string EmptyEquipmentOverrideToken = "__EMPTY__";
         private static int playerEquipmentPresetIndex;
         private static int currentBattleStageRound;
         private static readonly Dictionary<string, Dictionary<string, string>> PlayerEquipmentOverrides = new Dictionary<string, Dictionary<string, string>>();
@@ -1064,14 +1065,20 @@ namespace Wuxing.Battle
             if (PlayerEquipmentOverrides.TryGetValue(unitId, out slotOverrides))
             {
                 string overrideInstanceId;
-                if (slotOverrides.TryGetValue(slot, out overrideInstanceId)
-                    && !string.IsNullOrEmpty(overrideInstanceId)
-                    && GameProgressManager.OwnsEquipmentInstance(overrideInstanceId))
+                if (slotOverrides.TryGetValue(slot, out overrideInstanceId))
                 {
-                    var overrideEquipment = GetEquipmentConfigByInstanceId(equipmentDatabase, overrideInstanceId);
-                    if (overrideEquipment != null && string.Equals(overrideEquipment.Slot, slot, StringComparison.OrdinalIgnoreCase))
+                    if (string.IsNullOrEmpty(overrideInstanceId))
                     {
-                        return overrideInstanceId;
+                        return string.Empty;
+                    }
+
+                    if (GameProgressManager.OwnsEquipmentInstance(overrideInstanceId))
+                    {
+                        var overrideEquipment = GetEquipmentConfigByInstanceId(equipmentDatabase, overrideInstanceId);
+                        if (overrideEquipment != null && string.Equals(overrideEquipment.Slot, slot, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return overrideInstanceId;
+                        }
                     }
                 }
             }
@@ -1243,6 +1250,12 @@ namespace Wuxing.Battle
                 }
 
                 var overrideValue = parts[2];
+                if (string.Equals(overrideValue, EmptyEquipmentOverrideToken, StringComparison.Ordinal))
+                {
+                    SetPlayerEquipmentOverride(parts[0], parts[1], string.Empty);
+                    continue;
+                }
+
                 if (!GameProgressManager.OwnsEquipmentInstance(overrideValue))
                 {
                     overrideValue = GameProgressManager.GetFirstOwnedEquipmentInstanceIdByEquipmentId(parts[2]);
@@ -1280,11 +1293,6 @@ namespace Wuxing.Battle
             {
                 foreach (var slotPair in unitPair.Value)
                 {
-                    if (string.IsNullOrEmpty(slotPair.Value))
-                    {
-                        continue;
-                    }
-
                     if (builder.Length > 0)
                     {
                         builder.Append(';');
@@ -1294,7 +1302,7 @@ namespace Wuxing.Battle
                         .Append('|')
                         .Append(slotPair.Key)
                         .Append('|')
-                        .Append(slotPair.Value);
+                        .Append(string.IsNullOrEmpty(slotPair.Value) ? EmptyEquipmentOverrideToken : slotPair.Value);
                 }
             }
 
