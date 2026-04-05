@@ -1,5 +1,6 @@
-"ID","StageFrom","StageTo","NodeType","EnemyIds","OverrideElement","Weight","Notes"
+﻿"ID","StageFrom","StageTo","NodeType","EnemyIds","OverrideElement","Weight","Notes"
 "ENC_BATTLE_1","1","20","Battle","E001|E004","","100","第一章普通战"
+"ENC_BATTLE_STAGE11_SWARM","11","11","Battle","E001|E001|E002|E003|E004|E004","","10000","第11关六敌测试编组"
 "ENC_ELITE_1","1","20","Elite","E006|E007","","100","第一章精英战"
 "ENC_BOSS_1","1","20","Boss","E008","Holy","100","第一章Boss"
 "ENC_BATTLE_2","21","40","Battle","E002|E004","","100","第二章普通战"

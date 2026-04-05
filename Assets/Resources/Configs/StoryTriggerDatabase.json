@@ -7,7 +7,25 @@
             "NodeId": "STORY_START_001",
             "OncePerRun": true,
             "Enabled": true,
-            "Notes": "开始游戏触发开场剧情"
+            "Notes": "开始游戏时触发开场剧情"
+        },
+        {
+            "Id": "TRIGGER_STAGE2_BEFORE_BATTLE",
+            "TriggerKey": "BeforeBattle",
+            "Stage": 2,
+            "NodeId": "DIALOG_STAGE2_PRE_001",
+            "OncePerRun": true,
+            "Enabled": true,
+            "Notes": "第二关战前对白"
+        },
+        {
+            "Id": "TRIGGER_STAGE2_AFTER_BATTLE",
+            "TriggerKey": "AfterBattle",
+            "Stage": 2,
+            "NodeId": "DIALOG_STAGE2_POST_001",
+            "OncePerRun": true,
+            "Enabled": true,
+            "Notes": "第二关战后对白"
         }
     ]
 }

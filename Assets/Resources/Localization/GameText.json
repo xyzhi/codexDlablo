@@ -1872,8 +1872,8 @@
         },
         {
             "key": "story.start.prologue_content",
-            "zhHans": "寿元如火，五行如刃。你将以残存阳寿踏入这场修行。",
-            "en": "Lifespan burns like fuel, and the five elements cut like blades. You step into this path with only your remaining years."
+            "zhHans": "山门之外，五行地脉已现紊乱之兆。有人说这是天时将变，也有人说，这是某场更大试炼的前声。你在寿元缓缓流逝的当下启程，所能依靠的，只有尚未磨灭的道心与眼前这条未必正确的路。",
+            "en": "Beyond the mountain gate, the five elemental veins have already begun to falter. Some call it a shift in heaven's timing, others the prelude to a greater trial. You set out while your lifespan is already slipping away, with only your unbroken resolve and a road that may not be the right one."
         },
         {
             "key": "dialog.start.guide_speaker",
@@ -1882,8 +1882,8 @@
         },
         {
             "key": "dialog.start.guide_content",
-            "zhHans": "先熟悉地图、功法与装备。若已准备妥当，就继续前行。",
-            "en": "Learn the route, skills, and equipment first. When you are ready, continue onward."
+            "zhHans": "自今日起，前路不会再替你放缓脚步。先看清地图、功法与装备，再决定把时间花在什么地方。",
+            "en": "From this day on, the road will not slow itself for you. Study the route, the techniques, and your equipment first, then decide where your time is worth spending."
         },
         {
             "key": "dialog.start.player_speaker",
@@ -1892,8 +1892,108 @@
         },
         {
             "key": "dialog.start.player_content",
-            "zhHans": "我已知晓。先稳住脚步，再看前路如何展开。",
-            "en": "Understood. I will steady myself first, then see how the road unfolds."
+            "zhHans": "若时间本就有限，我便不想把每一步都走得含混。先求活，再求看得更远。",
+            "en": "If time is already limited, then I will not spend each step in confusion. First I survive, then I learn to see farther."
+        },
+        {
+            "key": "dialog.start.guide_followup_content",
+            "zhHans": "记住，强大从不是白得的。你每一次停留、每一次争夺、每一次绕路，都会让你离终局更近一步。",
+            "en": "Remember this: strength is never given freely. Every pause, every contest, every detour brings you one step closer to the end."
+        },
+        {
+            "key": "dialog.start.player_resolve_content",
+            "zhHans": "我明白。若终局终究会来，那我至少要以自己的方式走到那里。",
+            "en": "I understand. If the ending must come, then I will at least reach it on my own terms."
+        },
+        {
+            "key": "dialog.start.guide_closing_content",
+            "zhHans": "很好。先从眼前这一程开始吧。等你真的走得够远，我们自会再谈更深的事。",
+            "en": "Good. Then begin with the road before you. When you have truly gone far enough, we will speak of deeper matters."
+        },
+        {
+            "key": "dialog.stage2.pre.guide_content",
+            "zhHans": "第二程的敌人不会再像山门外那般散乱。若只凭一口锐气硬闯，很容易被拖进它们熟悉的节奏里。",
+            "en": "The enemies on the second stretch will not be as scattered as those beyond the gate. If you rush in on resolve alone, they will drag you into a rhythm that favors them."
+        },
+        {
+            "key": "dialog.stage2.pre.player_content",
+            "zhHans": "那就先看清它们的破绽，再决定先斩谁、先留谁。多走一步路，也该多长一分眼力。",
+            "en": "Then I will read their openings first and decide who falls first and who can be left standing. If I walk one step farther, my judgment should grow with it."
+        },
+        {
+            "key": "dialog.stage2.post.guide_content",
+            "zhHans": "你已经开始明白了。修行路上，真正决定胜负的，往往不是出手有多快，而是你愿不愿意为一次正确的判断多等半息。",
+            "en": "You are beginning to understand. On the path of cultivation, victory is rarely decided by speed alone, but by whether you are willing to wait half a breath for the right decision."
+        },
+        {
+            "key": "dialog.stage2.post.player_content",
+            "zhHans": "我能感觉到。若只是更快挥刀，我迟早会撞上比我更快的人；可若我先看懂局势，未必要靠蛮力去赢。",
+            "en": "I can feel it. If all I do is swing faster, sooner or later I will meet someone faster than me. But if I understand the situation first, I do not always need brute force to win."
+        },
+        {
+            "key": "",
+            "zhHans": "山门初启",
+            "en": "The Gate Opens"
+        },
+        {
+            "key": "",
+            "zhHans": "山门之外，五行地脉已现紊乱之兆。有人说这是天时将变，也有人说，这是某场更大试炼的前声。你在寿元缓缓流逝的当下启程，所能依靠的，只有尚未磨灭的道心与眼前这条未必正确的路。",
+            "en": "Beyond the mountain gate, the five elemental veins have already begun to falter. Some call it a shift in heaven's timing, others the prelude to a greater trial. You set out while your lifespan is already slipping away, with only your unbroken resolve and a road that may not be the right one."
+        },
+        {
+            "key": "",
+            "zhHans": "引路人",
+            "en": "Guide"
+        },
+        {
+            "key": "",
+            "zhHans": "自今日起，前路不会再替你放缓脚步。先看清地图、功法与装备，再决定把时间花在什么地方。",
+            "en": "From this day on, the road will not slow itself for you. Study the route, the techniques, and your equipment first, then decide where your time is worth spending."
+        },
+        {
+            "key": "",
+            "zhHans": "行者",
+            "en": "Traveler"
+        },
+        {
+            "key": "",
+            "zhHans": "若时间本就有限，我便不想把每一步都走得含混。先求活，再求看得更远。",
+            "en": "If time is already limited, then I will not spend each step in confusion. First I survive, then I learn to see farther."
+        },
+        {
+            "key": "",
+            "zhHans": "记住，强大从不是白得的。你每一次停留、每一次争夺、每一次绕路，都会让你离终局更近一步。",
+            "en": "Remember this: strength is never given freely. Every pause, every contest, every detour brings you one step closer to the end."
+        },
+        {
+            "key": "",
+            "zhHans": "我明白。若终局终究会来，那我至少要以自己的方式走到那里。",
+            "en": "I understand. If the ending must come, then I will at least reach it on my own terms."
+        },
+        {
+            "key": "",
+            "zhHans": "很好。先从眼前这一程开始吧。等你真的走得够远，我们自会再谈更深的事。",
+            "en": "Good. Then begin with the road before you. When you have truly gone far enough, we will speak of deeper matters."
+        },
+        {
+            "key": "",
+            "zhHans": "第二程的敌人不会再像山门外那般散乱。若只凭一口锐气硬闯，很容易被拖进它们熟悉的节奏里。",
+            "en": "The enemies on the second stretch will not be as scattered as those beyond the gate. If you rush in on resolve alone, they will drag you into a rhythm that favors them."
+        },
+        {
+            "key": "",
+            "zhHans": "那就先看清它们的破绽，再决定先斩谁、先留谁。多走一步路，也该多长一分眼力。",
+            "en": "Then I will read their openings first and decide who falls first and who can be left standing. If I walk one step farther, my judgment should grow with it."
+        },
+        {
+            "key": "",
+            "zhHans": "你已经开始明白了。修行路上，真正决定胜负的，往往不是出手有多快，而是你愿不愿意为一次正确的判断多等半息。",
+            "en": "You are beginning to understand. On the path of cultivation, victory is rarely decided by speed alone, but by whether you are willing to wait half a breath for the right decision."
+        },
+        {
+            "key": "",
+            "zhHans": "我能感觉到。若只是更快挥刀，我迟早会撞上比我更快的人；可若我先看懂局势，未必要靠蛮力去赢。",
+            "en": "I can feel it. If all I do is swing faster, sooner or later I will meet someone faster than me. But if I understand the situation first, I do not always need brute force to win."
         }
     ]
 }
