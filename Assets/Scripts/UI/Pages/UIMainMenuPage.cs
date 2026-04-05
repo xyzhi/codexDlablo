@@ -14,6 +14,7 @@ namespace Wuxing.UI
 
         public override void OnOpen(object data)
         {
+            RefreshLayout();
             RefreshProgress();
             RefreshButtons();
         }
@@ -118,7 +119,7 @@ namespace Wuxing.UI
 
         private void OnClickToast()
         {
-            UIManager.Instance.ShowToast(GameProgressManager.BuildLastBattleSummary(IsEnglish()), 2.2f);
+            UIManager.Instance.ShowPage("Start");
         }
 
         private void RefreshProgress()
@@ -127,6 +128,9 @@ namespace Wuxing.UI
             {
                 return;
             }
+
+            progressText.alignment = TextAnchor.MiddleCenter;
+            progressText.lineSpacing = 1.18f;
 
             var isEnglish = IsEnglish();
             var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
@@ -159,13 +163,72 @@ namespace Wuxing.UI
                 ? (isEnglish ? "Reset Run" : "重置本轮")
                 : (isEnglish ? "Flow Guide" : "流程说明"));
 
-            SetButtonText(toastButton, isEnglish ? "Last Battle" : "上一场战报");
+            SetButtonText(toastButton, LocalizationManager.GetText("menu.button_back_start"));
         }
 
         private void OnLanguageChanged()
         {
+            RefreshLayout();
             RefreshProgress();
             RefreshButtons();
+        }
+
+        private void RefreshLayout()
+        {
+            SetRect("Header", 0.18f, 0.72f, 0.82f, 0.84f);
+            SetRect("SubTitle", 0.22f, 0.64f, 0.78f, 0.68f);
+            SetRect("ProgressPanel", 0.16f, 0.42f, 0.84f, 0.58f);
+            SetRect("MenuPanel", 0.16f, 0.19f, 0.84f, 0.40f);
+            SetRect("Footer", 0.16f, 0.11f, 0.84f, 0.16f);
+
+            var menu = transform.Find("MenuPanel/Menu") as RectTransform;
+            if (menu != null)
+            {
+                menu.anchorMin = new Vector2(0.08f, 0.12f);
+                menu.anchorMax = new Vector2(0.92f, 0.88f);
+                menu.offsetMin = Vector2.zero;
+                menu.offsetMax = Vector2.zero;
+
+                var layout = menu.GetComponent<VerticalLayoutGroup>();
+                if (layout != null)
+                {
+                    layout.spacing = 16f;
+                    layout.padding = new RectOffset(0, 0, 6, 6);
+                }
+            }
+
+            ConfigureButtonHeight(startButton, 62f);
+            ConfigureButtonHeight(popupButton, 62f);
+            ConfigureButtonHeight(toastButton, 62f);
+        }
+
+        private void SetRect(string path, float minX, float minY, float maxX, float maxY)
+        {
+            var rect = transform.Find(path) as RectTransform;
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = new Vector2(minX, minY);
+            rect.anchorMax = new Vector2(maxX, maxY);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        private static void ConfigureButtonHeight(Button button, float preferredHeight)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var layoutElement = button.GetComponent<LayoutElement>();
+            if (layoutElement != null)
+            {
+                layoutElement.preferredHeight = preferredHeight;
+                layoutElement.minHeight = preferredHeight;
+            }
         }
 
         private static void SetButtonText(Button button, string text)

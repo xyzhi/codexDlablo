@@ -47,8 +47,8 @@
         },
         {
             "key": "menu.subtitle",
-            "zhHans": "第一阶段 / 第一步 / 文字与线框 UGUI",
-            "en": "Phase 1 / Step 1 / Text and line UGUI"
+            "zhHans": "",
+            "en": ""
         },
         {
             "key": "menu.button_battle",
@@ -64,6 +64,11 @@
             "key": "menu.button_toast",
             "zhHans": "显示提示",
             "en": "Show Toast"
+        },
+        {
+            "key": "menu.button_back_start",
+            "zhHans": "返回开始界面",
+            "en": "Back To Start"
         },
         {
             "key": "menu.button_language",
@@ -1739,6 +1744,106 @@
             "key": "cheat.section_loadout",
             "zhHans": "装备 / 功法",
             "en": "Equipment / Skills"
+        },
+        {
+            "key": "skill.trigger.default",
+            "zhHans": "默认可释放",
+            "en": "Ready by default"
+        },
+        {
+            "key": "skill.trigger.first_round",
+            "zhHans": "首回合优先",
+            "en": "Prioritize on round 1"
+        },
+        {
+            "key": "skill.trigger.self_hp_below_pct",
+            "zhHans": "生命低于 {0}%",
+            "en": "Cast when self HP is below {0}%"
+        },
+        {
+            "key": "skill.trigger.ally_hp_below_pct",
+            "zhHans": "友方生命低于 {0}%",
+            "en": "Cast when an ally HP is below {0}%"
+        },
+        {
+            "key": "skill.trigger.enemy_count_at_least",
+            "zhHans": "敌人数不少于 {0}",
+            "en": "Cast when enemy count is at least {0}"
+        },
+        {
+            "key": "skill.trigger.target_hp_below_pct",
+            "zhHans": "目标生命低于 {0}%",
+            "en": "Cast when target HP is below {0}%"
+        },
+        {
+            "key": "skill.trigger.target_hp_above_pct",
+            "zhHans": "目标生命高于 {0}%",
+            "en": "Cast when target HP is above {0}%"
+        },
+        {
+            "key": "skill.trigger.self_no_shield",
+            "zhHans": "自身无护盾时",
+            "en": "Cast when self has no shield"
+        },
+        {
+            "key": "skill.trigger.target_has_shield",
+            "zhHans": "目标有护盾时",
+            "en": "Cast when target has a shield"
+        },
+        {
+            "key": "skill.trigger.self_has_status",
+            "zhHans": "自身拥有状态 {0}",
+            "en": "Cast when self has status {0}"
+        },
+        {
+            "key": "skill.trigger.target_has_debuff",
+            "zhHans": "目标带有减益 {0}",
+            "en": "Cast when target has debuff {0}"
+        },
+        {
+            "key": "skill.target.default",
+            "zhHans": "默认目标",
+            "en": "Default target"
+        },
+        {
+            "key": "skill.target.lowest_hp_enemy",
+            "zhHans": "敌方最低生命",
+            "en": "Lowest HP enemy"
+        },
+        {
+            "key": "skill.target.highest_hp_enemy",
+            "zhHans": "敌方最高生命",
+            "en": "Highest HP enemy"
+        },
+        {
+            "key": "skill.target.highest_atk_enemy",
+            "zhHans": "敌方最高攻击",
+            "en": "Highest ATK enemy"
+        },
+        {
+            "key": "skill.target.random_enemy",
+            "zhHans": "随机敌方",
+            "en": "Random enemy"
+        },
+        {
+            "key": "skill.target.all_enemies",
+            "zhHans": "全体敌方",
+            "en": "All enemies"
+        },
+        {
+            "key": "skill.target.self",
+            "zhHans": "自身",
+            "en": "Self"
+        },
+        {
+            "key": "skill.target.lowest_hp_ally",
+            "zhHans": "我方最低生命",
+            "en": "Lowest HP ally"
+        },
+        {
+            "key": "skill.target.all_allies",
+            "zhHans": "我方全体",
+            "en": "All allies"
         }
     ]
 }

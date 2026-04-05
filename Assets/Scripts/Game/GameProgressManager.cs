@@ -2976,65 +2976,126 @@ namespace Wuxing.Game
         {
             if (skill == null || string.IsNullOrWhiteSpace(skill.TriggerType))
             {
-                return english ? "默认可释放" : "默认可释放";
+                return LocalizationManager.GetText("skill.trigger.default");
             }
 
             var triggerType = skill.TriggerType.Trim();
             var triggerValue = skill.TriggerValue ?? string.Empty;
-            switch (triggerType)
+            var triggerKey = GetTriggerLocalizationKey(triggerType);
+            if (string.IsNullOrEmpty(triggerKey))
             {
-                case "FirstRound":
-                    return english ? "首回合优先" : "首回合优先";
-                case "SelfHpBelowPct":
-                    return (english ? "生命低于 " : "生命低于 ") + triggerValue + "%";
-                case "AllyHpBelowPct":
-                    return (english ? "友方生命低于 " : "友方生命低于 ") + triggerValue + "%";
-                case "EnemyCountAtLeast":
-                    return (english ? "敌人数不少于 " : "敌人数不少于 ") + triggerValue;
-                case "TargetHpBelowPct":
-                    return (english ? "目标生命低于 " : "目标生命低于 ") + triggerValue + "%";
-                case "TargetHpAbovePct":
-                    return (english ? "目标生命高于 " : "目标生命高于 ") + triggerValue + "%";
-                case "SelfNoShield":
-                    return english ? "自身无护盾时" : "自身无护盾时";
-                case "TargetHasShield":
-                    return english ? "目标有护盾时" : "目标有护盾时";
-                case "SelfHasStatus":
-                    return (english ? "自身拥有状态 " : "自身拥有状态 ") + triggerValue;
-                case "TargetHasDebuff":
-                    return (english ? "目标带有减益 " : "目标带有减益 ") + triggerValue;
-                default:
-                    return triggerType;
+                return triggerType;
             }
+
+            var template = LocalizationManager.GetText(triggerKey);
+            return TriggerNeedsArgument(triggerType)
+                ? string.Format(template, DescribeTriggerArgument(triggerType, triggerValue))
+                : template;
         }
 
         private static string DescribeTargetRule(SkillConfig skill, bool english)
         {
             if (skill == null || string.IsNullOrWhiteSpace(skill.TargetRule))
             {
-                return english ? "默认目标" : "默认目标";
+                return LocalizationManager.GetText("skill.target.default");
             }
 
-            switch (skill.TargetRule.Trim())
+            var targetRule = skill.TargetRule.Trim();
+            var targetKey = GetTargetRuleLocalizationKey(targetRule);
+            if (!string.IsNullOrEmpty(targetKey))
             {
-                case "LowestHPEnemy":
-                    return english ? "敌方最低生命" : "敌方最低生命";
-                case "HighestHPEnemy":
-                    return english ? "敌方最高生命" : "敌方最高生命";
-                case "HighestATKEnemy":
-                    return english ? "敌方最高攻击" : "敌方最高攻击";
-                case "RandomEnemy":
-                    return english ? "随机敌方" : "随机敌方";
-                case "AllEnemies":
-                    return english ? "全体敌方" : "全体敌方";
-                case "Self":
-                    return english ? "自身" : "自身";
-                case "LowestHPAlly":
-                    return english ? "我方最低生命" : "我方最低生命";
-                case "AllAllies":
-                    return english ? "我方全体" : "我方全体";
+                return LocalizationManager.GetText(targetKey);
+            }
+
+            return skill.TargetRule;
+        }
+
+        private static string GetTriggerLocalizationKey(string triggerType)
+        {
+            switch ((triggerType ?? string.Empty).Trim())
+            {
+                case "":
+                case "Always":
+                case "Passive":
+                    return "skill.trigger.default";
+                case "FirstRound":
+                    return "skill.trigger.first_round";
+                case "SelfHpBelowPct":
+                    return "skill.trigger.self_hp_below_pct";
+                case "AllyHpBelowPct":
+                    return "skill.trigger.ally_hp_below_pct";
+                case "EnemyCountAtLeast":
+                    return "skill.trigger.enemy_count_at_least";
+                case "TargetHpBelowPct":
+                    return "skill.trigger.target_hp_below_pct";
+                case "TargetHpAbovePct":
+                    return "skill.trigger.target_hp_above_pct";
+                case "SelfNoShield":
+                    return "skill.trigger.self_no_shield";
+                case "TargetHasShield":
+                    return "skill.trigger.target_has_shield";
+                case "SelfHasStatus":
+                    return "skill.trigger.self_has_status";
+                case "TargetHasDebuff":
+                    return "skill.trigger.target_has_debuff";
                 default:
-                    return skill.TargetRule;
+                    return null;
+            }
+        }
+
+        private static bool TriggerNeedsArgument(string triggerType)
+        {
+            switch ((triggerType ?? string.Empty).Trim())
+            {
+                case "SelfHpBelowPct":
+                case "AllyHpBelowPct":
+                case "EnemyCountAtLeast":
+                case "TargetHpBelowPct":
+                case "TargetHpAbovePct":
+                case "SelfHasStatus":
+                case "TargetHasDebuff":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static string DescribeTriggerArgument(string triggerType, string triggerValue)
+        {
+            switch ((triggerType ?? string.Empty).Trim())
+            {
+                case "SelfHasStatus":
+                case "TargetHasDebuff":
+                    return string.IsNullOrWhiteSpace(triggerValue) ? "-" : triggerValue.Trim();
+                default:
+                    return string.IsNullOrWhiteSpace(triggerValue) ? "0" : triggerValue.Trim();
+            }
+        }
+
+        private static string GetTargetRuleLocalizationKey(string targetRule)
+        {
+            switch ((targetRule ?? string.Empty).Trim())
+            {
+                case "":
+                    return "skill.target.default";
+                case "LowestHPEnemy":
+                    return "skill.target.lowest_hp_enemy";
+                case "HighestHPEnemy":
+                    return "skill.target.highest_hp_enemy";
+                case "HighestATKEnemy":
+                    return "skill.target.highest_atk_enemy";
+                case "RandomEnemy":
+                    return "skill.target.random_enemy";
+                case "AllEnemies":
+                    return "skill.target.all_enemies";
+                case "Self":
+                    return "skill.target.self";
+                case "LowestHPAlly":
+                    return "skill.target.lowest_hp_ally";
+                case "AllAllies":
+                    return "skill.target.all_allies";
+                default:
+                    return null;
             }
         }
 

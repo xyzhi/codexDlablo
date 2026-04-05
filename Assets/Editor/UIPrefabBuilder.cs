@@ -201,50 +201,51 @@ public static class UIPrefabBuilder
         UIFactory.CreateLine(root.transform, "TopLine", new Color(0.7f, 0.74f, 0.8f, 1f), new Vector2(0.08f, 0.88f), new Vector2(0.92f, 0.88f), 2f);
         UIFactory.CreateLine(root.transform, "BottomLine", new Color(0.7f, 0.74f, 0.8f, 1f), new Vector2(0.08f, 0.1f), new Vector2(0.92f, 0.1f), 2f);
 
-        var header = UIFactory.CreateContainer(root.transform, "Header", new Vector2(0.1f, 0.72f), new Vector2(0.9f, 0.88f), Vector2.zero, Vector2.zero);
+        var header = UIFactory.CreateContainer(root.transform, "Header", new Vector2(0.18f, 0.72f), new Vector2(0.82f, 0.84f), Vector2.zero, Vector2.zero);
         var title = UIFactory.CreateText(header, "Title", "Wuxing Prototype", 54, TextAnchor.MiddleCenter, Color.white);
         AddLocalizedText(title, "menu.title");
 
-        var subtitle = UIFactory.CreateContainer(root.transform, "SubTitle", new Vector2(0.16f, 0.64f), new Vector2(0.84f, 0.72f), Vector2.zero, Vector2.zero);
+        var subtitle = UIFactory.CreateContainer(root.transform, "SubTitle", new Vector2(0.22f, 0.64f), new Vector2(0.78f, 0.68f), Vector2.zero, Vector2.zero);
         var subtitleText = UIFactory.CreateText(subtitle, "SubTitleText", "Phase 1 / Step 1 / Text and line UGUI", 24, TextAnchor.MiddleCenter, new Color(0.82f, 0.84f, 0.9f, 1f));
         AddLocalizedText(subtitleText, "menu.subtitle");
 
         var progressPanel = UIFactory.CreatePanel(root.transform, "ProgressPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
         var progressPanelRect = progressPanel.GetComponent<RectTransform>();
-        progressPanelRect.anchorMin = new Vector2(0.16f, 0.47f);
-        progressPanelRect.anchorMax = new Vector2(0.84f, 0.63f);
+        progressPanelRect.anchorMin = new Vector2(0.16f, 0.42f);
+        progressPanelRect.anchorMax = new Vector2(0.84f, 0.58f);
         progressPanelRect.offsetMin = Vector2.zero;
         progressPanelRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(progressPanel.transform, "ProgressOutline", new Color(0.82f, 0.84f, 0.9f, 0.55f), 1f);
-        var progressText = UIFactory.CreateText(progressPanel.transform, "ProgressText", "Current Stage 1 / Highest Cleared 0", 22, TextAnchor.UpperCenter, new Color(0.95f, 0.86f, 0.72f, 1f));
+        var progressText = UIFactory.CreateText(progressPanel.transform, "ProgressText", "Current Stage 1 / Highest Cleared 0", 22, TextAnchor.MiddleCenter, new Color(0.95f, 0.86f, 0.72f, 1f));
         progressText.rectTransform.offsetMin = new Vector2(20f, 14f);
         progressText.rectTransform.offsetMax = new Vector2(-20f, -14f);
+        progressText.lineSpacing = 1.18f;
 
         var menuPanel = UIFactory.CreatePanel(root.transform, "MenuPanel", new Color(0.13f, 0.14f, 0.18f, 0.92f));
         var menuRect = menuPanel.GetComponent<RectTransform>();
-        menuRect.anchorMin = new Vector2(0.16f, 0.22f);
-        menuRect.anchorMax = new Vector2(0.84f, 0.46f);
+        menuRect.anchorMin = new Vector2(0.16f, 0.19f);
+        menuRect.anchorMax = new Vector2(0.84f, 0.40f);
         menuRect.offsetMin = Vector2.zero;
         menuRect.offsetMax = Vector2.zero;
         UIFactory.AddOutlineBox(menuPanel.transform, "MenuOutline", new Color(0.82f, 0.84f, 0.9f, 0.75f), 1f);
 
         var menu = UIFactory.CreateContainer(menuPanel.transform, "Menu", new Vector2(0.08f, 0.12f), new Vector2(0.92f, 0.88f), Vector2.zero, Vector2.zero);
-        var layout = UIFactory.AddVerticalLayout(menu.gameObject, 14, TextAnchor.UpperCenter);
-        layout.padding = new RectOffset(0, 0, 8, 8);
+        var layout = UIFactory.AddVerticalLayout(menu.gameObject, 16, TextAnchor.UpperCenter);
+        layout.padding = new RectOffset(0, 0, 6, 6);
 
         var startButton = UIFactory.CreateButton(menu, "StartButton", "Open Battle", delegate { });
         AddLocalizedText(startButton.GetComponentInChildren<Text>(), "menu.button_battle");
-        UIFactory.AddLayoutElement(startButton.gameObject, 70f);
+        UIFactory.AddLayoutElement(startButton.gameObject, 62f);
 
         var popupButton = UIFactory.CreateButton(menu, "PopupButton", "Open Popup", delegate { });
         AddLocalizedText(popupButton.GetComponentInChildren<Text>(), "menu.button_popup");
-        UIFactory.AddLayoutElement(popupButton.gameObject, 70f);
+        UIFactory.AddLayoutElement(popupButton.gameObject, 62f);
 
         var toastButton = UIFactory.CreateButton(menu, "ToastButton", "Show Toast", delegate { });
         AddLocalizedText(toastButton.GetComponentInChildren<Text>(), "menu.button_toast");
-        UIFactory.AddLayoutElement(toastButton.gameObject, 70f);
+        UIFactory.AddLayoutElement(toastButton.gameObject, 62f);
 
-        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.12f, 0.1f), new Vector2(0.88f, 0.18f), Vector2.zero, Vector2.zero);
+        var footer = UIFactory.CreateContainer(root.transform, "Footer", new Vector2(0.16f, 0.11f), new Vector2(0.84f, 0.16f), Vector2.zero, Vector2.zero);
         var footerText = UIFactory.CreateText(footer, "FooterText", "This version uses text, lines, and rectangles first so art can be replaced later.", 22, TextAnchor.MiddleCenter, new Color(0.72f, 0.76f, 0.82f, 1f));
         AddLocalizedText(footerText, "menu.footer");
 
