@@ -1844,6 +1844,46 @@
             "key": "skill.target.all_allies",
             "zhHans": "我方全体",
             "en": "All allies"
+        },
+        {
+            "key": "story.skip_hint",
+            "zhHans": "点击屏幕任意位置跳过",
+            "en": "Tap anywhere to skip"
+        },
+        {
+            "key": "dialog.continue_hint",
+            "zhHans": "点击任意位置继续",
+            "en": "Tap anywhere to continue"
+        },
+        {
+            "key": "story.start.prologue_title",
+            "zhHans": "山门初启",
+            "en": "The Gate Opens"
+        },
+        {
+            "key": "story.start.prologue_content",
+            "zhHans": "寿元如火，五行如刃。你将以残存阳寿踏入这场修行。",
+            "en": "Lifespan burns like fuel, and the five elements cut like blades. You step into this path with only your remaining years."
+        },
+        {
+            "key": "dialog.start.guide_speaker",
+            "zhHans": "引路人",
+            "en": "Guide"
+        },
+        {
+            "key": "dialog.start.guide_content",
+            "zhHans": "先熟悉地图、功法与装备。若已准备妥当，就继续前行。",
+            "en": "Learn the route, skills, and equipment first. When you are ready, continue onward."
+        },
+        {
+            "key": "dialog.start.player_speaker",
+            "zhHans": "行者",
+            "en": "Traveler"
+        },
+        {
+            "key": "dialog.start.player_content",
+            "zhHans": "我已知晓。先稳住脚步，再看前路如何展开。",
+            "en": "Understood. I will steady myself first, then see how the road unfolds."
         }
     ]
 }

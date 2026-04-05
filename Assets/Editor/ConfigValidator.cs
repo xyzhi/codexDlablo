@@ -22,6 +22,8 @@ public static class ConfigValidator
     private const string StageBalanceCsvPath = "Docs/StageBalance.csv";
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
+    private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
+    private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
 
     private static readonly HashSet<string> ValidSkillQualities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -42,6 +44,16 @@ public static class ConfigValidator
     private static readonly HashSet<string> ValidNodeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "Battle", "Elite", "Rest", "Boss"
+    };
+
+    private static readonly HashSet<string> ValidStoryNodeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Story", "Dialog"
+    };
+
+    private static readonly HashSet<string> ValidStorySpeakerSides = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Left", "Right"
     };
 
     private static readonly HashSet<string> ValidEventRewardModes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -111,6 +123,8 @@ public static class ConfigValidator
             var stageBalanceTable = LoadTable(StageBalanceCsvPath, "关卡成长表");
             var stageNodeTable = LoadTable(StageNodeCsvPath, "关卡节点表");
             var eventOptionTable = LoadTable(EventOptionCsvPath, "事件选项表");
+            var storyNodeTable = LoadTable(StoryNodeCsvPath, "剧情节点表");
+            var storyTriggerTable = LoadTable(StoryTriggerCsvPath, "剧情触发表");
             var localizationTable = LoadTable(LocalizationCsvPath, "语言表");
 
             var localizationKeys = ValidateLocalizationTable(localizationTable, items);
@@ -127,6 +141,8 @@ public static class ConfigValidator
             ValidateStageBalanceTable(stageBalanceTable, stageNodeTable, items);
             var eventProfiles = ValidateEventOptionTable(eventOptionTable, localizationKeys, items);
             ValidateStageNodeTable(stageNodeTable, eventProfiles, items);
+            var storyNodeIds = ValidateStoryNodeTable(storyNodeTable, localizationKeys, items);
+            ValidateStoryTriggerTable(storyTriggerTable, storyNodeIds, items);
 
             LogValidationItems(items);
         }
@@ -330,6 +346,74 @@ public static class ConfigValidator
             if (!seenPairs.Add(pair))
             {
                 AddError(items, row, "DefenderElement", $"元素关系重复：'{pair}'。");
+            }
+        }
+    }
+
+    private static HashSet<string> ValidateStoryNodeTable(CsvTable table, HashSet<string> localizationKeys, List<ValidationItem> items)
+    {
+        ValidateDuplicateIds(table, items);
+        var nodeIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "Id", "Type", "ContentKey");
+            ValidateIntegerField(row, items, "TypingCharsPerSecond");
+            ValidateFloatField(row, items, "SkipHintDelay");
+
+            var id = row.Get("Id").Trim();
+            if (!string.IsNullOrEmpty(id))
+            {
+                nodeIds.Add(id);
+            }
+
+            var type = row.Get("Type").Trim();
+            if (!string.IsNullOrEmpty(type) && !ValidStoryNodeTypes.Contains(type))
+            {
+                AddError(items, row, "Type", $"剧情节点类型不合法：'{type}'。当前仅支持 Story / Dialog。");
+            }
+
+            ValidateOptionalLocalizationKey(row, items, localizationKeys, "SpeakerKey");
+            ValidateOptionalLocalizationKey(row, items, localizationKeys, "LeftSpeakerKey");
+            ValidateOptionalLocalizationKey(row, items, localizationKeys, "RightSpeakerKey");
+            ValidateOptionalLocalizationKey(row, items, localizationKeys, "TitleKey");
+            ValidateOptionalLocalizationKey(row, items, localizationKeys, "ContentKey");
+
+            var activeSpeakerSide = row.Get("ActiveSpeakerSide").Trim();
+            if (!string.IsNullOrEmpty(activeSpeakerSide) && !ValidStorySpeakerSides.Contains(activeSpeakerSide))
+            {
+                AddError(items, row, "ActiveSpeakerSide", $"当前说话侧不合法：'{activeSpeakerSide}'。当前仅支持 Left / Right。");
+            }
+        }
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            var nextNodeId = row.Get("NextNodeId").Trim();
+            if (!string.IsNullOrEmpty(nextNodeId) && !nodeIds.Contains(nextNodeId))
+            {
+                AddError(items, row, "NextNodeId", $"剧情节点引用了不存在的下一节点：'{nextNodeId}'。");
+            }
+        }
+
+        return nodeIds;
+    }
+
+    private static void ValidateStoryTriggerTable(CsvTable table, HashSet<string> storyNodeIds, List<ValidationItem> items)
+    {
+        ValidateDuplicateIds(table, items);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "Id", "TriggerKey", "Stage", "NodeId", "OncePerRun", "Enabled");
+            ValidateIntegerField(row, items, "Stage");
+
+            var nodeId = row.Get("NodeId").Trim();
+            if (!string.IsNullOrEmpty(nodeId) && storyNodeIds != null && !storyNodeIds.Contains(nodeId))
+            {
+                AddError(items, row, "NodeId", $"剧情触发器引用了不存在的剧情节点：'{nodeId}'。");
             }
         }
     }
@@ -892,6 +976,11 @@ public static class ConfigValidator
         {
             AddError(items, row, fieldName, $"多语言 key 不存在：'{key}'。");
         }
+    }
+
+    private static void ValidateOptionalLocalizationKey(CsvRow row, List<ValidationItem> items, HashSet<string> localizationKeys, string fieldName)
+    {
+        ValidateLocalizationKeyReference(row, items, localizationKeys, fieldName, false);
     }
 
     private static void RequireFields(CsvRow row, List<ValidationItem> items, params string[] fieldNames)

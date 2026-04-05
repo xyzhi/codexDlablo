@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using Wuxing.Game;
 using Wuxing.Localization;
 
 namespace Wuxing.UI
@@ -73,7 +74,8 @@ namespace Wuxing.UI
 
         private void OnClickEnter()
         {
-            UIManager.Instance.ShowPage("MainMenu");
+            StoryManager.ClearRunTriggerStates();
+            StoryManager.TryTrigger("StartGame", 1, () => UIManager.Instance.ShowPage("MainMenu"));
         }
 
         private void OnClickLanguage()

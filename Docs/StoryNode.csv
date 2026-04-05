@@ -1,0 +1,4 @@
+Id,Type,SpeakerKey,LeftSpeakerKey,RightSpeakerKey,ActiveSpeakerSide,TitleKey,ContentKey,TypingCharsPerSecond,SkipHintDelay,Skippable,NextNodeId,CallbackKey,CallbackParam,Notes
+STORY_START_001,Story,,,,,story.start.prologue_title,story.start.prologue_content,28,1.8,TRUE,DIALOG_START_001,,,开始游戏时的开场剧情
+DIALOG_START_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_content,30,0.8,TRUE,DIALOG_START_002,,,开场引导第一句
+DIALOG_START_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.start.player_content,30,0.8,TRUE,,,,开场引导第二句

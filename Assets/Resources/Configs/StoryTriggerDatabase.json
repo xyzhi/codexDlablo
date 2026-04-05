@@ -1,0 +1,13 @@
+﻿{
+    "storyTriggers": [
+        {
+            "Id": "TRIGGER_START_GAME",
+            "TriggerKey": "StartGame",
+            "Stage": 1,
+            "NodeId": "STORY_START_001",
+            "OncePerRun": true,
+            "Enabled": true,
+            "Notes": "开始游戏触发开场剧情"
+        }
+    ]
+}

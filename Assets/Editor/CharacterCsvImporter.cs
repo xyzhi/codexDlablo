@@ -23,6 +23,8 @@ public static class CharacterCsvImporter
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
     private const string EventProfileCsvPath = "Docs/EventProfile.csv";
+    private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
+    private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
     private const string LocalizationOutputFolder = "Assets/Resources/Localization";
@@ -39,6 +41,8 @@ public static class CharacterCsvImporter
     private const string StageNodeJsonPath = ConfigOutputFolder + "/StageNodeDatabase.json";
     private const string EventOptionJsonPath = ConfigOutputFolder + "/EventOptionDatabase.json";
     private const string EventProfileJsonPath = ConfigOutputFolder + "/EventProfileDatabase.json";
+    private const string StoryNodeJsonPath = ConfigOutputFolder + "/StoryNodeDatabase.json";
+    private const string StoryTriggerJsonPath = ConfigOutputFolder + "/StoryTriggerDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
     [MenuItem("Tools/Config/Import All CSV")]
     public static void ImportAll()
@@ -58,6 +62,8 @@ public static class CharacterCsvImporter
             ImportStageNodes();
             ImportEventOptions();
             ImportEventProfiles();
+            ImportStoryNodes();
+            ImportStoryTriggers();
             ImportLocalization();
             AssetDatabase.Refresh();
             Debug.Log("Imported all config CSV files successfully.");
@@ -581,6 +587,101 @@ public static class CharacterCsvImporter
         WriteJson(LocalizationJsonPath, JsonUtility.ToJson(table, true));
         Debug.Log($"Imported {entries.Count} localization rows to {LocalizationJsonPath}");
     }
+    [MenuItem("Tools/Config/Import Story Nodes CSV")]
+    public static void ImportStoryNodes()
+    {
+        var rows = ReadRequiredRows(StoryNodeCsvPath, "StoryNode CSV");
+        var configs = new List<StoryNodeConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 12)
+            {
+                throw new InvalidOperationException($"Invalid story node row at line {i + 1}.");
+            }
+
+            var speakerKey = columns[2];
+            var leftSpeakerKey = columns.Count >= 15 ? columns[3] : speakerKey;
+            var rightSpeakerKey = columns.Count >= 15 ? columns[4] : string.Empty;
+            var activeSpeakerSide = columns.Count >= 15 ? columns[5] : "Left";
+            var titleKey = columns.Count >= 15 ? columns[6] : columns[3];
+            var contentKey = columns.Count >= 15 ? columns[7] : columns[4];
+            var typingCharsPerSecond = columns.Count >= 15 ? ParseInt(columns[8], nameof(StoryNodeConfig.TypingCharsPerSecond), i + 1) : ParseInt(columns[5], nameof(StoryNodeConfig.TypingCharsPerSecond), i + 1);
+            var skipHintDelay = columns.Count >= 15 ? ParseFloat(columns[9], nameof(StoryNodeConfig.SkipHintDelay), i + 1) : ParseFloat(columns[6], nameof(StoryNodeConfig.SkipHintDelay), i + 1);
+            var skippable = columns.Count >= 15 ? ParseBool(columns[10]) : ParseBool(columns[7]);
+            var nextNodeId = columns.Count >= 15 ? columns[11] : columns[8];
+            var callbackKey = columns.Count >= 15 ? columns[12] : columns[9];
+            var callbackParam = columns.Count >= 15 ? columns[13] : columns[10];
+            var notes = columns.Count >= 15 ? columns[14] : columns[11];
+
+            configs.Add(new StoryNodeConfig
+            {
+                Id = columns[0],
+                Type = columns[1],
+                SpeakerKey = speakerKey,
+                LeftSpeakerKey = leftSpeakerKey,
+                RightSpeakerKey = rightSpeakerKey,
+                ActiveSpeakerSide = activeSpeakerSide,
+                TitleKey = titleKey,
+                ContentKey = contentKey,
+                TypingCharsPerSecond = typingCharsPerSecond,
+                SkipHintDelay = skipHintDelay,
+                Skippable = skippable,
+                NextNodeId = nextNodeId,
+                CallbackKey = callbackKey,
+                CallbackParam = callbackParam,
+                Notes = notes
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new StoryNodeDatabase { storyNodes = configs };
+        WriteJson(StoryNodeJsonPath, JsonUtility.ToJson(database, true));
+        StoryNodeDatabaseLoader.ClearCache();
+        Debug.Log($"Imported {configs.Count} story nodes to {StoryNodeJsonPath}");
+    }
+
+    [MenuItem("Tools/Config/Import Story Triggers CSV")]
+    public static void ImportStoryTriggers()
+    {
+        var rows = ReadRequiredRows(StoryTriggerCsvPath, "StoryTrigger CSV");
+        var configs = new List<StoryTriggerConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 7)
+            {
+                throw new InvalidOperationException($"Invalid story trigger row at line {i + 1}.");
+            }
+
+            configs.Add(new StoryTriggerConfig
+            {
+                Id = columns[0],
+                TriggerKey = columns[1],
+                Stage = ParseInt(columns[2], nameof(StoryTriggerConfig.Stage), i + 1),
+                NodeId = columns[3],
+                OncePerRun = ParseBool(columns[4]),
+                Enabled = ParseBool(columns[5]),
+                Notes = columns[6]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new StoryTriggerDatabase { storyTriggers = configs };
+        WriteJson(StoryTriggerJsonPath, JsonUtility.ToJson(database, true));
+        StoryTriggerDatabaseLoader.ClearCache();
+        Debug.Log($"Imported {configs.Count} story triggers to {StoryTriggerJsonPath}");
+    }
     private static Dictionary<string, List<SkillEffectConfig>> BuildSkillEffectMap(List<List<string>> rows)
     {
         var effectMap = new Dictionary<string, List<SkillEffectConfig>>(StringComparer.OrdinalIgnoreCase);
@@ -803,6 +904,19 @@ public static class CharacterCsvImporter
             return result;
         }
         throw new FormatException($"Failed to parse {fieldName} at line {lineNumber}: {value}");
+    }
+    private static bool ParseBool(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var normalized = value.Trim();
+        return string.Equals(normalized, "true", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "1", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "yes", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(normalized, "y", StringComparison.OrdinalIgnoreCase);
     }
     private static bool IsRowEmpty(List<string> columns)
     {

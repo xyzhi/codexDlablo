@@ -1,0 +1,2 @@
+Id,TriggerKey,Stage,NodeId,OncePerRun,Enabled,Notes
+TRIGGER_START_GAME,StartGame,1,STORY_START_001,TRUE,TRUE,开始游戏触发开场剧情

@@ -1,0 +1,55 @@
+﻿{
+    "storyNodes": [
+        {
+            "Id": "STORY_START_001",
+            "Type": "Story",
+            "SpeakerKey": "",
+            "LeftSpeakerKey": "",
+            "RightSpeakerKey": "",
+            "ActiveSpeakerSide": "",
+            "TitleKey": "story.start.prologue_title",
+            "ContentKey": "story.start.prologue_content",
+            "TypingCharsPerSecond": 28,
+            "SkipHintDelay": 1.7999999523162842,
+            "Skippable": true,
+            "NextNodeId": "DIALOG_START_001",
+            "CallbackKey": "",
+            "CallbackParam": "",
+            "Notes": "开始游戏时的开场剧情"
+        },
+        {
+            "Id": "DIALOG_START_001",
+            "Type": "Dialog",
+            "SpeakerKey": "",
+            "LeftSpeakerKey": "dialog.start.guide_speaker",
+            "RightSpeakerKey": "dialog.start.player_speaker",
+            "ActiveSpeakerSide": "Left",
+            "TitleKey": "",
+            "ContentKey": "dialog.start.guide_content",
+            "TypingCharsPerSecond": 30,
+            "SkipHintDelay": 0.800000011920929,
+            "Skippable": true,
+            "NextNodeId": "DIALOG_START_002",
+            "CallbackKey": "",
+            "CallbackParam": "",
+            "Notes": "开场引导第一句"
+        },
+        {
+            "Id": "DIALOG_START_002",
+            "Type": "Dialog",
+            "SpeakerKey": "",
+            "LeftSpeakerKey": "dialog.start.guide_speaker",
+            "RightSpeakerKey": "dialog.start.player_speaker",
+            "ActiveSpeakerSide": "Right",
+            "TitleKey": "",
+            "ContentKey": "dialog.start.player_content",
+            "TypingCharsPerSecond": 30,
+            "SkipHintDelay": 0.800000011920929,
+            "Skippable": true,
+            "NextNodeId": "",
+            "CallbackKey": "",
+            "CallbackParam": "",
+            "Notes": "开场引导第二句"
+        }
+    ]
+}
