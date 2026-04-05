@@ -29,6 +29,7 @@ namespace Wuxing.Battle
         private const string EquipmentPresetPrefKey = "battle.equipment.preset";
         private const string EquipmentOverridePrefKey = "battle.equipment.overrides";
         private static int playerEquipmentPresetIndex;
+        private static int currentBattleStageRound;
         private static readonly Dictionary<string, Dictionary<string, string>> PlayerEquipmentOverrides = new Dictionary<string, Dictionary<string, string>>();
         private static bool equipmentSettingsLoaded;
 
@@ -949,6 +950,8 @@ namespace Wuxing.Battle
 
                 unit.SetSkillLevel(skillId, GameProgressManager.GetSkillLevel(unit.Id, skillId));
             }
+
+            unit.EquippedActiveSkillIds = GameProgressManager.GetEquippedActiveSkillIds(unit.Id);
         }
 
         private static void ApplyCultivationScaling(BattleUnitRuntime unit)
@@ -1389,9 +1392,11 @@ namespace Wuxing.Battle
         {
             var result = new BattlePlaybackResult();
             const int maxRounds = 20;
+            currentBattleStageRound = 0;
 
             for (var round = 1; round <= maxRounds; round++)
             {
+                currentBattleStageRound = round;
                 result.TotalRounds = round;
                 AddEvent(
                     result.Events,
@@ -1408,6 +1413,7 @@ namespace Wuxing.Battle
                     result.FinalPlayerTeamSummary = FormatTeam(playerTeam);
                     result.FinalEnemyTeamSummary = FormatTeam(enemyTeam);
                     AddBattleEndEvents(result, playerTeam, enemyTeam, LocalizationManager.GetText("battle.log_enemy_defeated"));
+                    currentBattleStageRound = 0;
                     return result;
                 }
 
@@ -1419,6 +1425,7 @@ namespace Wuxing.Battle
                     result.FinalPlayerTeamSummary = FormatTeam(playerTeam);
                     result.FinalEnemyTeamSummary = FormatTeam(enemyTeam);
                     AddBattleEndEvents(result, playerTeam, enemyTeam, LocalizationManager.GetText("battle.log_player_defeated"));
+                    currentBattleStageRound = 0;
                     return result;
                 }
             }
@@ -1428,6 +1435,7 @@ namespace Wuxing.Battle
             result.FinalPlayerTeamSummary = FormatTeam(playerTeam);
             result.FinalEnemyTeamSummary = FormatTeam(enemyTeam);
             AddBattleEndEvents(result, playerTeam, enemyTeam, LocalizationManager.GetText("battle.log_round_limit"));
+            currentBattleStageRound = 0;
             return result;
         }
 
@@ -1453,6 +1461,8 @@ namespace Wuxing.Battle
                     continue;
                 }
 
+                actor.TickSkillCooldowns();
+
                 var target = targetTeam.GetFirstAlive();
                 if (target == null)
                 {
@@ -1467,10 +1477,11 @@ namespace Wuxing.Battle
                     continue;
                 }
 
-                var skill = GetFirstCastableSkill(actor, skillDatabase);
+                var skill = ChooseCastableSkill(actor, actingTeam, targetTeam, skillDatabase);
                 if (skill != null)
                 {
-                    ResolveSkill(actor, actingTeam, targetTeam, playerTeam, enemyTeam, target, skill, events);
+                    var preferredTarget = ResolvePrimaryTarget(actor, actingTeam, targetTeam, target, skill);
+                    ResolveSkill(actor, actingTeam, targetTeam, playerTeam, enemyTeam, preferredTarget, skill, events);
                 }
                 else
                 {
@@ -1519,18 +1530,57 @@ namespace Wuxing.Battle
             actor.TickPeriodicStatusEffects("TurnStart");
             actor.CleanupExpiredStatusEffects();
         }
-        private static SkillConfig GetFirstCastableSkill(BattleUnitRuntime actor, SkillDatabase skillDatabase)
+        private static SkillConfig ChooseCastableSkill(BattleUnitRuntime actor, BattleTeamRuntime actingTeam, BattleTeamRuntime targetTeam, SkillDatabase skillDatabase)
         {
-            for (var i = 0; i < actor.SkillIds.Count; i++)
+            if (actor == null || skillDatabase == null)
             {
-                var skill = skillDatabase.GetById(actor.SkillIds[i]);
-                if (skill != null && actor.CurrentMP >= skill.MPCost && !IsPassiveSkill(skill))
-                {
-                    return skill;
-                }
+                return null;
             }
 
-            return null;
+            var candidateIds = actor.EquippedActiveSkillIds != null && actor.EquippedActiveSkillIds.Count > 0
+                ? actor.EquippedActiveSkillIds
+                : actor.SkillIds;
+            var candidates = new List<SkillConfig>();
+            for (var i = 0; i < candidateIds.Count; i++)
+            {
+                var skillId = candidateIds[i];
+                if (string.IsNullOrWhiteSpace(skillId))
+                {
+                    continue;
+                }
+
+                var skill = skillDatabase.GetById(skillId);
+                if (!IsSkillCastable(actor, actingTeam, targetTeam, skill))
+                {
+                    continue;
+                }
+
+                candidates.Add(skill);
+            }
+
+            if (candidates.Count <= 0)
+            {
+                return null;
+            }
+
+            candidates.Sort(delegate(SkillConfig left, SkillConfig right)
+            {
+                var priorityCompare = right.Priority.CompareTo(left.Priority);
+                if (priorityCompare != 0)
+                {
+                    return priorityCompare;
+                }
+
+                var costCompare = left.MPCost.CompareTo(right.MPCost);
+                if (costCompare != 0)
+                {
+                    return costCompare;
+                }
+
+                return string.CompareOrdinal(left.Id, right.Id);
+            });
+
+            return candidates[0];
         }
 
         private static bool IsPassiveSkill(SkillConfig skill)
@@ -1556,6 +1606,8 @@ namespace Wuxing.Battle
             List<BattleEvent> events)
         {
             actor.CurrentMP = Clamp(actor.CurrentMP - skill.MPCost, 0, actor.MaxMP);
+            actor.SetSkillCooldown(skill.Id, Mathf.Max(0, skill.Cooldown));
+            actor.IncrementSkillCastCount(skill.Id);
             AddEvent(
                 events,
                 BattleEventType.Action,
@@ -1728,7 +1780,7 @@ namespace Wuxing.Battle
                 return;
             }
 
-            var targets = ResolveTargets(actor, actingTeam, targetTeam, defaultTarget, effect);
+            var targets = ResolveTargets(actor, actingTeam, targetTeam, defaultTarget, skill, effect);
             for (var i = 0; i < targets.Count; i++)
             {
                 var target = targets[i];
@@ -1764,7 +1816,7 @@ namespace Wuxing.Battle
 
             if (string.Equals(effectType, "Heal", StringComparison.OrdinalIgnoreCase))
             {
-                var healValue = Mathf.Max(1, scaledValue);
+                var healValue = Mathf.Max(1, Mathf.RoundToInt(scaledValue * GetBattleFormula().HealMultiplier));
                 target.CurrentHP = Clamp(target.CurrentHP + healValue, 0, target.MaxHP);
                 AddEvent(events, BattleEventType.Action, LocalizationManager.GetText("battle.log_heals") + " " + target.Name + " " + LocalizationManager.GetText("battle.log_for") + " " + healValue + ".", playerTeam, enemyTeam);
                 return;
@@ -1772,7 +1824,7 @@ namespace Wuxing.Battle
 
             if (string.Equals(effectType, "Shield", StringComparison.OrdinalIgnoreCase))
             {
-                var shieldGain = Mathf.Max(1, scaledValue);
+                var shieldGain = Mathf.Max(1, Mathf.RoundToInt(scaledValue * GetBattleFormula().ShieldMultiplier));
                 target.ApplyShield(shieldGain);
                 AddEvent(events, BattleEventType.Action, target.Name + " " + LocalizationManager.GetText("battle.log_steadies") + " " + LocalizationManager.GetText("battle.log_for") + " " + shieldGain + ".", playerTeam, enemyTeam);
                 return;
@@ -1872,6 +1924,7 @@ namespace Wuxing.Battle
             BattleTeamRuntime actingTeam,
             BattleTeamRuntime targetTeam,
             BattleUnitRuntime defaultTarget,
+            SkillConfig skill,
             SkillEffectConfig effect)
         {
             var results = new List<BattleUnitRuntime>();
@@ -1882,21 +1935,269 @@ namespace Wuxing.Battle
                 case "Self":
                     results.Add(actor);
                     break;
-                case "SingleAlly":
-                    results.Add(actingTeam.GetFirstAlive());
-                    break;
                 case "AllAllies":
                     results.AddRange(GetAliveUnits(actingTeam));
                     break;
                 case "AllEnemies":
                     results.AddRange(GetAliveUnits(targetTeam));
                     break;
+                case "SingleEnemy":
+                    results.Add(ResolvePrimaryTarget(actor, actingTeam, targetTeam, defaultTarget, skill));
+                    break;
+                case "SingleAlly":
+                    results.Add(ResolvePrimaryAllyTarget(actor, actingTeam, skill));
+                    break;
                 default:
-                    results.Add(defaultTarget ?? targetTeam.GetFirstAlive());
+                    if (IsFriendlyTargetRule(skill))
+                    {
+                        results.Add(ResolvePrimaryAllyTarget(actor, actingTeam, skill));
+                    }
+                    else
+                    {
+                        results.Add(ResolvePrimaryTarget(actor, actingTeam, targetTeam, defaultTarget, skill));
+                    }
                     break;
             }
 
             return results;
+        }
+
+        private static bool IsSkillCastable(BattleUnitRuntime actor, BattleTeamRuntime actingTeam, BattleTeamRuntime targetTeam, SkillConfig skill)
+        {
+            if (actor == null || skill == null || IsPassiveSkill(skill))
+            {
+                return false;
+            }
+
+            if (actor.CurrentMP < skill.MPCost)
+            {
+                return false;
+            }
+
+            if (actor.GetSkillCooldown(skill.Id) > 0)
+            {
+                return false;
+            }
+
+            if (skill.CastLimit > 0 && actor.GetSkillCastCount(skill.Id) >= skill.CastLimit)
+            {
+                return false;
+            }
+
+            return MeetsTriggerCondition(actor, actingTeam, targetTeam, skill);
+        }
+
+        private static bool MeetsTriggerCondition(BattleUnitRuntime actor, BattleTeamRuntime actingTeam, BattleTeamRuntime targetTeam, SkillConfig skill)
+        {
+            if (skill == null || string.IsNullOrWhiteSpace(skill.TriggerType))
+            {
+                return true;
+            }
+
+            var triggerType = skill.TriggerType.Trim();
+            var triggerValue = ParseOptionalInt(skill.TriggerValue);
+            switch (triggerType)
+            {
+                case "Always":
+                    return true;
+                case "Passive":
+                    return false;
+                case "FirstRound":
+                    return currentBattleStageRound <= 1;
+                case "SelfHpBelowPct":
+                    return GetCurrentHpPercent(actor) <= Mathf.Max(0, triggerValue);
+                case "AllyHpBelowPct":
+                    return GetLowestHpPercent(actingTeam) <= Mathf.Max(0, triggerValue);
+                case "EnemyCountAtLeast":
+                    return CountAliveUnits(targetTeam) >= Mathf.Max(1, triggerValue);
+                case "TargetHpBelowPct":
+                    return GetCurrentHpPercent(ResolvePrimaryTarget(actor, actingTeam, targetTeam, targetTeam != null ? targetTeam.GetFirstAlive() : null, skill)) <= Mathf.Max(0, triggerValue);
+                case "TargetHpAbovePct":
+                    return GetCurrentHpPercent(ResolvePrimaryTarget(actor, actingTeam, targetTeam, targetTeam != null ? targetTeam.GetFirstAlive() : null, skill)) >= Mathf.Max(0, triggerValue);
+                case "SelfNoShield":
+                    return actor.Shield <= 0;
+                case "TargetHasShield":
+                    return ResolvePrimaryTarget(actor, actingTeam, targetTeam, targetTeam != null ? targetTeam.GetFirstAlive() : null, skill)?.Shield > 0;
+                case "SelfHasStatus":
+                    return HasStatus(actor, skill.TriggerValue);
+                case "TargetHasDebuff":
+                    return HasStatus(ResolvePrimaryTarget(actor, actingTeam, targetTeam, targetTeam != null ? targetTeam.GetFirstAlive() : null, skill), skill.TriggerValue);
+                default:
+                    return true;
+            }
+        }
+
+        private static BattleUnitRuntime ResolvePrimaryTarget(BattleUnitRuntime actor, BattleTeamRuntime actingTeam, BattleTeamRuntime targetTeam, BattleUnitRuntime fallbackTarget, SkillConfig skill)
+        {
+            var aliveTargets = GetAliveUnits(targetTeam);
+            if (aliveTargets.Count <= 0)
+            {
+                return fallbackTarget;
+            }
+
+            var rule = skill != null ? (skill.TargetRule ?? string.Empty).Trim() : string.Empty;
+            switch (rule)
+            {
+                case "LowestHPEnemy":
+                    return GetLowestHpUnit(aliveTargets);
+                case "HighestHPEnemy":
+                    return GetHighestHpUnit(aliveTargets);
+                case "HighestATKEnemy":
+                    return GetHighestAttackUnit(aliveTargets);
+                case "RandomEnemy":
+                    return aliveTargets[UnityEngine.Random.Range(0, aliveTargets.Count)];
+                default:
+                    return fallbackTarget != null && !fallbackTarget.IsDead ? fallbackTarget : aliveTargets[0];
+            }
+        }
+
+        private static BattleUnitRuntime ResolvePrimaryAllyTarget(BattleUnitRuntime actor, BattleTeamRuntime actingTeam, SkillConfig skill)
+        {
+            var aliveAllies = GetAliveUnits(actingTeam);
+            if (aliveAllies.Count <= 0)
+            {
+                return actor;
+            }
+
+            var rule = skill != null ? (skill.TargetRule ?? string.Empty).Trim() : string.Empty;
+            switch (rule)
+            {
+                case "LowestHPAlly":
+                    return GetLowestHpUnit(aliveAllies);
+                case "Self":
+                    return actor;
+                default:
+                    return actor ?? aliveAllies[0];
+            }
+        }
+
+        private static bool IsFriendlyTargetRule(SkillConfig skill)
+        {
+            if (skill == null || string.IsNullOrWhiteSpace(skill.TargetRule))
+            {
+                return false;
+            }
+
+            switch (skill.TargetRule.Trim())
+            {
+                case "Self":
+                case "LowestHPAlly":
+                case "AllAllies":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private static bool HasStatus(BattleUnitRuntime unit, string statusType)
+        {
+            if (unit == null || unit.StatusEffects == null || string.IsNullOrWhiteSpace(statusType))
+            {
+                return false;
+            }
+
+            for (var i = 0; i < unit.StatusEffects.Count; i++)
+            {
+                var effect = unit.StatusEffects[i];
+                if (effect != null && effect.RemainingRounds > 0 && string.Equals(effect.EffectType, statusType.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static int CountAliveUnits(BattleTeamRuntime team)
+        {
+            return GetAliveUnits(team).Count;
+        }
+
+        private static int GetCurrentHpPercent(BattleUnitRuntime unit)
+        {
+            if (unit == null || unit.MaxHP <= 0)
+            {
+                return 0;
+            }
+
+            return Mathf.RoundToInt(unit.CurrentHP * 100f / unit.MaxHP);
+        }
+
+        private static int GetLowestHpPercent(BattleTeamRuntime team)
+        {
+            var aliveUnits = GetAliveUnits(team);
+            if (aliveUnits.Count <= 0)
+            {
+                return 0;
+            }
+
+            var minPercent = 100;
+            for (var i = 0; i < aliveUnits.Count; i++)
+            {
+                minPercent = Mathf.Min(minPercent, GetCurrentHpPercent(aliveUnits[i]));
+            }
+
+            return minPercent;
+        }
+
+        private static BattleUnitRuntime GetLowestHpUnit(List<BattleUnitRuntime> units)
+        {
+            BattleUnitRuntime best = null;
+            var bestPercent = int.MaxValue;
+            for (var i = 0; i < units.Count; i++)
+            {
+                var unit = units[i];
+                var percent = GetCurrentHpPercent(unit);
+                if (best == null || percent < bestPercent)
+                {
+                    best = unit;
+                    bestPercent = percent;
+                }
+            }
+
+            return best;
+        }
+
+        private static BattleUnitRuntime GetHighestHpUnit(List<BattleUnitRuntime> units)
+        {
+            BattleUnitRuntime best = null;
+            var bestPercent = int.MinValue;
+            for (var i = 0; i < units.Count; i++)
+            {
+                var unit = units[i];
+                var percent = GetCurrentHpPercent(unit);
+                if (best == null || percent > bestPercent)
+                {
+                    best = unit;
+                    bestPercent = percent;
+                }
+            }
+
+            return best;
+        }
+
+        private static BattleUnitRuntime GetHighestAttackUnit(List<BattleUnitRuntime> units)
+        {
+            BattleUnitRuntime best = null;
+            var bestAttack = int.MinValue;
+            for (var i = 0; i < units.Count; i++)
+            {
+                var unit = units[i];
+                var attack = GetEffectiveAttack(unit);
+                if (best == null || attack > bestAttack)
+                {
+                    best = unit;
+                    bestAttack = attack;
+                }
+            }
+
+            return best;
+        }
+
+        private static int ParseOptionalInt(string value)
+        {
+            int parsed;
+            return int.TryParse(value, out parsed) ? parsed : 0;
         }
 
         private static List<BattleUnitRuntime> GetAliveUnits(BattleTeamRuntime team)
@@ -1930,8 +2231,11 @@ namespace Wuxing.Battle
             {
                 DamageMultiplier = 1f,
                 FlatDamageBonus = 0,
+                HealMultiplier = 1f,
+                ShieldMultiplier = 1f,
                 VulnerablePerPoint = 0.01f,
                 DefenseMitigationFactor = 1f,
+                CritMultiplier = 1.5f,
                 MinDamage = 1f
             };
         }

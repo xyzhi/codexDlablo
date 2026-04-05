@@ -157,7 +157,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 12)
+            if (columns.Count < 19)
             {
                 throw new InvalidOperationException($"Invalid skill row at line {i + 1}.");
             }
@@ -176,12 +176,19 @@ public static class CharacterCsvImporter
                 Quality = columns[3],
                 Category = columns[4],
                 TargetType = columns[5],
-                MPCost = ParseInt(columns[6], nameof(SkillConfig.MPCost), i + 1),
-                Power = ParseInt(columns[7], nameof(SkillConfig.Power), i + 1),
-                Duration = ParseInt(columns[8], nameof(SkillConfig.Duration), i + 1),
-                EffectType = columns[9],
-                Description = columns[10],
-                Notes = columns[11],
+                Priority = ParseInt(columns[6], nameof(SkillConfig.Priority), i + 1),
+                Cooldown = ParseInt(columns[7], nameof(SkillConfig.Cooldown), i + 1),
+                MPCost = ParseInt(columns[8], nameof(SkillConfig.MPCost), i + 1),
+                TriggerType = columns[9],
+                TriggerValue = columns[10],
+                TargetRule = columns[11],
+                CastLimit = ParseInt(columns[12], nameof(SkillConfig.CastLimit), i + 1),
+                SkillTags = columns[13],
+                Power = ParseInt(columns[14], nameof(SkillConfig.Power), i + 1),
+                Duration = ParseInt(columns[15], nameof(SkillConfig.Duration), i + 1),
+                EffectType = columns[16],
+                Description = columns[17],
+                Notes = columns[18],
                 Effects = effects
             });
         }
@@ -196,7 +203,7 @@ public static class CharacterCsvImporter
     {
         var rows = ReadRequiredRows(BattleFormulaCsvPath, "BattleFormula CSV");
         var columns = rows[1];
-        if (columns.Count < 6)
+        if (columns.Count < 9)
         {
             throw new InvalidOperationException("Invalid battle formula row.");
         }
@@ -207,10 +214,13 @@ public static class CharacterCsvImporter
             {
                 DamageMultiplier = ParseFloat(columns[0], nameof(BattleFormulaConfig.DamageMultiplier), 2),
                 FlatDamageBonus = ParseInt(columns[1], nameof(BattleFormulaConfig.FlatDamageBonus), 2),
-                VulnerablePerPoint = ParseFloat(columns[2], nameof(BattleFormulaConfig.VulnerablePerPoint), 2),
-                DefenseMitigationFactor = ParseFloat(columns[3], nameof(BattleFormulaConfig.DefenseMitigationFactor), 2),
-                MinDamage = ParseFloat(columns[4], nameof(BattleFormulaConfig.MinDamage), 2),
-                Notes = columns[5]
+                HealMultiplier = ParseFloat(columns[2], nameof(BattleFormulaConfig.HealMultiplier), 2),
+                ShieldMultiplier = ParseFloat(columns[3], nameof(BattleFormulaConfig.ShieldMultiplier), 2),
+                VulnerablePerPoint = ParseFloat(columns[4], nameof(BattleFormulaConfig.VulnerablePerPoint), 2),
+                DefenseMitigationFactor = ParseFloat(columns[5], nameof(BattleFormulaConfig.DefenseMitigationFactor), 2),
+                CritMultiplier = ParseFloat(columns[6], nameof(BattleFormulaConfig.CritMultiplier), 2),
+                MinDamage = ParseFloat(columns[7], nameof(BattleFormulaConfig.MinDamage), 2),
+                Notes = columns[8]
             }
         };
 

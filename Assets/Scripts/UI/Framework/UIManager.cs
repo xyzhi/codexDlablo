@@ -150,6 +150,7 @@ namespace Wuxing.UI
             _popupPrefabPaths["Confirm"] = "Prefabs/UI/Popups/ConfirmPopup";
             _popupPrefabPaths["CardBrowser"] = "Prefabs/UI/Popups/CardBrowserPopup";
             _popupPrefabPaths["Equipment"] = "Prefabs/UI/Popups/EquipmentPopup";
+            _popupPrefabPaths["Skill"] = "Prefabs/UI/Popups/SkillPopup";
             _popupPrefabPaths["SpiritConvert"] = "Prefabs/UI/Popups/SpiritStoneConvertPopup";
         }
 

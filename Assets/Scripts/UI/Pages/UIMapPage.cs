@@ -143,17 +143,7 @@ namespace Wuxing.UI
         private void OnClickSkillOverview()
         {
             if (isMoving) return;
-
-            var popup = UIManager.Instance.ShowPopup<UICardBrowserPopup>("CardBrowser");
-            if (popup == null)
-            {
-                return;
-            }
-
-            popup.Setup(
-                LocalizationManager.GetText("map.skill_overview_title"),
-                string.Empty,
-                GameProgressManager.BuildLearnedSkillCards(IsEnglish()));
+            UIManager.Instance.ShowPopup<UISkillPopup>("Skill", GameProgressManager.GetPrimaryCharacterId());
         }
 
         private void OnClickReset()
@@ -513,14 +503,7 @@ namespace Wuxing.UI
 
             if (string.Equals(action, "OpenSkillOverview", StringComparison.OrdinalIgnoreCase))
             {
-                var popup = UIManager.Instance.ShowPopup<UICardBrowserPopup>("CardBrowser");
-                if (popup != null)
-                {
-                    popup.Setup(
-                        LocalizationManager.GetText("map.skill_overview_title"),
-                        string.Empty,
-                        GameProgressManager.BuildLearnedSkillCards(IsEnglish()));
-                }
+                UIManager.Instance.ShowPopup<UISkillPopup>("Skill", GameProgressManager.GetPrimaryCharacterId());
                 return;
             }
 

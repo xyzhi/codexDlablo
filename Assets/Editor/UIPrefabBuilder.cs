@@ -41,6 +41,7 @@ public static class UIPrefabBuilder
         BuildConfirmPopupPrefab();
         BuildCardBrowserPopupPrefab();
         BuildEquipmentPopupPrefab();
+        BuildSkillPopupPrefab();
         BuildSpiritStoneConvertPopupPrefab();
         BuildToastPopupPrefab();
 
@@ -891,6 +892,111 @@ public static class UIPrefabBuilder
 
         SavePrefab(root, PopupsFolder + "/EquipmentPopup.prefab");
     }
+
+    private static void BuildSkillPopupPrefab()
+    {
+        var root = UIFactory.CreatePanel(null, "SkillPopup", new Color(0f, 0f, 0f, 0.72f));
+        var panel = UIFactory.CreatePanel(root.transform, "Panel", new Color(0.06f, 0.06f, 0.07f, 0.985f));
+        var panelRect = panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.05f, 0.08f);
+        panelRect.anchorMax = new Vector2(0.95f, 0.9f);
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(panel.transform, "Outline", new Color(0.76f, 0.46f, 0.18f, 0.95f), 2f);
+
+        var title = UIFactory.CreateText(panel.transform, "Title", "已学功法", 36, TextAnchor.UpperLeft, Color.white);
+        title.rectTransform.anchorMin = new Vector2(0.04f, 0.91f);
+        title.rectTransform.anchorMax = new Vector2(0.6f, 0.98f);
+        title.rectTransform.offsetMin = Vector2.zero;
+        title.rectTransform.offsetMax = Vector2.zero;
+
+        var closeButton = UIFactory.CreateButton(panel.transform, "CloseButton", "关闭", delegate { });
+        var closeRect = closeButton.GetComponent<RectTransform>();
+        closeRect.anchorMin = new Vector2(0.86f, 0.915f);
+        closeRect.anchorMax = new Vector2(0.96f, 0.972f);
+        closeRect.offsetMin = Vector2.zero;
+        closeRect.offsetMax = Vector2.zero;
+        var closeLabel = closeButton.GetComponentInChildren<Text>();
+        if (closeLabel != null)
+        {
+            closeLabel.fontSize = 18;
+        }
+
+        var slotScrollRoot = UIFactory.CreateContainer(panel.transform, "SlotScrollRoot", new Vector2(0.04f, 0.64f), new Vector2(0.96f, 0.86f), Vector2.zero, Vector2.zero);
+        var slotScrollRect = UIFactory.CreateScrollRect(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(slotScrollRect.GetComponent<RectTransform>());
+
+        var libraryScrollRoot = UIFactory.CreateContainer(panel.transform, "LibraryScrollRoot", new Vector2(0.04f, 0.28f), new Vector2(0.96f, 0.6f), Vector2.zero, Vector2.zero);
+        var libraryScrollRect = UIFactory.CreateScrollRect(libraryScrollRoot, "LibraryScroll", new Color(0f, 0f, 0f, 0.18f));
+        UIFactory.Stretch(libraryScrollRect.GetComponent<RectTransform>());
+
+        var detailPanel = UIFactory.CreatePanel(panel.transform, "DetailPanel", new Color(0.05f, 0.05f, 0.06f, 0.985f));
+        var detailRect = detailPanel.GetComponent<RectTransform>();
+        detailRect.anchorMin = new Vector2(0.04f, 0.08f);
+        detailRect.anchorMax = new Vector2(0.96f, 0.23f);
+        detailRect.offsetMin = Vector2.zero;
+        detailRect.offsetMax = Vector2.zero;
+        UIFactory.AddOutlineBox(detailPanel.transform, "DetailOutline", new Color(0.76f, 0.46f, 0.18f, 0.8f), 2f);
+
+        var detailTitle = UIFactory.CreateText(detailPanel.transform, "DetailTitle", "功法详情", 24, TextAnchor.UpperLeft, Color.white);
+        detailTitle.rectTransform.anchorMin = new Vector2(0.04f, 0.66f);
+        detailTitle.rectTransform.anchorMax = new Vector2(0.96f, 0.92f);
+        detailTitle.rectTransform.offsetMin = Vector2.zero;
+        detailTitle.rectTransform.offsetMax = Vector2.zero;
+
+        var detailBody = UIFactory.CreateText(detailPanel.transform, "DetailBody", string.Empty, 18, TextAnchor.UpperLeft, new Color(0.94f, 0.94f, 0.94f, 1f));
+        detailBody.rectTransform.anchorMin = new Vector2(0.04f, 0.08f);
+        detailBody.rectTransform.anchorMax = new Vector2(0.96f, 0.6f);
+        detailBody.rectTransform.offsetMin = Vector2.zero;
+        detailBody.rectTransform.offsetMax = Vector2.zero;
+
+        var slotTemplate = UIFactory.CreateButton(slotScrollRect.content, "SlotTemplate", string.Empty, delegate { });
+        var slotTemplateRect = slotTemplate.GetComponent<RectTransform>();
+        slotTemplateRect.anchorMin = new Vector2(0f, 1f);
+        slotTemplateRect.anchorMax = new Vector2(0f, 1f);
+        slotTemplateRect.pivot = new Vector2(0f, 1f);
+        slotTemplateRect.anchoredPosition = Vector2.zero;
+        slotTemplateRect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
+        var slotLabel = slotTemplate.GetComponentInChildren<Text>();
+        if (slotLabel != null)
+        {
+            slotLabel.text = string.Empty;
+            slotLabel.gameObject.SetActive(false);
+        }
+        var slotTitle = UIFactory.CreateText(slotTemplate.transform, "TitleText", "技能栏1", 22, TextAnchor.UpperLeft, new Color(0.96f, 0.92f, 0.84f, 1f));
+        slotTitle.rectTransform.anchorMin = new Vector2(0.08f, 0.72f);
+        slotTitle.rectTransform.anchorMax = new Vector2(0.92f, 0.9f);
+        slotTitle.rectTransform.offsetMin = Vector2.zero;
+        slotTitle.rectTransform.offsetMax = Vector2.zero;
+        var slotSubtitle = UIFactory.CreateText(slotTemplate.transform, "SubtitleText", "空技能栏", 18, TextAnchor.UpperLeft, new Color(0.72f, 0.78f, 0.84f, 0.92f));
+        slotSubtitle.rectTransform.anchorMin = new Vector2(0.08f, 0.52f);
+        slotSubtitle.rectTransform.anchorMax = new Vector2(0.92f, 0.68f);
+        slotSubtitle.rectTransform.offsetMin = Vector2.zero;
+        slotSubtitle.rectTransform.offsetMax = Vector2.zero;
+        var slotProgressRoot = UIFactory.CreatePanel(slotTemplate.transform, "ProgressRoot", new Color(1f, 1f, 1f, 0.03f));
+        slotProgressRoot.GetComponent<RectTransform>().anchorMin = new Vector2(0.08f, 0.1f);
+        slotProgressRoot.GetComponent<RectTransform>().anchorMax = new Vector2(0.92f, 0.18f);
+        slotProgressRoot.GetComponent<RectTransform>().offsetMin = Vector2.zero;
+        slotProgressRoot.GetComponent<RectTransform>().offsetMax = Vector2.zero;
+        slotProgressRoot.SetActive(false);
+        slotTemplate.gameObject.SetActive(false);
+
+        var libraryTemplate = Object.Instantiate(slotTemplate.gameObject, libraryScrollRect.content, false);
+        libraryTemplate.name = "LibraryTemplate";
+        libraryTemplate.SetActive(false);
+
+        var popup = root.AddComponent<UISkillPopup>();
+        BindSerializedProperty(popup, "titleText", title);
+        BindSerializedProperty(popup, "closeButton", closeButton);
+        BindSerializedProperty(popup, "slotContentRoot", slotScrollRect.content);
+        BindSerializedProperty(popup, "slotTemplateButton", slotTemplate);
+        BindSerializedProperty(popup, "libraryContentRoot", libraryScrollRect.content);
+        BindSerializedProperty(popup, "libraryTemplateButton", libraryTemplate.GetComponent<Button>());
+        BindSerializedProperty(popup, "detailTitleText", detailTitle);
+        BindSerializedProperty(popup, "detailBodyText", detailBody);
+
+        SavePrefab(root, PopupsFolder + "/SkillPopup.prefab");
+    }
     private static void BuildSpiritStoneConvertPopupPrefab()
     {
         var root = UIFactory.CreatePanel(null, "SpiritStoneConvertPopup", new Color(0f, 0f, 0f, 0.74f));
@@ -1315,6 +1421,7 @@ public static class UIPrefabBuilder
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ConfirmPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/CardBrowserPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/EquipmentPopup.prefab"))
+            && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/SkillPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/SpiritStoneConvertPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ToastPopup.prefab"));
     }

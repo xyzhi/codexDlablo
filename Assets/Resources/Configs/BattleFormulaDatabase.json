@@ -2,8 +2,11 @@
     "Formula": {
         "DamageMultiplier": 1.0,
         "FlatDamageBonus": 0,
+        "HealMultiplier": 1.0,
+        "ShieldMultiplier": 1.0,
         "VulnerablePerPoint": 0.009999999776482582,
         "DefenseMitigationFactor": 1.0,
+        "CritMultiplier": 1.5,
         "MinDamage": 1.0,
         "Notes": "正式默认公式参数"
     }

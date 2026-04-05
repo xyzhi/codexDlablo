@@ -696,6 +696,51 @@ namespace Wuxing.Game
             return Instance.GetSkillLevelInternal(characterId, skillId);
         }
 
+        public static List<string> GetEquippedActiveSkillIds(string characterId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId))
+            {
+                return new List<string>();
+            }
+
+            return Instance.GetEquippedActiveSkillIdsInternal(characterId);
+        }
+
+        public static void EquipActiveSkill(string characterId, int slotIndex, string skillId)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId))
+            {
+                return;
+            }
+
+            Instance.EquipActiveSkillInternal(characterId, slotIndex, skillId);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void UnequipActiveSkill(string characterId, int slotIndex)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(characterId))
+            {
+                return;
+            }
+
+            Instance.UnequipActiveSkillInternal(characterId, slotIndex);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static bool CanEquipActiveSkill(string characterId, string skillId)
+        {
+            EnsureInstance();
+            return Instance != null
+                && !string.IsNullOrEmpty(characterId)
+                && Instance.CharacterCanEquipActiveSkill(characterId, skillId);
+        }
+
         public static string BuildLearnedSkillsOverview(bool english)
         {
             EnsureInstance();
@@ -813,6 +858,77 @@ namespace Wuxing.Game
                         BorderColor = UIElementPalette.GetBorderColor(skill.Element)
                     });
                 }
+            }
+
+            return result;
+        }
+
+        public static string GetPrimaryCharacterId()
+        {
+            return BasePlayerCharacterIds.Length > 0 ? BasePlayerCharacterIds[0] : string.Empty;
+        }
+
+        public static List<UICardData> BuildEquippedActiveSkillCards(string characterId, bool english)
+        {
+            EnsureInstance();
+
+            var result = new List<UICardData>();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (skillDatabase == null || string.IsNullOrEmpty(characterId))
+            {
+                return result;
+            }
+
+            var equippedSkillIds = GetEquippedActiveSkillIds(characterId);
+            for (var i = 0; i < 3; i++)
+            {
+                var equippedSkillId = i < equippedSkillIds.Count ? equippedSkillIds[i] : string.Empty;
+                var skill = !string.IsNullOrEmpty(equippedSkillId) ? skillDatabase.GetById(equippedSkillId) : null;
+                result.Add(new UICardData
+                {
+                    Id = "slot:" + i,
+                    Title = skill != null ? WrapSkillNameWithQualityColor(skill.Name, skill.Quality) : (english ? "Empty Slot" : "空技能栏"),
+                    Subtitle = skill != null ? LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, equippedSkillId) : (english ? "Choose active skill" : "选择主动技能"),
+                    DetailTitle = skill != null ? skill.Name : (english ? "Skill Slot" : "技能栏"),
+                    DetailBody = skill != null ? BuildSkillDetail(characterId, skill, english) : (english ? "Select an active skill from the library below." : "从下方技能库中选择一个主动技能上场。"),
+                    BorderColor = UIElementPalette.GetBorderColor(skill != null ? skill.Element : "None")
+                });
+            }
+
+            return result;
+        }
+
+        public static List<UICardData> BuildSkillLibraryCards(string characterId, bool english)
+        {
+            EnsureInstance();
+
+            var result = new List<UICardData>();
+            var skillDatabase = SkillDatabaseLoader.Load();
+            if (skillDatabase == null || string.IsNullOrEmpty(characterId))
+            {
+                return result;
+            }
+
+            var entry = Instance != null ? Instance.GetOrCreateCharacterRunData(characterId) : null;
+            var knownSkillIds = Instance != null ? Instance.GetKnownSkillIds(characterId, entry) : new List<string>();
+            for (var i = 0; i < knownSkillIds.Count; i++)
+            {
+                var skillId = knownSkillIds[i];
+                var skill = skillDatabase.GetById(skillId);
+                if (skill == null)
+                {
+                    continue;
+                }
+
+                result.Add(new UICardData
+                {
+                    Id = skillId,
+                    Title = WrapSkillNameWithQualityColor(skill.Name, skill.Quality),
+                    Subtitle = LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, skillId),
+                    DetailTitle = skill.Name + " " + LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, skillId),
+                    DetailBody = BuildSkillDetail(characterId, skill, english),
+                    BorderColor = UIElementPalette.GetBorderColor(skill.Element)
+                });
             }
 
             return result;
@@ -1048,6 +1164,7 @@ namespace Wuxing.Game
 
             var nextLevel = Mathf.Max(1, option.ResultLevel);
             Instance.SetSkillLevelInternal(entry, option.SkillId, nextLevel);
+            Instance.TryAutoEquipActiveSkill(entry, option.SkillId);
             option.CurrentLevel = previousLevel;
             option.ResultLevel = nextLevel;
             option.IsUpgrade = alreadyKnown;
@@ -2046,11 +2163,17 @@ namespace Wuxing.Game
                     entry.LearnedSkillIds = new List<string>();
                 }
 
+                if (entry.EquippedActiveSkillIds == null)
+                {
+                    entry.EquippedActiveSkillIds = new List<string>();
+                }
+
                 if (entry.SkillLevels == null)
                 {
                     entry.SkillLevels = new List<SkillLevelData>();
                 }
 
+                EnsureEquippedActiveSkills(entry);
                 characterRunData.Add(entry);
             }
         }
@@ -2106,10 +2229,22 @@ namespace Wuxing.Game
             {
                 if (string.Equals(characterRunData[i].CharacterId, characterId, StringComparison.OrdinalIgnoreCase))
                 {
+                    if (characterRunData[i].LearnedSkillIds == null)
+                    {
+                        characterRunData[i].LearnedSkillIds = new List<string>();
+                    }
+
+                    if (characterRunData[i].EquippedActiveSkillIds == null)
+                    {
+                        characterRunData[i].EquippedActiveSkillIds = new List<string>();
+                    }
+
                     if (characterRunData[i].SkillLevels == null)
                     {
                         characterRunData[i].SkillLevels = new List<SkillLevelData>();
                     }
+
+                    EnsureEquippedActiveSkills(characterRunData[i]);
                     return characterRunData[i];
                 }
             }
@@ -2117,8 +2252,11 @@ namespace Wuxing.Game
             var created = new CharacterRunData
             {
                 CharacterId = characterId,
+                LearnedSkillIds = new List<string>(),
+                EquippedActiveSkillIds = new List<string>(),
                 SkillLevels = new List<SkillLevelData>()
             };
+            EnsureEquippedActiveSkills(created);
             characterRunData.Add(created);
             return created;
         }
@@ -2127,6 +2265,12 @@ namespace Wuxing.Game
         {
             var entry = GetOrCreateCharacterRunData(characterId);
             return new List<string>(entry.LearnedSkillIds);
+        }
+
+        private List<string> GetEquippedActiveSkillIdsInternal(string characterId)
+        {
+            var entry = GetOrCreateCharacterRunData(characterId);
+            return new List<string>(entry.EquippedActiveSkillIds);
         }
 
         private int GetSkillLevelInternal(string characterId, string skillId)
@@ -2183,6 +2327,264 @@ namespace Wuxing.Game
                 SkillId = skillId,
                 Level = Mathf.Max(1, level)
             });
+        }
+
+        private void EquipActiveSkillInternal(string characterId, int slotIndex, string skillId)
+        {
+            var entry = GetOrCreateCharacterRunData(characterId);
+            EnsureEquippedActiveSkills(entry);
+
+            if (slotIndex < 0 || slotIndex >= 3)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(skillId))
+            {
+                entry.EquippedActiveSkillIds[slotIndex] = string.Empty;
+                return;
+            }
+
+            var normalizedSkillId = skillId.Trim();
+            if (!CharacterCanEquipActiveSkill(characterId, normalizedSkillId))
+            {
+                return;
+            }
+
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                if (i == slotIndex)
+                {
+                    continue;
+                }
+
+                if (string.Equals(entry.EquippedActiveSkillIds[i], normalizedSkillId, StringComparison.OrdinalIgnoreCase))
+                {
+                    entry.EquippedActiveSkillIds[i] = string.Empty;
+                }
+            }
+
+            entry.EquippedActiveSkillIds[slotIndex] = normalizedSkillId;
+        }
+
+        private void UnequipActiveSkillInternal(string characterId, int slotIndex)
+        {
+            var entry = GetOrCreateCharacterRunData(characterId);
+            EnsureEquippedActiveSkills(entry);
+            if (slotIndex < 0 || slotIndex >= entry.EquippedActiveSkillIds.Count)
+            {
+                return;
+            }
+
+            entry.EquippedActiveSkillIds[slotIndex] = string.Empty;
+        }
+
+        private void EnsureEquippedActiveSkills(CharacterRunData entry)
+        {
+            if (entry == null)
+            {
+                return;
+            }
+
+            if (entry.EquippedActiveSkillIds == null)
+            {
+                entry.EquippedActiveSkillIds = new List<string>();
+            }
+
+            while (entry.EquippedActiveSkillIds.Count < 3)
+            {
+                entry.EquippedActiveSkillIds.Add(string.Empty);
+            }
+
+            if (entry.EquippedActiveSkillIds.Count > 3)
+            {
+                entry.EquippedActiveSkillIds.RemoveRange(3, entry.EquippedActiveSkillIds.Count - 3);
+            }
+
+            var defaultEquipped = BuildDefaultEquippedActiveSkills(entry.CharacterId, entry);
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                var equippedSkillId = entry.EquippedActiveSkillIds[i];
+                if (CharacterCanEquipActiveSkill(entry.CharacterId, equippedSkillId))
+                {
+                    continue;
+                }
+
+                entry.EquippedActiveSkillIds[i] = i < defaultEquipped.Count ? defaultEquipped[i] : string.Empty;
+            }
+
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                var equippedSkillId = entry.EquippedActiveSkillIds[i];
+                if (string.IsNullOrWhiteSpace(equippedSkillId))
+                {
+                    continue;
+                }
+
+                if (!seen.Add(equippedSkillId))
+                {
+                    entry.EquippedActiveSkillIds[i] = string.Empty;
+                }
+            }
+
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                if (!string.IsNullOrEmpty(entry.EquippedActiveSkillIds[i]))
+                {
+                    continue;
+                }
+
+                for (var j = 0; j < defaultEquipped.Count; j++)
+                {
+                    if (seen.Add(defaultEquipped[j]))
+                    {
+                        entry.EquippedActiveSkillIds[i] = defaultEquipped[j];
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void TryAutoEquipActiveSkill(CharacterRunData entry, string skillId)
+        {
+            if (entry == null || !CharacterCanEquipActiveSkill(entry.CharacterId, skillId))
+            {
+                return;
+            }
+
+            EnsureEquippedActiveSkills(entry);
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                if (string.Equals(entry.EquippedActiveSkillIds[i], skillId, StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+            }
+
+            for (var i = 0; i < entry.EquippedActiveSkillIds.Count; i++)
+            {
+                if (string.IsNullOrEmpty(entry.EquippedActiveSkillIds[i]))
+                {
+                    entry.EquippedActiveSkillIds[i] = skillId;
+                    return;
+                }
+            }
+        }
+
+        private List<string> BuildDefaultEquippedActiveSkills(string characterId, CharacterRunData entry)
+        {
+            var knownSkillIds = GetKnownSkillIds(characterId, entry);
+            var skillDatabase = SkillDatabaseLoader.Load();
+            var activeSkills = new List<SkillConfig>();
+            for (var i = 0; i < knownSkillIds.Count; i++)
+            {
+                var skill = skillDatabase != null ? skillDatabase.GetById(knownSkillIds[i]) : null;
+                if (skill == null || IsPassiveSkill(skill))
+                {
+                    continue;
+                }
+
+                activeSkills.Add(skill);
+            }
+
+            activeSkills.Sort(delegate(SkillConfig left, SkillConfig right)
+            {
+                var priorityCompare = right.Priority.CompareTo(left.Priority);
+                if (priorityCompare != 0)
+                {
+                    return priorityCompare;
+                }
+
+                return string.CompareOrdinal(left.Id, right.Id);
+            });
+
+            var results = new List<string>();
+            for (var i = 0; i < activeSkills.Count && results.Count < 3; i++)
+            {
+                results.Add(activeSkills[i].Id);
+            }
+
+            return results;
+        }
+
+        private List<string> GetKnownSkillIds(string characterId, CharacterRunData entry)
+        {
+            var knownSkillIds = new List<string>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(characterId) : null;
+            if (character != null)
+            {
+                AddSkillIds(character.InitialSkills, knownSkillIds, seen);
+            }
+
+            if (entry != null && entry.LearnedSkillIds != null)
+            {
+                for (var i = 0; i < entry.LearnedSkillIds.Count; i++)
+                {
+                    var skillId = entry.LearnedSkillIds[i];
+                    if (!string.IsNullOrWhiteSpace(skillId) && seen.Add(skillId.Trim()))
+                    {
+                        knownSkillIds.Add(skillId.Trim());
+                    }
+                }
+            }
+
+            return knownSkillIds;
+        }
+
+        private static void AddSkillIds(string rawSkills, List<string> sink, HashSet<string> seen)
+        {
+            if (string.IsNullOrWhiteSpace(rawSkills))
+            {
+                return;
+            }
+
+            var parts = rawSkills.Split(new[] { '|', ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var skillId = parts[i].Trim();
+                if (string.IsNullOrEmpty(skillId) || !seen.Add(skillId))
+                {
+                    continue;
+                }
+
+                sink.Add(skillId);
+            }
+        }
+
+        private bool CharacterCanEquipActiveSkill(string characterId, string skillId)
+        {
+            if (string.IsNullOrWhiteSpace(skillId))
+            {
+                return false;
+            }
+
+            var skillDatabase = SkillDatabaseLoader.Load();
+            var skill = skillDatabase != null ? skillDatabase.GetById(skillId) : null;
+            if (skill == null || IsPassiveSkill(skill))
+            {
+                return false;
+            }
+
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(characterId) : null;
+            CharacterRunData entry = null;
+            for (var i = 0; i < characterRunData.Count; i++)
+            {
+                if (string.Equals(characterRunData[i].CharacterId, characterId, StringComparison.OrdinalIgnoreCase))
+                {
+                    entry = characterRunData[i];
+                    break;
+                }
+            }
+
+            return CharacterHasInitialSkill(character, skillId)
+                || (entry != null && entry.LearnedSkillIds != null && entry.LearnedSkillIds.Exists(delegate(string learnedId)
+                {
+                    return string.Equals(learnedId, skillId, StringComparison.OrdinalIgnoreCase);
+                }));
         }
 
         private bool CharacterHasSkillInternal(CharacterConfig character, string skillId)
@@ -2248,6 +2650,7 @@ namespace Wuxing.Game
                 {
                     CharacterId = entry.CharacterId,
                     LearnedSkillIds = new List<string>(entry.LearnedSkillIds),
+                    EquippedActiveSkillIds = entry.EquippedActiveSkillIds != null ? new List<string>(entry.EquippedActiveSkillIds) : new List<string>(),
                     SkillLevels = entry.SkillLevels != null ? new List<SkillLevelData>(entry.SkillLevels) : new List<SkillLevelData>()
                 });
             }
@@ -2325,6 +2728,11 @@ namespace Wuxing.Game
             }
 
             return false;
+        }
+
+        private static bool IsPassiveSkill(SkillConfig skill)
+        {
+            return IsPassiveSkillReward(skill);
         }
         private static bool CharacterHasInitialSkill(CharacterConfig character, string skillId)
         {
@@ -2439,6 +2847,41 @@ namespace Wuxing.Game
                 : WrapSkillNameWithQualityColor(option.SkillName, option.SkillQuality) + "\nLv." + option.ResultLevel + "\n" + option.CharacterName;
         }
 
+        public static string BuildSkillDetail(string characterId, SkillConfig skill, bool english)
+        {
+            if (skill == null)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(english ? "角色: " : "角色：")
+                .Append(GetCharacterName(characterId))
+                .Append('\n')
+                .Append(english ? "类型: " : "类型：")
+                .Append(IsPassiveSkill(skill) ? (english ? "被动" : "被动") : (english ? "主动" : "主动"))
+                .Append('\n')
+                .Append(english ? "五行: " : "五行：")
+                .Append(skill.Element)
+                .Append('\n')
+                .Append(english ? "优先级: " : "优先级：")
+                .Append(skill.Priority)
+                .Append('\n')
+                .Append(english ? "冷却: " : "冷却：")
+                .Append(Mathf.Max(0, skill.Cooldown))
+                .Append(english ? " 回合" : " 回合")
+                .Append('\n')
+                .Append(english ? "触发: " : "触发：")
+                .Append(DescribeTrigger(skill, english))
+                .Append('\n')
+                .Append(english ? "选敌: " : "选敌：")
+                .Append(DescribeTargetRule(skill, english))
+                .Append('\n')
+                .Append(english ? "效果: " : "效果：")
+                .Append(BuildSkillEffectSummary(skill, GetSkillLevel(characterId, skill.Id), english));
+            return builder.ToString();
+        }
+
         private static void AppendSkillNames(string characterId, string rawSkills, List<string> targetNames, HashSet<string> knownSkillIds, SkillDatabase skillDatabase, bool english)
         {
             if (targetNames == null || string.IsNullOrEmpty(rawSkills))
@@ -2509,6 +2952,79 @@ namespace Wuxing.Game
             }
 
             return builder.ToString();
+        }
+
+        private static string GetCharacterName(string characterId)
+        {
+            var characterDatabase = CharacterDatabaseLoader.Load();
+            var character = characterDatabase != null ? characterDatabase.GetById(characterId) : null;
+            return character != null ? character.Name : characterId;
+        }
+
+        private static string DescribeTrigger(SkillConfig skill, bool english)
+        {
+            if (skill == null || string.IsNullOrWhiteSpace(skill.TriggerType))
+            {
+                return english ? "默认可释放" : "默认可释放";
+            }
+
+            var triggerType = skill.TriggerType.Trim();
+            var triggerValue = skill.TriggerValue ?? string.Empty;
+            switch (triggerType)
+            {
+                case "FirstRound":
+                    return english ? "首回合优先" : "首回合优先";
+                case "SelfHpBelowPct":
+                    return (english ? "生命低于 " : "生命低于 ") + triggerValue + "%";
+                case "AllyHpBelowPct":
+                    return (english ? "友方生命低于 " : "友方生命低于 ") + triggerValue + "%";
+                case "EnemyCountAtLeast":
+                    return (english ? "敌人数不少于 " : "敌人数不少于 ") + triggerValue;
+                case "TargetHpBelowPct":
+                    return (english ? "目标生命低于 " : "目标生命低于 ") + triggerValue + "%";
+                case "TargetHpAbovePct":
+                    return (english ? "目标生命高于 " : "目标生命高于 ") + triggerValue + "%";
+                case "SelfNoShield":
+                    return english ? "自身无护盾时" : "自身无护盾时";
+                case "TargetHasShield":
+                    return english ? "目标有护盾时" : "目标有护盾时";
+                case "SelfHasStatus":
+                    return (english ? "自身拥有状态 " : "自身拥有状态 ") + triggerValue;
+                case "TargetHasDebuff":
+                    return (english ? "目标带有减益 " : "目标带有减益 ") + triggerValue;
+                default:
+                    return triggerType;
+            }
+        }
+
+        private static string DescribeTargetRule(SkillConfig skill, bool english)
+        {
+            if (skill == null || string.IsNullOrWhiteSpace(skill.TargetRule))
+            {
+                return english ? "默认目标" : "默认目标";
+            }
+
+            switch (skill.TargetRule.Trim())
+            {
+                case "LowestHPEnemy":
+                    return english ? "敌方最低生命" : "敌方最低生命";
+                case "HighestHPEnemy":
+                    return english ? "敌方最高生命" : "敌方最高生命";
+                case "HighestATKEnemy":
+                    return english ? "敌方最高攻击" : "敌方最高攻击";
+                case "RandomEnemy":
+                    return english ? "随机敌方" : "随机敌方";
+                case "AllEnemies":
+                    return english ? "全体敌方" : "全体敌方";
+                case "Self":
+                    return english ? "自身" : "自身";
+                case "LowestHPAlly":
+                    return english ? "我方最低生命" : "我方最低生命";
+                case "AllAllies":
+                    return english ? "我方全体" : "我方全体";
+                default:
+                    return skill.TargetRule;
+            }
         }
 
         private static string GetEquipmentSlotLabel(string slot, bool english)

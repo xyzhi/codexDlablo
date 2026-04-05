@@ -18,7 +18,10 @@ namespace Wuxing.Battle
         public int CurrentMP;
         public int Shield;
         public List<string> SkillIds = new List<string>();
+        public List<string> EquippedActiveSkillIds = new List<string>();
         public Dictionary<string, int> SkillLevels = new Dictionary<string, int>();
+        public Dictionary<string, int> SkillCooldowns = new Dictionary<string, int>();
+        public Dictionary<string, int> SkillCastCounts = new Dictionary<string, int>();
         public List<string> EquippedItemIds = new List<string>();
         public List<BattleStatusEffectRuntime> StatusEffects = new List<BattleStatusEffectRuntime>();
 
@@ -109,6 +112,73 @@ namespace Wuxing.Battle
             {
                 SkillIds.Add(skillId);
             }
+        }
+
+        public int GetSkillCooldown(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId) || SkillCooldowns == null)
+            {
+                return 0;
+            }
+
+            int cooldown;
+            return SkillCooldowns.TryGetValue(skillId, out cooldown) ? Math.Max(0, cooldown) : 0;
+        }
+
+        public void SetSkillCooldown(string skillId, int cooldown)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                return;
+            }
+
+            if (SkillCooldowns == null)
+            {
+                SkillCooldowns = new Dictionary<string, int>();
+            }
+
+            SkillCooldowns[skillId] = Math.Max(0, cooldown);
+        }
+
+        public void TickSkillCooldowns()
+        {
+            if (SkillCooldowns == null || SkillCooldowns.Count == 0)
+            {
+                return;
+            }
+
+            var keys = new List<string>(SkillCooldowns.Keys);
+            for (var i = 0; i < keys.Count; i++)
+            {
+                var key = keys[i];
+                SkillCooldowns[key] = Math.Max(0, SkillCooldowns[key] - 1);
+            }
+        }
+
+        public int GetSkillCastCount(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId) || SkillCastCounts == null)
+            {
+                return 0;
+            }
+
+            int castCount;
+            return SkillCastCounts.TryGetValue(skillId, out castCount) ? Math.Max(0, castCount) : 0;
+        }
+
+        public void IncrementSkillCastCount(string skillId)
+        {
+            if (string.IsNullOrEmpty(skillId))
+            {
+                return;
+            }
+
+            if (SkillCastCounts == null)
+            {
+                SkillCastCounts = new Dictionary<string, int>();
+            }
+
+            SkillCastCounts[skillId] = GetSkillCastCount(skillId) + 1;
         }
 
         public void ApplyShield(int amount)

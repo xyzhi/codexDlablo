@@ -12,7 +12,14 @@ namespace Wuxing.Config
         public string Quality;
         public string Category;
         public string TargetType;
+        public int Priority;
+        public int Cooldown;
         public int MPCost;
+        public string TriggerType;
+        public string TriggerValue;
+        public string TargetRule;
+        public int CastLimit;
+        public string SkillTags;
         public int Power;
         public int Duration;
         public string EffectType;

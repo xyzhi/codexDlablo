@@ -69,6 +69,17 @@ public static class ConfigValidator
         "Instant", "TurnStart", "TurnEnd", "Duration", "Passive", "Control"
     };
 
+    private static readonly HashSet<string> ValidSkillTriggerTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Always", "Passive", "FirstRound", "SelfHpBelowPct", "AllyHpBelowPct", "EnemyCountAtLeast", "TargetHpBelowPct",
+        "TargetHpAbovePct", "SelfNoShield", "TargetHasShield", "SelfHasStatus", "TargetHasDebuff"
+    };
+
+    private static readonly HashSet<string> ValidSkillTargetRules = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Default", "LowestHPEnemy", "HighestHPEnemy", "HighestATKEnemy", "RandomEnemy", "AllEnemies", "Self", "LowestHPAlly", "AllAllies"
+    };
+
     private static readonly HashSet<string> BuiltinStageEventProfiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "DefaultBattle", "DefaultElite", "DefaultBoss"
@@ -167,8 +178,11 @@ public static class ConfigValidator
         for (var i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
-            RequireFields(row, items, "ID", "Name", "Element", "Quality", "Category", "TargetType", "EffectType");
+            RequireFields(row, items, "ID", "Name", "Element", "Quality", "Category", "TargetType", "Priority", "Cooldown", "MPCost", "TriggerType", "TargetRule", "CastLimit", "Power", "Duration", "EffectType");
+            ValidateIntegerField(row, items, "Priority");
+            ValidateIntegerField(row, items, "Cooldown");
             ValidateIntegerField(row, items, "MPCost");
+            ValidateIntegerField(row, items, "CastLimit");
             ValidateIntegerField(row, items, "Power");
             ValidateIntegerField(row, items, "Duration");
 
@@ -189,6 +203,22 @@ public static class ConfigValidator
             {
                 AddError(items, row, "Element", $"技能五行不合法：'{element}'。");
             }
+
+            var triggerType = row.Get("TriggerType").Trim();
+            if (!string.IsNullOrEmpty(triggerType) && !ValidSkillTriggerTypes.Contains(triggerType))
+            {
+                AddError(items, row, "TriggerType", $"技能触发类型不合法：'{triggerType}'。");
+            }
+
+            var targetRule = row.Get("TargetRule").Trim();
+            if (!string.IsNullOrEmpty(targetRule) && !ValidSkillTargetRules.Contains(targetRule))
+            {
+                AddError(items, row, "TargetRule", $"技能目标规则不合法：'{targetRule}'。");
+            }
+
+            ValidateNonNegativeIntegerField(row, items, "Priority");
+            ValidateNonNegativeIntegerField(row, items, "Cooldown");
+            ValidateNonNegativeIntegerField(row, items, "CastLimit");
 
             DetectMojibake(row, items, "Name");
             DetectMojibake(row, items, "Description");
@@ -277,8 +307,11 @@ public static class ConfigValidator
         var row = table.Rows[0];
         ValidateIntegerField(row, items, "FlatDamageBonus");
         ValidateFloatField(row, items, "DamageMultiplier");
+        ValidateFloatField(row, items, "HealMultiplier");
+        ValidateFloatField(row, items, "ShieldMultiplier");
         ValidateFloatField(row, items, "VulnerablePerPoint");
         ValidateFloatField(row, items, "DefenseMitigationFactor");
+        ValidateFloatField(row, items, "CritMultiplier");
         ValidateFloatField(row, items, "MinDamage");
     }
 
