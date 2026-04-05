@@ -76,8 +76,7 @@ namespace Wuxing.UI
 
         private void OnClickEnter()
         {
-            StoryManager.ClearRunTriggerStates();
-            StoryManager.TryTrigger("StartGame", 1, () => UIManager.Instance.ShowPage("MainMenu"));
+            UIManager.Instance.ShowPage("Map");
         }
 
         private void OnClickLanguage()

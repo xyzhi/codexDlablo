@@ -287,8 +287,8 @@
         },
         {
             "key": "battle.button_back",
-            "zhHans": "返回主菜单",
-            "en": "Back To Main Menu"
+            "zhHans": "返回标题",
+            "en": "Back To Title"
         },
         {
             "key": "battle.button_tip",
@@ -407,8 +407,8 @@
         },
         {
             "key": "map.button_back_menu",
-            "zhHans": "返回主菜单",
-            "en": "Back To Menu"
+            "zhHans": "返回标题",
+            "en": "Back To Title"
         },
         {
             "key": "map.toast_lifespan_ended",
@@ -417,8 +417,8 @@
         },
         {
             "key": "map.toast_route_complete",
-            "zhHans": "本轮路线完成，返回主菜单。",
-            "en": "Route complete. Returning to main menu."
+            "zhHans": "本轮路线完成，返回标题。",
+            "en": "Route complete. Returning to title."
         },
         {
             "key": "map.toast_month_passed",

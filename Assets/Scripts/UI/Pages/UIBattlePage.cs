@@ -342,13 +342,13 @@ namespace Wuxing.UI
 
             popup.Setup(
                 isEnglish ? "Reset Run" : "\u91cd\u7f6e\u672c\u8f6e",
-                isEnglish ? "Return to the main menu and reset current progress?" : "\u56de\u5230\u4e3b\u83dc\u5355\uff0c\u5e76\u5c06\u5f53\u524d\u8fdb\u5ea6\u91cd\u7f6e\u4e3a 0 \u5417\uff1f",
+                isEnglish ? "Return to the title screen and reset current progress?" : "\u8fd4\u56de\u6807\u9898\uff0c\u5e76\u5c06\u5f53\u524d\u8fdb\u5ea6\u91cd\u7f6e\u4e3a 0 \u5417\uff1f",
                 false,
                 delegate
                 {
                     ClearStoredBattleResult();
                     GameProgressManager.ResetRun();
-                    UIManager.Instance.ShowPage("MainMenu");
+                    UIManager.Instance.ShowPage("Start");
                 },
                 delegate { },
                 isEnglish ? "Confirm" : "\u786e\u8ba4",
@@ -481,7 +481,7 @@ namespace Wuxing.UI
             yield return new WaitForSeconds(AutoStartDelaySeconds);
             if (!openedForEquipment)
             {
-                OnClickStartBattle();
+                RunBeforeBattleTrigger(OnClickStartBattle);
             }
         }
 
@@ -958,7 +958,7 @@ namespace Wuxing.UI
 
             GameProgressManager.RecordBattleResult(playback.IsVictory, GameProgressManager.GetCurrentStage(), playback.TotalRounds);
             StoreBattleResult(playback, reward);
-            OpenStoredBattleResultPopup();
+            RunAfterBattleTrigger(OpenStoredBattleResultPopup);
         }
 
         private void OpenStoredBattleResultPopup()
@@ -990,12 +990,12 @@ namespace Wuxing.UI
                 return;
             }
 
-            popup.SetupChoices(
-                LocalizationManager.GetText("battle.status_defeat"),
-                BuildDefeatMessage(playback, isEnglish),
-                new List<string>
+                popup.SetupChoices(
+                    LocalizationManager.GetText("battle.status_defeat"),
+                    BuildDefeatMessage(playback, isEnglish),
+                    new List<string>
                 {
-                    isEnglish ? "Back To Main Menu" : "\u8fd4\u56de\u4e3b\u83dc\u5355",
+                    isEnglish ? "Back To Title" : "\u8fd4\u56de\u6807\u9898",
                     LocalizationManager.GetText("battle.button_review")
                 },
                 new List<System.Action>
@@ -1004,7 +1004,7 @@ namespace Wuxing.UI
                     {
                         ClearStoredBattleResult();
                         GameProgressManager.ResetRun();
-                        UIManager.Instance.ShowPage("MainMenu");
+                        UIManager.Instance.ShowPage("Start");
                     },
                     delegate
                     {
@@ -1109,20 +1109,20 @@ namespace Wuxing.UI
                 if (popup == null)
                 {
                     GameProgressManager.ResetRun();
-                    UIManager.Instance.ShowPage("MainMenu");
+                    UIManager.Instance.ShowPage("Start");
                     return;
                 }
 
                 popup.Setup(
                     isEnglish ? "Route Complete" : "\u8def\u7ebf\u5b8c\u6210",
                     isEnglish
-                        ? "You have cleared the final boss of this route. The current run will be closed and return to the main menu."
-                        : "\u4f60\u5df2\u51fb\u8d25\u5f53\u524d\u8def\u7ebf\u7684\u6700\u7ec8\u9996\u9886\u3002\u672c\u8f6e\u5c06\u5b8c\u6210\u7ed3\u7b97\uff0c\u5e76\u8fd4\u56de\u4e3b\u83dc\u5355\u3002",
+                        ? "You have cleared the final boss of this route. The current run will be closed and return to the title screen."
+                        : "\u4f60\u5df2\u51fb\u8d25\u5f53\u524d\u8def\u7ebf\u7684\u6700\u7ec8\u9996\u9886\u3002\u672c\u8f6e\u5c06\u5b8c\u6210\u7ed3\u7b97\uff0c\u5e76\u8fd4\u56de\u6807\u9898\u3002",
                     false,
                     delegate
                     {
                         GameProgressManager.ResetRun();
-                        UIManager.Instance.ShowPage("MainMenu");
+                        UIManager.Instance.ShowPage("Start");
                     },
                     null,
                     isEnglish ? "Finish Run" : "\u7ed3\u675f\u672c\u8f6e",
@@ -1131,6 +1131,24 @@ namespace Wuxing.UI
             }
 
             UIManager.Instance.ShowPage("Map");
+        }
+
+        private void RunBeforeBattleTrigger(System.Action onComplete)
+        {
+            var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+            if (!StoryManager.TryTrigger("BeforeBattle", stage, onComplete))
+            {
+                onComplete?.Invoke();
+            }
+        }
+
+        private void RunAfterBattleTrigger(System.Action onComplete)
+        {
+            var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+            if (!StoryManager.TryTrigger("AfterBattle", stage, onComplete))
+            {
+                onComplete?.Invoke();
+            }
         }
 
         private static string BuildVictoryChoiceTitle(bool isEnglish)

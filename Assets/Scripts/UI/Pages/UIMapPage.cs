@@ -52,6 +52,7 @@ namespace Wuxing.UI
             GameProgressManager.StartRun();
             selectedStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             RefreshView();
+            StoryManager.TryTrigger("StartGame", Mathf.Max(1, GameProgressManager.GetCurrentStage()));
         }
 
         private void Awake()
@@ -153,18 +154,18 @@ namespace Wuxing.UI
             if (popup == null)
             {
                 GameProgressManager.ResetRun();
-                UIManager.Instance.ShowPage("MainMenu");
+                UIManager.Instance.ShowPage("Start");
                 return;
             }
 
             popup.Setup(
                 IsEnglish() ? "Reset Run" : "\u91cd\u7f6e\u672c\u8f6e",
-                IsEnglish() ? "Return to the main menu and reset current progress?" : "\u56de\u5230\u4e3b\u83dc\u5355\uff0c\u5e76\u5c06\u5f53\u524d\u8fdb\u5ea6\u91cd\u7f6e\u4e3a 0 \u5417\uff1f",
+                IsEnglish() ? "Return to the title screen and reset current progress?" : "\u8fd4\u56de\u6807\u9898\uff0c\u5e76\u5c06\u5f53\u524d\u8fdb\u5ea6\u91cd\u7f6e\u4e3a 0 \u5417\uff1f",
                 false,
                 delegate
                 {
                     GameProgressManager.ResetRun();
-                    UIManager.Instance.ShowPage("MainMenu");
+                    UIManager.Instance.ShowPage("Start");
                 },
                 delegate { },
                 IsEnglish() ? "Confirm" : "\u786e\u8ba4",
@@ -174,7 +175,7 @@ namespace Wuxing.UI
         private void OnClickBack()
         {
             if (isMoving) return;
-            UIManager.Instance.ShowPage("MainMenu");
+            UIManager.Instance.ShowPage("Start");
         }
 
         private void OnClickNodeStage(int stage)
@@ -192,7 +193,7 @@ namespace Wuxing.UI
             if (popup == null)
             {
                 GameProgressManager.ResetRun();
-                UIManager.Instance.ShowPage("MainMenu");
+                UIManager.Instance.ShowPage("Start");
                 return;
             }
 
@@ -203,7 +204,7 @@ namespace Wuxing.UI
                 delegate
                 {
                     GameProgressManager.ResetRun();
-                    UIManager.Instance.ShowPage("MainMenu");
+                    UIManager.Instance.ShowPage("Start");
                 },
                 null,
                 LocalizationManager.GetText("map.button_back_main"),
@@ -930,7 +931,7 @@ namespace Wuxing.UI
             SetButtonText(spiritConvertButton, LocalizationManager.GetText("map.button_spirit_convert"));
             SetButtonText(skillOverviewButton, LocalizationManager.GetText("map.button_skill_overview"));
             SetButtonText(resetButton, LocalizationManager.GetText("map.button_reset_run"));
-            SetButtonText(backButton, LocalizationManager.GetText("map.button_back_menu"));
+            SetButtonText(backButton, LocalizationManager.GetText("menu.button_back_start"));
 
             if (previousButton != null) previousButton.interactable = canMovePrevious;
             if (nextButton != null) nextButton.interactable = canMoveNext;
