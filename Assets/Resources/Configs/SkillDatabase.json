@@ -2,7 +2,7 @@
     "skills":  [
                    {
                        "Id":  "SK001",
-                       "Name":  "金刃术",
+                       "Name":  "断金诀",
                        "Element":  "金",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -18,8 +18,8 @@
                        "Power":  20,
                        "Duration":  0,
                        "EffectType":  "Damage",
-                       "Description":  "稳定追击残血目标的单体斩击",
-                       "Notes":  "默认稳定输出",
+                       "Description":  "凝聚锋锐金气斩向破绽最显的敌手",
+                       "Notes":  "稳定的单体追击功法",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -37,7 +37,7 @@
                    },
                    {
                        "Id":  "SK002",
-                       "Name":  "火球术",
+                       "Name":  "赤焰流火",
                        "Element":  "火",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -53,8 +53,8 @@
                        "Power":  14,
                        "Duration":  0,
                        "EffectType":  "Damage",
-                       "Description":  "敌人数较多时优先释放的群体火伤",
-                       "Notes":  "清杂核心群攻",
+                       "Description":  "引赤焰成流席卷敌阵",
+                       "Notes":  "清场效率出色的群攻法诀",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -72,7 +72,7 @@
                    },
                    {
                        "Id":  "SK003",
-                       "Name":  "回春术",
+                       "Name":  "青木回元术",
                        "Element":  "木",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -88,8 +88,8 @@
                        "Power":  28,
                        "Duration":  0,
                        "EffectType":  "Heal",
-                       "Description":  "我方血线危险时优先单体急救",
-                       "Notes":  "单体保命治疗",
+                       "Description":  "催发生机为濒危同伴续命回元",
+                       "Notes":  "稳健的单体救急治疗",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -107,7 +107,7 @@
                    },
                    {
                        "Id":  "SK004",
-                       "Name":  "藤缚术",
+                       "Name":  "藤锁缠心",
                        "Element":  "木",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -123,8 +123,8 @@
                        "Power":  10,
                        "Duration":  3,
                        "EffectType":  "Dot",
-                       "Description":  "优先给高血量目标挂持续伤害",
-                       "Notes":  "拖战磨血技能",
+                       "Description":  "以灵藤缠体蚀气久拖强敌",
+                       "Notes":  "擅长拉长战线的持续伤害",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -142,7 +142,7 @@
                    },
                    {
                        "Id":  "SK005",
-                       "Name":  "冰针术",
+                       "Name":  "玄冰断脉",
                        "Element":  "水",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -158,8 +158,8 @@
                        "Power":  16,
                        "Duration":  1,
                        "EffectType":  "Control",
-                       "Description":  "首回合优先压制高威胁敌人",
-                       "Notes":  "起手控制技",
+                       "Description":  "首轮以寒锋封脉压制最危险的敌人",
+                       "Notes":  "起手控制兼打断节奏",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -189,7 +189,7 @@
                    },
                    {
                        "Id":  "SK006",
-                       "Name":  "岩甲术",
+                       "Name":  "坤岳护身诀",
                        "Element":  "土",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -205,8 +205,8 @@
                        "Power":  24,
                        "Duration":  0,
                        "EffectType":  "Shield",
-                       "Description":  "自身无护盾时补一层厚盾",
-                       "Notes":  "基础站场技能",
+                       "Description":  "引厚土护体在危局中稳住身形",
+                       "Notes":  "基础而可靠的站场护身术",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -224,7 +224,7 @@
                    },
                    {
                        "Id":  "SK007",
-                       "Name":  "地脉震",
+                       "Name":  "地脉崩山印",
                        "Element":  "土",
                        "Quality":  "绝品",
                        "Category":  "主动",
@@ -240,8 +240,8 @@
                        "Power":  18,
                        "Duration":  0,
                        "EffectType":  "Damage",
-                       "Description":  "敌人数较多时释放的高品质群攻",
-                       "Notes":  "终盘群伤核心",
+                       "Description":  "催动地脉震荡群敌令山势同崩",
+                       "Notes":  "终盘强力的范围杀伤法门",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -259,7 +259,7 @@
                    },
                    {
                        "Id":  "SK008",
-                       "Name":  "焚心诀",
+                       "Name":  "焚脉诀",
                        "Element":  "火",
                        "Quality":  "稀有",
                        "Category":  "被动",
@@ -275,8 +275,8 @@
                        "Power":  10,
                        "Duration":  0,
                        "EffectType":  "DotBoost",
-                       "Description":  "提高持续伤害类技能收益",
-                       "Notes":  "被动增伤核心",
+                       "Description":  "以焚灼之意催旺一切持续伤害",
+                       "Notes":  "持续流派的核心被动",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -294,7 +294,7 @@
                    },
                    {
                        "Id":  "SK009",
-                       "Name":  "凝水盾",
+                       "Name":  "玄水镜甲",
                        "Element":  "水",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -310,8 +310,8 @@
                        "Power":  16,
                        "Duration":  2,
                        "EffectType":  "Shield",
-                       "Description":  "生命偏低时给自己套盾并回复",
-                       "Notes":  "法系保命技",
+                       "Description":  "凝水成镜护身并缓缓回气养元",
+                       "Notes":  "法修常备的应急保命术",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -341,7 +341,7 @@
                    },
                    {
                        "Id":  "SK010",
-                       "Name":  "破甲诀",
+                       "Name":  "裂甲真诀",
                        "Element":  "金",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -357,8 +357,8 @@
                        "Power":  14,
                        "Duration":  2,
                        "EffectType":  "ArmorBreak",
-                       "Description":  "首轮优先削弱高血量目标防御",
-                       "Notes":  "起手破甲",
+                       "Description":  "起手直破强敌护势削其筋骨",
+                       "Notes":  "单体开局破防的核心手段",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -388,7 +388,7 @@
                    },
                    {
                        "Id":  "SK011",
-                       "Name":  "烈焰追击",
+                       "Name":  "离火追魂",
                        "Element":  "火",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -404,8 +404,8 @@
                        "Power":  24,
                        "Duration":  0,
                        "EffectType":  "Damage",
-                       "Description":  "优先收割残血敌人的爆发火伤",
-                       "Notes":  "收割专用技能",
+                       "Description":  "以离火追击残敌不留喘息之机",
+                       "Notes":  "专为终结残血而设的爆发法诀",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -423,7 +423,7 @@
                    },
                    {
                        "Id":  "SK012",
-                       "Name":  "玄水印",
+                       "Name":  "玄溟印",
                        "Element":  "水",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -439,8 +439,8 @@
                        "Power":  10,
                        "Duration":  2,
                        "EffectType":  "Vulnerable",
-                       "Description":  "首回合给高血量目标挂易伤",
-                       "Notes":  "起手铺垫技能",
+                       "Description":  "先以玄印压身再放大后续伤害",
+                       "Notes":  "起手铺垫团队输出窗口",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -470,7 +470,7 @@
                    },
                    {
                        "Id":  "SK013",
-                       "Name":  "金钟诀",
+                       "Name":  "金钟护体诀",
                        "Element":  "金",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -486,8 +486,8 @@
                        "Power":  20,
                        "Duration":  2,
                        "EffectType":  "Shield",
-                       "Description":  "补盾同时短暂提高攻击",
-                       "Notes":  "攻守一体自保技",
+                       "Description":  "金钟加身之际同时提振攻势",
+                       "Notes":  "兼顾自保与反击的守御法",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -517,7 +517,7 @@
                    },
                    {
                        "Id":  "SK014",
-                       "Name":  "裂甲刺",
+                       "Name":  "碎盾破锋刺",
                        "Element":  "土",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -533,8 +533,8 @@
                        "Power":  14,
                        "Duration":  2,
                        "EffectType":  "ArmorBreak",
-                       "Description":  "敌方有盾时优先刺穿并破甲",
-                       "Notes":  "针对护盾单位",
+                       "Description":  "专挑护盾未散之敌强行穿甲破势",
+                       "Notes":  "针对护盾单位的克制手段",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -564,7 +564,7 @@
                    },
                    {
                        "Id":  "SK015",
-                       "Name":  "甘霖术",
+                       "Name":  "甘霖化生术",
                        "Element":  "木",
                        "Quality":  "稀有",
                        "Category":  "主动",
@@ -580,8 +580,8 @@
                        "Power":  16,
                        "Duration":  0,
                        "EffectType":  "Heal",
-                       "Description":  "我方整体血线危险时进行群体回复",
-                       "Notes":  "团队续航技能",
+                       "Description":  "降灵雨润泽同伴扭转整体血线",
+                       "Notes":  "团队续航能力极强的群疗法门",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,
@@ -599,7 +599,7 @@
                    },
                    {
                        "Id":  "SK016",
-                       "Name":  "战意诀",
+                       "Name":  "战意燃魂诀",
                        "Element":  "火",
                        "Quality":  "普通",
                        "Category":  "主动",
@@ -615,8 +615,8 @@
                        "Power":  6,
                        "Duration":  3,
                        "EffectType":  "AttackUp",
-                       "Description":  "首回合给自己上战意提高输出",
-                       "Notes":  "开局强化技能",
+                       "Description":  "以炽烈战意先行点燃自身气势",
+                       "Notes":  "开局建立压制节奏的强化技",
                        "Effects":  [
                                        {
                                            "EffectIndex":  1,

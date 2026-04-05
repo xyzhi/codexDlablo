@@ -617,12 +617,12 @@
         },
         {
             "key": "map.rest_title",
-            "zhHans": "休整事件",
+            "zhHans": "山间歇脚",
             "en": "Rest Event"
         },
         {
             "key": "map.rest_message",
-            "zhHans": "选择你在此地如何调整状态。",
+            "zhHans": "长途跋涉之后，你可以在此调息、采气，或整理下一段行程所需。",
             "en": "Choose how to spend this stop."
         },
         {
@@ -642,17 +642,17 @@
         },
         {
             "key": "map.village_title",
-            "zhHans": "新手村",
+            "zhHans": "山门外村",
             "en": "Novice Village"
         },
         {
             "key": "map.village_message",
-            "zhHans": "离开新手村前，选择一份启程助力。",
+            "zhHans": "离山入世之前，你可以在村中做最后一轮整备与取舍。",
             "en": "Before leaving the village, choose one piece of support."
         },
         {
             "key": "map.rest_result_gather",
-            "zhHans": "你在附近采集五行灵石，囊中收获更丰。",
+            "zhHans": "你循着地脉残息采得数枚灵石，行囊因此宽裕了几分。",
             "en": "You gather the local five-element crystals and leave with fuller pockets."
         },
         {
@@ -667,37 +667,37 @@
         },
         {
             "key": "map.rest_result_refine",
-            "zhHans": "你将储备灵石当场炼化，强行换来一段更猛的修为推进。",
+            "zhHans": "你就地炼化随身灵石，将零散积蓄硬生生催成一截修为。",
             "en": "You refine stored spirit stones into pure progress and push your cultivation further."
         },
         {
             "key": "map.rest_result_sort",
-            "zhHans": "你整理装备与气机，为下一段路做足准备。",
+            "zhHans": "你收束气息、整饬囊中器物，为接下来的险路腾出余地。",
             "en": "You sort equipment and steady your rhythm before moving on."
         },
         {
             "key": "map.rest_result_breath",
-            "zhHans": "你专心调息运转周天，修为更进一步。",
+            "zhHans": "你静坐运转周天，心息渐定，修为也随之稳稳推进。",
             "en": "You focus on breathing practice and deepen your cultivation."
         },
         {
             "key": "map.rest_result_title",
-            "zhHans": "休整结果",
+            "zhHans": "歇脚所得",
             "en": "Rest Result"
         },
         {
             "key": "map.village_result_supply",
-            "zhHans": "路过行商给你留下一份赶路所需的修行补给。",
+            "zhHans": "村中行商替你补齐了赶路所需，免去一段仓促狼狈。",
             "en": "A passing merchant leaves you a small bundle of cultivation supplies."
         },
         {
             "key": "map.village_result_elder",
-            "zhHans": "临行前，村中长者给了你几句修行指点。",
+            "zhHans": "临行之前，老修士点破了你几处行气滞涩之处。",
             "en": "The village elder gives you a few words of guidance before you set out."
         },
         {
             "key": "map.village_result_title",
-            "zhHans": "村中收获",
+            "zhHans": "村中所得",
             "en": "Village Result"
         },
         {
@@ -907,7 +907,7 @@
         },
         {
             "key": "map.market_message",
-            "zhHans": "你可以在这里拿灵石换资源，或稳稳补一轮状态。",
+            "zhHans": "摊棚杂陈、人声纷乱，你可以拿灵石换资源，也可以借此稳住行程节奏。",
             "en": "Trade spirit stones for resources here"
         },
         {
@@ -927,17 +927,17 @@
         },
         {
             "key": "map.market_result_title",
-            "zhHans": "集市收获",
+            "zhHans": "集市所得",
             "en": "Market Result"
         },
         {
             "key": "map.market_result_relic",
-            "zhHans": "你用手头灵石换来一件趁手法器，顺便稳住了一截修为。",
+            "zhHans": "你以手中灵石换得一件合手法器，顺势也稳住了自身气机。",
             "en": "You trade your spirit stones for a fitting relic and stabilize your cultivation a bit."
         },
         {
             "key": "map.market_result_supply",
-            "zhHans": "你补足了路上的必需品，推进节奏重新平顺下来。",
+            "zhHans": "你把路上缺的药散与符纸补齐，接下来的推进也重新顺了起来。",
             "en": "You restock what you need for the road and smooth out your run tempo."
         },
         {
@@ -952,12 +952,12 @@
         },
         {
             "key": "map.market_skill_intro",
-            "zhHans": "你从集市摊位上换来一页残卷。",
+            "zhHans": "你从旧摊深处换来一页残卷，其中隐约藏着一门可用法诀。",
             "en": "You trade for a torn manual page from the market stall."
         },
         {
             "key": "map.market_skill_empty",
-            "zhHans": "你翻遍摊位，却没有遇到合适的机缘。",
+            "zhHans": "你翻遍摊位，也没遇到真正契合当前路数的机缘。",
             "en": "You search every stall"
         },
         {
@@ -967,7 +967,7 @@
         },
         {
             "key": "map.insight_message",
-            "zhHans": "首领战前的最后一站，你可以换一轮更激进的成长。",
+            "zhHans": "静室隔绝外扰，最适合在大战之前做一次更彻底的取舍与凝练。",
             "en": "This is your last stop before the boss"
         },
         {
@@ -992,12 +992,12 @@
         },
         {
             "key": "map.insight_result_core",
-            "zhHans": "你以灵石强行凝练道基，换来一段更扎实的修为突破。",
+            "zhHans": "你借静室灵机凝练道基，将散乱修为重新锻成一截实打实的突破。",
             "en": "You force your foundation tighter with spirit stones and secure a sharper cultivation jump."
         },
         {
             "key": "map.insight_result_cache",
-            "zhHans": "你开启静室遗藏，补到一份装备机缘与临战储备。",
+            "zhHans": "你开启尘封遗藏，补到一件可用器物与一段临战储备。",
             "en": "You open the sanctum cache and come away with gear and a bit of battle stock."
         },
         {
@@ -1012,12 +1012,12 @@
         },
         {
             "key": "map.insight_skill_intro",
-            "zhHans": "你在静室闭关片刻，抓住了一线更高阶的功法机缘。",
+            "zhHans": "你在静室中沉心片刻，终于从纷乱念头里捞起一线更高阶的法门。",
             "en": "A brief retreat inside the sanctum reveals a higher-tier skill opportunity."
         },
         {
             "key": "map.insight_skill_empty",
-            "zhHans": "这一次闭关没有新的感悟，只留下片刻清明。",
+            "zhHans": "这一次闭关并未迎来新悟，只留下一瞬格外澄明的心境。",
             "en": "This retreat brings no new revelation"
         },
         {
@@ -1107,17 +1107,17 @@
         },
         {
             "key": "map.village_result_prepare",
-            "zhHans": "此处只提供整备，不直接赠送资源。你可以随时整理当前装备。",
+            "zhHans": "村中铁匠只借你整备器物，此处不产资源，但足够你把装备理顺。",
             "en": "This stop offers preparation only. You can reorganize your equipment here without gaining direct rewards."
         },
         {
             "key": "map.village_result_review",
-            "zhHans": "此处只供温习功法，不直接赠送资源。你可以查看当前已学功法。",
+            "zhHans": "祠前石阶适合温习旧法，此处不直接给奖励，但能帮你重新梳理本局功法。",
             "en": "This stop is for reviewing skills only. You can inspect learned techniques here without gaining direct rewards."
         },
         {
             "key": "map.village_result_route",
-            "zhHans": "此处是固定路标点，用来确认前路与节奏，不直接产出奖励。",
+            "zhHans": "村口石碑记着前路诸险，此处不产出奖励，但能帮你重新判断节奏。",
             "en": "This fixed waypoint helps you review the route and pacing. It does not grant direct rewards."
         },
         {
@@ -1222,7 +1222,7 @@
         },
         {
             "key": "map.broker_message",
-            "zhHans": "这里专做灵石与机缘的交换，适合把库存资源转成即时战力。",
+            "zhHans": "牙行最擅长把压箱底的库存换成眼下能派上用场的筹码。",
             "en": "A broker stop for turning stored spirit stones into immediate power."
         },
         {
@@ -1247,12 +1247,12 @@
         },
         {
             "key": "map.broker_result_refine",
-            "zhHans": "你把一批灵石低价炼化，换来一截扎实的修为增长。",
+            "zhHans": "你把一批灵石折价炼化，虽然吃了亏，却换来立刻可用的修为推进。",
             "en": "You refine a batch of stones at a discount and turn it into steady cultivation growth."
         },
         {
             "key": "map.broker_result_cache",
-            "zhHans": "你从牙行收来一份旧藏，顺手补到一轮装备与路资。",
+            "zhHans": "你自牙行收来一份旧藏，把器物与路资都补整齐了些。",
             "en": "You acquire a hidden cache from the broker and round out your gear and travel stock."
         },
         {
@@ -1267,12 +1267,12 @@
         },
         {
             "key": "map.broker_skill_intro",
-            "zhHans": "你从牙行竞下了一份更高阶的功法残卷。",
+            "zhHans": "你从牙行竞下一卷旧法残篇，其中竟真有可堪一用的高阶机缘。",
             "en": "You win a higher-tier skill fragment from the broker."
         },
         {
             "key": "map.broker_skill_empty",
-            "zhHans": "这批残卷都不合眼缘，没有换到想要的机缘。",
+            "zhHans": "这一批残卷虽然名头不小，却没有一门真正合你眼下路数。",
             "en": "None of the broker manuals fit your build this time."
         },
         {
@@ -1282,7 +1282,7 @@
         },
         {
             "key": "map.forge_message",
-            "zhHans": "这里更像一次冲刺抉择，你可以用现有资源换一轮更激进的成长。",
+            "zhHans": "熔炉最适合孤注一掷的决断，你可以在此换来一次更锋利也更冒险的跃升。",
             "en": "A sprint-focused stop where you trade current resources for a more aggressive power spike."
         },
         {
@@ -1307,12 +1307,12 @@
         },
         {
             "key": "map.forge_result_temper",
-            "zhHans": "你借熔炉之力强行淬体，换来一段更激进的成长。",
+            "zhHans": "你借熔炉烈势淬炼筋骨，硬生生把这一程的成长再往上拔了一截。",
             "en": "You force a body-tempering session through the forge and gain a sharper growth spike."
         },
         {
             "key": "map.forge_result_hoard",
-            "zhHans": "你打开炉中旧藏，补到一份装备机缘与临战资源。",
+            "zhHans": "你打开炉中旧藏，从中补到一件器物与几分临战余裕。",
             "en": "You open the forge cache and gain gear opportunity plus battle stock."
         },
         {
@@ -1327,12 +1327,12 @@
         },
         {
             "key": "map.forge_skill_intro",
-            "zhHans": "你在熔炉异象中抓住了一门顶阶功法机缘。",
+            "zhHans": "你从熔炉异象里截住一缕真火意念，凝成一门顶阶法诀的雏形。",
             "en": "You seize a top-tier skill opportunity from the forge omen."
         },
         {
             "key": "map.forge_skill_empty",
-            "zhHans": "这次熔炉异象没有留下新的法诀。",
+            "zhHans": "这次炉象虽然壮阔，却没真正留下能为你所用的新法。",
             "en": "This forge omen leaves no new technique behind."
         },
         {
@@ -1537,22 +1537,22 @@
         },
         {
             "key": "map.fortune_result_blessing",
-            "zhHans": "你顺着流转的机缘收拢气运，换来一段平稳的修为与灵石增长。",
+            "zhHans": "你顺着偶然显化的气运收拢机缘，换来一段平稳却扎实的增益。",
             "en": "You ride the passing fortune into a steady gain of cultivation and spirit stones."
         },
         {
             "key": "map.fortune_result_cache",
-            "zhHans": "你在沿途残痕里翻出一份旧藏，顺手补到装备与些许路资。",
+            "zhHans": "你在残痕旧址里翻出一份遗藏，顺手补到器物与些许路资。",
             "en": "You uncover a forgotten cache along the road and come away with gear plus a little stock."
         },
         {
             "key": "map.fortune_skill_intro",
-            "zhHans": "你抓住转瞬即逝的一线灵感，凝成一次更高阶的功法机缘。",
+            "zhHans": "你抓住一闪而逝的灵感，将它勉强凝成一次更高阶的功法机缘。",
             "en": "You seize a fleeting flash of insight and turn it into a higher-tier skill opportunity."
         },
         {
             "key": "map.fortune_skill_empty",
-            "zhHans": "这次机缘来得快去得也快，没有留下新的法门。",
+            "zhHans": "这缕机缘来得快散得也快，终究没有留下真正成形的法门。",
             "en": "This opportunity fades quickly and leaves no new technique behind."
         },
         {
