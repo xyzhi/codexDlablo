@@ -76,6 +76,16 @@
             "en": "Switch Language"
         },
         {
+            "key": "menu.button_language_to_en",
+            "zhHans": "English",
+            "en": "English"
+        },
+        {
+            "key": "menu.button_language_to_zh",
+            "zhHans": "中文",
+            "en": "中文"
+        },
+        {
             "key": "menu.button_rebuild_ui",
             "zhHans": "重建UI预设",
             "en": "Rebuild UI Prefabs"

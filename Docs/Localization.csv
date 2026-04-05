@@ -14,6 +14,8 @@
 "menu.button_toast","显示提示","Show Toast"
 "menu.button_back_start","返回开始界面","Back To Start"
 "menu.button_language","切换语言","Switch Language"
+"menu.button_language_to_en","English","English"
+"menu.button_language_to_zh","中文","中文"
 "menu.button_rebuild_ui","重建UI预设","Rebuild UI Prefabs"
 "menu.footer","这一版先只用文字、线条和矩形框，方便后续替换美术。","This version uses text lines and rectangles first so art can be replaced later."
 "battle.summary_no_data","无数据","No data"

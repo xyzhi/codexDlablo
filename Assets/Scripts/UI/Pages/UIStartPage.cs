@@ -23,6 +23,7 @@ namespace Wuxing.UI
         private Vector2 _orbitGlowBasePosition;
         private Vector3 _buttonBaseScale = Vector3.one;
         private bool _layoutCached;
+        private Text _languageButtonText;
 
         public override void OnOpen(object data)
         {
@@ -41,6 +42,7 @@ namespace Wuxing.UI
             if (languageButton != null)
             {
                 languageButton.onClick.AddListener(OnClickLanguage);
+                _languageButtonText = languageButton.GetComponentInChildren<Text>(true);
             }
         }
 
@@ -122,14 +124,19 @@ namespace Wuxing.UI
 
         private void RefreshLanguageState()
         {
-            if (languageStateText == null)
-            {
-                return;
-            }
-
             var isEnglish = LocalizationManager.Instance != null
                 && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
-            languageStateText.text = isEnglish ? "Current Language: English" : "\u5f53\u524d\u8bed\u8a00\uff1a\u7b80\u4f53\u4e2d\u6587";
+
+            if (languageStateText != null)
+            {
+                languageStateText.text = isEnglish ? "Current Language: English" : "\u5f53\u524d\u8bed\u8a00\uff1a\u7b80\u4f53\u4e2d\u6587";
+            }
+
+            if (_languageButtonText != null)
+            {
+                var targetKey = isEnglish ? "menu.button_language_to_zh" : "menu.button_language_to_en";
+                _languageButtonText.text = LocalizationManager.GetText(targetKey);
+            }
         }
 
         private void UpdateIdleAnimation(bool instant)

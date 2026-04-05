@@ -86,10 +86,10 @@ namespace Wuxing.UI
             rect.anchorMax = new Vector2(1f, 1f);
             rect.pivot = new Vector2(1f, 1f);
             rect.anchoredPosition = new Vector2(-14f, -84f);
-            rect.sizeDelta = new Vector2(28f, 28f);
+            rect.sizeDelta = new Vector2(56f, 56f);
 
             var image = entryButton.GetComponent<Image>();
-            image.color = new Color(0.95f, 0.88f, 0.72f, 0.12f);
+            image.color = new Color(0.95f, 0.88f, 0.72f, 0.04f);
             UIFactory.AddOutlineBox(entryButton.transform, "Outline", new Color(0.95f, 0.88f, 0.72f, 0.55f), 1f);
 
             var dot = UIFactory.CreatePanel(entryButton.transform, "Dot", new Color(0.95f, 0.88f, 0.72f, 0.8f));
