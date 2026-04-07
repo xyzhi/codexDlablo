@@ -44,8 +44,10 @@ namespace Wuxing.UI
 
             leftSpeakerText.text = leftSpeaker;
             rightSpeakerText.text = rightSpeaker;
-            leftSpeakerText.gameObject.SetActive(!string.IsNullOrEmpty(leftSpeaker));
-            rightSpeakerText.gameObject.SetActive(!string.IsNullOrEmpty(rightSpeaker));
+            bool showLeft = !string.IsNullOrEmpty(leftSpeaker) && activeSide != StorySpeakerSide.Right;
+            bool showRight = !string.IsNullOrEmpty(rightSpeaker) && activeSide == StorySpeakerSide.Right;
+            leftSpeakerText.gameObject.SetActive(showLeft);
+            rightSpeakerText.gameObject.SetActive(showRight);
             leftSpeakerText.color = activeSide == StorySpeakerSide.Right ? InactiveSpeakerColor : ActiveSpeakerColor;
             rightSpeakerText.color = activeSide == StorySpeakerSide.Right ? ActiveSpeakerColor : InactiveSpeakerColor;
             fullContent = ResolveText(node.ContentKey);
