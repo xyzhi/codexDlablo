@@ -22,7 +22,7 @@
 "battle.summary_no_units","无单位","No units"
 "battle.summary_dead","阵亡","KO"
 "battle.log_config_missing","战斗配置缺失，请先导入全部 CSV。","Battle config missing. Import all CSV files first."
-"battle.title","战斗页占位","Battle Page Placeholder"
+"battle.title","战斗详情","Battle Details"
 "battle.player_team","我方队伍","Player Team"
 "battle.player_content","角色甲  HP 120/120角色乙  HP 150/150","Unit A  HP 120/120Unit B  HP 150/150"
 "battle.enemy_team","敌方队伍","Enemy Team"
