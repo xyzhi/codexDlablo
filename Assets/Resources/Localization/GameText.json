@@ -876,6 +876,16 @@
             "en": "Exp: "
         },
         {
+            "key": "map.profile_active_effects",
+            "zhHans": "当前机缘：",
+            "en": "Current Effects: "
+        },
+        {
+            "key": "map.profile_no_effects",
+            "zhHans": "无",
+            "en": "None"
+        },
+        {
             "key": "map.profile_owned_equipment",
             "zhHans": "已拥有装备：",
             "en": "Owned Equipment: "

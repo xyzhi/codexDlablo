@@ -121,7 +121,6 @@ namespace Wuxing.Game
         {
             if (string.IsNullOrEmpty(triggerKey))
             {
-                onComplete?.Invoke();
                 return false;
             }
 
@@ -129,20 +128,17 @@ namespace Wuxing.Game
             var nodeDatabase = StoryNodeDatabaseLoader.Load();
             if (triggerDatabase == null || nodeDatabase == null)
             {
-                onComplete?.Invoke();
                 return false;
             }
 
             var trigger = triggerDatabase.FindBestMatch(triggerKey, Mathf.Max(0, stage));
             if (trigger == null || string.IsNullOrEmpty(trigger.NodeId))
             {
-                onComplete?.Invoke();
                 return false;
             }
 
             if (trigger.OncePerRun && consumedTriggerIds.Contains(trigger.Id))
             {
-                onComplete?.Invoke();
                 return false;
             }
 
@@ -150,7 +146,6 @@ namespace Wuxing.Game
             if (node == null)
             {
                 Debug.LogWarning("Story trigger references missing node: " + trigger.NodeId);
-                onComplete?.Invoke();
                 return false;
             }
 

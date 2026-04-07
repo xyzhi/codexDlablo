@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -17,12 +17,18 @@ namespace Wuxing.UI
         private const string RoundDivider = "============";
         private const string EndDivider = "##########";
         private const string ActionPrefix = "  > ";
-        private const float TeamCardWidth = UICardChromeUtility.StandardCardWidth;
-        private const float TeamCardHeight = UICardChromeUtility.StandardCardHeight;
-        private const float TeamCardHorizontalSpacing = -28f;
-        private const float TeamCardVerticalSpacing = 10f;
+        private const float TeamCardWidth = UICardChromeUtility.StandardCardWidth * 0.7f;
+        private const float TeamCardHeight = UICardChromeUtility.StandardCardHeight * 0.7f;
+        private const float TeamCardHorizontalSpacing = 12f;
+        private const float TeamCardVerticalSpacing = 16f;
         private const int TeamCardColumns = 3;
         private const int TeamCardRows = 2;
+        private const float BattleSummaryTopMargin = 74f;
+        private const float BattleSummaryHeight = 470f;
+        private const float BattleLogTopGap = 20f;
+        private const float BattleFooterBottom = 26f;
+        private const float BattleFooterHeight = 78f;
+        private const float BattleLogBottomGap = 18f;
 
         [SerializeField] private GameObject battleLogOverlay;
         [SerializeField] private Button backButton;
@@ -1429,8 +1435,8 @@ namespace Wuxing.UI
             var stageRect = stageInfoText != null ? stageInfoText.transform.parent as RectTransform : null;
             if (stageRect != null)
             {
-                stageRect.anchorMin = new Vector2(0.18f, 0.885f);
-                stageRect.anchorMax = new Vector2(0.82f, 0.925f);
+                stageRect.anchorMin = new Vector2(0.18f, 0.875f);
+                stageRect.anchorMax = new Vector2(0.82f, 0.915f);
                 stageRect.offsetMin = Vector2.zero;
                 stageRect.offsetMax = Vector2.zero;
                 stageRect.gameObject.SetActive(true);
@@ -1451,28 +1457,30 @@ namespace Wuxing.UI
             var summaryBar = playerCardRoot != null ? playerCardRoot.parent?.parent?.parent as RectTransform : null;
             if (summaryBar != null)
             {
-                summaryBar.anchorMin = new Vector2(0.02f, 0.57f);
-                summaryBar.anchorMax = new Vector2(0.97f, 0.96f);
-                summaryBar.offsetMin = Vector2.zero;
-                summaryBar.offsetMax = Vector2.zero;
+                summaryBar.anchorMin = new Vector2(0.02f, 1f);
+                summaryBar.anchorMax = new Vector2(0.97f, 1f);
+                summaryBar.pivot = new Vector2(0.5f, 1f);
+                summaryBar.offsetMin = new Vector2(0f, -(BattleSummaryTopMargin + BattleSummaryHeight));
+                summaryBar.offsetMax = new Vector2(0f, -BattleSummaryTopMargin);
             }
 
             var logPanel = battleLogScrollRect != null ? battleLogScrollRect.transform.parent?.parent as RectTransform : null;
             if (logPanel != null)
             {
-                logPanel.anchorMin = new Vector2(0.03f, 0.12f);
-                logPanel.anchorMax = new Vector2(0.97f, 0.54f);
-                logPanel.offsetMin = Vector2.zero;
-                logPanel.offsetMax = Vector2.zero;
+                logPanel.anchorMin = new Vector2(0.03f, 0f);
+                logPanel.anchorMax = new Vector2(0.97f, 1f);
+                logPanel.offsetMin = new Vector2(0f, BattleFooterBottom + BattleFooterHeight + BattleLogBottomGap);
+                logPanel.offsetMax = new Vector2(0f, -(BattleSummaryTopMargin + BattleSummaryHeight + BattleLogTopGap));
             }
 
             var footer = backButton != null ? backButton.transform.parent as RectTransform : null;
             if (footer != null)
             {
-                footer.anchorMin = new Vector2(0.24f, 0.03f);
-                footer.anchorMax = new Vector2(0.76f, 0.11f);
-                footer.offsetMin = Vector2.zero;
-                footer.offsetMax = Vector2.zero;
+                footer.anchorMin = new Vector2(0.24f, 0f);
+                footer.anchorMax = new Vector2(0.76f, 0f);
+                footer.pivot = new Vector2(0.5f, 0f);
+                footer.offsetMin = new Vector2(0f, BattleFooterBottom);
+                footer.offsetMax = new Vector2(0f, BattleFooterBottom + BattleFooterHeight);
             }
         }
 
@@ -1496,11 +1504,16 @@ namespace Wuxing.UI
                 var bodyRect = cardRoot.parent as RectTransform;
                 if (bodyRect != null)
                 {
-                    bodyRect.anchorMin = new Vector2(0.02f, 0.14f);
-                    bodyRect.anchorMax = new Vector2(0.98f, 0.82f);
+                    bodyRect.anchorMin = new Vector2(0.02f, 0.08f);
+                    bodyRect.anchorMax = new Vector2(0.98f, 0.86f);
                     bodyRect.offsetMin = Vector2.zero;
                     bodyRect.offsetMax = Vector2.zero;
                 }
+
+                cardRoot.anchorMin = new Vector2(0.5f, 1f);
+                cardRoot.anchorMax = new Vector2(0.5f, 1f);
+                cardRoot.pivot = new Vector2(0.5f, 1f);
+                cardRoot.anchoredPosition = new Vector2(0f, -8f);
             }
 
             if (equipmentText != null)
@@ -1564,10 +1577,11 @@ namespace Wuxing.UI
             var title = button.transform.Find("TitleText")?.GetComponent<Text>();
             if (title != null)
             {
-                title.fontSize = 20;
+                title.fontSize = 18;
+                EnsureReadableText(title);
                 var titleRect = title.rectTransform;
-                titleRect.anchorMin = new Vector2(0.08f, 0.72f);
-                titleRect.anchorMax = new Vector2(0.92f, 0.9f);
+                titleRect.anchorMin = new Vector2(0.12f, 0.72f);
+                titleRect.anchorMax = new Vector2(0.88f, 0.88f);
                 titleRect.offsetMin = Vector2.zero;
                 titleRect.offsetMax = Vector2.zero;
             }
@@ -1575,10 +1589,11 @@ namespace Wuxing.UI
             var subtitle = button.transform.Find("SubtitleText")?.GetComponent<Text>();
             if (subtitle != null)
             {
-                subtitle.fontSize = 18;
+                subtitle.fontSize = 16;
+                EnsureReadableText(subtitle);
                 var subtitleRect = subtitle.rectTransform;
-                subtitleRect.anchorMin = new Vector2(0.08f, 0.52f);
-                subtitleRect.anchorMax = new Vector2(0.92f, 0.7f);
+                subtitleRect.anchorMin = new Vector2(0.12f, 0.5f);
+                subtitleRect.anchorMax = new Vector2(0.88f, 0.64f);
                 subtitleRect.offsetMin = Vector2.zero;
                 subtitleRect.offsetMax = Vector2.zero;
             }
@@ -1586,10 +1601,16 @@ namespace Wuxing.UI
             var progressRoot = button.transform.Find("ProgressRoot") as RectTransform;
             if (progressRoot != null)
             {
-                progressRoot.anchorMin = new Vector2(0.08f, 0.12f);
-                progressRoot.anchorMax = new Vector2(0.92f, 0.2f);
+                progressRoot.anchorMin = new Vector2(0.12f, 0.12f);
+                progressRoot.anchorMax = new Vector2(0.88f, 0.2f);
                 progressRoot.offsetMin = Vector2.zero;
                 progressRoot.offsetMax = Vector2.zero;
+            }
+
+            var progressLabel = button.transform.Find("ProgressRoot/ProgressLabel")?.GetComponent<Text>();
+            if (progressLabel != null)
+            {
+                EnsureReadableText(progressLabel);
             }
         }
 
@@ -1628,8 +1649,13 @@ namespace Wuxing.UI
             var progressFill = button.transform.Find("ProgressRoot/Fill")?.GetComponent<Image>();
             if (progressFill != null)
             {
-                progressFill.fillAmount = Mathf.Clamp01(card.ProgressCurrent / (float)Mathf.Max(1, card.ProgressMax));
-                progressFill.color = card.BorderColor;
+                var ratio = Mathf.Clamp01(card.ProgressCurrent / (float)Mathf.Max(1, card.ProgressMax));
+                var fillRect = progressFill.rectTransform;
+                fillRect.anchorMin = new Vector2(0f, 0f);
+                fillRect.anchorMax = new Vector2(ratio, 1f);
+                fillRect.offsetMin = Vector2.zero;
+                fillRect.offsetMax = Vector2.zero;
+                progressFill.color = new Color(0.92f, 0.23f, 0.24f, 1f);
             }
 
             var progressLabel = button.transform.Find("ProgressRoot/ProgressLabel")?.GetComponent<Text>();
@@ -1638,6 +1664,23 @@ namespace Wuxing.UI
                 progressLabel.text = card.ProgressLabel ?? string.Empty;
                 progressLabel.gameObject.SetActive(card.ShowProgress);
             }
+        }
+
+        private static void EnsureReadableText(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var outline = text.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+
+            outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
         }
 
         private List<UICardData> BuildUnitCardsFromSummary(string teamSummary, string equipmentSummary, bool playerSide)

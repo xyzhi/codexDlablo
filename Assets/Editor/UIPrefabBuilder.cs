@@ -37,7 +37,6 @@ public static class UIPrefabBuilder
         BuildStartPagePrefab();
         BuildMainMenuPrefab();
         BuildMapPagePrefab();
-        BuildBattlePagePrefab();
         BuildConfirmPopupPrefab();
         BuildCardBrowserPopupPrefab();
         BuildEquipmentPopupPrefab();
@@ -294,7 +293,7 @@ public static class UIPrefabBuilder
 
         var detailPanel = UIFactory.CreatePanel(root.transform, "DetailPanel", new Color(0.12f, 0.1f, 0.1f, 0.95f));
         var detailRect = detailPanel.GetComponent<RectTransform>();
-        detailRect.anchorMin = new Vector2(0.08f, 0.29f);
+        detailRect.anchorMin = new Vector2(0.08f, 0.145f);
         detailRect.anchorMax = new Vector2(0.48f, 0.49f);
         detailRect.offsetMin = Vector2.zero;
         detailRect.offsetMax = Vector2.zero;
@@ -307,7 +306,7 @@ public static class UIPrefabBuilder
 
         var routePanel = UIFactory.CreatePanel(root.transform, "RoutePanel", new Color(0.11f, 0.09f, 0.09f, 0.96f));
         var routeRect = routePanel.GetComponent<RectTransform>();
-        routeRect.anchorMin = new Vector2(0.52f, 0.29f);
+        routeRect.anchorMin = new Vector2(0.52f, 0.145f);
         routeRect.anchorMax = new Vector2(0.92f, 0.49f);
         routeRect.offsetMin = Vector2.zero;
         routeRect.offsetMax = Vector2.zero;

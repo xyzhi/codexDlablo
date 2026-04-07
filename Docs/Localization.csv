@@ -174,6 +174,8 @@
 "map.profile_reachable_frontier","可达前沿：","Reachable Frontier: "
 "map.profile_cultivation_level","修为等级 ","Cultivation Lv."
 "map.profile_exp","经验：","Exp: "
+"map.profile_active_effects","当前机缘：","Current Effects: "
+"map.profile_no_effects","无","None"
 "map.profile_owned_equipment","已拥有装备：","Owned Equipment: "
 "map.arrival_toast","已抵达第 {0} 关 · {1}","Arrived at Stage {0} · {1}"
 "map.node_label","第{0}关{1}","Stage {0}{1}"

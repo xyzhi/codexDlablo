@@ -109,6 +109,7 @@ namespace Wuxing.Game
 
             if (Instance.CurrentStage <= 0)
             {
+                StoryManager.ClearRunTriggerStates();
                 Instance.CurrentStage = 1;
                 Instance.ElapsedMonths = 0;
                 Instance.CultivationLevel = 1;
@@ -185,6 +186,7 @@ namespace Wuxing.Game
                 return;
             }
 
+            StoryManager.ClearRunTriggerStates();
             Instance.CurrentStage = 0;
             Instance.ElapsedMonths = 0;
             Instance.CultivationLevel = 1;
