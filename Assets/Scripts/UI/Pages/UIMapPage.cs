@@ -912,7 +912,8 @@ namespace Wuxing.UI
             if (routeText != null)
             {
                 routeText.supportRichText = true;
-                routeText.lineSpacing = 1.16f;
+                routeText.fontSize = 21;
+                routeText.lineSpacing = 1.06f;
                 routeText.text = BuildProfileText(isEnglish, currentStage, maxReachableStage);
             }
 
@@ -1133,40 +1134,43 @@ namespace Wuxing.UI
             {
                 builder.Append(objectiveSummary)
                     .Append('\n')
+                    .Append("<color=#4B433A>────────────────</color>")
+                    .Append('\n')
                     .Append('\n');
             }
 
-            builder.Append("<color=#CDAA6A><b>")
-                .Append(LocalizationManager.GetText("map.profile_title"))
-                .Append("</b></color>")
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_current_stage"))
-                .Append(currentStage)
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_highest_cleared"))
-                .Append(GameProgressManager.GetHighestClearedStage())
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_reachable_frontier"))
-                .Append(maxReachableStage)
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_cultivation_level"))
-                .Append(GameProgressManager.GetCultivationLevel())
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_exp"))
-                .Append(GameProgressManager.GetCultivationExp())
-                .Append('/')
-                .Append(GameProgressManager.GetRequiredExpForNextLevel())
-                .Append('\n')
+            builder.Append(BuildSectionHeader(LocalizationManager.GetText("map.profile_title")))
+                .Append('\n');
+            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_current_stage"), currentStage.ToString());
+            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_cultivation_level"), GameProgressManager.GetCultivationLevel().ToString());
+            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_exp"), GameProgressManager.GetCultivationExp() + "/" + GameProgressManager.GetRequiredExpForNextLevel());
+            builder.Append("<color=#C7B89A>")
                 .Append(GameProgressManager.BuildSpiritStoneSummary(isEnglish, true))
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.profile_owned_equipment"))
-                .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
-                .Append('\n')
-                .Append(GameProgressManager.BuildActiveEffectsSummary(isEnglish))
-                .Append('\n')
-                .Append('\n')
-                .Append(GameProgressManager.BuildLastBattleSummary(isEnglish));
+                .Append("</color>")
+                .Append('\n');
+            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_owned_equipment"), GameProgressManager.GetOwnedEquipmentIds().Count.ToString());
+
             return builder.ToString();
+        }
+
+        private static string BuildSectionHeader(string title)
+        {
+            return "<color=#CDAA6A><b>" + title + "</b></color>";
+        }
+
+        private static void AppendProfileLine(StringBuilder builder, string label, string value)
+        {
+            if (builder == null)
+            {
+                return;
+            }
+
+            builder.Append("<color=#8E8579>")
+                .Append(label)
+                .Append("</color><color=#EDE7DB>")
+                .Append(value)
+                .Append("</color>")
+                .Append('\n');
         }
 
         private string BuildArrivalToast(int stage)

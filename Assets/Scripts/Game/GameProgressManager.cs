@@ -3630,15 +3630,6 @@ namespace Wuxing.Game
                         .Append(GetObjectiveLocalizedText(objective.TitleKey))
                         .Append("</color>")
                         .Append(BuildObjectiveProgressText(objective));
-
-                    var content = GetObjectiveLocalizedText(objective.ContentKey);
-                    if (!string.IsNullOrEmpty(content))
-                    {
-                        builder.Append('\n')
-                            .Append("<color=#90897C>  ")
-                            .Append(content)
-                            .Append("</color>");
-                    }
                 }
             }
 

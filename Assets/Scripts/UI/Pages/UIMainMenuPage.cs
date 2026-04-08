@@ -131,22 +131,23 @@ namespace Wuxing.UI
 
             progressText.alignment = TextAnchor.MiddleCenter;
             progressText.lineSpacing = 1.18f;
+            progressText.supportRichText = true;
 
             var isEnglish = IsEnglish();
             var stage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             if (isEnglish)
             {
                 progressText.text = GameProgressManager.BuildProgressSummary(true)
-                    + "\nRegion: " + GameProgressManager.GetStageTheme(true, stage)
-                    + "\nLifespan: " + GameProgressManager.BuildLongevitySummary(true)
-                    + "\nObjective: " + GameProgressManager.BuildCurrentObjective(true);
+                    + "\n<color=#8E8579>Region: </color><color=#EDE7DB>" + GameProgressManager.GetStageTheme(true, stage) + "</color>"
+                    + "\n<color=#8E8579>Lifespan: </color><color=#EDE7DB>" + GameProgressManager.BuildLongevitySummary(true) + "</color>"
+                    + "\n<color=#CDAA6A>Objective: </color><color=#F1E6C7>" + GameProgressManager.BuildCurrentObjective(true) + "</color>";
                 return;
             }
 
             progressText.text = GameProgressManager.BuildProgressSummary(false)
-                + "\n区域：" + GameProgressManager.GetStageTheme(false, stage)
-                + "\n" + GameProgressManager.BuildLongevitySummary(false)
-                + "\n目标：" + GameProgressManager.BuildCurrentObjective(false);
+                + "\n<color=#8E8579>区域：</color><color=#EDE7DB>" + GameProgressManager.GetStageTheme(false, stage) + "</color>"
+                + "\n<color=#8E8579>" + GameProgressManager.BuildLongevitySummary(false) + "</color>"
+                + "\n<color=#CDAA6A>目标：</color><color=#F1E6C7>" + GameProgressManager.BuildCurrentObjective(false) + "</color>";
         }
 
         private void RefreshButtons()
