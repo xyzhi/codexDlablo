@@ -84,6 +84,12 @@ namespace Wuxing.UI
             {
                 titleText.color = accentColor;
             }
+
+            var subtitleText = button.transform.Find("SubtitleText")?.GetComponent<Text>();
+            if (subtitleText != null)
+            {
+                subtitleText.color = accentColor;
+            }
         }
 
         private static void CleanupLegacyFrames(Transform parent)

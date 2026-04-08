@@ -28,7 +28,12 @@ public static class ConfigValidator
 
     private static readonly HashSet<string> ValidSkillQualities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "普通", "稀有", "绝品", "common", "rare", "epic", "legendary"
+        "普通", "优秀", "稀有", "史诗", "绝品", "common", "uncommon", "rare", "epic", "legendary"
+    };
+
+    private static readonly HashSet<string> ValidEquipmentQualities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "白", "绿", "蓝", "紫", "金", "white", "green", "blue", "purple", "gold"
     };
 
     private static readonly HashSet<string> ValidElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -211,7 +216,7 @@ public static class ConfigValidator
             var quality = row.Get("Quality");
             if (!string.IsNullOrWhiteSpace(quality) && !ValidSkillQualities.Contains(quality.Trim()))
             {
-                AddError(items, row, "Quality", $"技能品质不合法：'{quality}'。当前仅支持 普通/稀有/绝品（或 common/rare/epic/legendary）。");
+                AddError(items, row, "Quality", $"技能品质不合法：'{quality}'。当前仅支持 普通/优秀/稀有/史诗/绝品（或 common/uncommon/rare/epic/legendary）。");
             }
 
             var element = row.Get("Element");
@@ -526,7 +531,8 @@ public static class ConfigValidator
         for (var i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
-            RequireFields(row, items, "ID", "Name", "Slot");
+            RequireFields(row, items, "ID", "Name", "Slot", "Quality", "Level");
+            ValidateIntegerField(row, items, "Level");
             ValidateIntegerField(row, items, "HP");
             ValidateIntegerField(row, items, "ATK");
             ValidateIntegerField(row, items, "DEF");
@@ -536,6 +542,18 @@ public static class ConfigValidator
             if (!string.IsNullOrWhiteSpace(slot) && !ValidEquipmentSlots.Contains(slot.Trim()))
             {
                 AddError(items, row, "Slot", $"装备槽位缺少运行时映射：'{slot}'。当前仅支持 Weapon/Armor/Accessory。");
+            }
+
+            var quality = row.Get("Quality");
+            if (!string.IsNullOrWhiteSpace(quality) && !ValidEquipmentQualities.Contains(quality.Trim()))
+            {
+                AddError(items, row, "Quality", $"装备品质不合法：'{quality}'。当前仅支持 白/绿/蓝/紫/金。");
+            }
+
+            int level;
+            if (int.TryParse(row.Get("Level"), out level) && (level < 1 || level > 5))
+            {
+                AddError(items, row, "Level", $"装备等级不合法：'{level}'。当前仅支持 1 到 5。");
             }
 
             DetectMojibake(row, items, "Name");

@@ -958,7 +958,13 @@ namespace Wuxing.Game
                 }
 
                 var detail = new StringBuilder();
-                detail.Append(english ? "Slot: " : "部位：")
+                detail.Append(english ? "Quality: " : "品级：")
+                    .Append(GetEquipmentQualityLabel(equipment.Quality, english))
+                    .Append('\n')
+                    .Append(english ? "Level: " : "等级：")
+                    .Append(GetEquipmentLevelLabel(equipment.Level, english))
+                    .Append('\n')
+                    .Append(english ? "Slot: " : "部位：")
                     .Append(GetEquipmentSlotLabel(equipment.Slot, english));
 
                 var stats = BuildEquipmentStatCardLines(equipment, english);
@@ -978,10 +984,10 @@ namespace Wuxing.Game
                 {
                     Id = entry.InstanceId,
                     Title = equipment.Name,
-                    Subtitle = GetEquipmentSlotLabel(equipment.Slot, english),
+                    Subtitle = BuildEquipmentCardSubtitle(equipment, english),
                     DetailTitle = equipment.Name,
                     DetailBody = detail.ToString(),
-                    BorderColor = UIElementPalette.GetBorderColor(GetEquipmentSlotElement(equipment.Slot))
+                    BorderColor = UIElementPalette.GetQualityColor(equipment.Quality)
                 });
             }
 
@@ -1950,10 +1956,22 @@ namespace Wuxing.Game
             }
 
             var candidates = new List<EquipmentConfig>();
+            var targetLevel = GetEquipmentDropLevelByStage(stage);
+            var preferredQuality = GetPreferredEquipmentQuality(stage, GetNodeType(stage));
             for (var i = 0; i < equipmentDatabase.Equipments.Count; i++)
             {
                 var equipment = equipmentDatabase.Equipments[i];
                 if (equipment == null)
+                {
+                    continue;
+                }
+
+                 if (equipment.Level != targetLevel)
+                {
+                    continue;
+                }
+
+                if (!string.Equals(NormalizeEquipmentQuality(equipment.Quality), preferredQuality, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
@@ -1965,6 +1983,26 @@ namespace Wuxing.Game
                 }
 
                 candidates.Add(equipment);
+            }
+
+            if (candidates.Count == 0)
+            {
+                var fallbackLevel = targetLevel;
+                while (fallbackLevel >= 1 && candidates.Count == 0)
+                {
+                    for (var i = 0; i < equipmentDatabase.Equipments.Count; i++)
+                    {
+                        var equipment = equipmentDatabase.Equipments[i];
+                        if (equipment == null || equipment.Level != fallbackLevel)
+                        {
+                            continue;
+                        }
+
+                        candidates.Add(equipment);
+                    }
+
+                    fallbackLevel--;
+                }
             }
 
             if (candidates.Count == 0)
@@ -1994,6 +2032,77 @@ namespace Wuxing.Game
             }
 
             return 30;
+        }
+
+        private static int GetEquipmentDropLevelByStage(int stage)
+        {
+            var resolvedStage = Mathf.Max(1, stage);
+            if (resolvedStage <= 2)
+            {
+                return 1;
+            }
+
+            if (resolvedStage <= 4)
+            {
+                return 2;
+            }
+
+            if (resolvedStage <= 6)
+            {
+                return 3;
+            }
+
+            if (resolvedStage <= 8)
+            {
+                return 4;
+            }
+
+            return 5;
+        }
+
+        private static string GetPreferredEquipmentQuality(int stage, MapNodeType nodeType)
+        {
+            var roll = UnityEngine.Random.value;
+            switch (nodeType)
+            {
+                case MapNodeType.Boss:
+                    if (roll < 0.08f) return "gold";
+                    if (roll < 0.48f) return "purple";
+                    return "blue";
+                case MapNodeType.Elite:
+                    if (roll < 0.28f) return "blue";
+                    return "green";
+                case MapNodeType.Rest:
+                    return stage >= 5 ? "green" : "white";
+                case MapNodeType.Battle:
+                default:
+                    if (roll < 0.22f) return "green";
+                    return "white";
+            }
+        }
+
+        private static string NormalizeEquipmentQuality(string quality)
+        {
+            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "白":
+                case "white":
+                    return "white";
+                case "绿":
+                case "green":
+                    return "green";
+                case "蓝":
+                case "blue":
+                    return "blue";
+                case "紫":
+                case "purple":
+                    return "purple";
+                case "金":
+                case "gold":
+                    return "gold";
+                default:
+                    return "white";
+            }
         }
 
         private void ResetOwnedEquipmentToBase()
@@ -3115,6 +3224,53 @@ namespace Wuxing.Game
                     return string.IsNullOrEmpty(slot)
                         ? (english ? "Unknown" : "未知")
                         : slot;
+            }
+        }
+
+        private static string BuildEquipmentCardSubtitle(EquipmentConfig equipment, bool english)
+        {
+            if (equipment == null)
+            {
+                return string.Empty;
+            }
+
+            return GetEquipmentQualityLabel(equipment.Quality, english) + " / " + GetEquipmentLevelLabel(equipment.Level, english);
+        }
+
+        private static string GetEquipmentQualityLabel(string quality, bool english)
+        {
+            switch (NormalizeEquipmentQuality(quality))
+            {
+                case "green":
+                    return english ? "Green" : "绿";
+                case "blue":
+                    return english ? "Blue" : "蓝";
+                case "purple":
+                    return english ? "Purple" : "紫";
+                case "gold":
+                    return english ? "Gold" : "金";
+                case "white":
+                default:
+                    return english ? "White" : "白";
+            }
+        }
+
+        private static string GetEquipmentLevelLabel(int level, bool english)
+        {
+            var clamped = Mathf.Clamp(level, 1, 5);
+            if (english)
+            {
+                return "Lv." + clamped;
+            }
+
+            switch (clamped)
+            {
+                case 1: return "一阶";
+                case 2: return "二阶";
+                case 3: return "三阶";
+                case 4: return "四阶";
+                case 5: return "五阶";
+                default: return "一阶";
             }
         }
 

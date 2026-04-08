@@ -153,7 +153,7 @@ namespace Wuxing.UI
             }
 
             detailTitleText.text = equipment.Name;
-            detailTitleText.color = UIElementPalette.GetBorderColor(GetSlotElement(equipment.Slot));
+            detailTitleText.color = UIElementPalette.GetQualityColor(equipment.Quality);
             detailBodyText.text = BuildEquipmentDetail(equipment);
         }
 
@@ -191,7 +191,10 @@ namespace Wuxing.UI
             }
 
             var isSelected = string.Equals(selectedSlot, slot, StringComparison.OrdinalIgnoreCase);
-            UICardChromeUtility.Apply(button, UIElementPalette.GetBorderColor(GetSlotElement(slot)), isSelected);
+            var equippedInstanceId = BattleManager.GetEquippedPlayerEquipmentInstanceId(PlayerUnitIndex, slot);
+            var equippedConfig = BattleManager.GetOwnedEquipmentConfigByInstance(equippedInstanceId);
+            var accentColor = equippedConfig != null ? UIElementPalette.GetQualityColor(equippedConfig.Quality) : Color.white;
+            UICardChromeUtility.Apply(button, accentColor, isSelected);
             SetCardTexts(button, GetSlotDisplayName(slot), BattleManager.GetPlayerEquipmentName(PlayerUnitIndex, slot));
 
             button.onClick.RemoveAllListeners();
@@ -242,7 +245,7 @@ namespace Wuxing.UI
                 Title = "\u5378\u4e0b\u88c5\u5907",
                 Subtitle = GetSlotDisplayName(selectedSlot),
                 EquipmentInstanceId = string.Empty,
-                BorderColor = new Color(0.88f, 0.82f, 0.76f, 1f),
+                BorderColor = Color.white,
                 IsUnequip = true
             });
 
@@ -265,9 +268,9 @@ namespace Wuxing.UI
                 result.Add(new EquipmentCardData
                 {
                     Title = equipment.Name,
-                    Subtitle = GetSlotDisplayName(equipment.Slot),
+                    Subtitle = BuildEquipmentCardSubtitle(equipment),
                     EquipmentInstanceId = instance.InstanceId,
-                    BorderColor = UIElementPalette.GetBorderColor(GetSlotElement(equipment.Slot)),
+                    BorderColor = UIElementPalette.GetQualityColor(equipment.Quality),
                     IsUnequip = false
                 });
             }
@@ -326,7 +329,13 @@ namespace Wuxing.UI
         private static string BuildEquipmentDetail(EquipmentConfig equipment)
         {
             var builder = new StringBuilder();
-            builder.Append("\u90e8\u4f4d\uff1a")
+            builder.Append("\u54c1\u7ea7\uff1a")
+                .Append(GetEquipmentQualityLabel(equipment.Quality))
+                .Append('\n')
+                .Append("\u7b49\u7ea7\uff1a")
+                .Append(GetEquipmentLevelLabel(equipment.Level))
+                .Append('\n')
+                .Append("\u90e8\u4f4d\uff1a")
                 .Append(GetSlotDisplayName(equipment.Slot));
 
             if (equipment.HP != 0)
@@ -369,6 +378,49 @@ namespace Wuxing.UI
                     return "\u9970\u54c1";
                 default:
                     return "\u672a\u5206\u7c7b";
+            }
+        }
+
+        private static string BuildEquipmentCardSubtitle(EquipmentConfig equipment)
+        {
+            return GetEquipmentQualityLabel(equipment != null ? equipment.Quality : string.Empty)
+                + " / "
+                + GetEquipmentLevelLabel(equipment != null ? equipment.Level : 1);
+        }
+
+        private static string GetEquipmentQualityLabel(string quality)
+        {
+            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "绿":
+                case "green":
+                    return "绿";
+                case "蓝":
+                case "blue":
+                    return "蓝";
+                case "紫":
+                case "purple":
+                    return "紫";
+                case "金":
+                case "gold":
+                    return "金";
+                case "白":
+                case "white":
+                default:
+                    return "白";
+            }
+        }
+
+        private static string GetEquipmentLevelLabel(int level)
+        {
+            switch (Mathf.Clamp(level, 1, 5))
+            {
+                case 1: return "一阶";
+                case 2: return "二阶";
+                case 3: return "三阶";
+                case 4: return "四阶";
+                case 5: return "五阶";
+                default: return "一阶";
             }
         }
 

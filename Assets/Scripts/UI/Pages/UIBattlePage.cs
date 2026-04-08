@@ -3005,6 +3005,25 @@ namespace Wuxing.UI
             return equipment.Name;
         }
 
+        private static Color GetEquipmentAccentColor(EquipmentConfig equipment)
+        {
+            return equipment != null ? UIElementPalette.GetQualityColor(equipment.Quality) : Color.white;
+        }
+
+        private string BuildEquipmentMetaLabel(EquipmentConfig equipment)
+        {
+            if (equipment == null)
+            {
+                return string.Empty;
+            }
+
+            var isEnglish = LocalizationManager.Instance != null
+                && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
+            return BuildEquipmentQualityLabel(equipment.Quality, isEnglish)
+                + " / "
+                + BuildEquipmentLevelLabel(equipment.Level, isEnglish);
+        }
+
         private static int GetEquipmentDisplayScore(EquipmentConfig equipment)
         {
             if (equipment == null)
@@ -3087,9 +3106,11 @@ namespace Wuxing.UI
                     slotLabel.fontSize = 20;
                     slotLabel.alignment = TextAnchor.UpperLeft;
                 }
+                var equippedInstanceId = BattleManager.GetEquippedPlayerEquipmentInstanceId(selectedEquipmentUnitIndex, slotButtonData.Slot);
+                var equippedConfig = BattleManager.GetOwnedEquipmentConfigByInstance(equippedInstanceId);
                 SetSelectionCardTexts(slotButton, GetSlotDisplayName(slotButtonData.Slot), BattleManager.GetPlayerEquipmentName(selectedEquipmentUnitIndex, slotButtonData.Slot));
 
-                ApplyEquipmentCardButton(slotButton, Color.white, string.Equals(slotButtonData.Slot, slot, System.StringComparison.OrdinalIgnoreCase));
+                ApplyEquipmentCardButton(slotButton, GetEquipmentAccentColor(equippedConfig), string.Equals(slotButtonData.Slot, slot, System.StringComparison.OrdinalIgnoreCase));
             }
 
             var unequipButton = GetOrCreateEquipmentSelectionButton(3);
@@ -3176,8 +3197,8 @@ namespace Wuxing.UI
                     label.fontSize = 20;
                     label.alignment = TextAnchor.MiddleLeft;
                 }
-                SetSelectionCardTexts(button, BuildEquipmentOptionLabel(equipment), GetSlotDisplayName(equipment.Slot));
-                ApplyEquipmentCardButton(button, Color.white, false);
+                SetSelectionCardTexts(button, BuildEquipmentOptionLabel(equipment), BuildEquipmentMetaLabel(equipment));
+                ApplyEquipmentCardButton(button, GetEquipmentAccentColor(equipment), false);
 
             }
 
@@ -3214,6 +3235,9 @@ namespace Wuxing.UI
             var builder = new StringBuilder();
             builder.Append(equipment.Name)
                 .Append("\n\n")
+                .Append("\u54c1\u7ea7\uff1a").Append(BuildEquipmentQualityLabel(equipment.Quality, false))
+                .Append("\n\u7b49\u7ea7\uff1a").Append(BuildEquipmentLevelLabel(equipment.Level, false))
+                .Append('\n')
                 .Append("\u90e8\u4f4d\uff1a").Append(GetSlotDisplayName(equipment.Slot));
             if (equipment.ATK != 0)
             {
@@ -3431,6 +3455,48 @@ namespace Wuxing.UI
             return slotName + "\n" + equipmentName;
         }
 
+        private static string BuildEquipmentQualityLabel(string quality, bool english)
+        {
+            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "绿":
+                case "green":
+                    return english ? "Green" : "绿";
+                case "蓝":
+                case "blue":
+                    return english ? "Blue" : "蓝";
+                case "紫":
+                case "purple":
+                    return english ? "Purple" : "紫";
+                case "金":
+                case "gold":
+                    return english ? "Gold" : "金";
+                case "白":
+                case "white":
+                default:
+                    return english ? "White" : "白";
+            }
+        }
+
+        private static string BuildEquipmentLevelLabel(int level, bool english)
+        {
+            var clamped = Mathf.Clamp(level, 1, 5);
+            if (english)
+            {
+                return "Lv." + clamped;
+            }
+
+            switch (clamped)
+            {
+                case 1: return "一阶";
+                case 2: return "二阶";
+                case 3: return "三阶";
+                case 4: return "四阶";
+                case 5: return "五阶";
+                default: return "一阶";
+            }
+        }
+
         private static string GetSlotDisplayName(string slot)
         {
             switch (slot)
@@ -3464,9 +3530,9 @@ namespace Wuxing.UI
         private void RefreshEquipmentChrome()
         {
             ApplyEquipmentCardButton(cycleEquipmentUnitButton, Color.white, true);
-            ApplyEquipmentCardButton(cycleWeaponButton, Color.white, false);
-            ApplyEquipmentCardButton(cycleArmorButton, Color.white, false);
-            ApplyEquipmentCardButton(cycleAccessoryButton, Color.white, false);
+            ApplyEquipmentCardButton(cycleWeaponButton, GetEquipmentAccentColor(BattleManager.GetOwnedEquipmentConfigByInstance(BattleManager.GetEquippedPlayerEquipmentInstanceId(selectedEquipmentUnitIndex, "Weapon"))), false);
+            ApplyEquipmentCardButton(cycleArmorButton, GetEquipmentAccentColor(BattleManager.GetOwnedEquipmentConfigByInstance(BattleManager.GetEquippedPlayerEquipmentInstanceId(selectedEquipmentUnitIndex, "Armor"))), false);
+            ApplyEquipmentCardButton(cycleAccessoryButton, GetEquipmentAccentColor(BattleManager.GetOwnedEquipmentConfigByInstance(BattleManager.GetEquippedPlayerEquipmentInstanceId(selectedEquipmentUnitIndex, "Accessory"))), false);
         }
 
         private static void ApplyEquipmentCardButton(Button button, Color borderColor, bool emphasize)

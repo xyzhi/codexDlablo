@@ -30,20 +30,30 @@ namespace Wuxing.UI
         {
             switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
             {
+                case "绿":
                 case "优秀":
                 case "uncommon":
+                case "green":
                     return Parse("#63D66E");
+                case "蓝":
                 case "稀有":
                 case "rare":
+                case "blue":
                     return Parse("#5BA8FF");
+                case "紫":
                 case "史诗":
                 case "epic":
+                case "purple":
                     return Parse("#B77CFF");
+                case "金":
                 case "绝品":
                 case "legendary":
+                case "gold":
                     return Parse("#F0D45C");
+                case "白":
                 case "普通":
                 case "common":
+                case "white":
                 default:
                     return Parse("#F2F2F2");
             }

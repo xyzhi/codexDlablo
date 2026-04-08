@@ -314,7 +314,7 @@ public static class CharacterCsvImporter
             {
                 continue;
             }
-            if (columns.Count < 8)
+            if (columns.Count < 10)
             {
                 throw new InvalidOperationException($"Invalid equipment row at line {i + 1}.");
             }
@@ -323,11 +323,13 @@ public static class CharacterCsvImporter
                 Id = columns[0],
                 Name = columns[1],
                 Slot = columns[2],
-                HP = ParseInt(columns[3], nameof(EquipmentConfig.HP), i + 1),
-                ATK = ParseInt(columns[4], nameof(EquipmentConfig.ATK), i + 1),
-                DEF = ParseInt(columns[5], nameof(EquipmentConfig.DEF), i + 1),
-                MP = ParseInt(columns[6], nameof(EquipmentConfig.MP), i + 1),
-                Notes = columns[7]
+                Quality = columns[3],
+                Level = ParseInt(columns[4], nameof(EquipmentConfig.Level), i + 1),
+                HP = ParseInt(columns[5], nameof(EquipmentConfig.HP), i + 1),
+                ATK = ParseInt(columns[6], nameof(EquipmentConfig.ATK), i + 1),
+                DEF = ParseInt(columns[7], nameof(EquipmentConfig.DEF), i + 1),
+                MP = ParseInt(columns[8], nameof(EquipmentConfig.MP), i + 1),
+                Notes = columns[9]
             });
         }
         EnsureFolderExists(ConfigOutputFolder);
