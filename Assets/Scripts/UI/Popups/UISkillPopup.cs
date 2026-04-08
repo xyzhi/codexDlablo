@@ -147,6 +147,7 @@ namespace Wuxing.UI
             if (string.IsNullOrEmpty(selectedSkillId))
             {
                 detailTitleText.text = LocalizationManager.GetText("map.skill_overview_title");
+                detailTitleText.color = Color.white;
                 detailBodyText.text = "\u5f53\u524d\u69fd\u4f4d\u4e3a\u7a7a\u3002\n\u4ece\u4e0b\u65b9\u6280\u80fd\u5e93\u9009\u62e9\u4e00\u4e2a\u4e3b\u52a8\u6280\u80fd\u4e0a\u573a\u3002";
                 return;
             }
@@ -158,12 +159,14 @@ namespace Wuxing.UI
                 if (card != null && string.Equals(card.Id, selectedSkillId, StringComparison.OrdinalIgnoreCase))
                 {
                     detailTitleText.text = card.DetailTitle;
+                    detailTitleText.color = card.BorderColor;
                     detailBodyText.text = card.DetailBody;
                     return;
                 }
             }
 
             detailTitleText.text = LocalizationManager.GetText("map.skill_overview_title");
+            detailTitleText.color = Color.white;
             detailBodyText.text = "\u672a\u627e\u5230\u6280\u80fd\u8be6\u60c5\u3002";
         }
 

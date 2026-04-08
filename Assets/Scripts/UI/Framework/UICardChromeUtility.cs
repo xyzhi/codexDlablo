@@ -25,7 +25,7 @@ namespace Wuxing.UI
             var rootImage = button.GetComponent<Image>();
             if (rootImage != null)
             {
-                rootImage.color = borderColor;
+                rootImage.color = Color.white;
                 rootImage.raycastTarget = true;
             }
 
@@ -42,6 +42,7 @@ namespace Wuxing.UI
             if (surface != null) surface.raycastTarget = false;
             if (innerBorder != null) innerBorder.raycastTarget = false;
             if (innerSurface != null) innerSurface.raycastTarget = false;
+            ApplyTitleAccent(button, borderColor);
         }
 
         public static void ApplySimple(Button button, Color borderColor, bool selected)
@@ -66,6 +67,22 @@ namespace Wuxing.UI
             {
                 surface.gameObject.SetActive(!selected);
                 surface.raycastTarget = false;
+            }
+
+            ApplyTitleAccent(button, borderColor);
+        }
+
+        private static void ApplyTitleAccent(Button button, Color accentColor)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var titleText = button.transform.Find("TitleText")?.GetComponent<Text>();
+            if (titleText != null)
+            {
+                titleText.color = accentColor;
             }
         }
 

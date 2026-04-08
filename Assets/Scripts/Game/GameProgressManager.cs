@@ -857,7 +857,7 @@ namespace Wuxing.Game
                         Subtitle = LocalizationManager.GetText("common.level_prefix") + level,
                         DetailTitle = skill.Name + "  " + LocalizationManager.GetText("common.level_prefix") + level,
                         DetailBody = detail.ToString(),
-                        BorderColor = UIElementPalette.GetBorderColor(skill.Element)
+                        BorderColor = UIElementPalette.GetQualityColor(skill.Quality)
                     });
                 }
             }
@@ -893,7 +893,7 @@ namespace Wuxing.Game
                     Subtitle = skill != null ? LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, equippedSkillId) : (english ? "Choose active skill" : "选择主动技能"),
                     DetailTitle = skill != null ? skill.Name : (english ? "Skill Slot" : "技能栏"),
                     DetailBody = skill != null ? BuildSkillDetail(characterId, skill, english) : (english ? "Select an active skill from the library below." : "从下方技能库中选择一个主动技能上场。"),
-                    BorderColor = UIElementPalette.GetBorderColor(skill != null ? skill.Element : "None")
+                    BorderColor = skill != null ? UIElementPalette.GetQualityColor(skill.Quality) : UIElementPalette.GetBorderColor("None")
                 });
             }
 
@@ -929,7 +929,7 @@ namespace Wuxing.Game
                     Subtitle = LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, skillId),
                     DetailTitle = skill.Name + " " + LocalizationManager.GetText("common.level_prefix") + GetSkillLevel(characterId, skillId),
                     DetailBody = BuildSkillDetail(characterId, skill, english),
-                    BorderColor = UIElementPalette.GetBorderColor(skill.Element)
+                    BorderColor = UIElementPalette.GetQualityColor(skill.Quality)
                 });
             }
 
@@ -981,7 +981,7 @@ namespace Wuxing.Game
                     Subtitle = GetEquipmentSlotLabel(equipment.Slot, english),
                     DetailTitle = equipment.Name,
                     DetailBody = detail.ToString(),
-                    BorderColor = UIElementPalette.GetBorderColor("None")
+                    BorderColor = UIElementPalette.GetBorderColor(GetEquipmentSlotElement(equipment.Slot))
                 });
             }
 
@@ -3115,6 +3115,21 @@ namespace Wuxing.Game
                     return string.IsNullOrEmpty(slot)
                         ? (english ? "Unknown" : "未知")
                         : slot;
+            }
+        }
+
+        private static string GetEquipmentSlotElement(string slot)
+        {
+            switch ((slot ?? string.Empty).Trim())
+            {
+                case "Weapon":
+                    return "Metal";
+                case "Armor":
+                    return "Earth";
+                case "Accessory":
+                    return "Water";
+                default:
+                    return "None";
             }
         }
 

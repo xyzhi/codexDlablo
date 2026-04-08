@@ -26,6 +26,29 @@ namespace Wuxing.UI
             }
         }
 
+        public static Color GetQualityColor(string quality)
+        {
+            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
+            {
+                case "优秀":
+                case "uncommon":
+                    return Parse("#63D66E");
+                case "稀有":
+                case "rare":
+                    return Parse("#5BA8FF");
+                case "史诗":
+                case "epic":
+                    return Parse("#B77CFF");
+                case "绝品":
+                case "legendary":
+                    return Parse("#F0D45C");
+                case "普通":
+                case "common":
+                default:
+                    return Parse("#F2F2F2");
+            }
+        }
+
         private static Color Parse(string html)
         {
             Color color;

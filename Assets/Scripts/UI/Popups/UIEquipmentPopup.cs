@@ -138,6 +138,7 @@ namespace Wuxing.UI
             if (string.IsNullOrEmpty(selectedEquipmentInstanceId))
             {
                 detailTitleText.text = LocalizationManager.GetText("battle.equipment_none");
+                detailTitleText.color = Color.white;
                 detailBodyText.text = BuildEmptySlotDetail();
                 return;
             }
@@ -146,11 +147,13 @@ namespace Wuxing.UI
             if (equipment == null)
             {
                 detailTitleText.text = LocalizationManager.GetText("battle.equipment_none");
+                detailTitleText.color = Color.white;
                 detailBodyText.text = BuildEmptySlotDetail();
                 return;
             }
 
             detailTitleText.text = equipment.Name;
+            detailTitleText.color = UIElementPalette.GetBorderColor(GetSlotElement(equipment.Slot));
             detailBodyText.text = BuildEquipmentDetail(equipment);
         }
 
