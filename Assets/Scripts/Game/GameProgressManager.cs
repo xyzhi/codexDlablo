@@ -1742,20 +1742,27 @@ namespace Wuxing.Game
                 return LocalizationManager.GetText("progress.current_objective_start");
             }
 
-            var summary = Instance.BuildObjectiveSummaryInternal(english);
-            if (!string.IsNullOrEmpty(summary))
+            var database = ObjectiveDatabaseLoader.Load();
+            if (database != null && database.Objectives != null && database.Objectives.Count > 0)
             {
-                var lines = summary.Split('\n');
-                for (var i = 0; i < lines.Length; i++)
-                {
-                    var line = lines[i] != null ? lines[i].Trim() : string.Empty;
-                    if (string.IsNullOrEmpty(line)
-                        || string.Equals(line, LocalizationManager.GetText("objective.section_title"), StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
+                ObjectiveConfig mainObjective;
+                ObjectiveConfig hintObjective;
+                List<ObjectiveConfig> stageObjectives;
+                Instance.GetActiveObjectives(database, out mainObjective, out stageObjectives, out hintObjective);
 
-                    return line;
+                if (mainObjective != null)
+                {
+                    return GetObjectiveLocalizedText(mainObjective.TitleKey);
+                }
+
+                if (stageObjectives != null && stageObjectives.Count > 0)
+                {
+                    return GetObjectiveLocalizedText(stageObjectives[0].TitleKey);
+                }
+
+                if (hintObjective != null)
+                {
+                    return GetObjectiveLocalizedText(hintObjective.TitleKey);
                 }
             }
 
@@ -3573,10 +3580,99 @@ namespace Wuxing.Game
                 return string.Empty;
             }
 
+            ObjectiveConfig mainObjective;
+            ObjectiveConfig hintObjective;
+            List<ObjectiveConfig> stageObjectives;
+            GetActiveObjectives(database, out mainObjective, out stageObjectives, out hintObjective);
+
+            var builder = new StringBuilder();
+            builder.Append("<color=#E6D2A2><b>")
+                .Append(LocalizationManager.GetText("objective.section_title"))
+                .Append("</b></color>");
+
+            if (mainObjective == null && stageObjectives.Count == 0 && hintObjective == null)
+            {
+                builder.Append('\n')
+                    .Append("<color=#9E9788>")
+                    .Append(LocalizationManager.GetText("objective.empty"))
+                    .Append("</color>");
+                return builder.ToString();
+            }
+
+            if (mainObjective != null)
+            {
+                builder.Append('\n')
+                    .Append("<color=#CDAA6A>")
+                    .Append(LocalizationManager.GetText("objective.main_label"))
+                    .Append("</color>")
+                    .Append("<color=#F4F0E5><b>")
+                    .Append(GetObjectiveLocalizedText(mainObjective.TitleKey))
+                    .Append("</b></color>")
+                    .Append(BuildObjectiveProgressText(mainObjective))
+                    .Append('\n')
+                    .Append("<color=#A9A092>")
+                    .Append(GetObjectiveLocalizedText(mainObjective.ContentKey))
+                    .Append("</color>");
+            }
+
+            if (stageObjectives.Count > 0)
+            {
+                builder.Append('\n')
+                    .Append('\n')
+                    .Append("<color=#CDAA6A>")
+                    .Append(LocalizationManager.GetText("objective.stage_label"))
+                    .Append("</color>");
+                for (var i = 0; i < stageObjectives.Count; i++)
+                {
+                    var objective = stageObjectives[i];
+                    builder.Append('\n')
+                        .Append("<color=#D8D2C6>• </color><color=#F0ECE1>")
+                        .Append(GetObjectiveLocalizedText(objective.TitleKey))
+                        .Append("</color>")
+                        .Append(BuildObjectiveProgressText(objective));
+
+                    var content = GetObjectiveLocalizedText(objective.ContentKey);
+                    if (!string.IsNullOrEmpty(content))
+                    {
+                        builder.Append('\n')
+                            .Append("<color=#90897C>  ")
+                            .Append(content)
+                            .Append("</color>");
+                    }
+                }
+            }
+
+            if (hintObjective != null)
+            {
+                builder.Append('\n')
+                    .Append('\n')
+                    .Append("<color=#CDAA6A>")
+                    .Append(LocalizationManager.GetText("objective.hint_label"))
+                    .Append("</color>")
+                    .Append("<color=#BFE3A6>")
+                    .Append(GetObjectiveLocalizedText(hintObjective.TitleKey))
+                    .Append("</color>")
+                    .Append(BuildObjectiveProgressText(hintObjective));
+
+                var hintContent = GetObjectiveLocalizedText(hintObjective.ContentKey);
+                if (!string.IsNullOrEmpty(hintContent))
+                {
+                    builder.Append('\n')
+                        .Append("<color=#8FA882>")
+                        .Append(hintContent)
+                        .Append("</color>");
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private void GetActiveObjectives(ObjectiveDatabase database, out ObjectiveConfig mainObjective, out List<ObjectiveConfig> stageObjectives, out ObjectiveConfig hintObjective)
+        {
+            mainObjective = null;
+            hintObjective = null;
+            stageObjectives = new List<ObjectiveConfig>();
             var predecessorMap = BuildObjectivePredecessorMap(database);
-            ObjectiveConfig mainObjective = null;
-            ObjectiveConfig hintObjective = null;
-            var stageObjectives = new List<ObjectiveConfig>();
 
             for (var i = 0; i < database.Objectives.Count; i++)
             {
@@ -3613,64 +3709,6 @@ namespace Wuxing.Game
                         break;
                 }
             }
-
-            var builder = new StringBuilder();
-            builder.Append(LocalizationManager.GetText("objective.section_title"));
-
-            if (mainObjective == null && stageObjectives.Count == 0 && hintObjective == null)
-            {
-                builder.Append('\n')
-                    .Append(LocalizationManager.GetText("objective.empty"));
-                return builder.ToString();
-            }
-
-            if (mainObjective != null)
-            {
-                builder.Append('\n')
-                    .Append(LocalizationManager.GetText("objective.main_label"))
-                    .Append(GetObjectiveLocalizedText(mainObjective.TitleKey))
-                    .Append('\n')
-                    .Append(GetObjectiveLocalizedText(mainObjective.ContentKey));
-            }
-
-            if (stageObjectives.Count > 0)
-            {
-                builder.Append('\n')
-                    .Append('\n')
-                    .Append(LocalizationManager.GetText("objective.stage_label"));
-                for (var i = 0; i < stageObjectives.Count; i++)
-                {
-                    var objective = stageObjectives[i];
-                    builder.Append('\n')
-                        .Append("• ")
-                        .Append(GetObjectiveLocalizedText(objective.TitleKey));
-
-                    var content = GetObjectiveLocalizedText(objective.ContentKey);
-                    if (!string.IsNullOrEmpty(content))
-                    {
-                        builder.Append('\n')
-                            .Append("  ")
-                            .Append(content);
-                    }
-                }
-            }
-
-            if (hintObjective != null)
-            {
-                builder.Append('\n')
-                    .Append('\n')
-                    .Append(LocalizationManager.GetText("objective.hint_label"))
-                    .Append(GetObjectiveLocalizedText(hintObjective.TitleKey));
-
-                var hintContent = GetObjectiveLocalizedText(hintObjective.ContentKey);
-                if (!string.IsNullOrEmpty(hintContent))
-                {
-                    builder.Append('\n')
-                        .Append(hintContent);
-                }
-            }
-
-            return builder.ToString();
         }
 
         private Dictionary<string, string> BuildObjectivePredecessorMap(ObjectiveDatabase database)
@@ -3720,35 +3758,7 @@ namespace Wuxing.Game
                 return false;
             }
 
-            var targetValue = Mathf.Max(1, objective.TargetValue);
-            var conditionType = NormalizeObjectiveToken(objective.ConditionType);
-            var conditionParam = NormalizeObjectiveToken(objective.ConditionParam);
-
-            switch (conditionType)
-            {
-                case "reachstage":
-                    return CurrentStage >= targetValue || HighestClearedStage >= targetValue;
-                case "clearstage":
-                    return HighestClearedStage >= targetValue;
-                case "enternodetype":
-                    return GetObjectiveEventCount("EnterNodeType", conditionParam) >= targetValue;
-                case "winbattle":
-                    return GetObjectiveEventCount("WinBattle", string.Empty) >= targetValue;
-                case "winnodetypebattle":
-                    return GetObjectiveEventCount("WinNodeTypeBattle", conditionParam) >= targetValue;
-                case "obtainequipment":
-                    return GetObjectiveEventCount("ObtainEquipment", conditionParam) >= targetValue;
-                case "gainskillreward":
-                    return GetObjectiveEventCount("GainSkillReward", conditionParam) >= targetValue;
-                case "configureskill":
-                    return GetObjectiveEventCount("ConfigureSkill", conditionParam) >= targetValue;
-                case "triggerstory":
-                    return GetObjectiveEventCount("TriggerStory", conditionParam) >= targetValue;
-                case "equippedskillcountatleast":
-                    return GetEquippedActiveSkillCount(GetPrimaryCharacterId()) >= targetValue;
-                default:
-                    return false;
-            }
+            return GetObjectiveCurrentValue(objective) >= Mathf.Max(1, objective.TargetValue);
         }
 
         private int GetObjectiveEventCount(string eventType, string conditionParam)
@@ -3769,6 +3779,54 @@ namespace Wuxing.Game
             }
 
             return 0;
+        }
+
+        private int GetObjectiveCurrentValue(ObjectiveConfig objective)
+        {
+            if (objective == null)
+            {
+                return 0;
+            }
+
+            var conditionType = NormalizeObjectiveToken(objective.ConditionType);
+            var conditionParam = NormalizeObjectiveToken(objective.ConditionParam);
+            switch (conditionType)
+            {
+                case "reachstage":
+                    return Mathf.Max(CurrentStage, HighestClearedStage);
+                case "clearstage":
+                    return Mathf.Max(0, HighestClearedStage);
+                case "enternodetype":
+                    return GetObjectiveEventCount("EnterNodeType", conditionParam);
+                case "winbattle":
+                    return GetObjectiveEventCount("WinBattle", string.Empty);
+                case "winnodetypebattle":
+                    return GetObjectiveEventCount("WinNodeTypeBattle", conditionParam);
+                case "obtainequipment":
+                    return GetObjectiveEventCount("ObtainEquipment", conditionParam);
+                case "gainskillreward":
+                    return GetObjectiveEventCount("GainSkillReward", conditionParam);
+                case "configureskill":
+                    return GetObjectiveEventCount("ConfigureSkill", conditionParam);
+                case "triggerstory":
+                    return GetObjectiveEventCount("TriggerStory", conditionParam);
+                case "equippedskillcountatleast":
+                    return GetEquippedActiveSkillCount(GetPrimaryCharacterId());
+                default:
+                    return 0;
+            }
+        }
+
+        private string BuildObjectiveProgressText(ObjectiveConfig objective)
+        {
+            if (objective == null)
+            {
+                return string.Empty;
+            }
+
+            var targetValue = Mathf.Max(1, objective.TargetValue);
+            var currentValue = Mathf.Clamp(GetObjectiveCurrentValue(objective), 0, targetValue);
+            return " <color=#7E776B>(" + currentValue + "/" + targetValue + ")</color>";
         }
 
         private static string NormalizeObjectiveToken(string value)

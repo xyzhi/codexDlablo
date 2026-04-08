@@ -912,6 +912,7 @@ namespace Wuxing.UI
             if (routeText != null)
             {
                 routeText.supportRichText = true;
+                routeText.lineSpacing = 1.16f;
                 routeText.text = BuildProfileText(isEnglish, currentStage, maxReachableStage);
             }
 
@@ -1135,7 +1136,9 @@ namespace Wuxing.UI
                     .Append('\n');
             }
 
-            builder.Append(LocalizationManager.GetText("map.profile_title"))
+            builder.Append("<color=#CDAA6A><b>")
+                .Append(LocalizationManager.GetText("map.profile_title"))
+                .Append("</b></color>")
                 .Append('\n')
                 .Append(LocalizationManager.GetText("map.profile_current_stage"))
                 .Append(currentStage)
