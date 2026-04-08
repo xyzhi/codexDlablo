@@ -25,6 +25,7 @@ public static class CharacterCsvImporter
     private const string EventProfileCsvPath = "Docs/EventProfile.csv";
     private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
     private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
+    private const string ObjectiveCsvPath = "Docs/Objective.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
     private const string ConfigOutputFolder = "Assets/Resources/Configs";
     private const string LocalizationOutputFolder = "Assets/Resources/Localization";
@@ -43,6 +44,7 @@ public static class CharacterCsvImporter
     private const string EventProfileJsonPath = ConfigOutputFolder + "/EventProfileDatabase.json";
     private const string StoryNodeJsonPath = ConfigOutputFolder + "/StoryNodeDatabase.json";
     private const string StoryTriggerJsonPath = ConfigOutputFolder + "/StoryTriggerDatabase.json";
+    private const string ObjectiveJsonPath = ConfigOutputFolder + "/ObjectiveDatabase.json";
     private const string LocalizationJsonPath = LocalizationOutputFolder + "/GameText.json";
     [MenuItem("Tools/Config/Import All CSV")]
     public static void ImportAll()
@@ -64,6 +66,7 @@ public static class CharacterCsvImporter
             ImportEventProfiles();
             ImportStoryNodes();
             ImportStoryTriggers();
+            ImportObjectives();
             ImportLocalization();
             AssetDatabase.Refresh();
             Debug.Log("Imported all config CSV files successfully.");
@@ -399,6 +402,47 @@ public static class CharacterCsvImporter
         database.conversions = configs;
         WriteJson(SpiritStoneConversionJsonPath, JsonUtility.ToJson(database, true));
         Debug.Log($"Imported {configs.Count} spirit stone conversions to {SpiritStoneConversionJsonPath}");
+    }
+    [MenuItem("Tools/Config/Import Objective CSV")]
+    public static void ImportObjectives()
+    {
+        var rows = ReadRequiredRows(ObjectiveCsvPath, "Objective CSV");
+        var configs = new List<ObjectiveConfig>();
+        for (var i = 1; i < rows.Count; i++)
+        {
+            var columns = rows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 12)
+            {
+                throw new InvalidOperationException($"Invalid objective row at line {i + 1}.");
+            }
+
+            configs.Add(new ObjectiveConfig
+            {
+                Id = columns[0],
+                Group = columns[1],
+                Type = columns[2],
+                TitleKey = columns[3],
+                ContentKey = columns[4],
+                ConditionType = columns[5],
+                ConditionParam = columns[6],
+                TargetValue = ParseInt(columns[7], nameof(ObjectiveConfig.TargetValue), i + 1),
+                NextId = columns[8],
+                AutoTrack = ParseBool(columns[9]),
+                Visible = ParseBool(columns[10]),
+                Notes = columns[11]
+            });
+        }
+
+        EnsureFolderExists(ConfigOutputFolder);
+        var database = new ObjectiveDatabase();
+        database.objectives = configs;
+        WriteJson(ObjectiveJsonPath, JsonUtility.ToJson(database, true));
+        Debug.Log($"Imported {configs.Count} objectives to {ObjectiveJsonPath}");
     }
     [MenuItem("Tools/Config/Import Stage Balance CSV")]
     public static void ImportStageBalances()
@@ -907,6 +951,7 @@ public static class CharacterCsvImporter
         }
         throw new FormatException($"Failed to parse {fieldName} at line {lineNumber}: {value}");
     }
+
     private static bool ParseBool(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

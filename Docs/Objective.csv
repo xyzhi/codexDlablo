@@ -1,0 +1,8 @@
+Id,Group,Type,TitleKey,ContentKey,ConditionType,ConditionParam,TargetValue,NextId,AutoTrack,Visible,Notes
+OBJ_MAIN_001,Prologue,Main,objective.main.reach_stage_2.title,objective.main.reach_stage_2.content,ReachStage,,2,OBJ_MAIN_002,1,1,第一段主推进目标
+OBJ_MAIN_002,Prologue,Main,objective.main.clear_stage_2.title,objective.main.clear_stage_2.content,ClearStage,,2,OBJ_MAIN_003,1,1,第二段主推进目标
+OBJ_MAIN_003,Prologue,Main,objective.main.reach_stage_3.title,objective.main.reach_stage_3.content,ReachStage,,3,,1,1,第三段主推进目标
+OBJ_STAGE_001,Prologue,Stage,objective.stage.configure_skill.title,objective.stage.configure_skill.content,ConfigureSkill,,1,,0,1,完成一次功法配置
+OBJ_STAGE_002,Prologue,Stage,objective.stage.obtain_equipment.title,objective.stage.obtain_equipment.content,ObtainEquipment,,1,,0,1,获得任意一件装备
+OBJ_STAGE_003,Prologue,Stage,objective.stage.enter_rest.title,objective.stage.enter_rest.content,EnterNodeType,Rest,1,,0,1,进入一次休整节点
+OBJ_HINT_001,Prologue,Hint,objective.hint.skill_slot.title,objective.hint.skill_slot.content,EquippedSkillCountAtLeast,,1,,0,1,提示玩家先配置主动功法

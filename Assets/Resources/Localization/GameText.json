@@ -2004,6 +2004,101 @@
             "key": "",
             "zhHans": "我能感觉到。若只是更快挥刀，我迟早会撞上比我更快的人；可若我先看懂局势，未必要靠蛮力去赢。",
             "en": "I can feel it. If all I do is swing faster, sooner or later I will meet someone faster than me. But if I understand the situation first, I do not always need brute force to win."
+        },
+        {
+            "key": "objective.section_title",
+            "zhHans": "当前目标",
+            "en": "Current Objectives"
+        },
+        {
+            "key": "objective.main_label",
+            "zhHans": "主目标：",
+            "en": "Main: "
+        },
+        {
+            "key": "objective.stage_label",
+            "zhHans": "阶段目标",
+            "en": "Stage Goals"
+        },
+        {
+            "key": "objective.hint_label",
+            "zhHans": "引导建议：",
+            "en": "Guide: "
+        },
+        {
+            "key": "objective.empty",
+            "zhHans": "当前阶段暂无新的目标，继续沿路线推进即可。",
+            "en": "No new objectives for this phase. Keep advancing along the route."
+        },
+        {
+            "key": "objective.main.reach_stage_2.title",
+            "zhHans": "抵达第二关",
+            "en": "Reach Stage 2"
+        },
+        {
+            "key": "objective.main.reach_stage_2.content",
+            "zhHans": "继续沿路线推进，观察第二程的异变与敌势。",
+            "en": "Advance along the route and observe the anomalies and enemy pressure on the second stretch."
+        },
+        {
+            "key": "objective.main.clear_stage_2.title",
+            "zhHans": "通过第二关",
+            "en": "Clear Stage 2"
+        },
+        {
+            "key": "objective.main.clear_stage_2.content",
+            "zhHans": "击败第二程的守关敌人，验证当前构筑是否稳定。",
+            "en": "Defeat the enemies on the second stretch and verify whether the current build is stable."
+        },
+        {
+            "key": "objective.main.reach_stage_3.title",
+            "zhHans": "抵达第三关",
+            "en": "Reach Stage 3"
+        },
+        {
+            "key": "objective.main.reach_stage_3.content",
+            "zhHans": "继续推进主线，准备迎接更完整的试炼节奏。",
+            "en": "Push the main route forward and prepare for a fuller trial rhythm."
+        },
+        {
+            "key": "objective.stage.configure_skill.title",
+            "zhHans": "完成一次功法配置",
+            "en": "Configure one active skill"
+        },
+        {
+            "key": "objective.stage.configure_skill.content",
+            "zhHans": "先在技能总览中调整上场功法，让战斗逻辑成型。",
+            "en": "Adjust the active loadout in the skill overview so the combat logic has a clear shape."
+        },
+        {
+            "key": "objective.stage.obtain_equipment.title",
+            "zhHans": "获得一件装备",
+            "en": "Obtain one piece of equipment"
+        },
+        {
+            "key": "objective.stage.obtain_equipment.content",
+            "zhHans": "先补一件可用装备，观察当前路线的掉落与收益。",
+            "en": "Secure one usable piece of equipment and observe the drops and rewards on the current route."
+        },
+        {
+            "key": "objective.stage.enter_rest.title",
+            "zhHans": "进入一次休整点",
+            "en": "Visit one rest node"
+        },
+        {
+            "key": "objective.stage.enter_rest.content",
+            "zhHans": "在休整节点停留一次，熟悉非战斗整备节奏。",
+            "en": "Stop at a rest node once to get familiar with the non-combat preparation rhythm."
+        },
+        {
+            "key": "objective.hint.skill_slot.title",
+            "zhHans": "先配置至少一门主动功法",
+            "en": "Equip at least one active skill first"
+        },
+        {
+            "key": "objective.hint.skill_slot.content",
+            "zhHans": "当前主动功法位仍为空，建议先打开已学功法进行调整。",
+            "en": "Your active skill slots are still empty. Open the learned skills panel and adjust them first."
         }
     ]
 }

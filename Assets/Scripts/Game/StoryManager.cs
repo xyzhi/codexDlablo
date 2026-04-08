@@ -161,6 +161,8 @@ namespace Wuxing.Game
                 return true;
             }
 
+            GameProgressManager.RegisterObjectiveEvent("TriggerStory", triggerKey, 1);
+            GameProgressManager.RegisterObjectiveEvent("TriggerStory", string.Empty, 1);
             StartSequence(trigger.Id, trigger.OncePerRun, node, onComplete);
             return true;
         }

@@ -24,6 +24,7 @@ public static class ConfigValidator
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
     private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
     private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
+    private const string ObjectiveCsvPath = "Docs/Objective.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
 
     private static readonly HashSet<string> ValidSkillQualities = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -59,6 +60,17 @@ public static class ConfigValidator
     private static readonly HashSet<string> ValidStorySpeakerSides = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "Left", "Right"
+    };
+
+    private static readonly HashSet<string> ValidObjectiveTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "Main", "Stage", "Hint"
+    };
+
+    private static readonly HashSet<string> ValidObjectiveConditions = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "ReachStage", "ClearStage", "EnterNodeType", "WinBattle", "WinNodeTypeBattle", "ObtainEquipment",
+        "GainSkillReward", "ConfigureSkill", "TriggerStory", "EquippedSkillCountAtLeast"
     };
 
     private static readonly HashSet<string> ValidEventRewardModes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -130,6 +142,7 @@ public static class ConfigValidator
             var eventOptionTable = LoadTable(EventOptionCsvPath, "事件选项表");
             var storyNodeTable = LoadTable(StoryNodeCsvPath, "剧情节点表");
             var storyTriggerTable = LoadTable(StoryTriggerCsvPath, "剧情触发表");
+            var objectiveTable = LoadTable(ObjectiveCsvPath, "目标表");
             var localizationTable = LoadTable(LocalizationCsvPath, "语言表");
 
             var localizationKeys = ValidateLocalizationTable(localizationTable, items);
@@ -148,6 +161,7 @@ public static class ConfigValidator
             ValidateStageNodeTable(stageNodeTable, eventProfiles, items);
             var storyNodeIds = ValidateStoryNodeTable(storyNodeTable, localizationKeys, items);
             ValidateStoryTriggerTable(storyTriggerTable, storyNodeIds, items);
+            ValidateObjectiveTable(objectiveTable, localizationKeys, items);
 
             LogValidationItems(items);
         }
@@ -558,6 +572,59 @@ public static class ConfigValidator
 
             DetectMojibake(row, items, "Name");
             DetectMojibake(row, items, "Notes");
+        }
+    }
+
+    private static void ValidateObjectiveTable(CsvTable table, HashSet<string> localizationKeys, List<ValidationItem> items)
+    {
+        ValidateDuplicateIds(table, items);
+        var objectiveIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "Id", "Type", "TitleKey", "ContentKey", "ConditionType", "TargetValue");
+            ValidateIntegerField(row, items, "TargetValue");
+
+            var id = row.Get("Id").Trim();
+            if (!string.IsNullOrEmpty(id))
+            {
+                objectiveIds.Add(id);
+            }
+
+            var type = row.Get("Type").Trim();
+            if (!string.IsNullOrEmpty(type) && !ValidObjectiveTypes.Contains(type))
+            {
+                AddError(items, row, "Type", $"目标类型不合法：'{type}'。当前仅支持 Main/Stage/Hint。");
+            }
+
+            var condition = row.Get("ConditionType").Trim();
+            if (!string.IsNullOrEmpty(condition) && !ValidObjectiveConditions.Contains(condition))
+            {
+                AddError(items, row, "ConditionType", $"目标条件类型不合法：'{condition}'。");
+            }
+
+            var titleKey = row.Get("TitleKey").Trim();
+            if (!string.IsNullOrEmpty(titleKey) && !localizationKeys.Contains(titleKey))
+            {
+                AddError(items, row, "TitleKey", $"目标标题 key 未在 Localization.csv 中定义：'{titleKey}'。");
+            }
+
+            var contentKey = row.Get("ContentKey").Trim();
+            if (!string.IsNullOrEmpty(contentKey) && !localizationKeys.Contains(contentKey))
+            {
+                AddError(items, row, "ContentKey", $"目标内容 key 未在 Localization.csv 中定义：'{contentKey}'。");
+            }
+        }
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            var nextId = row.Get("NextId").Trim();
+            if (!string.IsNullOrEmpty(nextId) && !objectiveIds.Contains(nextId))
+            {
+                AddError(items, row, "NextId", $"目标下一节点不存在：'{nextId}'。");
+            }
         }
     }
     private static void ValidateSpiritStoneTable(CsvTable table, List<ValidationItem> items)

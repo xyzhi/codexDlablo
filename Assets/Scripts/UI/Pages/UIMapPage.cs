@@ -290,6 +290,7 @@ namespace Wuxing.UI
             var eventProfile = GameProgressManager.GetStageEventProfile(stage);
             var nodeType = GameProgressManager.GetNodeType(stage);
             var eventMode = GameProgressManager.GetStageEventMode(stage);
+            GameProgressManager.RegisterObjectiveEvent("EnterNodeType", nodeType.ToString(), 1);
 
             if (GameProgressManager.IsBattleNode(nodeType))
             {
@@ -1126,6 +1127,14 @@ namespace Wuxing.UI
         private string BuildProfileText(bool isEnglish, int currentStage, int maxReachableStage)
         {
             var builder = new StringBuilder();
+            var objectiveSummary = GameProgressManager.BuildObjectiveSummary(isEnglish);
+            if (!string.IsNullOrEmpty(objectiveSummary))
+            {
+                builder.Append(objectiveSummary)
+                    .Append('\n')
+                    .Append('\n');
+            }
+
             builder.Append(LocalizationManager.GetText("map.profile_title"))
                 .Append('\n')
                 .Append(LocalizationManager.GetText("map.profile_current_stage"))

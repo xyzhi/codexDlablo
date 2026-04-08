@@ -30,6 +30,7 @@ namespace Wuxing.Game
         private const string PendingSkillRewardsPrefKey = "game.progress.pending_skill_rewards";
         private const string FixedStageEventsPrefKey = "game.progress.fixed_stage_events";
         private const string RandomStageEventStatesPrefKey = "game.progress.random_stage_events";
+        private const string ObjectiveCountersPrefKey = "game.progress.objective_counters";
         private const string ActiveEffectsPrefKey = "game.progress.active_effects";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
         private const string EquipmentInstanceCounterPrefKey = "game.progress.equipment_instance_counter";
@@ -71,6 +72,7 @@ namespace Wuxing.Game
         private readonly List<SkillRewardOption> pendingSkillRewards = new List<SkillRewardOption>();
         private readonly List<int> completedFixedEventStages = new List<int>();
         private readonly List<StageRandomEventState> randomStageEventStates = new List<StageRandomEventState>();
+        private readonly List<ObjectiveCounterData> objectiveCounters = new List<ObjectiveCounterData>();
         private readonly List<RunEffectData> activeEffects = new List<RunEffectData>();
         private int equipmentInstanceCounter;
 
@@ -120,6 +122,7 @@ namespace Wuxing.Game
                 Instance.pendingSkillRewards.Clear();
                 Instance.completedFixedEventStages.Clear();
                 Instance.randomStageEventStates.Clear();
+                Instance.objectiveCounters.Clear();
                 Instance.activeEffects.Clear();
                 Instance.SaveProgress();
                 ProgressChanged?.Invoke();
@@ -197,6 +200,7 @@ namespace Wuxing.Game
             Instance.pendingSkillRewards.Clear();
             Instance.completedFixedEventStages.Clear();
             Instance.randomStageEventStates.Clear();
+            Instance.objectiveCounters.Clear();
             Instance.activeEffects.Clear();
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
@@ -237,6 +241,8 @@ namespace Wuxing.Game
                     reward.DroppedEquipmentId = drop.Id;
                     reward.DroppedEquipmentInstanceId = instance != null ? instance.InstanceId : string.Empty;
                     reward.DroppedEquipmentName = drop.Name;
+                    Instance.RegisterObjectiveEventInternal("ObtainEquipment", drop.Slot, 1);
+                    Instance.RegisterObjectiveEventInternal("ObtainEquipment", string.Empty, 1);
                 }
             }
 
@@ -550,6 +556,25 @@ namespace Wuxing.Game
             };
 
             return LocalizationManager.GetText("progress.spirit_stones_prefix") + string.Join("  ", parts.ToArray());
+        }
+
+        public static void RegisterObjectiveEvent(string eventType, string conditionParam = "", int amount = 1)
+        {
+            EnsureInstance();
+            if (Instance == null || string.IsNullOrEmpty(eventType) || amount <= 0)
+            {
+                return;
+            }
+
+            Instance.RegisterObjectiveEventInternal(eventType, conditionParam, amount);
+            Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static string BuildObjectiveSummary(bool english)
+        {
+            EnsureInstance();
+            return Instance != null ? Instance.BuildObjectiveSummaryInternal(english) : string.Empty;
         }
 
         public static string BuildSpiritStoneGainText(BattleRewardResult reward, bool english, bool richText = false)
@@ -1122,6 +1147,8 @@ namespace Wuxing.Game
                     reward.DroppedEquipmentId = drop.Id;
                     reward.DroppedEquipmentInstanceId = instance != null ? instance.InstanceId : string.Empty;
                     reward.DroppedEquipmentName = drop.Name;
+                    Instance.RegisterObjectiveEventInternal("ObtainEquipment", drop.Slot, 1);
+                    Instance.RegisterObjectiveEventInternal("ObtainEquipment", string.Empty, 1);
                 }
             }
 
@@ -1176,6 +1203,8 @@ namespace Wuxing.Game
             option.CurrentLevel = previousLevel;
             option.ResultLevel = nextLevel;
             option.IsUpgrade = alreadyKnown;
+            Instance.RegisterObjectiveEventInternal("GainSkillReward", option.SkillId, 1);
+            Instance.RegisterObjectiveEventInternal("GainSkillReward", string.Empty, 1);
 
             Instance.pendingSkillRewards.Clear();
             Instance.SaveProgress();
@@ -1274,6 +1303,11 @@ namespace Wuxing.Game
             Instance.LastBattleVictory = isVictory;
             Instance.LastBattleStage = Mathf.Max(1, stage);
             Instance.LastBattleRounds = Mathf.Max(0, rounds);
+            if (isVictory)
+            {
+                Instance.RegisterObjectiveEventInternal("WinBattle", string.Empty, 1);
+                Instance.RegisterObjectiveEventInternal("WinNodeTypeBattle", GetNodeType(stage).ToString(), 1);
+            }
             Instance.SaveProgress();
             ProgressChanged?.Invoke();
         }
@@ -1702,13 +1736,33 @@ namespace Wuxing.Game
 
         public static string BuildCurrentObjective(bool english)
         {
-            var currentStage = GetCurrentStage();
-            if (currentStage <= 0)
+            EnsureInstance();
+            if (Instance == null)
             {
                 return LocalizationManager.GetText("progress.current_objective_start");
             }
 
-            return string.Format(LocalizationManager.GetText("progress.current_objective_stage"), currentStage);
+            var summary = Instance.BuildObjectiveSummaryInternal(english);
+            if (!string.IsNullOrEmpty(summary))
+            {
+                var lines = summary.Split('\n');
+                for (var i = 0; i < lines.Length; i++)
+                {
+                    var line = lines[i] != null ? lines[i].Trim() : string.Empty;
+                    if (string.IsNullOrEmpty(line)
+                        || string.Equals(line, LocalizationManager.GetText("objective.section_title"), StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    return line;
+                }
+            }
+
+            var currentStage = GetCurrentStage();
+            return currentStage <= 0
+                ? LocalizationManager.GetText("progress.current_objective_start")
+                : string.Format(LocalizationManager.GetText("progress.current_objective_stage"), currentStage);
         }
 
         public static int GetNodeMonthCost(int stage)
@@ -1911,6 +1965,7 @@ namespace Wuxing.Game
             LoadPendingSkillRewards();
             LoadCompletedFixedEventStages();
             LoadRandomStageEventStates();
+            LoadObjectiveCounters();
             LoadActiveEffects();
         }
 
@@ -1938,6 +1993,7 @@ namespace Wuxing.Game
             PlayerPrefs.SetString(PendingSkillRewardsPrefKey, SerializePendingSkillRewards());
             PlayerPrefs.SetString(FixedStageEventsPrefKey, SerializeCompletedFixedEventStages());
             PlayerPrefs.SetString(RandomStageEventStatesPrefKey, SerializeRandomStageEventStates());
+            PlayerPrefs.SetString(ObjectiveCountersPrefKey, SerializeObjectiveCounters());
             PlayerPrefs.SetString(ActiveEffectsPrefKey, SerializeActiveEffects());
             PlayerPrefs.SetString(RunDataSnapshotPrefKey, JsonUtility.ToJson(BuildRunDataSnapshot()));
             PlayerPrefs.Save();
@@ -2476,6 +2532,8 @@ namespace Wuxing.Game
             }
 
             entry.EquippedActiveSkillIds[slotIndex] = normalizedSkillId;
+            RegisterObjectiveEventInternal("ConfigureSkill", characterId, 1);
+            RegisterObjectiveEventInternal("ConfigureSkill", string.Empty, 1);
         }
 
         private void UnequipActiveSkillInternal(string characterId, int slotIndex)
@@ -2488,6 +2546,8 @@ namespace Wuxing.Game
             }
 
             entry.EquippedActiveSkillIds[slotIndex] = string.Empty;
+            RegisterObjectiveEventInternal("ConfigureSkill", characterId, 1);
+            RegisterObjectiveEventInternal("ConfigureSkill", string.Empty, 1);
         }
 
         private void EnsureEquippedActiveSkills(CharacterRunData entry)
@@ -3474,6 +3534,268 @@ namespace Wuxing.Game
             }
         }
 
+        private void RegisterObjectiveEventInternal(string eventType, string conditionParam, int amount)
+        {
+            var normalizedEventType = NormalizeObjectiveToken(eventType);
+            if (string.IsNullOrEmpty(normalizedEventType) || amount <= 0)
+            {
+                return;
+            }
+
+            var normalizedParam = NormalizeObjectiveToken(conditionParam);
+            for (var i = 0; i < objectiveCounters.Count; i++)
+            {
+                var counter = objectiveCounters[i];
+                if (counter == null
+                    || !string.Equals(counter.EventType, normalizedEventType, StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(counter.ConditionParam, normalizedParam, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                counter.Value += amount;
+                return;
+            }
+
+            objectiveCounters.Add(new ObjectiveCounterData
+            {
+                EventType = normalizedEventType,
+                ConditionParam = normalizedParam,
+                Value = amount
+            });
+        }
+
+        private string BuildObjectiveSummaryInternal(bool english)
+        {
+            var database = ObjectiveDatabaseLoader.Load();
+            if (database == null || database.Objectives == null || database.Objectives.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var predecessorMap = BuildObjectivePredecessorMap(database);
+            ObjectiveConfig mainObjective = null;
+            ObjectiveConfig hintObjective = null;
+            var stageObjectives = new List<ObjectiveConfig>();
+
+            for (var i = 0; i < database.Objectives.Count; i++)
+            {
+                var objective = database.Objectives[i];
+                if (objective == null || !objective.Visible)
+                {
+                    continue;
+                }
+
+                if (!IsObjectiveUnlocked(objective, predecessorMap) || IsObjectiveCompleted(objective))
+                {
+                    continue;
+                }
+
+                switch (NormalizeObjectiveToken(objective.Type))
+                {
+                    case "main":
+                        if (mainObjective == null)
+                        {
+                            mainObjective = objective;
+                        }
+                        break;
+                    case "stage":
+                        if (stageObjectives.Count < 3)
+                        {
+                            stageObjectives.Add(objective);
+                        }
+                        break;
+                    case "hint":
+                        if (hintObjective == null)
+                        {
+                            hintObjective = objective;
+                        }
+                        break;
+                }
+            }
+
+            var builder = new StringBuilder();
+            builder.Append(LocalizationManager.GetText("objective.section_title"));
+
+            if (mainObjective == null && stageObjectives.Count == 0 && hintObjective == null)
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("objective.empty"));
+                return builder.ToString();
+            }
+
+            if (mainObjective != null)
+            {
+                builder.Append('\n')
+                    .Append(LocalizationManager.GetText("objective.main_label"))
+                    .Append(GetObjectiveLocalizedText(mainObjective.TitleKey))
+                    .Append('\n')
+                    .Append(GetObjectiveLocalizedText(mainObjective.ContentKey));
+            }
+
+            if (stageObjectives.Count > 0)
+            {
+                builder.Append('\n')
+                    .Append('\n')
+                    .Append(LocalizationManager.GetText("objective.stage_label"));
+                for (var i = 0; i < stageObjectives.Count; i++)
+                {
+                    var objective = stageObjectives[i];
+                    builder.Append('\n')
+                        .Append("• ")
+                        .Append(GetObjectiveLocalizedText(objective.TitleKey));
+
+                    var content = GetObjectiveLocalizedText(objective.ContentKey);
+                    if (!string.IsNullOrEmpty(content))
+                    {
+                        builder.Append('\n')
+                            .Append("  ")
+                            .Append(content);
+                    }
+                }
+            }
+
+            if (hintObjective != null)
+            {
+                builder.Append('\n')
+                    .Append('\n')
+                    .Append(LocalizationManager.GetText("objective.hint_label"))
+                    .Append(GetObjectiveLocalizedText(hintObjective.TitleKey));
+
+                var hintContent = GetObjectiveLocalizedText(hintObjective.ContentKey);
+                if (!string.IsNullOrEmpty(hintContent))
+                {
+                    builder.Append('\n')
+                        .Append(hintContent);
+                }
+            }
+
+            return builder.ToString();
+        }
+
+        private Dictionary<string, string> BuildObjectivePredecessorMap(ObjectiveDatabase database)
+        {
+            var results = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (database == null || database.Objectives == null)
+            {
+                return results;
+            }
+
+            for (var i = 0; i < database.Objectives.Count; i++)
+            {
+                var objective = database.Objectives[i];
+                if (objective == null || string.IsNullOrEmpty(objective.Id) || string.IsNullOrEmpty(objective.NextId))
+                {
+                    continue;
+                }
+
+                results[objective.NextId.Trim()] = objective.Id.Trim();
+            }
+
+            return results;
+        }
+
+        private bool IsObjectiveUnlocked(ObjectiveConfig objective, Dictionary<string, string> predecessorMap)
+        {
+            if (objective == null || predecessorMap == null)
+            {
+                return false;
+            }
+
+            string predecessorId;
+            if (!predecessorMap.TryGetValue(objective.Id, out predecessorId) || string.IsNullOrEmpty(predecessorId))
+            {
+                return true;
+            }
+
+            var database = ObjectiveDatabaseLoader.Load();
+            var predecessor = database != null ? database.GetById(predecessorId) : null;
+            return predecessor == null || IsObjectiveCompleted(predecessor);
+        }
+
+        private bool IsObjectiveCompleted(ObjectiveConfig objective)
+        {
+            if (objective == null)
+            {
+                return false;
+            }
+
+            var targetValue = Mathf.Max(1, objective.TargetValue);
+            var conditionType = NormalizeObjectiveToken(objective.ConditionType);
+            var conditionParam = NormalizeObjectiveToken(objective.ConditionParam);
+
+            switch (conditionType)
+            {
+                case "reachstage":
+                    return CurrentStage >= targetValue || HighestClearedStage >= targetValue;
+                case "clearstage":
+                    return HighestClearedStage >= targetValue;
+                case "enternodetype":
+                    return GetObjectiveEventCount("EnterNodeType", conditionParam) >= targetValue;
+                case "winbattle":
+                    return GetObjectiveEventCount("WinBattle", string.Empty) >= targetValue;
+                case "winnodetypebattle":
+                    return GetObjectiveEventCount("WinNodeTypeBattle", conditionParam) >= targetValue;
+                case "obtainequipment":
+                    return GetObjectiveEventCount("ObtainEquipment", conditionParam) >= targetValue;
+                case "gainskillreward":
+                    return GetObjectiveEventCount("GainSkillReward", conditionParam) >= targetValue;
+                case "configureskill":
+                    return GetObjectiveEventCount("ConfigureSkill", conditionParam) >= targetValue;
+                case "triggerstory":
+                    return GetObjectiveEventCount("TriggerStory", conditionParam) >= targetValue;
+                case "equippedskillcountatleast":
+                    return GetEquippedActiveSkillCount(GetPrimaryCharacterId()) >= targetValue;
+                default:
+                    return false;
+            }
+        }
+
+        private int GetObjectiveEventCount(string eventType, string conditionParam)
+        {
+            var normalizedEventType = NormalizeObjectiveToken(eventType);
+            var normalizedParam = NormalizeObjectiveToken(conditionParam);
+            for (var i = 0; i < objectiveCounters.Count; i++)
+            {
+                var counter = objectiveCounters[i];
+                if (counter == null
+                    || !string.Equals(counter.EventType, normalizedEventType, StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(counter.ConditionParam, normalizedParam, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                return Mathf.Max(0, counter.Value);
+            }
+
+            return 0;
+        }
+
+        private static string NormalizeObjectiveToken(string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim().ToLowerInvariant();
+        }
+
+        private static string GetObjectiveLocalizedText(string key)
+        {
+            return string.IsNullOrEmpty(key) ? string.Empty : LocalizationManager.GetText(key);
+        }
+
+        private int GetEquippedActiveSkillCount(string characterId)
+        {
+            var equippedSkillIds = GetEquippedActiveSkillIds(characterId);
+            var count = 0;
+            for (var i = 0; i < equippedSkillIds.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(equippedSkillIds[i]))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+
         private void ResetSpiritStones()
         {
             SpiritStones = 0;
@@ -3846,6 +4168,61 @@ namespace Wuxing.Game
 
             return JsonUtility.ToJson(wrapper);
         }
+
+        private void LoadObjectiveCounters()
+        {
+            objectiveCounters.Clear();
+            var raw = PlayerPrefs.GetString(ObjectiveCountersPrefKey, string.Empty);
+            if (string.IsNullOrEmpty(raw))
+            {
+                return;
+            }
+
+            var wrapper = JsonUtility.FromJson<ObjectiveCounterListWrapper>(raw);
+            if (wrapper == null || wrapper.Entries == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < wrapper.Entries.Count; i++)
+            {
+                var entry = wrapper.Entries[i];
+                if (entry == null || string.IsNullOrEmpty(entry.EventType) || entry.Value <= 0)
+                {
+                    continue;
+                }
+
+                objectiveCounters.Add(new ObjectiveCounterData
+                {
+                    EventType = NormalizeObjectiveToken(entry.EventType),
+                    ConditionParam = NormalizeObjectiveToken(entry.ConditionParam),
+                    Value = Mathf.Max(0, entry.Value)
+                });
+            }
+        }
+
+        private string SerializeObjectiveCounters()
+        {
+            var wrapper = new ObjectiveCounterListWrapper();
+            for (var i = 0; i < objectiveCounters.Count; i++)
+            {
+                var counter = objectiveCounters[i];
+                if (counter == null || string.IsNullOrEmpty(counter.EventType) || counter.Value <= 0)
+                {
+                    continue;
+                }
+
+                wrapper.Entries.Add(new ObjectiveCounterData
+                {
+                    EventType = counter.EventType,
+                    ConditionParam = counter.ConditionParam,
+                    Value = counter.Value
+                });
+            }
+
+            return JsonUtility.ToJson(wrapper);
+        }
+
         private void LoadCompletedFixedEventStages()
         {
             completedFixedEventStages.Clear();
@@ -3938,6 +4315,20 @@ namespace Wuxing.Game
         private class RunEffectDataListWrapper
         {
             public List<RunEffectData> Entries = new List<RunEffectData>();
+        }
+
+        [Serializable]
+        private class ObjectiveCounterData
+        {
+            public string EventType;
+            public string ConditionParam;
+            public int Value;
+        }
+
+        [Serializable]
+        private class ObjectiveCounterListWrapper
+        {
+            public List<ObjectiveCounterData> Entries = new List<ObjectiveCounterData>();
         }
 
         [Serializable]

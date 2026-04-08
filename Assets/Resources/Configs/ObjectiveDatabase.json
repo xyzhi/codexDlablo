@@ -1,0 +1,102 @@
+{
+    "objectives": [
+        {
+            "Id": "OBJ_MAIN_001",
+            "Group": "Prologue",
+            "Type": "Main",
+            "TitleKey": "objective.main.reach_stage_2.title",
+            "ContentKey": "objective.main.reach_stage_2.content",
+            "ConditionType": "ReachStage",
+            "ConditionParam": "",
+            "TargetValue": 2,
+            "NextId": "OBJ_MAIN_002",
+            "AutoTrack": true,
+            "Visible": true,
+            "Notes": "第一段主推进目标"
+        },
+        {
+            "Id": "OBJ_MAIN_002",
+            "Group": "Prologue",
+            "Type": "Main",
+            "TitleKey": "objective.main.clear_stage_2.title",
+            "ContentKey": "objective.main.clear_stage_2.content",
+            "ConditionType": "ClearStage",
+            "ConditionParam": "",
+            "TargetValue": 2,
+            "NextId": "OBJ_MAIN_003",
+            "AutoTrack": true,
+            "Visible": true,
+            "Notes": "第二段主推进目标"
+        },
+        {
+            "Id": "OBJ_MAIN_003",
+            "Group": "Prologue",
+            "Type": "Main",
+            "TitleKey": "objective.main.reach_stage_3.title",
+            "ContentKey": "objective.main.reach_stage_3.content",
+            "ConditionType": "ReachStage",
+            "ConditionParam": "",
+            "TargetValue": 3,
+            "NextId": "",
+            "AutoTrack": true,
+            "Visible": true,
+            "Notes": "第三段主推进目标"
+        },
+        {
+            "Id": "OBJ_STAGE_001",
+            "Group": "Prologue",
+            "Type": "Stage",
+            "TitleKey": "objective.stage.configure_skill.title",
+            "ContentKey": "objective.stage.configure_skill.content",
+            "ConditionType": "ConfigureSkill",
+            "ConditionParam": "",
+            "TargetValue": 1,
+            "NextId": "",
+            "AutoTrack": false,
+            "Visible": true,
+            "Notes": "完成一次功法配置"
+        },
+        {
+            "Id": "OBJ_STAGE_002",
+            "Group": "Prologue",
+            "Type": "Stage",
+            "TitleKey": "objective.stage.obtain_equipment.title",
+            "ContentKey": "objective.stage.obtain_equipment.content",
+            "ConditionType": "ObtainEquipment",
+            "ConditionParam": "",
+            "TargetValue": 1,
+            "NextId": "",
+            "AutoTrack": false,
+            "Visible": true,
+            "Notes": "获得任意一件装备"
+        },
+        {
+            "Id": "OBJ_STAGE_003",
+            "Group": "Prologue",
+            "Type": "Stage",
+            "TitleKey": "objective.stage.enter_rest.title",
+            "ContentKey": "objective.stage.enter_rest.content",
+            "ConditionType": "EnterNodeType",
+            "ConditionParam": "Rest",
+            "TargetValue": 1,
+            "NextId": "",
+            "AutoTrack": false,
+            "Visible": true,
+            "Notes": "进入一次休整节点"
+        },
+        {
+            "Id": "OBJ_HINT_001",
+            "Group": "Prologue",
+            "Type": "Hint",
+            "TitleKey": "objective.hint.skill_slot.title",
+            "ContentKey": "objective.hint.skill_slot.content",
+            "ConditionType": "EquippedSkillCountAtLeast",
+            "ConditionParam": "",
+            "TargetValue": 1,
+            "NextId": "",
+            "AutoTrack": false,
+            "Visible": true,
+            "Notes": "提示玩家先配置主动功法"
+        }
+    ]
+}
