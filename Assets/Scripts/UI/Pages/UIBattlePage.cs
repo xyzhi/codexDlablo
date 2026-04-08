@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -29,6 +30,20 @@ namespace Wuxing.UI
         private const float BattleFooterBottom = 26f;
         private const float BattleFooterHeight = 78f;
         private const float BattleLogBottomGap = 18f;
+        private const float CardEntryDuration = 0.24f;
+        private const float CardPulseDuration = 0.3f;
+        private const float CardHitDuration = 0.22f;
+        private const float CardDeathDuration = 0.42f;
+        private const float FloatTextDuration = 0.7f;
+        private const float ProjectileDuration = 0.18f;
+        private static readonly Color ActionHighlightColor = new Color(0.98f, 0.9f, 0.56f, 1f);
+        private static readonly Color HitFlashColor = new Color(1f, 0.55f, 0.55f, 1f);
+        private static readonly Color HealFlashColor = new Color(0.58f, 0.92f, 0.68f, 1f);
+        private static readonly Color DamageFloatColor = new Color(1f, 0.46f, 0.46f, 1f);
+        private static readonly Color HealFloatColor = new Color(0.56f, 0.94f, 0.66f, 1f);
+        private static readonly Color ShieldFloatColor = new Color(0.52f, 0.84f, 1f, 1f);
+        private static readonly Color ProjectileColor = new Color(1f, 0.91f, 0.64f, 0.95f);
+        private static readonly Color DeathFlashColor = new Color(1f, 0.28f, 0.28f, 1f);
 
         [SerializeField] private GameObject battleLogOverlay;
         [SerializeField] private Button backButton;
@@ -82,6 +97,13 @@ namespace Wuxing.UI
         private bool canReopenBattleResultPopup;
         private int displayedBattleRoundCount;
         private int displayedBattleActionCount;
+        private readonly Dictionary<string, Button> playerCardLookup = new Dictionary<string, Button>(System.StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Button> enemyCardLookup = new Dictionary<string, Button>(System.StringComparer.OrdinalIgnoreCase);
+        private readonly List<BattleUnitSnapshot> currentPlayerSnapshots = new List<BattleUnitSnapshot>();
+        private readonly List<BattleUnitSnapshot> currentEnemySnapshots = new List<BattleUnitSnapshot>();
+        private readonly List<Graphic> transientBattleEffects = new List<Graphic>();
+        private readonly HashSet<string> defeatedPlayerUnits = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+        private readonly HashSet<string> defeatedEnemyUnits = new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
 
         public override void OnOpen(object data)
         {
@@ -449,8 +471,11 @@ namespace Wuxing.UI
             displayedBattleRoundCount = 0;
             displayedBattleActionCount = 0;
             ResetLogFollow();
+            ClearTransientBattleEffects();
             ApplyStatus(LocalizationManager.GetText("battle.status_idle"));
             ApplyBattleLog(string.Empty);
+            PlayInitialTeamEntryAnimation();
+            yield return new WaitForSeconds(CardEntryDuration * 0.85f);
 
             var playback = BattleManager.RunSampleBattlePlayback();
             for (var i = 0; i < playback.Events.Count; i++)
@@ -479,6 +504,11 @@ namespace Wuxing.UI
             ClearStoredBattleResult();
             displayedBattleRoundCount = 0;
             displayedBattleActionCount = 0;
+            ClearTransientBattleEffects();
+            currentPlayerSnapshots.Clear();
+            currentEnemySnapshots.Clear();
+            defeatedPlayerUnits.Clear();
+            defeatedEnemyUnits.Clear();
             RefreshPreview();
         }
 
@@ -493,6 +523,11 @@ namespace Wuxing.UI
 
         private void ApplyBattleEvent(BattleEvent battleEvent)
         {
+            var previousPlayerSnapshots = CloneSnapshots(currentPlayerSnapshots);
+            var previousEnemySnapshots = CloneSnapshots(currentEnemySnapshots);
+            var nextPlayerSnapshots = ParseBattleSnapshots(battleEvent != null ? battleEvent.PlayerTeamSummary : null, true);
+            var nextEnemySnapshots = ParseBattleSnapshots(battleEvent != null ? battleEvent.EnemyTeamSummary : null, false);
+
             if (playerTeamText != null)
             {
                 playerTeamText.text = string.Empty;
@@ -505,6 +540,8 @@ namespace Wuxing.UI
 
             RefreshTeamCardsFromSummary(battleEvent.PlayerTeamSummary, battleEvent.PlayerEquipmentSummary, true, playerCardRoot, playerCardTemplate, playerTeamCardButtons);
             RefreshTeamCardsFromSummary(battleEvent.EnemyTeamSummary, battleEvent.EnemyEquipmentSummary, false, enemyCardRoot, enemyCardTemplate, enemyTeamCardButtons);
+            UpdateSnapshots(currentPlayerSnapshots, nextPlayerSnapshots);
+            UpdateSnapshots(currentEnemySnapshots, nextEnemySnapshots);
 
             if (playerEquipmentText != null)
             {
@@ -533,6 +570,8 @@ namespace Wuxing.UI
                     ? LocalizationManager.GetText("battle.status_victory")
                     : LocalizationManager.GetText("battle.status_defeat"));
             }
+
+            PlayBattleEventPresentation(battleEvent, previousPlayerSnapshots, previousEnemySnapshots, nextPlayerSnapshots, nextEnemySnapshots);
         }
 
         private void RefreshPreview()
@@ -570,6 +609,13 @@ namespace Wuxing.UI
 
             RefreshTeamCardsFromSummary(playerSummary, playerEquipmentSummary, true, playerCardRoot, playerCardTemplate, playerTeamCardButtons);
             RefreshTeamCardsFromSummary(enemySummary, enemyEquipmentSummary, false, enemyCardRoot, enemyCardTemplate, enemyTeamCardButtons);
+            UpdateSnapshots(currentPlayerSnapshots, ParseBattleSnapshots(playerSummary, true));
+            UpdateSnapshots(currentEnemySnapshots, ParseBattleSnapshots(enemySummary, false));
+            if (!openedForEquipment && battlePlaybackCoroutine == null)
+            {
+                HideCardsBeforeBattleStart(playerTeamCardButtons);
+                HideCardsBeforeBattleStart(enemyTeamCardButtons);
+            }
 
             if (playerEquipmentText != null)
             {
@@ -1371,6 +1417,10 @@ namespace Wuxing.UI
                 return;
             }
 
+            var lookup = playerSide ? playerCardLookup : enemyCardLookup;
+            lookup.Clear();
+            var defeatedUnits = playerSide ? defeatedPlayerUnits : defeatedEnemyUnits;
+
             for (var i = 0; i < buttons.Count; i++)
             {
                 if (buttons[i] != null)
@@ -1385,6 +1435,8 @@ namespace Wuxing.UI
                 var button = GetOrCreateTeamCardButton(root, template, buttons, i);
                 ConfigureTeamCardVisual(button);
                 BindTeamCard(button, cards[i]);
+                ApplyDefeatedCardState(button, defeatedUnits.Contains(cards[i].Title));
+                RegisterTeamCardLookup(lookup, cards[i], button);
                 var rect = button.GetComponent<RectTransform>();
                 if (rect != null)
                 {
@@ -1624,6 +1676,7 @@ namespace Wuxing.UI
             button.gameObject.SetActive(true);
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(delegate { OpenCardDetail(card); });
+            ResetTeamCardVisualState(button);
 
             UICardChromeUtility.Apply(button, card.BorderColor, false);
 
@@ -1664,6 +1717,820 @@ namespace Wuxing.UI
                 progressLabel.text = card.ProgressLabel ?? string.Empty;
                 progressLabel.gameObject.SetActive(card.ShowProgress);
             }
+        }
+
+        private void RegisterTeamCardLookup(Dictionary<string, Button> lookup, UICardData card, Button button)
+        {
+            if (lookup == null || card == null || button == null || string.IsNullOrEmpty(card.Title))
+            {
+                return;
+            }
+
+            lookup[card.Title.Trim()] = button;
+        }
+
+        private static void ResetTeamCardVisualState(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var rect = button.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.localScale = Vector3.one;
+                rect.localRotation = Quaternion.identity;
+            }
+
+            var graphic = button.targetGraphic;
+            if (graphic != null)
+            {
+                graphic.color = Color.white;
+            }
+
+            var canvasGroup = button.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = 1f;
+            }
+        }
+
+        private static void ApplyDefeatedCardState(Button button, bool defeated)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var graphic = button.targetGraphic;
+            if (graphic != null)
+            {
+                graphic.color = defeated
+                    ? new Color(0.38f, 0.38f, 0.4f, 0.92f)
+                    : Color.white;
+            }
+
+            var title = button.transform.Find("TitleText")?.GetComponent<Text>();
+            var subtitle = button.transform.Find("SubtitleText")?.GetComponent<Text>();
+            var progressLabel = button.transform.Find("ProgressRoot/ProgressLabel")?.GetComponent<Text>();
+            ApplyTextDefeatedTint(title, defeated);
+            ApplyTextDefeatedTint(subtitle, defeated);
+            ApplyTextDefeatedTint(progressLabel, defeated);
+
+            var progressFill = button.transform.Find("ProgressRoot/Fill")?.GetComponent<Image>();
+            if (progressFill != null)
+            {
+                progressFill.color = defeated
+                    ? new Color(0.35f, 0.35f, 0.37f, 0.95f)
+                    : new Color(0.92f, 0.23f, 0.24f, 1f);
+            }
+
+            var canvasGroup = EnsureCanvasGroup(button.gameObject);
+            if (canvasGroup != null)
+            {
+                canvasGroup.alpha = defeated ? 0.72f : 1f;
+            }
+        }
+
+        private static void ApplyTextDefeatedTint(Text text, bool defeated)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            text.color = defeated
+                ? new Color(0.72f, 0.72f, 0.74f, 0.95f)
+                : Color.white;
+        }
+
+        private void PlayInitialTeamEntryAnimation()
+        {
+            PrepareCardsForEntry(playerTeamCardButtons);
+            PrepareCardsForEntry(enemyTeamCardButtons);
+            PlayEntryAnimationForButtons(playerTeamCardButtons, true);
+            PlayEntryAnimationForButtons(enemyTeamCardButtons, false);
+        }
+
+        private static void HideCardsBeforeBattleStart(List<Button> buttons)
+        {
+            if (buttons == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                var button = buttons[i];
+                if (button == null || !button.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                ResetTeamCardVisualState(button);
+                var canvasGroup = EnsureCanvasGroup(button.gameObject);
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 0f;
+                }
+            }
+        }
+
+        private static void PrepareCardsForEntry(List<Button> buttons)
+        {
+            if (buttons == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                var button = buttons[i];
+                if (button == null || !button.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                var rect = button.GetComponent<RectTransform>();
+                var canvasGroup = EnsureCanvasGroup(button.gameObject);
+                if (rect != null)
+                {
+                    rect.localScale = new Vector3(0.92f, 0.92f, 1f);
+                }
+
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 0f;
+                }
+            }
+        }
+
+        private void PlayEntryAnimationForButtons(List<Button> buttons, bool playerSide)
+        {
+            if (buttons == null)
+            {
+                return;
+            }
+
+            var order = 0;
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                var button = buttons[i];
+                if (button == null || !button.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                StartCoroutine(PlayCardEntryAnimation(button, playerSide, order));
+                order++;
+            }
+        }
+
+        private IEnumerator PlayCardEntryAnimation(Button button, bool playerSide, int order)
+        {
+            if (button == null)
+            {
+                yield break;
+            }
+
+            var rect = button.GetComponent<RectTransform>();
+            if (rect == null)
+            {
+                yield break;
+            }
+
+            var canvasGroup = EnsureCanvasGroup(button.gameObject);
+            var basePosition = rect.anchoredPosition;
+            var startPosition = basePosition + new Vector2(playerSide ? -32f : 32f, 16f);
+            var startScale = new Vector3(0.92f, 0.92f, 1f);
+            var delay = order * 0.035f;
+            if (delay > 0f)
+            {
+                yield return new WaitForSeconds(delay);
+            }
+
+            canvasGroup.alpha = 0f;
+            rect.anchoredPosition = startPosition;
+            rect.localScale = startScale;
+
+            var elapsed = 0f;
+            while (elapsed < CardEntryDuration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / CardEntryDuration);
+                var eased = EaseOutCubic(t);
+                canvasGroup.alpha = Mathf.Lerp(0f, 1f, eased);
+                rect.anchoredPosition = Vector2.LerpUnclamped(startPosition, basePosition, eased);
+                rect.localScale = Vector3.LerpUnclamped(startScale, Vector3.one, eased);
+                yield return null;
+            }
+
+            canvasGroup.alpha = 1f;
+            rect.anchoredPosition = basePosition;
+            rect.localScale = Vector3.one;
+        }
+
+        private void PlayBattleEventPresentation(
+            BattleEvent battleEvent,
+            List<BattleUnitSnapshot> previousPlayerSnapshots,
+            List<BattleUnitSnapshot> previousEnemySnapshots,
+            List<BattleUnitSnapshot> nextPlayerSnapshots,
+            List<BattleUnitSnapshot> nextEnemySnapshots)
+        {
+            if (battleEvent == null)
+            {
+                return;
+            }
+
+            var actor = FindActorSnapshot(battleEvent, nextPlayerSnapshots, nextEnemySnapshots);
+            var impacts = BuildImpactList(previousPlayerSnapshots, previousEnemySnapshots, nextPlayerSnapshots, nextEnemySnapshots);
+
+            if (actor != null && TryGetDisplayedCard(actor.Name, actor.PlayerSide, out var actorButton))
+            {
+                StartCoroutine(PlayCardPulseAnimation(actorButton, ActionHighlightColor, 1.08f, CardPulseDuration));
+            }
+
+            for (var i = 0; i < impacts.Count; i++)
+            {
+                var impact = impacts[i];
+                if (!TryGetDisplayedCard(impact.Name, impact.PlayerSide, out var targetButton))
+                {
+                    continue;
+                }
+
+                if (impact.HpDelta < 0)
+                {
+                    var targetSnapshot = FindSnapshotByName(nextPlayerSnapshots, impact.Name) ?? FindSnapshotByName(nextEnemySnapshots, impact.Name);
+                    var isDead = targetSnapshot != null && targetSnapshot.CurrentHp <= 0;
+                    if (isDead)
+                    {
+                        TrackDefeatedUnit(impact.Name, impact.PlayerSide, true);
+                        StartCoroutine(PlayCardDeathAnimation(targetButton));
+                        CreateFloatingValue(targetButton.transform as RectTransform, impact.HpDelta.ToString(CultureInfo.InvariantCulture), DeathFlashColor);
+                    }
+                    else
+                    {
+                        TrackDefeatedUnit(impact.Name, impact.PlayerSide, false);
+                        StartCoroutine(PlayCardHitAnimation(targetButton, HitFlashColor));
+                        CreateFloatingValue(targetButton.transform as RectTransform, impact.HpDelta.ToString(CultureInfo.InvariantCulture), DamageFloatColor);
+                    }
+                }
+                else if (impact.HpDelta > 0)
+                {
+                    TrackDefeatedUnit(impact.Name, impact.PlayerSide, false);
+                    StartCoroutine(PlayCardPulseAnimation(targetButton, HealFlashColor, 1.04f, CardPulseDuration * 0.9f));
+                    CreateFloatingValue(targetButton.transform as RectTransform, "+" + impact.HpDelta.ToString(CultureInfo.InvariantCulture), HealFloatColor);
+                }
+            }
+
+            if (actor != null && impacts.Count > 0 && TryGetDisplayedCard(actor.Name, actor.PlayerSide, out var sourceButton))
+            {
+                for (var i = 0; i < impacts.Count; i++)
+                {
+                    if (!TryGetDisplayedCard(impacts[i].Name, impacts[i].PlayerSide, out var targetButton))
+                    {
+                        continue;
+                    }
+
+                    if (impacts[i].HpDelta < 0)
+                    {
+                        CreateProjectileEffect(sourceButton.transform as RectTransform, targetButton.transform as RectTransform);
+                    }
+                }
+            }
+
+            if (impacts.Count == 0 && actor != null && TryGetDisplayedCard(actor.Name, actor.PlayerSide, out var fallbackButton))
+            {
+                var shieldToken = LocalizationManager.GetText("battle.log_steadies");
+                var healsToken = LocalizationManager.GetText("battle.log_heals");
+                var log = battleEvent.Log ?? string.Empty;
+                if (!string.IsNullOrEmpty(shieldToken) && log.Contains(shieldToken))
+                {
+                    CreateFloatingValue(fallbackButton.transform as RectTransform, LocalizationManager.Instance != null && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English ? "Shield" : "护盾", ShieldFloatColor);
+                }
+                else if (!string.IsNullOrEmpty(healsToken) && log.Contains(healsToken))
+                {
+                    CreateFloatingValue(fallbackButton.transform as RectTransform, "+", HealFloatColor);
+                }
+            }
+        }
+
+        private static void UpdateSnapshots(List<BattleUnitSnapshot> target, List<BattleUnitSnapshot> source)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            target.Clear();
+            if (source == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < source.Count; i++)
+            {
+                target.Add(source[i].Clone());
+            }
+        }
+
+        private static List<BattleUnitSnapshot> CloneSnapshots(List<BattleUnitSnapshot> snapshots)
+        {
+            var results = new List<BattleUnitSnapshot>();
+            if (snapshots == null)
+            {
+                return results;
+            }
+
+            for (var i = 0; i < snapshots.Count; i++)
+            {
+                results.Add(snapshots[i].Clone());
+            }
+
+            return results;
+        }
+
+        private static List<BattleUnitSnapshot> ParseBattleSnapshots(string teamSummary, bool playerSide)
+        {
+            var results = new List<BattleUnitSnapshot>();
+            if (string.IsNullOrWhiteSpace(teamSummary))
+            {
+                return results;
+            }
+
+            var lines = teamSummary.Split('\n');
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var line = lines[i] != null ? lines[i].Trim() : string.Empty;
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var match = Regex.Match(line, "^(?<name>.+?)\\s+HP\\s+(?<hp>\\d+)\\/(?<max>\\d+)\\s+MP\\s+(?<mp>\\d+)\\/(?<mpmax>\\d+)");
+                if (!match.Success)
+                {
+                    continue;
+                }
+
+                results.Add(new BattleUnitSnapshot
+                {
+                    Name = match.Groups["name"].Value.Trim(),
+                    PlayerSide = playerSide,
+                    CurrentHp = int.Parse(match.Groups["hp"].Value),
+                    MaxHp = int.Parse(match.Groups["max"].Value),
+                    CurrentMp = int.Parse(match.Groups["mp"].Value),
+                    MaxMp = int.Parse(match.Groups["mpmax"].Value)
+                });
+            }
+
+            return results;
+        }
+
+        private static List<BattleImpactInfo> BuildImpactList(
+            List<BattleUnitSnapshot> previousPlayerSnapshots,
+            List<BattleUnitSnapshot> previousEnemySnapshots,
+            List<BattleUnitSnapshot> nextPlayerSnapshots,
+            List<BattleUnitSnapshot> nextEnemySnapshots)
+        {
+            var results = new List<BattleImpactInfo>();
+            CollectImpacts(results, previousPlayerSnapshots, nextPlayerSnapshots);
+            CollectImpacts(results, previousEnemySnapshots, nextEnemySnapshots);
+            return results;
+        }
+
+        private static void CollectImpacts(List<BattleImpactInfo> results, List<BattleUnitSnapshot> previousSnapshots, List<BattleUnitSnapshot> nextSnapshots)
+        {
+            if (results == null || nextSnapshots == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < nextSnapshots.Count; i++)
+            {
+                var next = nextSnapshots[i];
+                var previous = FindSnapshotByName(previousSnapshots, next.Name);
+                if (previous == null)
+                {
+                    continue;
+                }
+
+                var hpDelta = next.CurrentHp - previous.CurrentHp;
+                if (hpDelta == 0)
+                {
+                    continue;
+                }
+
+                results.Add(new BattleImpactInfo
+                {
+                    Name = next.Name,
+                    PlayerSide = next.PlayerSide,
+                    HpDelta = hpDelta
+                });
+            }
+        }
+
+        private static BattleUnitSnapshot FindSnapshotByName(List<BattleUnitSnapshot> snapshots, string name)
+        {
+            if (snapshots == null || string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            for (var i = 0; i < snapshots.Count; i++)
+            {
+                if (string.Equals(snapshots[i].Name, name, System.StringComparison.OrdinalIgnoreCase))
+                {
+                    return snapshots[i];
+                }
+            }
+
+            return null;
+        }
+
+        private static BattleUnitSnapshot FindActorSnapshot(BattleEvent battleEvent, List<BattleUnitSnapshot> playerSnapshots, List<BattleUnitSnapshot> enemySnapshots)
+        {
+            if (battleEvent == null || string.IsNullOrEmpty(battleEvent.Log))
+            {
+                return null;
+            }
+
+            var snapshots = new List<BattleUnitSnapshot>();
+            if (playerSnapshots != null)
+            {
+                snapshots.AddRange(playerSnapshots);
+            }
+
+            if (enemySnapshots != null)
+            {
+                snapshots.AddRange(enemySnapshots);
+            }
+
+            BattleUnitSnapshot bestMatch = null;
+            var bestIndex = int.MaxValue;
+            for (var i = 0; i < snapshots.Count; i++)
+            {
+                var snapshot = snapshots[i];
+                if (snapshot == null || string.IsNullOrEmpty(snapshot.Name))
+                {
+                    continue;
+                }
+
+                var index = battleEvent.Log.IndexOf(snapshot.Name, System.StringComparison.OrdinalIgnoreCase);
+                if (index < 0 || index >= bestIndex)
+                {
+                    continue;
+                }
+
+                bestIndex = index;
+                bestMatch = snapshot;
+            }
+
+            return bestMatch;
+        }
+
+        private void TrackDefeatedUnit(string name, bool playerSide, bool defeated)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return;
+            }
+
+            var targetSet = playerSide ? defeatedPlayerUnits : defeatedEnemyUnits;
+            if (defeated)
+            {
+                targetSet.Add(name);
+            }
+            else
+            {
+                targetSet.Remove(name);
+            }
+        }
+
+        private bool TryGetDisplayedCard(string name, bool playerSide, out Button button)
+        {
+            button = null;
+            if (string.IsNullOrEmpty(name))
+            {
+                return false;
+            }
+
+            var lookup = playerSide ? playerCardLookup : enemyCardLookup;
+            return lookup.TryGetValue(name.Trim(), out button) && button != null;
+        }
+
+        private IEnumerator PlayCardPulseAnimation(Button button, Color flashColor, float targetScale, float duration)
+        {
+            if (button == null)
+            {
+                yield break;
+            }
+
+            var rect = button.GetComponent<RectTransform>();
+            var graphic = button.targetGraphic;
+            if (rect == null || graphic == null)
+            {
+                yield break;
+            }
+
+            var baseScale = Vector3.one;
+            var baseColor = Color.white;
+            var elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / duration);
+                var wave = Mathf.Sin(t * Mathf.PI);
+                rect.localScale = Vector3.LerpUnclamped(baseScale, new Vector3(targetScale, targetScale, 1f), wave);
+                graphic.color = Color.Lerp(baseColor, flashColor, wave * 0.8f);
+                yield return null;
+            }
+
+            rect.localScale = baseScale;
+            graphic.color = baseColor;
+        }
+
+        private IEnumerator PlayCardHitAnimation(Button button, Color flashColor)
+        {
+            if (button == null)
+            {
+                yield break;
+            }
+
+            var rect = button.GetComponent<RectTransform>();
+            var graphic = button.targetGraphic;
+            if (rect == null || graphic == null)
+            {
+                yield break;
+            }
+
+            var basePosition = rect.anchoredPosition;
+            var baseColor = Color.white;
+            var elapsed = 0f;
+            while (elapsed < CardHitDuration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / CardHitDuration);
+                var shake = Mathf.Sin(t * Mathf.PI * 5f) * (1f - t) * 14f;
+                rect.anchoredPosition = basePosition + new Vector2(shake, 0f);
+                graphic.color = Color.Lerp(baseColor, flashColor, 1f - t * 0.75f);
+                yield return null;
+            }
+
+            rect.anchoredPosition = basePosition;
+            graphic.color = baseColor;
+        }
+
+        private IEnumerator PlayCardDeathAnimation(Button button)
+        {
+            if (button == null)
+            {
+                yield break;
+            }
+
+            var rect = button.GetComponent<RectTransform>();
+            var graphic = button.targetGraphic;
+            var canvasGroup = EnsureCanvasGroup(button.gameObject);
+            if (rect == null || graphic == null || canvasGroup == null)
+            {
+                yield break;
+            }
+
+            var basePosition = rect.anchoredPosition;
+            var baseColor = Color.white;
+            var baseScale = Vector3.one;
+            var elapsed = 0f;
+            while (elapsed < CardDeathDuration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / CardDeathDuration);
+                var impact = Mathf.Sin(Mathf.Min(1f, t * 1.2f) * Mathf.PI);
+                var shake = Mathf.Sin(t * Mathf.PI * 9f) * (1f - t) * 18f;
+                rect.anchoredPosition = basePosition + new Vector2(shake, -32f * t);
+                rect.localScale = Vector3.LerpUnclamped(baseScale, new Vector3(0.78f, 0.78f, 1f), t);
+                graphic.color = Color.Lerp(baseColor, DeathFlashColor, impact * 0.9f);
+                canvasGroup.alpha = 1f - t * 0.78f;
+                yield return null;
+            }
+
+            rect.anchoredPosition = basePosition;
+            rect.localScale = baseScale;
+            graphic.color = baseColor;
+            canvasGroup.alpha = 1f;
+            ApplyDefeatedCardState(button, true);
+        }
+
+        private void CreateFloatingValue(RectTransform target, string text, Color color)
+        {
+            if (target == null || string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            var root = GetComponent<RectTransform>();
+            if (root == null)
+            {
+                return;
+            }
+
+            var effect = new GameObject("BattleFloatText", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            effect.transform.SetParent(root, false);
+            var effectRect = effect.GetComponent<RectTransform>();
+            effectRect.anchorMin = new Vector2(0.5f, 0.5f);
+            effectRect.anchorMax = new Vector2(0.5f, 0.5f);
+            effectRect.pivot = new Vector2(0.5f, 0.5f);
+            effectRect.sizeDelta = new Vector2(120f, 36f);
+
+            if (!TryGetLocalPointFromWorld(root, target.TransformPoint(target.rect.center), out var anchoredPosition))
+            {
+                Destroy(effect);
+                return;
+            }
+
+            effectRect.anchoredPosition = anchoredPosition + new Vector2(0f, 28f);
+            var label = effect.GetComponent<Text>();
+            label.text = text;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.fontSize = 24;
+            label.color = color;
+            label.raycastTarget = false;
+            label.supportRichText = true;
+            label.font = ResolveBattleEffectFont();
+            EnsureReadableText(label);
+            transientBattleEffects.Add(label);
+            StartCoroutine(PlayFloatingEffect(label, effectRect));
+        }
+
+        private void CreateProjectileEffect(RectTransform source, RectTransform target)
+        {
+            if (source == null || target == null)
+            {
+                return;
+            }
+
+            var root = GetComponent<RectTransform>();
+            if (root == null)
+            {
+                return;
+            }
+
+            if (!TryGetLocalPointFromWorld(root, source.TransformPoint(source.rect.center), out var startPosition)
+                || !TryGetLocalPointFromWorld(root, target.TransformPoint(target.rect.center), out var endPosition))
+            {
+                return;
+            }
+
+            var effect = new GameObject("BattleProjectile", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            effect.transform.SetParent(root, false);
+            var rect = effect.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.sizeDelta = new Vector2(18f, 18f);
+            rect.anchoredPosition = startPosition;
+
+            var image = effect.GetComponent<Image>();
+            image.color = ProjectileColor;
+            image.raycastTarget = false;
+            transientBattleEffects.Add(image);
+            StartCoroutine(PlayProjectileEffect(image, rect, startPosition, endPosition));
+        }
+
+        private IEnumerator PlayFloatingEffect(Graphic graphic, RectTransform rect)
+        {
+            if (graphic == null || rect == null)
+            {
+                yield break;
+            }
+
+            var startPosition = rect.anchoredPosition;
+            var endPosition = startPosition + new Vector2(0f, 42f);
+            var startScale = new Vector3(0.92f, 0.92f, 1f);
+            var endScale = new Vector3(1.08f, 1.08f, 1f);
+            var color = graphic.color;
+            var elapsed = 0f;
+            while (elapsed < FloatTextDuration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / FloatTextDuration);
+                var eased = EaseOutCubic(t);
+                rect.anchoredPosition = Vector2.LerpUnclamped(startPosition, endPosition, eased);
+                rect.localScale = Vector3.LerpUnclamped(startScale, endScale, eased);
+                graphic.color = new Color(color.r, color.g, color.b, 1f - t);
+                yield return null;
+            }
+
+            if (graphic != null)
+            {
+                transientBattleEffects.Remove(graphic);
+                Destroy(graphic.gameObject);
+            }
+        }
+
+        private IEnumerator PlayProjectileEffect(Graphic graphic, RectTransform rect, Vector2 startPosition, Vector2 endPosition)
+        {
+            if (graphic == null || rect == null)
+            {
+                yield break;
+            }
+
+            var color = graphic.color;
+            var elapsed = 0f;
+            while (elapsed < ProjectileDuration)
+            {
+                elapsed += Time.deltaTime;
+                var t = Mathf.Clamp01(elapsed / ProjectileDuration);
+                var eased = EaseOutCubic(t);
+                rect.anchoredPosition = Vector2.LerpUnclamped(startPosition, endPosition, eased);
+                rect.localScale = Vector3.one * Mathf.Lerp(0.65f, 1.1f, 1f - Mathf.Abs(0.5f - t) * 2f);
+                graphic.color = new Color(color.r, color.g, color.b, 1f - t * 0.35f);
+                yield return null;
+            }
+
+            if (graphic != null)
+            {
+                transientBattleEffects.Remove(graphic);
+                Destroy(graphic.gameObject);
+            }
+        }
+
+        private void ClearTransientBattleEffects()
+        {
+            for (var i = transientBattleEffects.Count - 1; i >= 0; i--)
+            {
+                var effect = transientBattleEffects[i];
+                if (effect != null)
+                {
+                    Destroy(effect.gameObject);
+                }
+            }
+
+            transientBattleEffects.Clear();
+            ResetCardListVisuals(playerTeamCardButtons);
+            ResetCardListVisuals(enemyTeamCardButtons);
+        }
+
+        private static void ResetCardListVisuals(List<Button> buttons)
+        {
+            if (buttons == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < buttons.Count; i++)
+            {
+                ResetTeamCardVisualState(buttons[i]);
+            }
+        }
+
+        private static CanvasGroup EnsureCanvasGroup(GameObject target)
+        {
+            if (target == null)
+            {
+                return null;
+            }
+
+            var group = target.GetComponent<CanvasGroup>();
+            if (group == null)
+            {
+                group = target.AddComponent<CanvasGroup>();
+            }
+
+            return group;
+        }
+
+        private Font ResolveBattleEffectFont()
+        {
+            if (battleLogText != null && battleLogText.font != null)
+            {
+                return battleLogText.font;
+            }
+
+            if (statusText != null && statusText.font != null)
+            {
+                return statusText.font;
+            }
+
+            return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        }
+
+        private static bool TryGetLocalPointFromWorld(RectTransform root, Vector3 worldPoint, out Vector2 localPoint)
+        {
+            localPoint = Vector2.zero;
+            if (root == null)
+            {
+                return false;
+            }
+
+            var screenPoint = RectTransformUtility.WorldToScreenPoint(null, worldPoint);
+            return RectTransformUtility.ScreenPointToLocalPointInRectangle(root, screenPoint, null, out localPoint);
+        }
+
+        private static float EaseOutCubic(float value)
+        {
+            var inverse = 1f - Mathf.Clamp01(value);
+            return 1f - inverse * inverse * inverse;
         }
 
         private static void EnsureReadableText(Text text)
@@ -2645,6 +3512,36 @@ namespace Wuxing.UI
             {
                 label.text = text;
             }
+        }
+
+        private class BattleUnitSnapshot
+        {
+            public string Name;
+            public bool PlayerSide;
+            public int CurrentHp;
+            public int MaxHp;
+            public int CurrentMp;
+            public int MaxMp;
+
+            public BattleUnitSnapshot Clone()
+            {
+                return new BattleUnitSnapshot
+                {
+                    Name = Name,
+                    PlayerSide = PlayerSide,
+                    CurrentHp = CurrentHp,
+                    MaxHp = MaxHp,
+                    CurrentMp = CurrentMp,
+                    MaxMp = MaxMp
+                };
+            }
+        }
+
+        private class BattleImpactInfo
+        {
+            public string Name;
+            public bool PlayerSide;
+            public int HpDelta;
         }
     }
 }

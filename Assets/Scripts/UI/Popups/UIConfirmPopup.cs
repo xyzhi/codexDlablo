@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Localization;
@@ -209,7 +210,7 @@ namespace Wuxing.UI
 
             if (multiChoiceMode)
             {
-                UICardChromeUtility.Apply(button, Color.white, false);
+                UICardChromeUtility.Apply(button, ResolveChoiceCardColor(label), false);
             }
             else
             {
@@ -220,6 +221,27 @@ namespace Wuxing.UI
                     rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64f);
                 }
             }
+        }
+
+        private static Color ResolveChoiceCardColor(string label)
+        {
+            if (string.IsNullOrEmpty(label))
+            {
+                return Color.white;
+            }
+
+            var match = Regex.Match(label, "<color=(?<color>#[0-9A-Fa-f]{6,8})>");
+            if (!match.Success)
+            {
+                return Color.white;
+            }
+
+            if (ColorUtility.TryParseHtmlString(match.Groups["color"].Value, out var parsedColor))
+            {
+                return parsedColor;
+            }
+
+            return Color.white;
         }
 
         private void ApplyDefaultButtonLayout()
