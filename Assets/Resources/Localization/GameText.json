@@ -2056,6 +2056,41 @@
             "en": "I can feel it. If all I do is swing faster, sooner or later I will meet someone faster than me. But if I understand the situation first, I do not always need brute force to win."
         },
         {
+            "key": "dialog.branch.test.prompt",
+            "zhHans": "若前路要你先表态一次，你会怎么选？这一轮只是测试分支能力，但你可以把它当成一次立场试探。",
+            "en": "If the road demanded that you state your position once, how would you answer? This round is only for branch testing, but you can treat it as a stance probe."
+        },
+        {
+            "key": "dialog.branch.choice.accept",
+            "zhHans": "我愿正面承担",
+            "en": "I will face it directly"
+        },
+        {
+            "key": "dialog.branch.choice.wait",
+            "zhHans": "我先观望再说",
+            "en": "I will hold my judgment for now"
+        },
+        {
+            "key": "dialog.branch.test.stance_true",
+            "zhHans": "你把立场先亮了出来。至少在这一步上，系统会把你视为愿意承担代价的人。",
+            "en": "You revealed your stance first. At least at this step, the system will read you as someone willing to bear the cost."
+        },
+        {
+            "key": "dialog.branch.test.stance_false",
+            "zhHans": "你没有急着亮明立场，而是先把退路留在手里。这同样是一种选择。",
+            "en": "You did not rush to declare a stance and kept a retreat in hand first. That is also a choice."
+        },
+        {
+            "key": "dialog.branch.test.flag_true",
+            "zhHans": "Flag 命中了，说明你刚才走的是“正面承担”那条选项。",
+            "en": "The flag branch was hit, which means you chose the direct-responsibility option just now."
+        },
+        {
+            "key": "dialog.branch.test.flag_false",
+            "zhHans": "Flag 没命中，说明你刚才走的是另一条表态路线。",
+            "en": "The flag branch did not hit, which means you chose the other response path."
+        },
+        {
             "key": "",
             "zhHans": "山门初启",
             "en": "The Gate Opens"

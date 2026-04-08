@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -13,6 +14,9 @@ namespace Wuxing.UI
         private Text titleText;
         private Text contentText;
         private Text hintText;
+        private RectTransform choiceRoot;
+        private readonly List<Button> choiceButtons = new List<Button>();
+        private readonly List<string> activeChoiceIds = new List<string>();
         private string fullContent;
         private float typingSpeed;
         private float skipHintDelay;
@@ -51,6 +55,8 @@ namespace Wuxing.UI
             contentText.text = typingCompleted ? fullContent : string.Empty;
             hintText.gameObject.SetActive(false);
             hintText.text = ResolveUiText("story.skip_hint", "Tap anywhere to skip");
+            RefreshChoices();
+            UpdateChoiceVisibility();
         }
 
         public override void OnClose()
@@ -58,6 +64,10 @@ namespace Wuxing.UI
             fullContent = string.Empty;
             contentText.text = string.Empty;
             hintText.gameObject.SetActive(false);
+            if (choiceRoot != null)
+            {
+                choiceRoot.gameObject.SetActive(false);
+            }
         }
 
         private void Update()
@@ -67,7 +77,7 @@ namespace Wuxing.UI
                 openElapsed += Time.unscaledDeltaTime;
                 if (canSkipTyping && !hintText.gameObject.activeSelf && openElapsed >= skipHintDelay)
                 {
-                    hintText.gameObject.SetActive(true);
+                    UpdateChoiceVisibility();
                 }
 
                 return;
@@ -80,11 +90,12 @@ namespace Wuxing.UI
             if (visibleCount >= fullContent.Length)
             {
                 typingCompleted = true;
+                UpdateChoiceVisibility();
             }
 
             if (canSkipTyping && !hintText.gameObject.activeSelf && openElapsed >= skipHintDelay)
             {
-                hintText.gameObject.SetActive(true);
+                UpdateChoiceVisibility();
             }
         }
 
@@ -99,7 +110,12 @@ namespace Wuxing.UI
 
                 typingCompleted = true;
                 contentText.text = fullContent;
-                hintText.gameObject.SetActive(true);
+                UpdateChoiceVisibility();
+                return;
+            }
+
+            if (activeChoiceIds.Count > 0)
+            {
                 return;
             }
 
@@ -110,6 +126,10 @@ namespace Wuxing.UI
         {
             if (TryBindExistingUi())
             {
+                if (choiceRoot == null)
+                {
+                    choiceRoot = UIFactory.CreateContainer(transform, "ChoiceRoot", new Vector2(0.18f, 0.1f), new Vector2(0.82f, 0.3f), Vector2.zero, Vector2.zero);
+                }
                 return;
             }
 
@@ -167,6 +187,8 @@ namespace Wuxing.UI
             hintText.rectTransform.offsetMin = Vector2.zero;
             hintText.rectTransform.offsetMax = Vector2.zero;
             hintText.gameObject.SetActive(false);
+
+            choiceRoot = UIFactory.CreateContainer(transform, "ChoiceRoot", new Vector2(0.18f, 0.1f), new Vector2(0.82f, 0.3f), Vector2.zero, Vector2.zero);
         }
 
         private bool TryBindExistingUi()
@@ -175,6 +197,8 @@ namespace Wuxing.UI
             titleText = FindText("ContentRoot/TitleText");
             contentText = FindText("ContentRoot/ContentText");
             hintText = FindText("HintText");
+            var choiceTransform = transform.Find("ChoiceRoot");
+            choiceRoot = choiceTransform != null ? choiceTransform.GetComponent<RectTransform>() : null;
             return rootImage != null && titleText != null && contentText != null && hintText != null;
         }
 
@@ -203,6 +227,81 @@ namespace Wuxing.UI
             }
 
             return fallback;
+        }
+
+        private void RefreshChoices()
+        {
+            activeChoiceIds.Clear();
+            var choices = StoryManager.GetCurrentChoices();
+            if (choiceRoot == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < choices.Count; i++)
+            {
+                var choice = choices[i];
+                if (choice == null)
+                {
+                    continue;
+                }
+
+                var button = GetOrCreateChoiceButton(i);
+                var capturedChoiceId = choice.Id;
+                button.gameObject.SetActive(true);
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(delegate { StoryManager.SelectChoice(capturedChoiceId); });
+
+                var label = button.GetComponentInChildren<Text>();
+                if (label != null)
+                {
+                    label.text = ResolveText(choice.TitleKey);
+                    label.alignment = TextAnchor.MiddleLeft;
+                    label.fontSize = 18;
+                }
+
+                var rect = button.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.anchorMin = new Vector2(0f, 1f);
+                    rect.anchorMax = new Vector2(1f, 1f);
+                    rect.pivot = new Vector2(0.5f, 1f);
+                    rect.anchoredPosition = new Vector2(0f, -i * 72f);
+                    rect.sizeDelta = new Vector2(0f, 60f);
+                }
+
+                activeChoiceIds.Add(choice.Id);
+            }
+
+            for (var i = activeChoiceIds.Count; i < choiceButtons.Count; i++)
+            {
+                if (choiceButtons[i] != null)
+                {
+                    choiceButtons[i].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private Button GetOrCreateChoiceButton(int index)
+        {
+            while (choiceButtons.Count <= index)
+            {
+                var button = UIFactory.CreateButton(choiceRoot, "ChoiceButton" + choiceButtons.Count, string.Empty, delegate { });
+                choiceButtons.Add(button);
+            }
+
+            return choiceButtons[index];
+        }
+
+        private void UpdateChoiceVisibility()
+        {
+            var hasChoices = activeChoiceIds.Count > 0;
+            if (choiceRoot != null)
+            {
+                choiceRoot.gameObject.SetActive(typingCompleted && hasChoices);
+            }
+
+            hintText.gameObject.SetActive(typingCompleted && !hasChoices && canSkipTyping && openElapsed >= skipHintDelay);
         }
     }
 }

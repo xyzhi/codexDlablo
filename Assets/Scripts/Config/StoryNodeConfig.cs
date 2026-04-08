@@ -19,6 +19,24 @@ namespace Wuxing.Config
         public string NextNodeId;
         public string CallbackKey;
         public string CallbackParam;
+        public string ConditionType;
+        public string ConditionParam;
+        public string ConditionOperator;
+        public int ConditionValue;
+        public string FalseNextNodeId;
+        public string Notes;
+    }
+
+    [Serializable]
+    public class StoryChoiceConfig
+    {
+        public string Id;
+        public string NodeId;
+        public int Order;
+        public string TitleKey;
+        public string NextNodeId;
+        public string SetFlag;
+        public string AddValue;
         public string Notes;
     }
 }

@@ -1,11 +1,18 @@
-Id,Type,SpeakerKey,LeftSpeakerKey,RightSpeakerKey,ActiveSpeakerSide,TitleKey,ContentKey,TypingCharsPerSecond,SkipHintDelay,Skippable,NextNodeId,CallbackKey,CallbackParam,Notes
-STORY_START_001,Story,,,,,story.start.prologue_title,story.start.prologue_content,28,1.8,TRUE,DIALOG_START_001,,,开始游戏时的开场剧情
-DIALOG_START_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_content,30,0.8,TRUE,DIALOG_START_002,,,引路人开场第一句
-DIALOG_START_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.start.player_content,30,0.8,TRUE,DIALOG_START_003,,,玩家回应第一句
-DIALOG_START_003,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_followup_content,30,0.8,TRUE,DIALOG_START_004,,,引路人补充引导
-DIALOG_START_004,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.start.player_resolve_content,30,0.8,TRUE,DIALOG_START_005,,,玩家确认启程
-DIALOG_START_005,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_closing_content,30,0.8,TRUE,,,,引路人送行收尾
-DIALOG_STAGE2_PRE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.stage2.pre.guide_content,30,0.8,TRUE,DIALOG_STAGE2_PRE_002,,,第二关战前引路人提醒
-DIALOG_STAGE2_PRE_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.stage2.pre.player_content,30,0.8,TRUE,,,,第二关战前玩家回应
-DIALOG_STAGE2_POST_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.stage2.post.guide_content,30,0.8,TRUE,DIALOG_STAGE2_POST_002,,,第二关战后引路人评价
-DIALOG_STAGE2_POST_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.stage2.post.player_content,30,0.8,TRUE,,,,第二关战后玩家回应
+Id,Type,SpeakerKey,LeftSpeakerKey,RightSpeakerKey,ActiveSpeakerSide,TitleKey,ContentKey,TypingCharsPerSecond,SkipHintDelay,Skippable,NextNodeId,CallbackKey,CallbackParam,ConditionType,ConditionParam,ConditionOperator,ConditionValue,FalseNextNodeId,Notes
+STORY_START_001,Story,,,,,story.start.prologue_title,story.start.prologue_content,28,1.8,TRUE,DIALOG_START_001,,,,,,,开始游戏时的开场剧情
+DIALOG_START_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_content,30,0.8,TRUE,DIALOG_START_002,,,,,,,引路人开场第一句
+DIALOG_START_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.start.player_content,30,0.8,TRUE,DIALOG_START_003,,,,,,,玩家回应第一句
+DIALOG_START_003,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_followup_content,30,0.8,TRUE,DIALOG_START_004,,,,,,,引路人补充引导
+DIALOG_START_004,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.start.player_resolve_content,30,0.8,TRUE,DIALOG_START_005,,,,,,,玩家确认启程
+DIALOG_START_005,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.start.guide_closing_content,30,0.8,TRUE,,,,,,,,引路人送行收尾
+DIALOG_STAGE2_PRE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.stage2.pre.guide_content,30,0.8,TRUE,DIALOG_STAGE2_PRE_002,,,,,,,第二关战前引路人提醒
+DIALOG_STAGE2_PRE_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.stage2.pre.player_content,30,0.8,TRUE,,,,,,,,第二关战前玩家回应
+DIALOG_STAGE2_POST_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.stage2.post.guide_content,30,0.8,TRUE,DIALOG_STAGE2_POST_002,,,,,,,第二关战后引路人评价
+DIALOG_STAGE2_POST_002,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Right,,dialog.stage2.post.player_content,30,0.8,TRUE,DIALOG_BRANCH_TEST_001,,,,,,,第二关战后玩家回应
+DIALOG_BRANCH_TEST_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.branch.test.prompt,30,0.8,TRUE,,,,,,,,分支测试入口
+COND_BRANCH_STANCE_001,Condition,,,,,,,0,0,FALSE,DIALOG_BRANCH_STANCE_TRUE_001,,,CompareValue,stance,>=,1,DIALOG_BRANCH_STANCE_FALSE_001,按 stance 数值分支
+DIALOG_BRANCH_STANCE_TRUE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.branch.test.stance_true,30,0.8,TRUE,COND_BRANCH_FLAG_001,,,,,,,正向立场分支
+DIALOG_BRANCH_STANCE_FALSE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.branch.test.stance_false,30,0.8,TRUE,COND_BRANCH_FLAG_001,,,,,,,反向立场分支
+COND_BRANCH_FLAG_001,Condition,,,,,,,0,0,FALSE,DIALOG_BRANCH_FLAG_TRUE_001,,,HasFlag,branch_accept,,0,DIALOG_BRANCH_FLAG_FALSE_001,按 flag 分支
+DIALOG_BRANCH_FLAG_TRUE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.branch.test.flag_true,30,0.8,TRUE,,,,,,,,Flag 命中分支
+DIALOG_BRANCH_FLAG_FALSE_001,Dialog,,dialog.start.guide_speaker,dialog.start.player_speaker,Left,,dialog.branch.test.flag_false,30,0.8,TRUE,,,,,,,,Flag 未命中分支

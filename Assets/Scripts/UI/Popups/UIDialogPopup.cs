@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -17,6 +18,9 @@ namespace Wuxing.UI
         private Text rightSpeakerText;
         private Text contentText;
         private Text hintText;
+        private RectTransform choiceRoot;
+        private readonly List<Button> choiceButtons = new List<Button>();
+        private readonly List<string> activeChoiceIds = new List<string>();
         private string fullContent;
         private float typingSpeed;
         private float revealProgress;
@@ -56,7 +60,8 @@ namespace Wuxing.UI
             typingCompleted = string.IsNullOrEmpty(fullContent);
             contentText.text = typingCompleted ? fullContent : string.Empty;
             hintText.text = ResolveUiText("dialog.continue_hint", "Tap anywhere to continue");
-            hintText.gameObject.SetActive(typingCompleted);
+            RefreshChoices();
+            UpdateChoiceVisibility();
         }
 
         private void Update()
@@ -72,7 +77,7 @@ namespace Wuxing.UI
             if (visibleCount >= fullContent.Length)
             {
                 typingCompleted = true;
-                hintText.gameObject.SetActive(true);
+                UpdateChoiceVisibility();
             }
         }
 
@@ -82,7 +87,13 @@ namespace Wuxing.UI
             {
                 typingCompleted = true;
                 contentText.text = fullContent;
-                hintText.gameObject.SetActive(true);
+                typingCompleted = true;
+                UpdateChoiceVisibility();
+                return;
+            }
+
+            if (activeChoiceIds.Count > 0)
+            {
                 return;
             }
 
@@ -93,6 +104,14 @@ namespace Wuxing.UI
         {
             if (TryBindExistingUi())
             {
+                if (choiceRoot == null)
+                {
+                    var dialogBox = transform.Find("DialogBox");
+                    if (dialogBox != null)
+                    {
+                        choiceRoot = UIFactory.CreateContainer(dialogBox, "ChoiceRoot", new Vector2(0f, 0.02f), new Vector2(1f, 0.28f), new Vector2(24f, 0f), new Vector2(-24f, 0f));
+                    }
+                }
                 return;
             }
 
@@ -158,6 +177,8 @@ namespace Wuxing.UI
             hintText.rectTransform.offsetMin = new Vector2(12f, 0f);
             hintText.rectTransform.offsetMax = new Vector2(-24f, 0f);
             hintText.gameObject.SetActive(false);
+
+            choiceRoot = UIFactory.CreateContainer(box.transform, "ChoiceRoot", new Vector2(0f, 0.02f), new Vector2(1f, 0.28f), new Vector2(24f, 0f), new Vector2(-24f, 0f));
         }
 
         private bool TryBindExistingUi()
@@ -167,6 +188,8 @@ namespace Wuxing.UI
             rightSpeakerText = FindText("DialogBox/RightSpeakerText") ?? FindText("DialogBox/TitleText");
             contentText = FindText("DialogBox/ContentText");
             hintText = FindText("DialogBox/HintText");
+            var choiceTransform = transform.Find("DialogBox/ChoiceRoot");
+            choiceRoot = choiceTransform != null ? choiceTransform.GetComponent<RectTransform>() : null;
             return rootImage != null && leftSpeakerText != null && rightSpeakerText != null && contentText != null && hintText != null;
         }
 
@@ -215,6 +238,83 @@ namespace Wuxing.UI
             }
 
             return StorySpeakerSide.Left;
+        }
+
+        private void RefreshChoices()
+        {
+            activeChoiceIds.Clear();
+            var choices = StoryManager.GetCurrentChoices();
+
+            if (choiceRoot == null)
+            {
+                return;
+            }
+
+            for (var i = 0; i < choices.Count; i++)
+            {
+                var choice = choices[i];
+                if (choice == null)
+                {
+                    continue;
+                }
+
+                var button = GetOrCreateChoiceButton(i);
+                var capturedChoiceId = choice.Id;
+                button.gameObject.SetActive(true);
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(delegate { StoryManager.SelectChoice(capturedChoiceId); });
+
+                var label = button.GetComponentInChildren<Text>();
+                if (label != null)
+                {
+                    label.text = ResolveText(choice.TitleKey);
+                    label.alignment = TextAnchor.MiddleLeft;
+                    label.fontSize = 18;
+                    label.supportRichText = true;
+                }
+
+                var rect = button.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    rect.anchorMin = new Vector2(0f, 1f);
+                    rect.anchorMax = new Vector2(1f, 1f);
+                    rect.pivot = new Vector2(0.5f, 1f);
+                    rect.anchoredPosition = new Vector2(0f, -i * 72f);
+                    rect.sizeDelta = new Vector2(0f, 60f);
+                }
+
+                activeChoiceIds.Add(choice.Id);
+            }
+
+            for (var i = activeChoiceIds.Count; i < choiceButtons.Count; i++)
+            {
+                if (choiceButtons[i] != null)
+                {
+                    choiceButtons[i].gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private Button GetOrCreateChoiceButton(int index)
+        {
+            while (choiceButtons.Count <= index)
+            {
+                var button = UIFactory.CreateButton(choiceRoot, "ChoiceButton" + choiceButtons.Count, string.Empty, delegate { });
+                choiceButtons.Add(button);
+            }
+
+            return choiceButtons[index];
+        }
+
+        private void UpdateChoiceVisibility()
+        {
+            var hasChoices = activeChoiceIds.Count > 0;
+            if (choiceRoot != null)
+            {
+                choiceRoot.gameObject.SetActive(typingCompleted && hasChoices);
+            }
+
+            hintText.gameObject.SetActive(typingCompleted && !hasChoices);
         }
 
         private enum StorySpeakerSide

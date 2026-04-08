@@ -23,6 +23,7 @@ public static class ConfigValidator
     private const string StageNodeCsvPath = "Docs/StageNode.csv";
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
     private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
+    private const string StoryChoiceCsvPath = "Docs/StoryChoice.csv";
     private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
     private const string ObjectiveCsvPath = "Docs/Objective.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
@@ -54,12 +55,22 @@ public static class ConfigValidator
 
     private static readonly HashSet<string> ValidStoryNodeTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        "Story", "Dialog"
+        "Story", "Dialog", "Condition"
     };
 
     private static readonly HashSet<string> ValidStorySpeakerSides = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         "Left", "Right"
+    };
+
+    private static readonly HashSet<string> ValidStoryConditionTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        "HasFlag", "CompareValue"
+    };
+
+    private static readonly HashSet<string> ValidStoryConditionOperators = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    {
+        ">", ">=", "<", "<=", "==", "!="
     };
 
     private static readonly HashSet<string> ValidObjectiveTypes = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
@@ -141,6 +152,7 @@ public static class ConfigValidator
             var stageNodeTable = LoadTable(StageNodeCsvPath, "关卡节点表");
             var eventOptionTable = LoadTable(EventOptionCsvPath, "事件选项表");
             var storyNodeTable = LoadTable(StoryNodeCsvPath, "剧情节点表");
+            var storyChoiceTable = LoadTable(StoryChoiceCsvPath, "剧情选项表");
             var storyTriggerTable = LoadTable(StoryTriggerCsvPath, "剧情触发表");
             var objectiveTable = LoadTable(ObjectiveCsvPath, "目标表");
             var localizationTable = LoadTable(LocalizationCsvPath, "语言表");
@@ -160,6 +172,7 @@ public static class ConfigValidator
             var eventProfiles = ValidateEventOptionTable(eventOptionTable, localizationKeys, items);
             ValidateStageNodeTable(stageNodeTable, eventProfiles, items);
             var storyNodeIds = ValidateStoryNodeTable(storyNodeTable, localizationKeys, items);
+            ValidateStoryChoiceTable(storyChoiceTable, storyNodeIds, localizationKeys, items);
             ValidateStoryTriggerTable(storyTriggerTable, storyNodeIds, items);
             ValidateObjectiveTable(objectiveTable, localizationKeys, items);
 
@@ -377,7 +390,7 @@ public static class ConfigValidator
         for (var i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
-            RequireFields(row, items, "Id", "Type", "ContentKey");
+            RequireFields(row, items, "Id", "Type");
             ValidateIntegerField(row, items, "TypingCharsPerSecond");
             ValidateFloatField(row, items, "SkipHintDelay");
 
@@ -390,7 +403,12 @@ public static class ConfigValidator
             var type = row.Get("Type").Trim();
             if (!string.IsNullOrEmpty(type) && !ValidStoryNodeTypes.Contains(type))
             {
-                AddError(items, row, "Type", $"剧情节点类型不合法：'{type}'。当前仅支持 Story / Dialog。");
+                AddError(items, row, "Type", $"剧情节点类型不合法：'{type}'。当前仅支持 Story / Dialog / Condition。");
+            }
+
+            if (!string.Equals(type, "Condition", StringComparison.OrdinalIgnoreCase))
+            {
+                RequireFields(row, items, "ContentKey");
             }
 
             ValidateOptionalLocalizationKey(row, items, localizationKeys, "SpeakerKey");
@@ -404,6 +422,18 @@ public static class ConfigValidator
             {
                 AddError(items, row, "ActiveSpeakerSide", $"当前说话侧不合法：'{activeSpeakerSide}'。当前仅支持 Left / Right。");
             }
+
+            var conditionType = row.Get("ConditionType").Trim();
+            if (!string.IsNullOrEmpty(conditionType) && !ValidStoryConditionTypes.Contains(conditionType))
+            {
+                AddError(items, row, "ConditionType", $"剧情条件类型不合法：'{conditionType}'。当前仅支持 HasFlag / CompareValue。");
+            }
+
+            var conditionOperator = row.Get("ConditionOperator").Trim();
+            if (!string.IsNullOrEmpty(conditionOperator) && !ValidStoryConditionOperators.Contains(conditionOperator))
+            {
+                AddError(items, row, "ConditionOperator", $"剧情条件运算符不合法：'{conditionOperator}'。");
+            }
         }
 
         for (var i = 0; i < table.Rows.Count; i++)
@@ -414,9 +444,58 @@ public static class ConfigValidator
             {
                 AddError(items, row, "NextNodeId", $"剧情节点引用了不存在的下一节点：'{nextNodeId}'。");
             }
+
+            var falseNextNodeId = row.Get("FalseNextNodeId").Trim();
+            if (!string.IsNullOrEmpty(falseNextNodeId) && !nodeIds.Contains(falseNextNodeId))
+            {
+                AddError(items, row, "FalseNextNodeId", $"剧情条件节点引用了不存在的失败分支：'{falseNextNodeId}'。");
+            }
         }
 
         return nodeIds;
+    }
+
+    private static void ValidateStoryChoiceTable(CsvTable table, HashSet<string> storyNodeIds, HashSet<string> localizationKeys, List<ValidationItem> items)
+    {
+        ValidateDuplicateIds(table, items);
+
+        for (var i = 0; i < table.Rows.Count; i++)
+        {
+            var row = table.Rows[i];
+            RequireFields(row, items, "Id", "NodeId", "Order", "TitleKey", "NextNodeId");
+            ValidateIntegerField(row, items, "Order");
+
+            var nodeId = row.Get("NodeId").Trim();
+            if (!string.IsNullOrEmpty(nodeId) && storyNodeIds != null && !storyNodeIds.Contains(nodeId))
+            {
+                AddError(items, row, "NodeId", $"剧情选项引用了不存在的节点：'{nodeId}'。");
+            }
+
+            var nextNodeId = row.Get("NextNodeId").Trim();
+            if (!string.IsNullOrEmpty(nextNodeId) && storyNodeIds != null && !storyNodeIds.Contains(nextNodeId))
+            {
+                AddError(items, row, "NextNodeId", $"剧情选项引用了不存在的下一节点：'{nextNodeId}'。");
+            }
+
+            var titleKey = row.Get("TitleKey").Trim();
+            if (!string.IsNullOrEmpty(titleKey) && localizationKeys != null && !localizationKeys.Contains(titleKey))
+            {
+                AddError(items, row, "TitleKey", $"剧情选项标题 key 未在 Localization.csv 中定义：'{titleKey}'。");
+            }
+
+            var addValue = row.Get("AddValue").Trim();
+            if (!string.IsNullOrEmpty(addValue))
+            {
+                var parts = addValue.Split(':');
+                int parsedValue;
+                if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]) || !int.TryParse(parts[1], out parsedValue))
+                {
+                    AddError(items, row, "AddValue", $"剧情选项 AddValue 格式不合法：'{addValue}'。应为 变量名:整数。");
+                }
+            }
+
+            DetectMojibake(row, items, "Notes");
+        }
     }
 
     private static void ValidateStoryTriggerTable(CsvTable table, HashSet<string> storyNodeIds, List<ValidationItem> items)

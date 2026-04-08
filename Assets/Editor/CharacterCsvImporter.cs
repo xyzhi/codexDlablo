@@ -24,6 +24,7 @@ public static class CharacterCsvImporter
     private const string EventOptionCsvPath = "Docs/EventOption.csv";
     private const string EventProfileCsvPath = "Docs/EventProfile.csv";
     private const string StoryNodeCsvPath = "Docs/StoryNode.csv";
+    private const string StoryChoiceCsvPath = "Docs/StoryChoice.csv";
     private const string StoryTriggerCsvPath = "Docs/StoryTrigger.csv";
     private const string ObjectiveCsvPath = "Docs/Objective.csv";
     private const string LocalizationCsvPath = "Docs/Localization.csv";
@@ -637,7 +638,9 @@ public static class CharacterCsvImporter
     public static void ImportStoryNodes()
     {
         var rows = ReadRequiredRows(StoryNodeCsvPath, "StoryNode CSV");
+        var choiceRows = ReadRequiredRows(StoryChoiceCsvPath, "StoryChoice CSV");
         var configs = new List<StoryNodeConfig>();
+        var choiceConfigs = new List<StoryChoiceConfig>();
         for (var i = 1; i < rows.Count; i++)
         {
             var columns = rows[i];
@@ -663,7 +666,12 @@ public static class CharacterCsvImporter
             var nextNodeId = columns.Count >= 15 ? columns[11] : columns[8];
             var callbackKey = columns.Count >= 15 ? columns[12] : columns[9];
             var callbackParam = columns.Count >= 15 ? columns[13] : columns[10];
-            var notes = columns.Count >= 15 ? columns[14] : columns[11];
+            var conditionType = columns.Count >= 20 ? columns[14] : string.Empty;
+            var conditionParam = columns.Count >= 20 ? columns[15] : string.Empty;
+            var conditionOperator = columns.Count >= 20 ? columns[16] : string.Empty;
+            var conditionValue = columns.Count >= 20 ? ParseOptionalInt(columns[17]) : 0;
+            var falseNextNodeId = columns.Count >= 20 ? columns[18] : string.Empty;
+            var notes = columns.Count >= 20 ? columns[19] : (columns.Count >= 15 ? columns[14] : columns[11]);
 
             configs.Add(new StoryNodeConfig
             {
@@ -681,15 +689,46 @@ public static class CharacterCsvImporter
                 NextNodeId = nextNodeId,
                 CallbackKey = callbackKey,
                 CallbackParam = callbackParam,
+                ConditionType = conditionType,
+                ConditionParam = conditionParam,
+                ConditionOperator = conditionOperator,
+                ConditionValue = conditionValue,
+                FalseNextNodeId = falseNextNodeId,
                 Notes = notes
             });
         }
 
+        for (var i = 1; i < choiceRows.Count; i++)
+        {
+            var columns = choiceRows[i];
+            if (IsRowEmpty(columns))
+            {
+                continue;
+            }
+
+            if (columns.Count < 8)
+            {
+                throw new InvalidOperationException($"Invalid story choice row at line {i + 1}.");
+            }
+
+            choiceConfigs.Add(new StoryChoiceConfig
+            {
+                Id = columns[0],
+                NodeId = columns[1],
+                Order = ParseInt(columns[2], nameof(StoryChoiceConfig.Order), i + 1),
+                TitleKey = columns[3],
+                NextNodeId = columns[4],
+                SetFlag = columns[5],
+                AddValue = columns[6],
+                Notes = columns[7]
+            });
+        }
+
         EnsureFolderExists(ConfigOutputFolder);
-        var database = new StoryNodeDatabase { storyNodes = configs };
+        var database = new StoryNodeDatabase { storyNodes = configs, storyChoices = choiceConfigs };
         WriteJson(StoryNodeJsonPath, JsonUtility.ToJson(database, true));
         StoryNodeDatabaseLoader.ClearCache();
-        Debug.Log($"Imported {configs.Count} story nodes to {StoryNodeJsonPath}");
+        Debug.Log($"Imported {configs.Count} story nodes and {choiceConfigs.Count} story choices to {StoryNodeJsonPath}");
     }
 
     [MenuItem("Tools/Config/Import Story Triggers CSV")]
@@ -950,6 +989,12 @@ public static class CharacterCsvImporter
             return result;
         }
         throw new FormatException($"Failed to parse {fieldName} at line {lineNumber}: {value}");
+    }
+
+    private static int ParseOptionalInt(string value)
+    {
+        int result;
+        return int.TryParse(value, out result) ? result : 0;
     }
 
     private static bool ParseBool(string value)
