@@ -615,6 +615,9 @@ public static class ConfigValidator
             {
                 AddError(items, row, "ContentKey", $"目标内容 key 未在 Localization.csv 中定义：'{contentKey}'。");
             }
+
+            DetectMojibake(row, items, "Group");
+            DetectMojibake(row, items, "Notes");
         }
 
         for (var i = 0; i < table.Rows.Count; i++)

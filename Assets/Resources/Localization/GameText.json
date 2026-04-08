@@ -166,6 +166,121 @@
             "en": "Burst"
         },
         {
+            "key": "equipment.action.unequip",
+            "zhHans": "卸下装备",
+            "en": "Unequip"
+        },
+        {
+            "key": "equipment.slot.weapon",
+            "zhHans": "武器",
+            "en": "Weapon"
+        },
+        {
+            "key": "equipment.slot.armor",
+            "zhHans": "护甲",
+            "en": "Armor"
+        },
+        {
+            "key": "equipment.slot.accessory",
+            "zhHans": "饰品",
+            "en": "Accessory"
+        },
+        {
+            "key": "equipment.slot.unknown",
+            "zhHans": "未分类",
+            "en": "Unknown"
+        },
+        {
+            "key": "equipment.detail.quality",
+            "zhHans": "品级：",
+            "en": "Quality: "
+        },
+        {
+            "key": "equipment.detail.level",
+            "zhHans": "阶级：",
+            "en": "Level: "
+        },
+        {
+            "key": "equipment.detail.slot",
+            "zhHans": "部位：",
+            "en": "Slot: "
+        },
+        {
+            "key": "equipment.detail.notes",
+            "zhHans": "说明：",
+            "en": "Notes: "
+        },
+        {
+            "key": "equipment.stat.hp",
+            "zhHans": "生命",
+            "en": "HP"
+        },
+        {
+            "key": "equipment.stat.atk",
+            "zhHans": "攻击",
+            "en": "ATK"
+        },
+        {
+            "key": "equipment.stat.def",
+            "zhHans": "防御",
+            "en": "DEF"
+        },
+        {
+            "key": "equipment.stat.mp",
+            "zhHans": "法力",
+            "en": "MP"
+        },
+        {
+            "key": "equipment.quality.white",
+            "zhHans": "白",
+            "en": "White"
+        },
+        {
+            "key": "equipment.quality.green",
+            "zhHans": "绿",
+            "en": "Green"
+        },
+        {
+            "key": "equipment.quality.blue",
+            "zhHans": "蓝",
+            "en": "Blue"
+        },
+        {
+            "key": "equipment.quality.purple",
+            "zhHans": "紫",
+            "en": "Purple"
+        },
+        {
+            "key": "equipment.quality.gold",
+            "zhHans": "金",
+            "en": "Gold"
+        },
+        {
+            "key": "equipment.level.1",
+            "zhHans": "一阶",
+            "en": "Level 1"
+        },
+        {
+            "key": "equipment.level.2",
+            "zhHans": "二阶",
+            "en": "Level 2"
+        },
+        {
+            "key": "equipment.level.3",
+            "zhHans": "三阶",
+            "en": "Level 3"
+        },
+        {
+            "key": "equipment.level.4",
+            "zhHans": "四阶",
+            "en": "Level 4"
+        },
+        {
+            "key": "equipment.level.5",
+            "zhHans": "五阶",
+            "en": "Level 5"
+        },
+        {
             "key": "battle.log_title",
             "zhHans": "战斗日志",
             "en": "Battle Log"

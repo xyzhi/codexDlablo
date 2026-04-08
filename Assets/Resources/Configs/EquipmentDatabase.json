@@ -46,7 +46,7 @@
             "ATK": 0,
             "DEF": 4,
             "MP": 10,
-            "Notes": "法系通用防具"
+            "Notes": "法系通用护具"
         },
         {
             "Id": "EQ005",
@@ -74,7 +74,7 @@
         },
         {
             "Id": "EQ007",
-            "Name": "裂风长刃",
+            "Name": "裂风长刀",
             "Slot": "Weapon",
             "Quality": "蓝",
             "Level": 2,
@@ -110,7 +110,7 @@
         },
         {
             "Id": "EQ010",
-            "Name": "流云法衣",
+            "Name": "流云法袍",
             "Slot": "Armor",
             "Quality": "紫",
             "Level": 2,
@@ -122,7 +122,7 @@
         },
         {
             "Id": "EQ011",
-            "Name": "噬炎戒",
+            "Name": "炽炎戒",
             "Slot": "Accessory",
             "Quality": "蓝",
             "Level": 2,
@@ -134,7 +134,7 @@
         },
         {
             "Id": "EQ012",
-            "Name": "长生佩",
+            "Name": "长生坠",
             "Slot": "Accessory",
             "Quality": "紫",
             "Level": 2,

@@ -9,20 +9,26 @@ namespace Wuxing.UI
             switch ((element ?? string.Empty).Trim().ToLowerInvariant())
             {
                 case "金":
-                case "metal": return Parse("#E5C36A");
+                case "metal":
+                    return Parse("#E5C36A");
                 case "木":
-                case "wood": return Parse("#5BC16A");
+                case "wood":
+                    return Parse("#5BC16A");
                 case "水":
-                case "water": return Parse("#59A7FF");
+                case "water":
+                    return Parse("#59A7FF");
                 case "火":
-                case "fire": return Parse("#FF6B5D");
+                case "fire":
+                    return Parse("#FF6B5D");
                 case "土":
-                case "earth": return Parse("#E6D25A");
+                case "earth":
+                    return Parse("#E6D25A");
                 case "圣":
                 case "holy":
                 case "无":
                 case "none":
-                default: return Parse("#F2F2F2");
+                default:
+                    return Parse("#F2F2F2");
             }
         }
 

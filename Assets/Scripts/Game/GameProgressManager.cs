@@ -1745,24 +1745,10 @@ namespace Wuxing.Game
             var database = ObjectiveDatabaseLoader.Load();
             if (database != null && database.Objectives != null && database.Objectives.Count > 0)
             {
-                ObjectiveConfig mainObjective;
-                ObjectiveConfig hintObjective;
-                List<ObjectiveConfig> stageObjectives;
-                Instance.GetActiveObjectives(database, out mainObjective, out stageObjectives, out hintObjective);
-
-                if (mainObjective != null)
+                var trackedObjective = Instance.GetTrackedObjective(database);
+                if (trackedObjective != null)
                 {
-                    return GetObjectiveLocalizedText(mainObjective.TitleKey);
-                }
-
-                if (stageObjectives != null && stageObjectives.Count > 0)
-                {
-                    return GetObjectiveLocalizedText(stageObjectives[0].TitleKey);
-                }
-
-                if (hintObjective != null)
-                {
-                    return GetObjectiveLocalizedText(hintObjective.TitleKey);
+                    return GetObjectiveLocalizedText(trackedObjective.TitleKey);
                 }
             }
 
@@ -3663,17 +3649,13 @@ namespace Wuxing.Game
             mainObjective = null;
             hintObjective = null;
             stageObjectives = new List<ObjectiveConfig>();
-            var predecessorMap = BuildObjectivePredecessorMap(database);
+            var activeObjectives = CollectActiveObjectives(database);
+            var activeGroup = ResolveActiveObjectiveGroup(activeObjectives);
 
-            for (var i = 0; i < database.Objectives.Count; i++)
+            for (var i = 0; i < activeObjectives.Count; i++)
             {
-                var objective = database.Objectives[i];
-                if (objective == null || !objective.Visible)
-                {
-                    continue;
-                }
-
-                if (!IsObjectiveUnlocked(objective, predecessorMap) || IsObjectiveCompleted(objective))
+                var objective = activeObjectives[i];
+                if (!MatchesObjectiveGroup(objective, activeGroup))
                 {
                     continue;
                 }
@@ -3700,6 +3682,117 @@ namespace Wuxing.Game
                         break;
                 }
             }
+        }
+
+        private ObjectiveConfig GetTrackedObjective(ObjectiveDatabase database)
+        {
+            var activeObjectives = CollectActiveObjectives(database);
+            var activeGroup = ResolveActiveObjectiveGroup(activeObjectives);
+            ObjectiveConfig fallbackObjective = null;
+
+            for (var i = 0; i < activeObjectives.Count; i++)
+            {
+                var objective = activeObjectives[i];
+                if (!MatchesObjectiveGroup(objective, activeGroup))
+                {
+                    continue;
+                }
+
+                if (objective.AutoTrack)
+                {
+                    return objective;
+                }
+
+                if (fallbackObjective == null)
+                {
+                    fallbackObjective = objective;
+                }
+            }
+
+            return fallbackObjective;
+        }
+
+        private List<ObjectiveConfig> CollectActiveObjectives(ObjectiveDatabase database)
+        {
+            var results = new List<ObjectiveConfig>();
+            if (database == null || database.Objectives == null)
+            {
+                return results;
+            }
+
+            var predecessorMap = BuildObjectivePredecessorMap(database);
+            for (var i = 0; i < database.Objectives.Count; i++)
+            {
+                var objective = database.Objectives[i];
+                if (objective == null || !objective.Visible)
+                {
+                    continue;
+                }
+
+                if (!IsObjectiveUnlocked(objective, predecessorMap) || IsObjectiveCompleted(objective))
+                {
+                    continue;
+                }
+
+                results.Add(objective);
+            }
+
+            return results;
+        }
+
+        private static string ResolveActiveObjectiveGroup(List<ObjectiveConfig> objectives)
+        {
+            if (objectives == null || objectives.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            for (var i = 0; i < objectives.Count; i++)
+            {
+                var objective = objectives[i];
+                if (objective != null && objective.AutoTrack && !string.IsNullOrWhiteSpace(objective.Group))
+                {
+                    return objective.Group.Trim();
+                }
+            }
+
+            for (var i = 0; i < objectives.Count; i++)
+            {
+                var objective = objectives[i];
+                if (objective != null
+                    && string.Equals(objective.Type, "Main", StringComparison.OrdinalIgnoreCase)
+                    && !string.IsNullOrWhiteSpace(objective.Group))
+                {
+                    return objective.Group.Trim();
+                }
+            }
+
+            for (var i = 0; i < objectives.Count; i++)
+            {
+                var objective = objectives[i];
+                if (objective != null && !string.IsNullOrWhiteSpace(objective.Group))
+                {
+                    return objective.Group.Trim();
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static bool MatchesObjectiveGroup(ObjectiveConfig objective, string activeGroup)
+        {
+            if (objective == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(activeGroup))
+            {
+                return true;
+            }
+
+            return string.IsNullOrWhiteSpace(objective.Group)
+                || string.Equals(objective.Group.Trim(), activeGroup, StringComparison.OrdinalIgnoreCase);
         }
 
         private Dictionary<string, string> BuildObjectivePredecessorMap(ObjectiveDatabase database)

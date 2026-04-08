@@ -82,7 +82,7 @@ namespace Wuxing.UI
             {
                 var slot = SlotOrder[i];
                 var button = GetOrCreateSlotButton(i);
-                ConfigureCardButtonRect(button, i, 0, 3);
+                ConfigureCardButtonRect(button, i, 0);
                 ConfigureSlotCard(button, slot);
                 button.gameObject.SetActive(true);
             }
@@ -107,7 +107,7 @@ namespace Wuxing.UI
             for (var i = 0; i < cards.Count; i++)
             {
                 var button = GetOrCreateInventoryButton(i);
-                ConfigureCardButtonRect(button, i % 4, i / 4, 4);
+                ConfigureCardButtonRect(button, i % 4, i / 4);
                 ConfigureInventoryCard(button, cards[i]);
                 button.gameObject.SetActive(true);
             }
@@ -242,7 +242,7 @@ namespace Wuxing.UI
             var result = new List<EquipmentCardData>();
             result.Add(new EquipmentCardData
             {
-                Title = "\u5378\u4e0b\u88c5\u5907",
+                Title = LocalizationManager.GetText("equipment.action.unequip"),
                 Subtitle = GetSlotDisplayName(selectedSlot),
                 EquipmentInstanceId = string.Empty,
                 BorderColor = Color.white,
@@ -301,7 +301,7 @@ namespace Wuxing.UI
             }
         }
 
-        private static void ConfigureCardButtonRect(Button button, int column, int row, int maxColumns)
+        private static void ConfigureCardButtonRect(Button button, int column, int row)
         {
             var rect = button.GetComponent<RectTransform>();
             if (rect == null)
@@ -319,7 +319,7 @@ namespace Wuxing.UI
         private string BuildEmptySlotDetail()
         {
             var builder = new StringBuilder();
-            builder.Append("\u90e8\u4f4d\uff1a")
+            builder.Append(LocalizationManager.GetText("equipment.detail.slot"))
                 .Append(GetSlotDisplayName(selectedSlot))
                 .Append('\n')
                 .Append(LocalizationManager.GetText("battle.equipment_none"));
@@ -329,38 +329,38 @@ namespace Wuxing.UI
         private static string BuildEquipmentDetail(EquipmentConfig equipment)
         {
             var builder = new StringBuilder();
-            builder.Append("\u54c1\u7ea7\uff1a")
+            builder.Append(LocalizationManager.GetText("equipment.detail.quality"))
                 .Append(GetEquipmentQualityLabel(equipment.Quality))
                 .Append('\n')
-                .Append("\u7b49\u7ea7\uff1a")
+                .Append(LocalizationManager.GetText("equipment.detail.level"))
                 .Append(GetEquipmentLevelLabel(equipment.Level))
                 .Append('\n')
-                .Append("\u90e8\u4f4d\uff1a")
+                .Append(LocalizationManager.GetText("equipment.detail.slot"))
                 .Append(GetSlotDisplayName(equipment.Slot));
 
             if (equipment.HP != 0)
             {
-                builder.Append('\n').Append("\u751f\u547d ").Append(FormatSignedValue(equipment.HP));
+                builder.Append('\n').Append(LocalizationManager.GetText("equipment.stat.hp")).Append(' ').Append(FormatSignedValue(equipment.HP));
             }
 
             if (equipment.ATK != 0)
             {
-                builder.Append('\n').Append("\u653b\u51fb ").Append(FormatSignedValue(equipment.ATK));
+                builder.Append('\n').Append(LocalizationManager.GetText("equipment.stat.atk")).Append(' ').Append(FormatSignedValue(equipment.ATK));
             }
 
             if (equipment.DEF != 0)
             {
-                builder.Append('\n').Append("\u9632\u5fa1 ").Append(FormatSignedValue(equipment.DEF));
+                builder.Append('\n').Append(LocalizationManager.GetText("equipment.stat.def")).Append(' ').Append(FormatSignedValue(equipment.DEF));
             }
 
             if (equipment.MP != 0)
             {
-                builder.Append('\n').Append("\u6cd5\u529b ").Append(FormatSignedValue(equipment.MP));
+                builder.Append('\n').Append(LocalizationManager.GetText("equipment.stat.mp")).Append(' ').Append(FormatSignedValue(equipment.MP));
             }
 
             if (!string.IsNullOrEmpty(equipment.Notes))
             {
-                builder.Append('\n').Append("\u8bf4\u660e\uff1a").Append(equipment.Notes);
+                builder.Append('\n').Append(LocalizationManager.GetText("equipment.detail.notes")).Append(equipment.Notes);
             }
 
             return builder.ToString();
@@ -371,13 +371,13 @@ namespace Wuxing.UI
             switch ((slot ?? string.Empty).Trim())
             {
                 case "Weapon":
-                    return "\u6b66\u5668";
+                    return LocalizationManager.GetText("equipment.slot.weapon");
                 case "Armor":
-                    return "\u62a4\u7532";
+                    return LocalizationManager.GetText("equipment.slot.armor");
                 case "Accessory":
-                    return "\u9970\u54c1";
+                    return LocalizationManager.GetText("equipment.slot.accessory");
                 default:
-                    return "\u672a\u5206\u7c7b";
+                    return LocalizationManager.GetText("equipment.slot.unknown");
             }
         }
 
@@ -390,24 +390,19 @@ namespace Wuxing.UI
 
         private static string GetEquipmentQualityLabel(string quality)
         {
-            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
+            switch (NormalizeEquipmentQuality(quality))
             {
-                case "绿":
                 case "green":
-                    return "绿";
-                case "蓝":
+                    return LocalizationManager.GetText("equipment.quality.green");
                 case "blue":
-                    return "蓝";
-                case "紫":
+                    return LocalizationManager.GetText("equipment.quality.blue");
                 case "purple":
-                    return "紫";
-                case "金":
+                    return LocalizationManager.GetText("equipment.quality.purple");
                 case "gold":
-                    return "金";
-                case "白":
+                    return LocalizationManager.GetText("equipment.quality.gold");
                 case "white":
                 default:
-                    return "白";
+                    return LocalizationManager.GetText("equipment.quality.white");
             }
         }
 
@@ -415,27 +410,42 @@ namespace Wuxing.UI
         {
             switch (Mathf.Clamp(level, 1, 5))
             {
-                case 1: return "一阶";
-                case 2: return "二阶";
-                case 3: return "三阶";
-                case 4: return "四阶";
-                case 5: return "五阶";
-                default: return "一阶";
+                case 1:
+                    return LocalizationManager.GetText("equipment.level.1");
+                case 2:
+                    return LocalizationManager.GetText("equipment.level.2");
+                case 3:
+                    return LocalizationManager.GetText("equipment.level.3");
+                case 4:
+                    return LocalizationManager.GetText("equipment.level.4");
+                case 5:
+                    return LocalizationManager.GetText("equipment.level.5");
+                default:
+                    return LocalizationManager.GetText("equipment.level.1");
             }
         }
 
-        private static string GetSlotElement(string slot)
+        private static string NormalizeEquipmentQuality(string quality)
         {
-            switch ((slot ?? string.Empty).Trim())
+            switch ((quality ?? string.Empty).Trim().ToLowerInvariant())
             {
-                case "Weapon":
-                    return "Metal";
-                case "Armor":
-                    return "Earth";
-                case "Accessory":
-                    return "Water";
+                case "白":
+                case "white":
+                    return "white";
+                case "绿":
+                case "green":
+                    return "green";
+                case "蓝":
+                case "blue":
+                    return "blue";
+                case "紫":
+                case "purple":
+                    return "purple";
+                case "金":
+                case "gold":
+                    return "gold";
                 default:
-                    return "None";
+                    return "white";
             }
         }
 

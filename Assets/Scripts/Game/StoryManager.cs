@@ -154,6 +154,7 @@ namespace Wuxing.Game
                 pendingRequests.Enqueue(new PendingStoryRequest
                 {
                     TriggerId = trigger.Id,
+                    TriggerKey = triggerKey,
                     OncePerRun = trigger.OncePerRun,
                     FirstNodeId = trigger.NodeId,
                     OnComplete = onComplete
@@ -239,6 +240,8 @@ namespace Wuxing.Game
             var pending = pendingRequests.Dequeue();
             var nodeDatabase = StoryNodeDatabaseLoader.Load();
             var nextNode = nodeDatabase != null ? nodeDatabase.GetById(pending.FirstNodeId) : null;
+            GameProgressManager.RegisterObjectiveEvent("TriggerStory", pending.TriggerKey, 1);
+            GameProgressManager.RegisterObjectiveEvent("TriggerStory", string.Empty, 1);
             StartSequence(pending.TriggerId, pending.OncePerRun, nextNode, pending.OnComplete);
         }
 
@@ -313,6 +316,7 @@ namespace Wuxing.Game
         private sealed class PendingStoryRequest
         {
             public string TriggerId;
+            public string TriggerKey;
             public bool OncePerRun;
             public string FirstNodeId;
             public Action OnComplete;
