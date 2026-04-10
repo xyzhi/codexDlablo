@@ -16,9 +16,19 @@ namespace Wuxing.UI
         public const float MapToastDuration = 1.25f;
 
         private const float MoveDurationPerStep = 0.5f;
-        private const float NodeSpacing = 185f;
-        private const float NodeWidth = 148f;
-        private const float NodeHeight = 90f;
+        private const int VisibleNodeCount = 5;
+        private const int CenterNodeIndex = 2;
+        private const float NodeWidth = 164f;
+        private const float NodeHeight = 148f;
+        private const float LineVerticalOffset = 40f;
+        private static readonly Vector2[] NodeLayoutPattern =
+        {
+            new Vector2(-340f, -280f),
+            new Vector2(-90f, -80f),
+            new Vector2(170f, 110f),
+            new Vector2(-30f, 340f),
+            new Vector2(230f, 560f)
+        };
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text statusText;
@@ -35,9 +45,17 @@ namespace Wuxing.UI
         [SerializeField] private Button skillOverviewButton;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button backButton;
+        [SerializeField] private Sprite bottomButtonSprite;
+        [SerializeField] private Sprite mapLineSprite;
+        [SerializeField] private Sprite restNodeSprite;
+        [SerializeField] private Sprite battleNodeSprite;
+        [SerializeField] private Sprite eliteNodeSprite;
+        [SerializeField] private Sprite bossNodeSprite;
+        [SerializeField] private Sprite eventNodeSprite;
 
         private readonly List<Button> nodeButtons = new List<Button>();
         private readonly List<Text> nodeButtonLabels = new List<Text>();
+        private readonly List<Image> nodeButtonIcons = new List<Image>();
         private readonly List<Image> nodeLines = new List<Image>();
         private readonly List<int> visibleStages = new List<int>();
         private readonly Dictionary<int, Vector2> stagePositions = new Dictionary<int, Vector2>();
@@ -883,25 +901,24 @@ namespace Wuxing.UI
 
             if (titleText != null)
             {
-                titleText.text = LocalizationManager.GetText("map.title");
+                titleText.text = LocalizationManager.GetText("menu.title");
             }
 
             if (statusText != null)
             {
-                statusText.text = string.Format(
-                    LocalizationManager.GetText("map.status_current_position"),
-                    currentStage,
-                    GameProgressManager.GetNodeTypeLabel(isEnglish, currentStage));
+                statusText.text = BuildHeaderSummary(isEnglish, currentStage);
             }
 
             if (regionText != null)
             {
-                regionText.text = LocalizationManager.GetText("map.region_prefix") + GameProgressManager.GetStageTheme(isEnglish, currentStage);
+                regionText.text = isEnglish ? "Cultivation Route" : "修行灵图";
             }
 
             if (longevityText != null)
             {
-                longevityText.text = GameProgressManager.BuildLongevitySummary(isEnglish);
+                longevityText.text = isEnglish
+                    ? "Lifespan  " + GameProgressManager.BuildLongevitySummary(isEnglish)
+                    : "寿元  " + GameProgressManager.BuildLongevitySummary(isEnglish);
             }
 
             if (nodeDetailText != null)
@@ -912,9 +929,9 @@ namespace Wuxing.UI
             if (routeText != null)
             {
                 routeText.supportRichText = true;
-                routeText.fontSize = 21;
-                routeText.lineSpacing = 1.06f;
-                routeText.text = BuildProfileText(isEnglish, currentStage, maxReachableStage);
+                routeText.fontSize = 19;
+                routeText.lineSpacing = 1.02f;
+                routeText.text = BuildCondensedProfileText(isEnglish, currentStage);
             }
 
             RefreshButtons(isEnglish, currentStage);
@@ -927,14 +944,23 @@ namespace Wuxing.UI
             var canMoveNext = !isMoving && GameProgressManager.CanTravelToStage(currentStage + 1);
             var canEnterSelected = !isMoving;
 
-            SetButtonText(previousButton, LocalizationManager.GetText("map.button_previous"));
-            SetButtonText(nextButton, LocalizationManager.GetText("map.button_next"));
-            SetButtonText(enterButton, LocalizationManager.GetText("map.button_enter"));
-            SetButtonText(equipmentButton, LocalizationManager.GetText("battle.button_equipment"));
-            SetButtonText(spiritConvertButton, LocalizationManager.GetText("map.button_spirit_convert"));
-            SetButtonText(skillOverviewButton, LocalizationManager.GetText("map.button_skill_overview"));
-            SetButtonText(resetButton, LocalizationManager.GetText("map.button_reset_run"));
-            SetButtonText(backButton, LocalizationManager.GetText("menu.button_back_start"));
+            SetButtonText(previousButton, isEnglish ? "Back" : "回退");
+            SetButtonText(nextButton, isEnglish ? "Forward" : "前行");
+            SetButtonText(enterButton, isEnglish ? "Start" : "启程");
+            SetButtonText(equipmentButton, isEnglish ? "Bag" : "行囊");
+            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "灵石");
+            SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "心法");
+            SetButtonText(resetButton, isEnglish ? "Reset" : "重置");
+            SetButtonText(backButton, isEnglish ? "Title" : "返始");
+
+            ApplyBottomButtonChrome(previousButton);
+            ApplyBottomButtonChrome(nextButton);
+            ApplyBottomButtonChrome(enterButton);
+            ApplyBottomButtonChrome(equipmentButton);
+            ApplyBottomButtonChrome(spiritConvertButton);
+            ApplyBottomButtonChrome(skillOverviewButton);
+            ApplyBottomButtonChrome(resetButton);
+            ApplyBottomButtonChrome(backButton);
 
             if (previousButton != null) previousButton.interactable = canMovePrevious;
             if (nextButton != null) nextButton.interactable = canMoveNext;
@@ -956,25 +982,35 @@ namespace Wuxing.UI
             visibleStages.Clear();
             stagePositions.Clear();
 
-            var minStage = Mathf.Max(1, currentStage - 2);
-            var maxStage = Mathf.Min(GameProgressManager.GetMaxStage(), currentStage + 2);
-            for (var stage = minStage; stage <= maxStage; stage++)
+            for (var slot = 0; slot < VisibleNodeCount; slot++)
             {
+                var stage = currentStage + (slot - CenterNodeIndex);
+                if (stage <= 0)
+                {
+                    visibleStages.Add(-1);
+                    continue;
+                }
+
+                if (currentStage <= 1 && stage > currentStage + 2)
+                {
+                    visibleStages.Add(-1);
+                    continue;
+                }
+
                 visibleStages.Add(stage);
             }
 
             var count = visibleStages.Count;
-            var startX = -((count - 1) * NodeSpacing) * 0.5f;
 
             for (var i = 0; i < nodeButtons.Count; i++)
             {
-                var active = i < count;
+                var active = i < count && visibleStages[i] > 0;
                 nodeButtons[i].gameObject.SetActive(active);
                 if (i < nodeLines.Count) nodeLines[i].gameObject.SetActive(false);
                 if (!active) continue;
 
                 var stage = visibleStages[i];
-                var position = new Vector2(startX + i * NodeSpacing, 0f);
+                var position = GetLoopedNodePosition(i, count);
                 stagePositions[stage] = position;
 
                 var buttonRect = nodeButtons[i].GetComponent<RectTransform>();
@@ -982,14 +1018,30 @@ namespace Wuxing.UI
                 buttonRect.sizeDelta = new Vector2(NodeWidth, NodeHeight);
 
                 var buttonImage = nodeButtons[i].GetComponent<Image>();
-                if (buttonImage != null) buttonImage.color = GetNodeColor(stage, currentStage);
+                if (buttonImage != null)
+                {
+                    buttonImage.color = new Color(1f, 1f, 1f, 0f);
+                }
 
                 var label = nodeButtonLabels[i];
                 if (label != null)
                 {
                     label.text = BuildNodeLabel(stage);
                     label.alignment = TextAnchor.MiddleCenter;
-                    label.fontSize = 22;
+                    label.fontSize = 28;
+                    label.color = GetNodeTextColor(stage, currentStage);
+                }
+
+                var icon = nodeButtonIcons[i];
+                if (icon != null)
+                {
+                    icon.sprite = GetNodeSprite(stage);
+                    icon.color = GetNodeIconColor(stage, currentStage);
+                    if (icon.sprite != null)
+                    {
+                        icon.SetNativeSize();
+                    }
+                    icon.gameObject.SetActive(icon.sprite != null);
                 }
 
                 nodeButtons[i].onClick.RemoveAllListeners();
@@ -998,9 +1050,18 @@ namespace Wuxing.UI
 
                 if (i > 0)
                 {
-                    var previousPosition = stagePositions[visibleStages[i - 1]];
+                    var previousStage = visibleStages[i - 1];
+                    if (previousStage <= 0 || !stagePositions.ContainsKey(previousStage))
+                    {
+                        continue;
+                    }
+
+                    var previousPosition = stagePositions[previousStage];
                     ConfigureLine(nodeLines[i - 1].rectTransform, previousPosition, position);
-                    nodeLines[i - 1].color = new Color(0.78f, 0.72f, 0.6f, 0.75f);
+                    nodeLines[i - 1].sprite = mapLineSprite;
+                    nodeLines[i - 1].type = Image.Type.Simple;
+                    nodeLines[i - 1].preserveAspect = true;
+                    nodeLines[i - 1].color = new Color(0.94f, 0.82f, 0.52f, 0.82f);
                     nodeLines[i - 1].gameObject.SetActive(true);
                 }
             }
@@ -1013,18 +1074,43 @@ namespace Wuxing.UI
 
         private void EnsureGraphPool()
         {
-            while (nodeButtons.Count < 5)
+            while (nodeButtons.Count < VisibleNodeCount)
             {
-                var button = UIFactory.CreateButton(nodeGraphRoot, "NodeButton" + nodeButtons.Count, "Node", delegate { });
+                var buttonObject = new GameObject("NodeButton" + nodeButtons.Count, typeof(RectTransform), typeof(Image), typeof(Button));
+                buttonObject.transform.SetParent(nodeGraphRoot, false);
+                var button = buttonObject.GetComponent<Button>();
+                var buttonImage = buttonObject.GetComponent<Image>();
+                button.targetGraphic = buttonImage;
+                buttonImage.color = new Color(1f, 1f, 1f, 0f);
+
                 var rect = button.GetComponent<RectTransform>();
                 rect.anchorMin = new Vector2(0.5f, 0.5f);
                 rect.anchorMax = new Vector2(0.5f, 0.5f);
                 rect.pivot = new Vector2(0.5f, 0.5f);
+
+                var iconObject = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+                iconObject.transform.SetParent(buttonObject.transform, false);
+                var iconRect = iconObject.GetComponent<RectTransform>();
+                iconRect.anchorMin = new Vector2(0.5f, 1f);
+                iconRect.anchorMax = new Vector2(0.5f, 1f);
+                iconRect.pivot = new Vector2(0.5f, 0.5f);
+                iconRect.anchoredPosition = new Vector2(0f, -34f);
+                var iconImage = iconObject.GetComponent<Image>();
+                iconImage.raycastTarget = false;
+
+                var label = UIFactory.CreateText(buttonObject.transform, "Label", "Node", 28, TextAnchor.LowerCenter, new Color(0.1f, 0.08f, 0.05f, 1f));
+                label.rectTransform.anchorMin = new Vector2(0f, 0f);
+                label.rectTransform.anchorMax = new Vector2(1f, 0.68f);
+                label.rectTransform.offsetMin = new Vector2(-24f, 0f);
+                label.rectTransform.offsetMax = new Vector2(24f, 0f);
+                label.supportRichText = false;
+
                 nodeButtons.Add(button);
-                nodeButtonLabels.Add(button.GetComponentInChildren<Text>());
+                nodeButtonLabels.Add(label);
+                nodeButtonIcons.Add(iconImage);
             }
 
-            while (nodeLines.Count < 4)
+            while (nodeLines.Count < VisibleNodeCount - 1)
             {
                 var lineObject = new GameObject("NodeLine" + nodeLines.Count, typeof(RectTransform), typeof(Image));
                 lineObject.transform.SetParent(nodeGraphRoot, false);
@@ -1034,6 +1120,7 @@ namespace Wuxing.UI
                 rect.pivot = new Vector2(0.5f, 0.5f);
                 var image = lineObject.GetComponent<Image>();
                 image.raycastTarget = false;
+                image.sprite = mapLineSprite;
                 nodeLines.Add(image);
                 lineObject.transform.SetAsFirstSibling();
             }
@@ -1048,7 +1135,7 @@ namespace Wuxing.UI
                 markerRect.pivot = new Vector2(0.5f, 0.5f);
                 markerRect.sizeDelta = new Vector2(22f, 22f);
                 travelerMarker = markerObject.GetComponent<Image>();
-                travelerMarker.color = new Color(0.98f, 0.9f, 0.5f, 1f);
+                travelerMarker.color = new Color(0.98f, 0.82f, 0.46f, 1f);
                 travelerMarker.raycastTarget = false;
             }
         }
@@ -1056,15 +1143,20 @@ namespace Wuxing.UI
         private void ConfigureLine(RectTransform rect, Vector2 from, Vector2 to)
         {
             var direction = to - from;
-            rect.anchoredPosition = from + direction * 0.5f;
-            rect.sizeDelta = new Vector2(direction.magnitude, 5f);
-            rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+            rect.anchoredPosition = from + direction * 0.5f + new Vector2(0f, LineVerticalOffset);
+            var lineImage = rect.GetComponent<Image>();
+            if (lineImage != null && lineImage.sprite != null)
+            {
+                lineImage.SetNativeSize();
+            }
+            rect.localScale = new Vector3(direction.x < 0f ? -1f : 1f, 1f, 1f);
+            rect.localRotation = Quaternion.identity;
         }
 
         private void UpdateTravelerMarkerPosition(Vector2 graphPosition)
         {
             if (travelerMarker == null) return;
-            travelerMarker.rectTransform.anchoredPosition = graphPosition + new Vector2(0f, 74f);
+            travelerMarker.rectTransform.anchoredPosition = graphPosition + new Vector2(44f, 6f);
             travelerMarker.gameObject.SetActive(true);
             travelerMarker.transform.SetAsLastSibling();
         }
@@ -1077,100 +1169,62 @@ namespace Wuxing.UI
             var eventMode = GameProgressManager.GetStageEventMode(selectedStage);
 
             var builder = new StringBuilder();
-            builder.Append(LocalizationManager.GetText("map.detail_title"))
+            builder.Append(isEnglish ? "Stage " : "第 ")
+                .Append(selectedStage)
+                .Append(isEnglish ? "  " : " 节  ")
+                .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage))
                 .Append('\n')
-                .Append(string.Format(LocalizationManager.GetText("map.detail_stage"), selectedStage, GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage)))
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.detail_reachable"))
-                .Append(LocalizationManager.GetText(canReach ? "map.detail_reachable_yes" : "map.detail_reachable_locked"))
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.detail_time_cost"))
+                .Append(isEnglish ? "Travel: " : "耗时：")
                 .Append(monthCost)
-                .Append(LocalizationManager.GetText("map.detail_month_suffix"));
+                .Append(isEnglish ? " mo" : "月")
+                .Append("  ")
+                .Append(isEnglish ? "Reach: " : "抵达：")
+                .Append(canReach ? (isEnglish ? "Yes" : "可达") : (isEnglish ? "Locked" : "未达"));
 
             if (!GameProgressManager.IsBattleNode(selectedNodeType))
             {
                 builder.Append('\n')
-                    .Append(LocalizationManager.GetText("map.detail_event_mode"))
-                    .Append(LocalizationManager.GetText(string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase)
-                        ? "map.detail_event_random"
-                        : "map.detail_event_fixed"));
-
-                if (string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase))
-                {
-                    var remainingMonths = GameProgressManager.GetRandomStageCooldownRemainingMonths(selectedStage);
-                    builder.Append('\n')
-                        .Append(LocalizationManager.GetText("map.detail_event_cooldown"))
-                        .Append(remainingMonths > 0
-                            ? string.Format(LocalizationManager.GetText("map.detail_event_remaining"), remainingMonths)
-                            : LocalizationManager.GetText("map.detail_event_ready"));
-                }
+                    .Append(isEnglish ? "Mode: " : "事件：")
+                    .Append(string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase)
+                        ? (isEnglish ? "Random" : "随机")
+                        : (isEnglish ? "Fixed" : "固定"));
             }
 
-            builder.Append('\n')
-                .Append('\n')
-                .Append(GameProgressManager.BuildNodeDetail(isEnglish, selectedStage));
-
-            if (selectedStage == currentStage && GameProgressManager.IsBattleNode(selectedNodeType))
+            var detail = GameProgressManager.BuildNodeDetail(isEnglish, selectedStage);
+            if (!string.IsNullOrEmpty(detail))
             {
-                builder.Append('\n')
-                    .Append('\n')
-                    .Append(BattleManager.BuildBattlePreparationSummary());
+                builder.Append('\n').Append('\n').Append(detail);
             }
-
-            builder.Append('\n')
-                .Append('\n')
-                .Append(LocalizationManager.GetText("map.detail_arrival_effect"))
-                .Append(LocalizationManager.GetText(selectedNodeType == MapNodeType.Rest ? "map.detail_arrival_rest" : "map.detail_arrival_battle"));
 
             return builder.ToString();
         }
 
-        private string BuildProfileText(bool isEnglish, int currentStage, int maxReachableStage)
+        private string BuildCondensedProfileText(bool isEnglish, int currentStage)
         {
             var builder = new StringBuilder();
             var objectiveSummary = GameProgressManager.BuildObjectiveSummary(isEnglish);
             if (!string.IsNullOrEmpty(objectiveSummary))
             {
-                builder.Append(objectiveSummary)
-                    .Append('\n')
-                    .Append("<color=#4B433A>────────────────</color>")
-                    .Append('\n')
-                    .Append('\n');
+                builder.Append(objectiveSummary.Trim());
             }
-
-            builder.Append(BuildSectionHeader(LocalizationManager.GetText("map.profile_title")))
-                .Append('\n');
-            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_current_stage"), currentStage.ToString());
-            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_cultivation_level"), GameProgressManager.GetCultivationLevel().ToString());
-            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_exp"), GameProgressManager.GetCultivationExp() + "/" + GameProgressManager.GetRequiredExpForNextLevel());
-            builder.Append("<color=#C7B89A>")
-                .Append(GameProgressManager.BuildSpiritStoneSummary(isEnglish, true))
-                .Append("</color>")
-                .Append('\n');
-            AppendProfileLine(builder, LocalizationManager.GetText("map.profile_owned_equipment"), GameProgressManager.GetOwnedEquipmentIds().Count.ToString());
-
-            return builder.ToString();
-        }
-
-        private static string BuildSectionHeader(string title)
-        {
-            return "<color=#CDAA6A><b>" + title + "</b></color>";
-        }
-
-        private static void AppendProfileLine(StringBuilder builder, string label, string value)
-        {
-            if (builder == null)
+            if (builder.Length > 0)
             {
-                return;
+                builder.Append('\n').Append('\n');
             }
-
-            builder.Append("<color=#8E8579>")
-                .Append(label)
-                .Append("</color><color=#EDE7DB>")
-                .Append(value)
-                .Append("</color>")
-                .Append('\n');
+            builder.Append(isEnglish ? "Realm " : "境界 ")
+                .Append(GameProgressManager.GetCultivationLevel())
+                .Append('\n')
+                .Append(isEnglish ? "Exp " : "修为 ")
+                .Append(GameProgressManager.GetCultivationExp())
+                .Append('/')
+                .Append(GameProgressManager.GetRequiredExpForNextLevel())
+                .Append('\n')
+                .Append(isEnglish ? "Gear " : "装备 ")
+                .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
+                .Append("  ")
+                .Append(isEnglish ? "Node " : "节点 ")
+                .Append(currentStage);
+            return builder.ToString();
         }
 
         private string BuildArrivalToast(int stage)
@@ -1183,19 +1237,60 @@ namespace Wuxing.UI
 
         private string BuildNodeLabel(int stage)
         {
-            return string.Format(
-                LocalizationManager.GetText("map.node_label"),
-                stage,
-                GameProgressManager.GetNodeTypeLabel(IsEnglish(), stage));
+            return GameProgressManager.GetNodeTypeLabel(IsEnglish(), stage);
         }
 
-        private Color GetNodeColor(int stage, int currentStage)
+        private string BuildHeaderSummary(bool isEnglish, int currentStage)
         {
-            if (stage == currentStage) return new Color(0.42f, 0.28f, 0.12f, 0.98f);
-            if (stage == selectedStage) return new Color(0.18f, 0.28f, 0.4f, 0.98f);
-            if (stage < currentStage) return new Color(0.18f, 0.18f, 0.2f, 0.95f);
-            if (GameProgressManager.CanTravelToStage(stage)) return new Color(0.22f, 0.22f, 0.26f, 0.96f);
-            return new Color(0.11f, 0.11f, 0.13f, 0.88f);
+            var maxStage = Mathf.Max(currentStage, GameProgressManager.GetMaxReachableStage());
+            return isEnglish
+                ? "Realm: " + GameProgressManager.GetCultivationLevel() + "\nPath: " + currentStage + "/" + maxStage
+                : "当前境界：" + GameProgressManager.GetCultivationLevel() + "\n已历节点：" + currentStage + "/" + maxStage;
+        }
+
+        private Vector2 GetLoopedNodePosition(int index, int visibleCount)
+        {
+            if (visibleCount <= 0)
+            {
+                return Vector2.zero;
+            }
+
+            var startOffset = Mathf.Max(0, (NodeLayoutPattern.Length - visibleCount) / 2);
+            var patternIndex = Mathf.Clamp(startOffset + index, 0, NodeLayoutPattern.Length - 1);
+            return NodeLayoutPattern[patternIndex];
+        }
+
+        private Sprite GetNodeSprite(int stage)
+        {
+            switch (GameProgressManager.GetNodeType(stage))
+            {
+                case MapNodeType.Rest:
+                    return restNodeSprite != null ? restNodeSprite : eventNodeSprite;
+                case MapNodeType.Elite:
+                    return eliteNodeSprite != null ? eliteNodeSprite : battleNodeSprite;
+                case MapNodeType.Boss:
+                    return bossNodeSprite != null ? bossNodeSprite : eliteNodeSprite;
+                case MapNodeType.Battle:
+                    return battleNodeSprite != null ? battleNodeSprite : restNodeSprite;
+                default:
+                    return eventNodeSprite != null ? eventNodeSprite : restNodeSprite;
+            }
+        }
+
+        private Color GetNodeTextColor(int stage, int currentStage)
+        {
+            if (stage == currentStage) return new Color(0.48f, 0.28f, 0.1f, 1f);
+            if (stage == selectedStage) return new Color(0.12f, 0.12f, 0.12f, 1f);
+            if (GameProgressManager.CanTravelToStage(stage)) return new Color(0.08f, 0.08f, 0.08f, 1f);
+            return new Color(0.48f, 0.48f, 0.48f, 0.82f);
+        }
+
+        private Color GetNodeIconColor(int stage, int currentStage)
+        {
+            if (stage == currentStage) return new Color(1f, 0.9f, 0.55f, 1f);
+            if (stage == selectedStage) return new Color(0.94f, 0.94f, 0.94f, 1f);
+            if (GameProgressManager.CanTravelToStage(stage)) return new Color(0.9f, 0.9f, 0.9f, 1f);
+            return new Color(0.65f, 0.65f, 0.65f, 0.72f);
         }
 
         private bool IsEnglish()
@@ -1209,6 +1304,36 @@ namespace Wuxing.UI
             if (button == null) return;
             var label = button.GetComponentInChildren<Text>();
             if (label != null) label.text = text;
+        }
+
+        private void ApplyBottomButtonChrome(Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var rootGraphic = button.GetComponent<Image>();
+            if (rootGraphic != null)
+            {
+                rootGraphic.sprite = null;
+                rootGraphic.color = new Color(1f, 1f, 1f, 0f);
+                rootGraphic.type = Image.Type.Simple;
+            }
+
+            var images = button.GetComponentsInChildren<Image>(true);
+            for (var i = 0; i < images.Length; i++)
+            {
+                if (!string.Equals(images[i].gameObject.name, "ButtonSurface", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                images[i].sprite = bottomButtonSprite;
+                images[i].color = Color.white;
+                images[i].type = Image.Type.Sliced;
+                images[i].preserveAspect = false;
+            }
         }
     }
 }
