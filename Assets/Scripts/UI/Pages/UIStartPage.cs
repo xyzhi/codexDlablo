@@ -11,6 +11,7 @@ namespace Wuxing.UI
         [SerializeField] private Button enterButton;
         [SerializeField] private Button languageButton;
         [SerializeField] private Text titleText;
+        [SerializeField] private Text titleShadowText;
         [SerializeField] private Text subtitleText;
         [SerializeField] private Text languageStateText;
         [SerializeField] private RectTransform titleBlock;
@@ -29,10 +30,12 @@ namespace Wuxing.UI
         private Text _languageButtonText;
         private Text _enterButtonText;
         private Font _defaultTitleFont;
+        private Font _defaultTitleShadowFont;
         private Font _defaultSubtitleFont;
         private Font _defaultLanguageStateFont;
         private Font _defaultLanguageButtonFont;
         private Font _defaultEnterButtonFont;
+        private Color _defaultEnterButtonColor;
         private int _defaultTitleFontSize;
         private int _defaultSubtitleFontSize;
         private int _defaultLanguageStateFontSize;
@@ -152,6 +155,11 @@ namespace Wuxing.UI
                 _defaultTitleFontStyle = titleText.fontStyle;
             }
 
+            if (titleShadowText != null && _defaultTitleShadowFont == null)
+            {
+                _defaultTitleShadowFont = titleShadowText.font;
+            }
+
             if (subtitleText != null && _defaultSubtitleFont == null)
             {
                 _defaultSubtitleFont = subtitleText.font;
@@ -178,6 +186,7 @@ namespace Wuxing.UI
                 _defaultEnterButtonFont = _enterButtonText.font;
                 _defaultEnterButtonFontSize = _enterButtonText.fontSize;
                 _defaultEnterButtonFontStyle = _enterButtonText.fontStyle;
+                _defaultEnterButtonColor = _enterButtonText.color;
             }
         }
 
@@ -188,10 +197,12 @@ namespace Wuxing.UI
 
             CacheDefaultFonts();
             ApplyLocalizedFont(titleText, isEnglish, _defaultTitleFont, 118, FontStyle.Bold);
+            ApplyLocalizedFont(titleShadowText, isEnglish, _defaultTitleShadowFont, 124, FontStyle.Bold);
             ApplyLocalizedFont(subtitleText, isEnglish, _defaultSubtitleFont, 30, FontStyle.Bold);
             ApplyLocalizedFont(languageStateText, isEnglish, _defaultLanguageStateFont, 22, FontStyle.Bold);
             ApplyLocalizedFont(_languageButtonText, isEnglish, _defaultLanguageButtonFont, 22, FontStyle.Bold);
             ApplyLocalizedFont(_enterButtonText, isEnglish, _defaultEnterButtonFont, 30, FontStyle.Bold);
+            RestoreDefaultColor(_enterButtonText, _defaultEnterButtonColor);
 
             if (languageStateText != null)
             {
@@ -282,6 +293,16 @@ namespace Wuxing.UI
             }
 
             text.fontStyle = sharedStyle;
+        }
+
+        private static void RestoreDefaultColor(Text text, Color color)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            text.color = color;
         }
     }
 }
