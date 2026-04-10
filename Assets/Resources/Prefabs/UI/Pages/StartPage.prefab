@@ -1914,12 +1914,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d1bcff3b7c29236478ee1aec096f066a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chineseFont: {fileID: 12800000, guid: 5a9eca5bfd010be47bd32535c5f0dc77, type: 3}
   enterButton: {fileID: 8352399084472779988}
   languageButton: {fileID: 3889320506380331608}
-  titleText: {fileID: 3290741234248796139}
-  titleShadowText: {fileID: 2489126377059314440}
-  subtitleText: {fileID: 7567858070687055065}
   languageStateText: {fileID: 6698085177990375607}
   titleBlock: {fileID: 7212539154034849638}
   actionPanel: {fileID: 7716842484789018400}

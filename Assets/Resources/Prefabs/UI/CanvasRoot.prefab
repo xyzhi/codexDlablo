@@ -190,6 +190,7 @@ MonoBehaviour:
   pageLayer: {fileID: 8017311741016324926}
   popupLayer: {fileID: 2512561374024050543}
   toastLayer: {fileID: 7925479939488062860}
+  chineseFont: {fileID: 12800000, guid: 5a9eca5bfd010be47bd32535c5f0dc77, type: 3}
 --- !u!1 &7927160698723883529
 GameObject:
   m_ObjectHideFlags: 0

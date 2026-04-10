@@ -51,6 +51,7 @@ namespace Wuxing.UI
             }
 
             _currentPage.OnOpen(data);
+            _canvasRoot.RefreshFonts(_currentPage.transform);
         }
 
         public T ShowPopup<T>(string popupId, object data = null) where T : UIPopup
@@ -68,6 +69,7 @@ namespace Wuxing.UI
             }
 
             popup.OnOpen(data);
+            _canvasRoot.RefreshFonts(popup.transform);
             _popupStack.Push(popup);
             return popup as T;
         }
@@ -102,6 +104,7 @@ namespace Wuxing.UI
             }
 
             popup.Show(message, duration);
+            _canvasRoot.RefreshFonts(popup.transform);
         }
 
         public void ShowToastByKey(string key, float duration = 1.5f)

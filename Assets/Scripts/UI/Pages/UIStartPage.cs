@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Game;
 using Wuxing.Localization;
@@ -7,12 +7,8 @@ namespace Wuxing.UI
 {
     public class UIStartPage : UIPage
     {
-        [SerializeField] private Font chineseFont;
         [SerializeField] private Button enterButton;
         [SerializeField] private Button languageButton;
-        [SerializeField] private Text titleText;
-        [SerializeField] private Text titleShadowText;
-        [SerializeField] private Text subtitleText;
         [SerializeField] private Text languageStateText;
         [SerializeField] private RectTransform titleBlock;
         [SerializeField] private RectTransform actionPanel;
@@ -29,23 +25,8 @@ namespace Wuxing.UI
         private bool _layoutCached;
         private Text _languageButtonText;
         private Text _enterButtonText;
-        private Font _defaultTitleFont;
-        private Font _defaultTitleShadowFont;
-        private Font _defaultSubtitleFont;
-        private Font _defaultLanguageStateFont;
-        private Font _defaultLanguageButtonFont;
-        private Font _defaultEnterButtonFont;
         private Color _defaultEnterButtonColor;
-        private int _defaultTitleFontSize;
-        private int _defaultSubtitleFontSize;
-        private int _defaultLanguageStateFontSize;
-        private int _defaultLanguageButtonFontSize;
-        private int _defaultEnterButtonFontSize;
-        private FontStyle _defaultTitleFontStyle;
-        private FontStyle _defaultSubtitleFontStyle;
-        private FontStyle _defaultLanguageStateFontStyle;
-        private FontStyle _defaultLanguageButtonFontStyle;
-        private FontStyle _defaultEnterButtonFontStyle;
+        private bool _buttonColorCached;
 
         public override void OnOpen(object data)
         {
@@ -68,7 +49,7 @@ namespace Wuxing.UI
                 _languageButtonText = languageButton.GetComponentInChildren<Text>(true);
             }
 
-            CacheDefaultFonts();
+            CacheButtonColor();
         }
 
         private void OnEnable()
@@ -146,48 +127,15 @@ namespace Wuxing.UI
             _layoutCached = true;
         }
 
-        private void CacheDefaultFonts()
+        private void CacheButtonColor()
         {
-            if (titleText != null && _defaultTitleFont == null)
+            if (_buttonColorCached || _enterButtonText == null)
             {
-                _defaultTitleFont = titleText.font;
-                _defaultTitleFontSize = titleText.fontSize;
-                _defaultTitleFontStyle = titleText.fontStyle;
+                return;
             }
 
-            if (titleShadowText != null && _defaultTitleShadowFont == null)
-            {
-                _defaultTitleShadowFont = titleShadowText.font;
-            }
-
-            if (subtitleText != null && _defaultSubtitleFont == null)
-            {
-                _defaultSubtitleFont = subtitleText.font;
-                _defaultSubtitleFontSize = subtitleText.fontSize;
-                _defaultSubtitleFontStyle = subtitleText.fontStyle;
-            }
-
-            if (languageStateText != null && _defaultLanguageStateFont == null)
-            {
-                _defaultLanguageStateFont = languageStateText.font;
-                _defaultLanguageStateFontSize = languageStateText.fontSize;
-                _defaultLanguageStateFontStyle = languageStateText.fontStyle;
-            }
-
-            if (_languageButtonText != null && _defaultLanguageButtonFont == null)
-            {
-                _defaultLanguageButtonFont = _languageButtonText.font;
-                _defaultLanguageButtonFontSize = _languageButtonText.fontSize;
-                _defaultLanguageButtonFontStyle = _languageButtonText.fontStyle;
-            }
-
-            if (_enterButtonText != null && _defaultEnterButtonFont == null)
-            {
-                _defaultEnterButtonFont = _enterButtonText.font;
-                _defaultEnterButtonFontSize = _enterButtonText.fontSize;
-                _defaultEnterButtonFontStyle = _enterButtonText.fontStyle;
-                _defaultEnterButtonColor = _enterButtonText.color;
-            }
+            _defaultEnterButtonColor = _enterButtonText.color;
+            _buttonColorCached = true;
         }
 
         private void RefreshLanguageState()
@@ -195,14 +143,7 @@ namespace Wuxing.UI
             var isEnglish = LocalizationManager.Instance != null
                 && LocalizationManager.Instance.CurrentLanguage == GameLanguage.English;
 
-            CacheDefaultFonts();
-            ApplyLocalizedFont(titleText, isEnglish, _defaultTitleFont, 118, FontStyle.Bold);
-            ApplyLocalizedFont(titleShadowText, isEnglish, _defaultTitleShadowFont, 124, FontStyle.Bold);
-            ApplyLocalizedFont(subtitleText, isEnglish, _defaultSubtitleFont, 30, FontStyle.Bold);
-            ApplyLocalizedFont(languageStateText, isEnglish, _defaultLanguageStateFont, 22, FontStyle.Bold);
-            ApplyLocalizedFont(_languageButtonText, isEnglish, _defaultLanguageButtonFont, 22, FontStyle.Bold);
-            ApplyLocalizedFont(_enterButtonText, isEnglish, _defaultEnterButtonFont, 30, FontStyle.Bold);
-            RestoreDefaultColor(_enterButtonText, _defaultEnterButtonColor);
+            CacheButtonColor();
 
             if (languageStateText != null)
             {
@@ -213,6 +154,11 @@ namespace Wuxing.UI
             {
                 var targetKey = isEnglish ? "menu.button_language_to_zh" : "menu.button_language_to_en";
                 _languageButtonText.text = LocalizationManager.GetText(targetKey);
+            }
+
+            if (_enterButtonText != null && _buttonColorCached)
+            {
+                _enterButtonText.color = _defaultEnterButtonColor;
             }
         }
 
@@ -269,40 +215,6 @@ namespace Wuxing.UI
             var color = graphic.color;
             color.a = alpha;
             graphic.color = color;
-        }
-
-        private void ApplyLocalizedFont(Text text, bool isEnglish, Font fallbackFont, int sharedSize, FontStyle sharedStyle)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            if (!isEnglish && chineseFont != null)
-            {
-                text.font = chineseFont;
-            }
-            else if (fallbackFont != null)
-            {
-                text.font = fallbackFont;
-            }
-
-            if (sharedSize > 0)
-            {
-                text.fontSize = sharedSize;
-            }
-
-            text.fontStyle = sharedStyle;
-        }
-
-        private static void RestoreDefaultColor(Text text, Color color)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            text.color = color;
         }
     }
 }
