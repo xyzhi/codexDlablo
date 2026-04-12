@@ -980,8 +980,8 @@ RectTransform:
   - {fileID: 5746239699255194754}
   m_Father: {fileID: 6624966642225177497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.08, y: 0.86}
-  m_AnchorMax: {x: 0.92, y: 0.91}
+  m_AnchorMin: {x: 0.08, y: 0.883}
+  m_AnchorMax: {x: 0.92, y: 0.906}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -1538,7 +1538,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.13, g: 0.105, b: 0.09, a: 0.48}
+  m_Color: {r: 0.13, g: 0.105, b: 0.09, a: 0.36}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1769,7 +1769,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.14, g: 0.11, b: 0.11, a: 0.92}
+  m_Color: {r: 0.14, g: 0.11, b: 0.11, a: 0.74}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2016,7 +2016,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.13, g: 0.105, b: 0.09, a: 0.48}
+  m_Color: {r: 0.13, g: 0.105, b: 0.09, a: 0.36}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2134,6 +2134,7 @@ MonoBehaviour:
   statusText: {fileID: 5281906692221868521}
   regionText: {fileID: 8138762869298007046}
   longevityText: {fileID: 6846459227748648945}
+  backgroundImage: {fileID: 8728479403463427411}
   nodeGraphRoot: {fileID: 8152126967274370915}
   nodeDetailText: {fileID: 1244502408889872469}
   routeText: {fileID: 784764749600030499}
@@ -2152,6 +2153,12 @@ MonoBehaviour:
   eliteNodeSprite: {fileID: 21300000, guid: 0b2d9cb6d078aa9419704812ab87eb9c, type: 3}
   bossNodeSprite: {fileID: 21300000, guid: eab0e21a5ed96f54991c464fce69b540, type: 3}
   eventNodeSprite: {fileID: 21300000, guid: 56ae0ad75c068954298422227f6cf920, type: 3}
+  chapterBackground1: {fileID: 21300000, guid: e43fa6c0a72cfe542b75a8ef1e3dfc60, type: 3}
+  chapterBackground2: {fileID: 21300000, guid: 658ec9c068f74154e878252c6742feb6, type: 3}
+  chapterBackground3: {fileID: 21300000, guid: f8f2796de69352d49a95fa9bde66738b, type: 3}
+  chapterBackground4: {fileID: 21300000, guid: 045c31a6e980e3341ad8fc27d3faf174, type: 3}
+  chapterBackground5: {fileID: 21300000, guid: 2ef006a043e4abe4ea94ad2c36ff7c05, type: 3}
+  chapterBackground6: {fileID: 21300000, guid: 9f85f9e65a7f6d74faca8b6acf314a62, type: 3}
 --- !u!1 &4894557030193469930
 GameObject:
   m_ObjectHideFlags: 0
@@ -2728,8 +2735,8 @@ RectTransform:
   - {fileID: 8400630214276580318}
   m_Father: {fileID: 6624966642225177497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.08, y: 0.81}
-  m_AnchorMax: {x: 0.92, y: 0.85}
+  m_AnchorMin: {x: 0.08, y: 0.853}
+  m_AnchorMax: {x: 0.92, y: 0.876}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -3265,8 +3272,8 @@ RectTransform:
   - {fileID: 3855069079264807961}
   m_Father: {fileID: 6624966642225177497}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.08, y: 0.91}
-  m_AnchorMax: {x: 0.92, y: 0.97}
+  m_AnchorMin: {x: 0.08, y: 0.903}
+  m_AnchorMax: {x: 0.92, y: 0.945}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}

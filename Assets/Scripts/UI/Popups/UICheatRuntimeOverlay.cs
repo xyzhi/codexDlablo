@@ -89,15 +89,25 @@ namespace Wuxing.UI
             rect.sizeDelta = new Vector2(56f, 56f);
 
             var image = entryButton.GetComponent<Image>();
-            image.color = new Color(0.95f, 0.88f, 0.72f, 0.04f);
-            UIFactory.AddOutlineBox(entryButton.transform, "Outline", new Color(0.95f, 0.88f, 0.72f, 0.55f), 1f);
+            image.color = new Color(0.12f, 0.09f, 0.08f, 0.24f);
+            UIFactory.AddOutlineBox(entryButton.transform, "Outline", new Color(0.95f, 0.88f, 0.72f, 0.78f), 2f);
+
+            var shadow = entryButton.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.3f);
+            shadow.effectDistance = new Vector2(0f, -2f);
+            shadow.useGraphicAlpha = true;
+
+            var glow = entryButton.AddComponent<Outline>();
+            glow.effectColor = new Color(0.95f, 0.88f, 0.72f, 0.28f);
+            glow.effectDistance = new Vector2(1.5f, -1.5f);
+            glow.useGraphicAlpha = true;
 
             var dot = UIFactory.CreatePanel(entryButton.transform, "Dot", new Color(0.95f, 0.88f, 0.72f, 0.8f));
             var dotRect = dot.GetComponent<RectTransform>();
             dotRect.anchorMin = new Vector2(0.5f, 0.5f);
             dotRect.anchorMax = new Vector2(0.5f, 0.5f);
             dotRect.pivot = new Vector2(0.5f, 0.5f);
-            dotRect.sizeDelta = new Vector2(7f, 7f);
+            dotRect.sizeDelta = new Vector2(9f, 9f);
             dotRect.localEulerAngles = new Vector3(0f, 0f, 45f);
 
             entryButton.GetComponent<Button>().onClick.AddListener(Toggle);

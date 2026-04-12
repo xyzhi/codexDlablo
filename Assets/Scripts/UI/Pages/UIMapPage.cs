@@ -21,19 +21,28 @@ namespace Wuxing.UI
         private const float NodeWidth = 164f;
         private const float NodeHeight = 148f;
         private const float LineVerticalOffset = 40f;
+        private static readonly Color MapLineTint = new Color(0.38f, 0.36f, 0.33f, 0.84f);
+        private static readonly Color MapLineLift = new Color(0.94f, 0.92f, 0.88f, 0.1f);
+        private static readonly Color NodeLabelColor = new Color(0.98f, 0.97f, 0.95f, 1f);
+        private static readonly Color NodeLabelCurrentColor = new Color(0.98f, 0.92f, 0.8f, 1f);
+        private static readonly Color NodeLabelOutlineColor = new Color(0.04f, 0.04f, 0.04f, 0.58f);
+        private static readonly Color NodeLabelCurrentOutlineColor = new Color(0.14f, 0.11f, 0.06f, 0.74f);
+        private static readonly Color NodeIconShadowColor = new Color(0f, 0f, 0f, 0.24f);
+        private static readonly Color NodeIconCurrentShadowColor = new Color(0.2f, 0.16f, 0.09f, 0.42f);
         private static readonly Vector2[] NodeLayoutPattern =
         {
-            new Vector2(-340f, -280f),
-            new Vector2(-90f, -80f),
-            new Vector2(170f, 110f),
-            new Vector2(-30f, 340f),
-            new Vector2(230f, 560f)
+            new Vector2(135f, -280f),
+            new Vector2(-135f, -80f),
+            new Vector2(90f, 110f),
+            new Vector2(-115f, 340f),
+            new Vector2(125f, 560f)
         };
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text statusText;
         [SerializeField] private Text regionText;
         [SerializeField] private Text longevityText;
+        [SerializeField] private Image backgroundImage;
         [SerializeField] private RectTransform nodeGraphRoot;
         [SerializeField] private Text nodeDetailText;
         [SerializeField] private Text routeText;
@@ -52,6 +61,12 @@ namespace Wuxing.UI
         [SerializeField] private Sprite eliteNodeSprite;
         [SerializeField] private Sprite bossNodeSprite;
         [SerializeField] private Sprite eventNodeSprite;
+        [SerializeField] private Sprite chapterBackground1;
+        [SerializeField] private Sprite chapterBackground2;
+        [SerializeField] private Sprite chapterBackground3;
+        [SerializeField] private Sprite chapterBackground4;
+        [SerializeField] private Sprite chapterBackground5;
+        [SerializeField] private Sprite chapterBackground6;
 
         private readonly List<Button> nodeButtons = new List<Button>();
         private readonly List<Text> nodeButtonLabels = new List<Text>();
@@ -64,6 +79,9 @@ namespace Wuxing.UI
         private Coroutine moveCoroutine;
         private int selectedStage;
         private bool isMoving;
+        private RectTransform activeIconRect;
+        private RectTransform activeLabelRect;
+        private Shadow activeIconShadow;
 
         public override void OnOpen(object data)
         {
@@ -75,6 +93,7 @@ namespace Wuxing.UI
 
         private void Awake()
         {
+            ApplyTextChrome();
             if (previousButton != null) previousButton.onClick.AddListener(OnClickPrevious);
             if (enterButton != null) enterButton.onClick.AddListener(OnClickEnter);
             if (nextButton != null) nextButton.onClick.AddListener(OnClickNext);
@@ -107,6 +126,11 @@ namespace Wuxing.UI
             if (skillOverviewButton != null) skillOverviewButton.onClick.RemoveListener(OnClickSkillOverview);
             if (resetButton != null) resetButton.onClick.RemoveListener(OnClickReset);
             if (backButton != null) backButton.onClick.RemoveListener(OnClickBack);
+        }
+
+        private void Update()
+        {
+            UpdateCurrentNodePulse();
         }
 
         private void OnProgressChanged()
@@ -898,6 +922,8 @@ namespace Wuxing.UI
             var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             var maxReachableStage = GameProgressManager.GetMaxReachableStage();
             selectedStage = Mathf.Clamp(selectedStage <= 0 ? currentStage : selectedStage, 1, Mathf.Max(currentStage, maxReachableStage));
+            RefreshBackground(currentStage);
+            ApplyHeaderTypography(isEnglish);
 
             if (titleText != null)
             {
@@ -911,7 +937,8 @@ namespace Wuxing.UI
 
             if (regionText != null)
             {
-                regionText.text = isEnglish ? "Cultivation Route" : "修行灵图";
+                var sceneTheme = GameProgressManager.GetStageTheme(isEnglish, currentStage);
+                regionText.text = isEnglish ? "Current Scene: " + sceneTheme : "当前场景：" + sceneTheme;
             }
 
             if (longevityText != null)
@@ -936,6 +963,21 @@ namespace Wuxing.UI
 
             RefreshButtons(isEnglish, currentStage);
             RefreshNodeGraph(currentStage);
+        }
+
+        private void RefreshBackground(int currentStage)
+        {
+            if (backgroundImage == null)
+            {
+                return;
+            }
+
+            var sprite = GetChapterBackgroundSprite(currentStage);
+            if (sprite != null)
+            {
+                backgroundImage.sprite = sprite;
+                backgroundImage.color = Color.white;
+            }
         }
 
         private void RefreshButtons(bool isEnglish, int currentStage)
@@ -981,6 +1023,9 @@ namespace Wuxing.UI
 
             visibleStages.Clear();
             stagePositions.Clear();
+            activeLabelRect = null;
+            activeIconRect = null;
+            activeIconShadow = null;
 
             for (var slot = 0; slot < VisibleNodeCount; slot++)
             {
@@ -1029,19 +1074,39 @@ namespace Wuxing.UI
                     label.text = BuildNodeLabel(stage);
                     label.alignment = TextAnchor.MiddleCenter;
                     label.fontSize = 28;
-                    label.color = GetNodeTextColor(stage, currentStage);
+                    label.color = stage == currentStage ? NodeLabelCurrentColor : NodeLabelColor;
+                    label.rectTransform.localScale = Vector3.one;
+                    var labelOutline = label.GetComponent<Outline>();
+                    if (labelOutline != null)
+                    {
+                        labelOutline.effectColor = stage == currentStage ? NodeLabelCurrentOutlineColor : NodeLabelOutlineColor;
+                    }
                 }
 
                 var icon = nodeButtonIcons[i];
                 if (icon != null)
                 {
                     icon.sprite = GetNodeSprite(stage);
-                    icon.color = GetNodeIconColor(stage, currentStage);
+                    icon.color = Color.white;
+                    icon.rectTransform.localScale = Vector3.one;
                     if (icon.sprite != null)
                     {
                         icon.SetNativeSize();
                     }
                     icon.gameObject.SetActive(icon.sprite != null);
+                    var iconShadow = icon.GetComponent<Shadow>();
+                    if (iconShadow != null)
+                    {
+                        iconShadow.effectDistance = stage == currentStage ? new Vector2(3f, -3f) : new Vector2(2f, -2f);
+                        iconShadow.effectColor = stage == currentStage ? NodeIconCurrentShadowColor : NodeIconShadowColor;
+                    }
+                }
+
+                if (stage == currentStage)
+                {
+                    activeIconRect = icon != null ? icon.rectTransform : null;
+                    activeLabelRect = label != null ? label.rectTransform : null;
+                    activeIconShadow = icon != null ? icon.GetComponent<Shadow>() : null;
                 }
 
                 nodeButtons[i].onClick.RemoveAllListeners();
@@ -1061,14 +1126,14 @@ namespace Wuxing.UI
                     nodeLines[i - 1].sprite = mapLineSprite;
                     nodeLines[i - 1].type = Image.Type.Simple;
                     nodeLines[i - 1].preserveAspect = true;
-                    nodeLines[i - 1].color = new Color(0.94f, 0.82f, 0.52f, 0.82f);
+                    nodeLines[i - 1].color = MapLineTint;
                     nodeLines[i - 1].gameObject.SetActive(true);
                 }
             }
 
-            if (stagePositions.TryGetValue(currentStage, out var currentPosition))
+            if (travelerMarker != null)
             {
-                UpdateTravelerMarkerPosition(currentPosition);
+                travelerMarker.gameObject.SetActive(false);
             }
         }
 
@@ -1097,13 +1162,21 @@ namespace Wuxing.UI
                 iconRect.anchoredPosition = new Vector2(0f, -34f);
                 var iconImage = iconObject.GetComponent<Image>();
                 iconImage.raycastTarget = false;
+                var iconShadow = iconObject.AddComponent<Shadow>();
+                iconShadow.effectColor = NodeIconShadowColor;
+                iconShadow.effectDistance = new Vector2(2f, -2f);
+                iconShadow.useGraphicAlpha = true;
 
-                var label = UIFactory.CreateText(buttonObject.transform, "Label", "Node", 28, TextAnchor.LowerCenter, new Color(0.1f, 0.08f, 0.05f, 1f));
+                var label = UIFactory.CreateText(buttonObject.transform, "Label", "Node", 28, TextAnchor.LowerCenter, NodeLabelColor);
                 label.rectTransform.anchorMin = new Vector2(0f, 0f);
                 label.rectTransform.anchorMax = new Vector2(1f, 0.68f);
                 label.rectTransform.offsetMin = new Vector2(-24f, 0f);
                 label.rectTransform.offsetMax = new Vector2(24f, 0f);
                 label.supportRichText = false;
+                var labelOutline = label.gameObject.AddComponent<Outline>();
+                labelOutline.effectColor = NodeLabelOutlineColor;
+                labelOutline.effectDistance = new Vector2(1.5f, -1.5f);
+                labelOutline.useGraphicAlpha = true;
 
                 nodeButtons.Add(button);
                 nodeButtonLabels.Add(label);
@@ -1121,6 +1194,11 @@ namespace Wuxing.UI
                 var image = lineObject.GetComponent<Image>();
                 image.raycastTarget = false;
                 image.sprite = mapLineSprite;
+                image.color = MapLineTint;
+                var shadow = lineObject.AddComponent<Shadow>();
+                shadow.effectColor = MapLineLift;
+                shadow.effectDistance = new Vector2(1f, -1f);
+                shadow.useGraphicAlpha = true;
                 nodeLines.Add(image);
                 lineObject.transform.SetAsFirstSibling();
             }
@@ -1133,9 +1211,9 @@ namespace Wuxing.UI
                 markerRect.anchorMin = new Vector2(0.5f, 0.5f);
                 markerRect.anchorMax = new Vector2(0.5f, 0.5f);
                 markerRect.pivot = new Vector2(0.5f, 0.5f);
-                markerRect.sizeDelta = new Vector2(22f, 22f);
+                markerRect.sizeDelta = new Vector2(18f, 18f);
                 travelerMarker = markerObject.GetComponent<Image>();
-                travelerMarker.color = new Color(0.98f, 0.82f, 0.46f, 1f);
+                travelerMarker.color = new Color(1f, 1f, 1f, 0f);
                 travelerMarker.raycastTarget = false;
             }
         }
@@ -1159,6 +1237,91 @@ namespace Wuxing.UI
             travelerMarker.rectTransform.anchoredPosition = graphPosition + new Vector2(44f, 6f);
             travelerMarker.gameObject.SetActive(true);
             travelerMarker.transform.SetAsLastSibling();
+        }
+
+        private void UpdateCurrentNodePulse()
+        {
+            if (activeIconRect == null)
+            {
+                return;
+            }
+
+            var pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 2.6f) * 0.5f;
+            activeIconRect.localScale = Vector3.one * Mathf.Lerp(1.02f, 1.1f, pulse);
+            if (activeLabelRect != null)
+            {
+                activeLabelRect.localScale = Vector3.one * Mathf.Lerp(1f, 1.04f, pulse);
+            }
+
+            if (activeIconShadow != null)
+            {
+                activeIconShadow.effectDistance = Vector2.Lerp(new Vector2(2f, -2f), new Vector2(4f, -4f), pulse);
+                var color = activeIconShadow.effectColor;
+                color.a = Mathf.Lerp(0.34f, 0.5f, pulse);
+                activeIconShadow.effectColor = color;
+            }
+        }
+
+        private void ApplyTextChrome()
+        {
+            ApplyTextShadow(titleText, new Color(0.96f, 0.92f, 0.84f, 0.18f), new Vector2(1f, -1f), null);
+            ApplyTextShadow(statusText, new Color(0.96f, 0.92f, 0.84f, 0.2f), new Vector2(1f, -1f), null);
+            ApplyTextShadow(regionText, new Color(0.12f, 0.08f, 0.03f, 0.24f), new Vector2(1f, -1f), null);
+            ApplyTextShadow(longevityText, new Color(0f, 0f, 0f, 0.28f), new Vector2(1.5f, -1.5f), null);
+            ApplyTextShadow(
+                nodeDetailText,
+                new Color(0f, 0f, 0f, 0.32f),
+                new Vector2(1.5f, -1.5f),
+                new Color(0.95f, 0.92f, 0.86f, 1f));
+            ApplyTextShadow(
+                routeText,
+                new Color(0f, 0f, 0f, 0.32f),
+                new Vector2(1.5f, -1.5f),
+                new Color(0.95f, 0.92f, 0.86f, 1f));
+        }
+
+        private static void ApplyTextShadow(Text text, Color shadowColor, Vector2 effectDistance, Color? overrideColor)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            if (overrideColor.HasValue)
+            {
+                text.color = overrideColor.Value;
+            }
+
+            var shadow = text.GetComponent<Shadow>();
+            if (shadow == null)
+            {
+                shadow = text.gameObject.AddComponent<Shadow>();
+            }
+
+            shadow.effectColor = shadowColor;
+            shadow.effectDistance = effectDistance;
+            shadow.useGraphicAlpha = true;
+        }
+
+        private void ApplyHeaderTypography(bool isEnglish)
+        {
+            ApplyHeaderTextStyle(titleText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 54, 1f);
+            ApplyHeaderTextStyle(statusText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 28, 0.92f);
+            ApplyHeaderTextStyle(regionText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 30, 0.92f);
+            ApplyHeaderTextStyle(longevityText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 27, 0.92f);
+        }
+
+        private static void ApplyHeaderTextStyle(Text text, FontStyle fontStyle, int fontSize, float lineSpacing)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            text.fontStyle = fontStyle;
+            text.fontSize = fontSize;
+            text.lineSpacing = lineSpacing;
+            text.alignByGeometry = true;
         }
 
         private string BuildSelectedNodeDetail(bool isEnglish, int currentStage)
@@ -1244,8 +1407,8 @@ namespace Wuxing.UI
         {
             var maxStage = Mathf.Max(currentStage, GameProgressManager.GetMaxReachableStage());
             return isEnglish
-                ? "Realm: " + GameProgressManager.GetCultivationLevel() + "\nPath: " + currentStage + "/" + maxStage
-                : "当前境界：" + GameProgressManager.GetCultivationLevel() + "\n已历节点：" + currentStage + "/" + maxStage;
+                ? "Visited Nodes: " + currentStage + "/" + maxStage
+                : "已历节点：" + currentStage + "/" + maxStage;
         }
 
         private Vector2 GetLoopedNodePosition(int index, int visibleCount)
@@ -1277,20 +1440,65 @@ namespace Wuxing.UI
             }
         }
 
-        private Color GetNodeTextColor(int stage, int currentStage)
+        private Sprite GetChapterBackgroundSprite(int stage)
         {
-            if (stage == currentStage) return new Color(0.48f, 0.28f, 0.1f, 1f);
-            if (stage == selectedStage) return new Color(0.12f, 0.12f, 0.12f, 1f);
-            if (GameProgressManager.CanTravelToStage(stage)) return new Color(0.08f, 0.08f, 0.08f, 1f);
-            return new Color(0.48f, 0.48f, 0.48f, 0.82f);
+            switch (GetChapterIndexForStage(stage))
+            {
+                case 1:
+                    return chapterBackground1;
+                case 2:
+                    return chapterBackground2 != null ? chapterBackground2 : chapterBackground1;
+                case 3:
+                    return chapterBackground3 != null ? chapterBackground3 : chapterBackground2;
+                case 4:
+                    return chapterBackground4 != null ? chapterBackground4 : chapterBackground3;
+                case 5:
+                    return chapterBackground5 != null ? chapterBackground5 : chapterBackground4;
+                case 6:
+                default:
+                    return chapterBackground6 != null ? chapterBackground6 : chapterBackground5;
+            }
         }
 
-        private Color GetNodeIconColor(int stage, int currentStage)
+        private int GetChapterIndexForStage(int stage)
         {
-            if (stage == currentStage) return new Color(1f, 0.9f, 0.55f, 1f);
-            if (stage == selectedStage) return new Color(0.94f, 0.94f, 0.94f, 1f);
-            if (GameProgressManager.CanTravelToStage(stage)) return new Color(0.9f, 0.9f, 0.9f, 1f);
-            return new Color(0.65f, 0.65f, 0.65f, 0.72f);
+            var database = StageNodeDatabaseLoader.Load();
+            var stageNodes = database != null ? database.StageNodes : null;
+            if (stageNodes == null || stageNodes.Count == 0)
+            {
+                return Mathf.Clamp(((Mathf.Max(1, stage) - 1) / 20) + 1, 1, 6);
+            }
+
+            var targetStage = Mathf.Max(1, stage);
+            var chapterIndex = 1;
+            string previousTheme = null;
+
+            for (var i = 0; i < stageNodes.Count; i++)
+            {
+                var config = stageNodes[i];
+                if (config == null)
+                {
+                    continue;
+                }
+
+                var themeKey = string.IsNullOrEmpty(config.ThemeZh) ? config.ThemeEn : config.ThemeZh;
+                if (previousTheme == null)
+                {
+                    previousTheme = themeKey;
+                }
+                else if (!string.Equals(previousTheme, themeKey, StringComparison.Ordinal))
+                {
+                    chapterIndex += 1;
+                    previousTheme = themeKey;
+                }
+
+                if (config.Stage >= targetStage)
+                {
+                    break;
+                }
+            }
+
+            return Mathf.Clamp(chapterIndex, 1, 6);
         }
 
         private bool IsEnglish()
