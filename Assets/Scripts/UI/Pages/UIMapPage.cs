@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Battle;
@@ -17,6 +18,7 @@ namespace Wuxing.UI
 
         private const float MoveDurationPerStep = 0.5f;
         private const int VisibleNodeCount = 5;
+        private const int AnimatedVisibleNodeCount = 6;
         private const int CenterNodeIndex = 2;
         private const float NodeWidth = 164f;
         private const float NodeHeight = 148f;
@@ -29,14 +31,8 @@ namespace Wuxing.UI
         private static readonly Color NodeLabelCurrentOutlineColor = new Color(0.14f, 0.11f, 0.06f, 0.74f);
         private static readonly Color NodeIconShadowColor = new Color(0f, 0f, 0f, 0.24f);
         private static readonly Color NodeIconCurrentShadowColor = new Color(0.2f, 0.16f, 0.09f, 0.42f);
-        private static readonly Vector2[] NodeLayoutPattern =
-        {
-            new Vector2(135f, -280f),
-            new Vector2(-135f, -80f),
-            new Vector2(90f, 110f),
-            new Vector2(-115f, 340f),
-            new Vector2(125f, 560f)
-        };
+        private static readonly float[] NodeVerticalPattern = { -330f, -110f, 110f, 330f, 550f };
+        private const float SnakeSideOffset = 112f;
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text statusText;
@@ -77,11 +73,14 @@ namespace Wuxing.UI
 
         private Image travelerMarker;
         private Coroutine moveCoroutine;
+        private Sequence moveSequence;
         private int selectedStage;
         private bool isMoving;
         private RectTransform activeIconRect;
         private RectTransform activeLabelRect;
         private Shadow activeIconShadow;
+        private Vector2 nodeGraphBaseAnchoredPosition;
+        private bool nodeGraphBasePositionCached;
 
         public override void OnOpen(object data)
         {
@@ -93,6 +92,7 @@ namespace Wuxing.UI
 
         private void Awake()
         {
+            CacheNodeGraphBasePosition();
             ApplyTextChrome();
             if (previousButton != null) previousButton.onClick.AddListener(OnClickPrevious);
             if (enterButton != null) enterButton.onClick.AddListener(OnClickEnter);
@@ -106,6 +106,7 @@ namespace Wuxing.UI
 
         private void OnEnable()
         {
+            CacheNodeGraphBasePosition();
             GameProgressManager.ProgressChanged += OnProgressChanged;
             LocalizationManager.LanguageChanged += OnLanguageChanged;
         }
@@ -256,6 +257,11 @@ namespace Wuxing.UI
         private void StartMoveToStage(int targetStage, bool triggerEventAfterMove)
         {
             if (isMoving) return;
+            if (moveSequence != null && moveSequence.IsActive())
+            {
+                moveSequence.Kill();
+                moveSequence = null;
+            }
             if (moveCoroutine != null) StopCoroutine(moveCoroutine);
             moveCoroutine = StartCoroutine(MoveToStageCoroutine(targetStage, triggerEventAfterMove));
         }
@@ -277,6 +283,9 @@ namespace Wuxing.UI
                 var advanceResult = GameProgressManager.TravelToStage(nextStage);
                 if (advanceResult == RunAdvanceResult.LifespanEnded)
                 {
+                    ResetAnimatedMapState();
+                    isMoving = false;
+                    moveCoroutine = null;
                     ShowLifespanEndedPopup();
                     yield break;
                 }
@@ -301,6 +310,10 @@ namespace Wuxing.UI
 
         private IEnumerator AnimateTravelStep(int fromStage, int toStage)
         {
+            CacheNodeGraphBasePosition();
+            var direction = toStage >= fromStage ? 1 : -1;
+            RenderNodeGraph(BuildVisibleStages(fromStage, direction, true), fromStage, direction);
+
             Vector2 fromPosition;
             Vector2 toPosition;
             if (!stagePositions.TryGetValue(fromStage, out fromPosition) || !stagePositions.TryGetValue(toStage, out toPosition))
@@ -309,14 +322,59 @@ namespace Wuxing.UI
                 yield break;
             }
 
-            float elapsed = 0f;
-            while (elapsed < MoveDurationPerStep)
+            var fixedMarkerY = fromPosition.y + 6f;
+            var targetGraphYOffset = fromPosition.y - toPosition.y;
+            var tweenState = new MapMoveTweenState
             {
-                elapsed += Time.unscaledDeltaTime;
-                float progress = Mathf.Clamp01(elapsed / MoveDurationPerStep);
-                UpdateTravelerMarkerPosition(Vector2.Lerp(fromPosition, toPosition, progress));
-                yield return null;
-            }
+                Progress = 0f,
+                GraphYOffset = 0f,
+                MarkerX = fromPosition.x
+            };
+
+            bool completed = false;
+            moveSequence = DOTween.Sequence().SetUpdate(true);
+            moveSequence.Join(DOTween.To(
+                    () => tweenState.Progress,
+                    value =>
+                    {
+                        tweenState.Progress = value;
+                        UpdateAnimatedMapVisibility(value, direction);
+                    },
+                    1f,
+                    MoveDurationPerStep)
+                .SetEase(Ease.InOutSine));
+            moveSequence.Join(DOTween.To(
+                    () => tweenState.GraphYOffset,
+                    value =>
+                    {
+                        tweenState.GraphYOffset = value;
+                        SetNodeGraphAnimatedOffset(value);
+                        UpdateTravelerMarkerPosition(new Vector2(tweenState.MarkerX, fixedMarkerY - value));
+                    },
+                    targetGraphYOffset,
+                    MoveDurationPerStep)
+                .SetEase(Ease.InOutSine));
+            moveSequence.Join(DOTween.To(
+                    () => tweenState.MarkerX,
+                    value =>
+                    {
+                        tweenState.MarkerX = value;
+                        UpdateTravelerMarkerPosition(new Vector2(value, fixedMarkerY - tweenState.GraphYOffset));
+                    },
+                    toPosition.x,
+                    MoveDurationPerStep)
+                .SetEase(Ease.InOutSine));
+            moveSequence.OnComplete(() =>
+            {
+                UpdateAnimatedMapVisibility(1f, direction);
+                SetNodeGraphAnimatedOffset(targetGraphYOffset);
+                UpdateTravelerMarkerPosition(new Vector2(toPosition.x, fixedMarkerY - targetGraphYOffset));
+                completed = true;
+            });
+            moveSequence.Play();
+
+            yield return new WaitUntil(() => completed);
+            moveSequence = null;
         }
 
         private void ShowArrivalToast(int stage)
@@ -923,7 +981,6 @@ namespace Wuxing.UI
             var maxReachableStage = GameProgressManager.GetMaxReachableStage();
             selectedStage = Mathf.Clamp(selectedStage <= 0 ? currentStage : selectedStage, 1, Mathf.Max(currentStage, maxReachableStage));
             RefreshBackground(currentStage);
-            ApplyHeaderTypography(isEnglish);
 
             if (titleText != null)
             {
@@ -1018,32 +1075,21 @@ namespace Wuxing.UI
         {
             if (nodeGraphRoot == null) return;
 
+            CacheNodeGraphBasePosition();
+            nodeGraphRoot.anchoredPosition = nodeGraphBaseAnchoredPosition;
             Canvas.ForceUpdateCanvases();
             EnsureGraphPool();
+            RenderNodeGraph(BuildVisibleStages(currentStage, 0, false), currentStage, 0);
+        }
 
+        private void RenderNodeGraph(List<int> stagesToRender, int currentStage, int animationDirection)
+        {
             visibleStages.Clear();
             stagePositions.Clear();
             activeLabelRect = null;
             activeIconRect = null;
             activeIconShadow = null;
-
-            for (var slot = 0; slot < VisibleNodeCount; slot++)
-            {
-                var stage = currentStage + (slot - CenterNodeIndex);
-                if (stage <= 0)
-                {
-                    visibleStages.Add(-1);
-                    continue;
-                }
-
-                if (currentStage <= 1 && stage > currentStage + 2)
-                {
-                    visibleStages.Add(-1);
-                    continue;
-                }
-
-                visibleStages.Add(stage);
-            }
+            visibleStages.AddRange(stagesToRender);
 
             var count = visibleStages.Count;
 
@@ -1055,7 +1101,7 @@ namespace Wuxing.UI
                 if (!active) continue;
 
                 var stage = visibleStages[i];
-                var position = GetLoopedNodePosition(i, count);
+                var position = GetLoopedNodePosition(stage, i, count, animationDirection);
                 stagePositions[stage] = position;
 
                 var buttonRect = nodeButtons[i].GetComponent<RectTransform>();
@@ -1139,7 +1185,7 @@ namespace Wuxing.UI
 
         private void EnsureGraphPool()
         {
-            while (nodeButtons.Count < VisibleNodeCount)
+            while (nodeButtons.Count < AnimatedVisibleNodeCount)
             {
                 var buttonObject = new GameObject("NodeButton" + nodeButtons.Count, typeof(RectTransform), typeof(Image), typeof(Button));
                 buttonObject.transform.SetParent(nodeGraphRoot, false);
@@ -1183,7 +1229,7 @@ namespace Wuxing.UI
                 nodeButtonIcons.Add(iconImage);
             }
 
-            while (nodeLines.Count < VisibleNodeCount - 1)
+            while (nodeLines.Count < AnimatedVisibleNodeCount - 1)
             {
                 var lineObject = new GameObject("NodeLine" + nodeLines.Count, typeof(RectTransform), typeof(Image));
                 lineObject.transform.SetParent(nodeGraphRoot, false);
@@ -1213,7 +1259,7 @@ namespace Wuxing.UI
                 markerRect.pivot = new Vector2(0.5f, 0.5f);
                 markerRect.sizeDelta = new Vector2(18f, 18f);
                 travelerMarker = markerObject.GetComponent<Image>();
-                travelerMarker.color = new Color(1f, 1f, 1f, 0f);
+                travelerMarker.color = new Color(0.98f, 0.9f, 0.72f, 0.95f);
                 travelerMarker.raycastTarget = false;
             }
         }
@@ -1237,6 +1283,118 @@ namespace Wuxing.UI
             travelerMarker.rectTransform.anchoredPosition = graphPosition + new Vector2(44f, 6f);
             travelerMarker.gameObject.SetActive(true);
             travelerMarker.transform.SetAsLastSibling();
+        }
+
+        private void CacheNodeGraphBasePosition()
+        {
+            if (nodeGraphRoot == null || nodeGraphBasePositionCached)
+            {
+                return;
+            }
+
+            nodeGraphBaseAnchoredPosition = nodeGraphRoot.anchoredPosition;
+            nodeGraphBasePositionCached = true;
+        }
+
+        private void SetNodeGraphAnimatedOffset(float yOffset)
+        {
+            if (nodeGraphRoot == null)
+            {
+                return;
+            }
+
+            nodeGraphRoot.anchoredPosition = nodeGraphBaseAnchoredPosition + new Vector2(0f, yOffset);
+        }
+
+        private void UpdateAnimatedMapVisibility(float progress, int direction)
+        {
+            var count = visibleStages.Count;
+            if (count <= 0)
+            {
+                return;
+            }
+
+            var frontSlot = direction >= 0 ? 0 : count - 1;
+            var backSlot = direction >= 0 ? count - 1 : 0;
+            var fadeOutAlpha = Mathf.Lerp(1f, 0f, progress);
+            var fadeInAlpha = Mathf.Lerp(0f, 1f, progress);
+
+            for (var i = 0; i < nodeButtons.Count; i++)
+            {
+                if (i >= visibleStages.Count || visibleStages[i] <= 0 || !nodeButtons[i].gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                var alpha = 1f;
+                if (i == frontSlot)
+                {
+                    alpha = fadeOutAlpha;
+                }
+                else if (i == backSlot)
+                {
+                    alpha = fadeInAlpha;
+                }
+
+                var icon = nodeButtonIcons[i];
+                if (icon != null)
+                {
+                    var iconColor = icon.color;
+                    iconColor.a = alpha;
+                    icon.color = iconColor;
+                }
+
+                var label = nodeButtonLabels[i];
+                if (label != null)
+                {
+                    var labelColor = label.color;
+                    labelColor.a = alpha;
+                    label.color = labelColor;
+                }
+            }
+
+            for (var i = 0; i < nodeLines.Count; i++)
+            {
+                var line = nodeLines[i];
+                if (line == null || !line.gameObject.activeSelf)
+                {
+                    continue;
+                }
+
+                var lineColor = MapLineTint;
+                if ((direction >= 0 && i == 0) || (direction < 0 && i == nodeLines.Count - 1))
+                {
+                    lineColor.a = Mathf.Lerp(MapLineTint.a, 0f, progress);
+                }
+                else if ((direction >= 0 && i == nodeLines.Count - 1) || (direction < 0 && i == 0))
+                {
+                    lineColor.a = Mathf.Lerp(0f, MapLineTint.a, progress);
+                }
+                else
+                {
+                    lineColor.a = MapLineTint.a;
+                }
+                line.color = lineColor;
+            }
+        }
+
+        private void ResetAnimatedMapState()
+        {
+            if (moveSequence != null && moveSequence.IsActive())
+            {
+                moveSequence.Kill();
+                moveSequence = null;
+            }
+
+            if (nodeGraphRoot != null)
+            {
+                nodeGraphRoot.anchoredPosition = nodeGraphBaseAnchoredPosition;
+            }
+
+            if (travelerMarker != null)
+            {
+                travelerMarker.gameObject.SetActive(false);
+            }
         }
 
         private void UpdateCurrentNodePulse()
@@ -1301,27 +1459,6 @@ namespace Wuxing.UI
             shadow.effectColor = shadowColor;
             shadow.effectDistance = effectDistance;
             shadow.useGraphicAlpha = true;
-        }
-
-        private void ApplyHeaderTypography(bool isEnglish)
-        {
-            ApplyHeaderTextStyle(titleText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 54, 1f);
-            ApplyHeaderTextStyle(statusText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 28, 0.92f);
-            ApplyHeaderTextStyle(regionText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 30, 0.92f);
-            ApplyHeaderTextStyle(longevityText, isEnglish ? FontStyle.Normal : FontStyle.Normal, 27, 0.92f);
-        }
-
-        private static void ApplyHeaderTextStyle(Text text, FontStyle fontStyle, int fontSize, float lineSpacing)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            text.fontStyle = fontStyle;
-            text.fontSize = fontSize;
-            text.lineSpacing = lineSpacing;
-            text.alignByGeometry = true;
         }
 
         private string BuildSelectedNodeDetail(bool isEnglish, int currentStage)
@@ -1411,16 +1548,78 @@ namespace Wuxing.UI
                 : "已历节点：" + currentStage + "/" + maxStage;
         }
 
-        private Vector2 GetLoopedNodePosition(int index, int visibleCount)
+        private List<int> BuildVisibleStages(int currentStage, int direction, bool includeIncomingStage)
+        {
+            var stages = new List<int>(includeIncomingStage ? AnimatedVisibleNodeCount : VisibleNodeCount);
+            var startOffset = includeIncomingStage
+                ? (direction >= 0 ? -CenterNodeIndex : -CenterNodeIndex - 1)
+                : -CenterNodeIndex;
+            var slotCount = includeIncomingStage ? AnimatedVisibleNodeCount : VisibleNodeCount;
+
+            for (var slot = 0; slot < slotCount; slot++)
+            {
+                var stage = currentStage + startOffset + slot;
+                if (stage <= 0)
+                {
+                    stages.Add(-1);
+                    continue;
+                }
+
+                if (!includeIncomingStage && currentStage <= 1 && stage > currentStage + 2)
+                {
+                    stages.Add(-1);
+                    continue;
+                }
+
+                stages.Add(stage);
+            }
+
+            return stages;
+        }
+
+        private Vector2 GetLoopedNodePosition(int stage, int index, int visibleCount, int animationDirection)
         {
             if (visibleCount <= 0)
             {
                 return Vector2.zero;
             }
 
-            var startOffset = Mathf.Max(0, (NodeLayoutPattern.Length - visibleCount) / 2);
-            var patternIndex = Mathf.Clamp(startOffset + index, 0, NodeLayoutPattern.Length - 1);
-            return NodeLayoutPattern[patternIndex];
+            float y;
+            if (visibleCount == AnimatedVisibleNodeCount)
+            {
+                if (animationDirection >= 0)
+                {
+                    if (index >= AnimatedVisibleNodeCount - 1)
+                    {
+                        var last = NodeVerticalPattern[NodeVerticalPattern.Length - 1];
+                        var prev = NodeVerticalPattern[NodeVerticalPattern.Length - 2];
+                        y = last + (last - prev);
+                    }
+                    else
+                    {
+                        y = NodeVerticalPattern[Mathf.Clamp(index, 0, NodeVerticalPattern.Length - 1)];
+                    }
+                }
+                else
+                {
+                    if (index <= 0)
+                    {
+                        y = NodeVerticalPattern[0] - (NodeVerticalPattern[1] - NodeVerticalPattern[0]);
+                    }
+                    else
+                    {
+                        var fixedIndex = Mathf.Clamp(index - 1, 0, NodeVerticalPattern.Length - 1);
+                        y = NodeVerticalPattern[fixedIndex];
+                    }
+                }
+            }
+            else
+            {
+                y = NodeVerticalPattern[Mathf.Clamp(index, 0, NodeVerticalPattern.Length - 1)];
+            }
+
+            var x = stage % 2 == 1 ? SnakeSideOffset : -SnakeSideOffset;
+            return new Vector2(x, y);
         }
 
         private Sprite GetNodeSprite(int stage)
@@ -1499,6 +1698,13 @@ namespace Wuxing.UI
             }
 
             return Mathf.Clamp(chapterIndex, 1, 6);
+        }
+
+        private class MapMoveTweenState
+        {
+            public float Progress;
+            public float GraphYOffset;
+            public float MarkerX;
         }
 
         private bool IsEnglish()
