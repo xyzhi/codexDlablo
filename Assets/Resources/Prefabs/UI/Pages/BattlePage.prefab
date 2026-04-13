@@ -9118,6 +9118,14 @@ MonoBehaviour:
   enemyEquipmentText: {fileID: 2369617620292062439}
   battleLogText: {fileID: 9014608255135166406}
   battleLogScrollRect: {fileID: 8039794588244217466}
+  backgroundImage: {fileID: 0}
+  chapterBackground1: {fileID: 21300000, guid: e43fa6c0a72cfe542b75a8ef1e3dfc60, type: 3}
+  chapterBackground2: {fileID: 21300000, guid: 658ec9c068f74154e878252c6742feb6, type: 3}
+  chapterBackground3: {fileID: 21300000, guid: f8f2796de69352d49a95fa9bde66738b, type: 3}
+  chapterBackground4: {fileID: 21300000, guid: 045c31a6e980e3341ad8fc27d3faf174, type: 3}
+  chapterBackground5: {fileID: 21300000, guid: 2ef006a043e4abe4ea94ad2c36ff7c05, type: 3}
+  chapterBackground6: {fileID: 21300000, guid: 9f85f9e65a7f6d74faca8b6acf314a62, type: 3}
+  previewCharacterSprite: {fileID: 21300000, guid: 5e929bbad65fa764d8b137ae5bc65c77, type: 3}
 --- !u!1 &9200426347047546828
 GameObject:
   m_ObjectHideFlags: 0

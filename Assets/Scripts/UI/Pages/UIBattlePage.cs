@@ -75,6 +75,14 @@ namespace Wuxing.UI
         [SerializeField] private Text enemyEquipmentText;
         [SerializeField] private Text battleLogText;
         [SerializeField] private ScrollRect battleLogScrollRect;
+        [SerializeField] private Image backgroundImage;
+        [SerializeField] private Sprite chapterBackground1;
+        [SerializeField] private Sprite chapterBackground2;
+        [SerializeField] private Sprite chapterBackground3;
+        [SerializeField] private Sprite chapterBackground4;
+        [SerializeField] private Sprite chapterBackground5;
+        [SerializeField] private Sprite chapterBackground6;
+        [SerializeField] private Sprite previewCharacterSprite;
 
         private Coroutine battlePlaybackCoroutine;
         private readonly StringBuilder battleLogBuilder = new StringBuilder();
@@ -110,6 +118,7 @@ namespace Wuxing.UI
             GameProgressManager.StartRun();
             openedForEquipment = data as string == "equipment";
             ResetCurrentBattleState();
+            RefreshBackground(GameProgressManager.GetCurrentStage());
 
             if (openedForEquipment)
             {
@@ -143,6 +152,8 @@ namespace Wuxing.UI
 
         private void Awake()
         {
+            EnsureBackgroundImageReference();
+
             if (battleLogText != null)
             {
                 battleLogText.supportRichText = true;
@@ -657,6 +668,66 @@ namespace Wuxing.UI
             stageInfoText.text = isEnglish
                 ? "Stage " + stage + " / " + region
                 : "\u7b2c" + stage + "\u5173 / " + region;
+        }
+
+        private void RefreshBackground(int currentStage)
+        {
+            EnsureBackgroundImageReference();
+            if (backgroundImage == null)
+            {
+                return;
+            }
+
+            var sprite = GetChapterBackgroundSprite(currentStage);
+            if (sprite != null)
+            {
+                backgroundImage.sprite = sprite;
+                backgroundImage.color = Color.white;
+                backgroundImage.preserveAspect = true;
+            }
+        }
+
+        private void EnsureBackgroundImageReference()
+        {
+            if (backgroundImage != null)
+            {
+                return;
+            }
+
+            var images = GetComponentsInChildren<Image>(true);
+            Image bestCandidate = null;
+            var bestScore = float.MinValue;
+            for (var i = 0; i < images.Length; i++)
+            {
+                var image = images[i];
+                if (image == null || image.transform == transform)
+                {
+                    continue;
+                }
+
+                var rect = image.rectTransform;
+                if (rect == null)
+                {
+                    continue;
+                }
+
+                var score = 0f;
+                if (rect.anchorMin == Vector2.zero && rect.anchorMax == Vector2.one)
+                {
+                    score += 10000f;
+                }
+
+                score += rect.rect.width * rect.rect.height;
+                score -= image.transform.GetSiblingIndex() * 10f;
+
+                if (score > bestScore)
+                {
+                    bestScore = score;
+                    bestCandidate = image;
+                }
+            }
+
+            backgroundImage = bestCandidate;
         }
 
         private void ApplyBattleLog(string content)
@@ -1434,7 +1505,7 @@ namespace Wuxing.UI
             {
                 var button = GetOrCreateTeamCardButton(root, template, buttons, i);
                 ConfigureTeamCardVisual(button);
-                BindTeamCard(button, cards[i]);
+                BindTeamCard(button, cards[i], playerSide);
                 ApplyDefeatedCardState(button, defeatedUnits.Contains(cards[i].Title));
                 RegisterTeamCardLookup(lookup, cards[i], button);
                 var rect = button.GetComponent<RectTransform>();
@@ -1666,7 +1737,7 @@ namespace Wuxing.UI
             }
         }
 
-        private void BindTeamCard(Button button, UICardData card)
+        private void BindTeamCard(Button button, UICardData card, bool playerSide)
         {
             if (button == null || card == null)
             {
@@ -1692,6 +1763,8 @@ namespace Wuxing.UI
             {
                 subtitle.text = card.Subtitle;
             }
+
+            ApplyPreviewPortrait(button, playerSide);
 
             var progressRoot = button.transform.Find("ProgressRoot");
             if (progressRoot != null)
@@ -2818,6 +2891,7 @@ namespace Wuxing.UI
 
         private void OnLanguageChanged()
         {
+            RefreshBackground(GameProgressManager.GetCurrentStage());
             RefreshPreview();
             UpdateBackButtonStateLabel();
 
@@ -2861,6 +2935,111 @@ namespace Wuxing.UI
             {
                 label.text = text;
             }
+        }
+
+        private void ApplyPreviewPortrait(Button button, bool playerSide)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var portrait = EnsurePortraitImage(button);
+            if (portrait == null)
+            {
+                return;
+            }
+
+            portrait.sprite = previewCharacterSprite;
+            portrait.enabled = previewCharacterSprite != null;
+            portrait.color = new Color(1f, 1f, 1f, 0.9f);
+            var portraitRect = portrait.rectTransform;
+            portraitRect.localScale = new Vector3(playerSide ? 1f : -1f, 1f, 1f);
+        }
+
+        private static Image EnsurePortraitImage(Button button)
+        {
+            var existing = button.transform.Find("PortraitImage")?.GetComponent<Image>();
+            if (existing != null)
+            {
+                return existing;
+            }
+
+            var portraitObject = new GameObject("PortraitImage", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            portraitObject.transform.SetParent(button.transform, false);
+            portraitObject.transform.SetSiblingIndex(0);
+
+            var rect = portraitObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.08f, 0.18f);
+            rect.anchorMax = new Vector2(0.92f, 0.92f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+
+            var image = portraitObject.GetComponent<Image>();
+            image.preserveAspect = true;
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private Sprite GetChapterBackgroundSprite(int stage)
+        {
+            switch (GetChapterIndexForStage(stage))
+            {
+                case 1:
+                    return chapterBackground1;
+                case 2:
+                    return chapterBackground2 != null ? chapterBackground2 : chapterBackground1;
+                case 3:
+                    return chapterBackground3 != null ? chapterBackground3 : chapterBackground2;
+                case 4:
+                    return chapterBackground4 != null ? chapterBackground4 : chapterBackground3;
+                case 5:
+                    return chapterBackground5 != null ? chapterBackground5 : chapterBackground4;
+                case 6:
+                default:
+                    return chapterBackground6 != null ? chapterBackground6 : chapterBackground5;
+            }
+        }
+
+        private int GetChapterIndexForStage(int stage)
+        {
+            var database = StageNodeDatabaseLoader.Load();
+            var stageNodes = database != null ? database.StageNodes : null;
+            if (stageNodes == null || stageNodes.Count == 0)
+            {
+                return Mathf.Clamp(((Mathf.Max(1, stage) - 1) / 20) + 1, 1, 6);
+            }
+
+            var targetStage = Mathf.Max(1, stage);
+            var chapterIndex = 1;
+            string previousTheme = null;
+
+            for (var i = 0; i < stageNodes.Count; i++)
+            {
+                var config = stageNodes[i];
+                if (config == null)
+                {
+                    continue;
+                }
+
+                var themeKey = string.IsNullOrEmpty(config.ThemeZh) ? config.ThemeEn : config.ThemeZh;
+                if (previousTheme == null)
+                {
+                    previousTheme = themeKey;
+                }
+                else if (!string.Equals(previousTheme, themeKey, System.StringComparison.Ordinal))
+                {
+                    chapterIndex = Mathf.Min(6, chapterIndex + 1);
+                    previousTheme = themeKey;
+                }
+
+                if (config.Stage >= targetStage)
+                {
+                    return chapterIndex;
+                }
+            }
+
+            return Mathf.Clamp(chapterIndex, 1, 6);
         }
 
         private static float GetEventDelay(BattleEvent battleEvent)
