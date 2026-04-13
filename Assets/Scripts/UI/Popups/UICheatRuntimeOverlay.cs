@@ -19,16 +19,16 @@ namespace Wuxing.UI
         private Text loadoutSectionText;
         private Text elementText;
         private Text amountLabelText;
-        private Text amountValueText;
+        private InputField amountInputField;
         private Text levelLabelText;
-        private Text levelValueText;
+        private InputField levelInputField;
         private Text stageLabelText;
-        private Text stageValueText;
+        private InputField stageInputField;
         private Text equipmentText;
         private Text characterText;
         private Text skillText;
         private Text skillLevelLabelText;
-        private Text skillLevelValueText;
+        private InputField skillLevelInputField;
         private Text runButtonText;
         private Text stoneButtonText;
         private Text all500ButtonText;
@@ -132,60 +132,61 @@ namespace Wuxing.UI
             summaryText.verticalOverflow = VerticalWrapMode.Overflow;
 
             closeButtonText = GetButtonLabel(CreateButton(panel.transform, "CloseButton", string.Empty, Close, 0.78f, 0.93f, 0.95f, 0.985f));
-            runButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "RunButton", string.Empty, OnRun, 0.05f, 0.77f, 0.95f, 0.82f));
+            var scrollRect = UIFactory.CreateScrollRect(panel.transform, "ContentScroll", new Color(0f, 0f, 0f, 0f));
+            var scrollRectRect = scrollRect.GetComponent<RectTransform>();
+            scrollRectRect.anchorMin = new Vector2(0.05f, 0.03f);
+            scrollRectRect.anchorMax = new Vector2(0.95f, 0.8f);
+            scrollRectRect.offsetMin = Vector2.zero;
+            scrollRectRect.offsetMax = Vector2.zero;
+            scrollRect.content.sizeDelta = new Vector2(0f, 1480f);
+            var content = scrollRect.content;
 
-            CreateSectionLine(panel.transform, 0.73f);
-            stonesSectionText = CreateSectionTitle(panel.transform, 0.695f);
-            CreateMiniButton(panel.transform, "ElementPrev", "<", delegate { elementIndex--; RefreshAll(); }, 0.05f, 0.625f, 0.13f, 0.68f);
-            elementText = CreateValueChip(panel.transform, "ElementValue", 22, 0.15f, 0.625f, 0.47f, 0.68f);
-            CreateMiniButton(panel.transform, "ElementNext", ">", delegate { elementIndex++; RefreshAll(); }, 0.49f, 0.625f, 0.57f, 0.68f);
-            amountLabelText = CreateCaption(panel.transform, "AmountLabel", 0.61f, 0.68f, 0.73f, 0.71f);
-            CreateMiniButton(panel.transform, "AmountMinus", "-", delegate { amount = Mathf.Max(100, amount - 100); RefreshAll(); }, 0.61f, 0.625f, 0.69f, 0.68f);
-            amountValueText = CreateValueChip(panel.transform, "AmountValue", 20, 0.71f, 0.625f, 0.81f, 0.68f);
-            CreateMiniButton(panel.transform, "AmountPlus", "+", delegate { amount = Mathf.Min(99999, amount + 100); RefreshAll(); }, 0.83f, 0.625f, 0.91f, 0.68f);
-            stoneButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "GrantStone", string.Empty, GrantCurrentStone, 0.05f, 0.555f, 0.42f, 0.61f));
-            all500ButtonText = GetButtonLabel(CreateButton(panel.transform, "GrantAll500", string.Empty, delegate { GrantAllSpiritStones(500); }, 0.45f, 0.555f, 0.68f, 0.61f));
-            all5000ButtonText = GetButtonLabel(CreateButton(panel.transform, "GrantAll5000", string.Empty, delegate { GrantAllSpiritStones(5000); }, 0.71f, 0.555f, 0.95f, 0.61f));
+            runButtonText = GetButtonLabel(CreateAccentButton(content, "RunButton", string.Empty, OnRun, 0f, 0.93f, 1f, 0.99f));
 
-            CreateSectionLine(panel.transform, 0.515f);
-            progressSectionText = CreateSectionTitle(panel.transform, 0.48f);
-            levelLabelText = CreateCaption(panel.transform, "LevelLabel", 0.05f, 0.46f, 0.17f, 0.49f);
-            CreateMiniButton(panel.transform, "LevelMinus", "-", delegate { targetLevel = Mathf.Max(1, targetLevel - 1); RefreshAll(); }, 0.05f, 0.395f, 0.13f, 0.45f);
-            levelValueText = CreateValueChip(panel.transform, "LevelValue", 20, 0.15f, 0.395f, 0.25f, 0.45f);
-            CreateMiniButton(panel.transform, "LevelPlus", "+", delegate { targetLevel = Mathf.Min(999, targetLevel + 1); RefreshAll(); }, 0.27f, 0.395f, 0.35f, 0.45f);
-            applyLevelButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "ApplyLevel", string.Empty, ApplyLevel, 0.37f, 0.395f, 0.59f, 0.45f));
-            CreateMiniButton(panel.transform, "QuickLevel10", "10", delegate { targetLevel = 10; ApplyLevel(); }, 0.62f, 0.395f, 0.7f, 0.45f);
-            CreateMiniButton(panel.transform, "QuickLevel30", "30", delegate { targetLevel = 30; ApplyLevel(); }, 0.73f, 0.395f, 0.81f, 0.45f);
-            CreateMiniButton(panel.transform, "QuickLevel99", "99", delegate { targetLevel = 99; ApplyLevel(); }, 0.84f, 0.395f, 0.92f, 0.45f);
+            CreateSectionLine(content, 0.88f);
+            stonesSectionText = CreateSectionTitle(content, 0.845f);
+            CreateMiniButton(content, "ElementPrev", "<", delegate { elementIndex--; RefreshAll(); }, 0f, 0.775f, 0.08f, 0.83f);
+            elementText = CreateValueChip(content, "ElementValue", 22, 0.1f, 0.775f, 0.46f, 0.83f);
+            CreateMiniButton(content, "ElementNext", ">", delegate { elementIndex++; RefreshAll(); }, 0.48f, 0.775f, 0.56f, 0.83f);
+            amountLabelText = CreateCaption(content, "AmountLabel", 0.6f, 0.83f, 0.72f, 0.86f);
+            amountInputField = CreateNumberInput(content, "AmountValue", 20, 0.6f, 0.775f, 0.9f, 0.83f, OnAmountChanged);
+            stoneButtonText = GetButtonLabel(CreateAccentButton(content, "GrantStone", string.Empty, GrantCurrentStone, 0f, 0.705f, 0.42f, 0.76f));
+            all500ButtonText = GetButtonLabel(CreateButton(content, "GrantAll500", string.Empty, delegate { GrantAllSpiritStones(500); }, 0.45f, 0.705f, 0.68f, 0.76f));
+            all5000ButtonText = GetButtonLabel(CreateButton(content, "GrantAll5000", string.Empty, delegate { GrantAllSpiritStones(5000); }, 0.71f, 0.705f, 1f, 0.76f));
 
-            stageLabelText = CreateCaption(panel.transform, "StageLabel", 0.05f, 0.365f, 0.17f, 0.395f);
-            CreateMiniButton(panel.transform, "StageMinus", "-", delegate { targetStage = Mathf.Max(1, targetStage - 1); RefreshAll(); }, 0.05f, 0.3f, 0.13f, 0.355f);
-            stageValueText = CreateValueChip(panel.transform, "StageValue", 20, 0.15f, 0.3f, 0.25f, 0.355f);
-            CreateMiniButton(panel.transform, "StagePlus", "+", delegate { targetStage = Mathf.Min(GameProgressManager.GetMaxStage(), targetStage + 1); RefreshAll(); }, 0.27f, 0.3f, 0.35f, 0.355f);
-            jumpStageButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "JumpStage", string.Empty, JumpToStage, 0.37f, 0.3f, 0.59f, 0.355f));
-            jumpLastButtonText = GetButtonLabel(CreateButton(panel.transform, "JumpLast", string.Empty, JumpToLastStage, 0.62f, 0.3f, 0.92f, 0.355f));
+            CreateSectionLine(content, 0.655f);
+            progressSectionText = CreateSectionTitle(content, 0.62f);
+            levelLabelText = CreateCaption(content, "LevelLabel", 0f, 0.6f, 0.15f, 0.63f);
+            levelInputField = CreateNumberInput(content, "LevelValue", 20, 0f, 0.535f, 0.18f, 0.59f, OnTargetLevelChanged);
+            applyLevelButtonText = GetButtonLabel(CreateAccentButton(content, "ApplyLevel", string.Empty, ApplyLevel, 0.22f, 0.535f, 0.52f, 0.59f));
+            CreateMiniButton(content, "QuickLevel10", "10", delegate { targetLevel = 10; ApplyLevel(); }, 0.56f, 0.535f, 0.66f, 0.59f);
+            CreateMiniButton(content, "QuickLevel30", "30", delegate { targetLevel = 30; ApplyLevel(); }, 0.69f, 0.535f, 0.79f, 0.59f);
+            CreateMiniButton(content, "QuickLevel99", "99", delegate { targetLevel = 99; ApplyLevel(); }, 0.82f, 0.535f, 0.92f, 0.59f);
 
-            CreateSectionLine(panel.transform, 0.275f);
-            loadoutSectionText = CreateSectionTitle(panel.transform, 0.24f);
-            CreateMiniButton(panel.transform, "EquipPrev", "<", delegate { equipmentIndex--; RefreshAll(); }, 0.05f, 0.19f, 0.13f, 0.245f);
-            equipmentText = CreateValueChip(panel.transform, "EquipValue", 17, 0.15f, 0.19f, 0.79f, 0.245f);
-            CreateMiniButton(panel.transform, "EquipNext", ">", delegate { equipmentIndex++; RefreshAll(); }, 0.81f, 0.19f, 0.89f, 0.245f);
-            grantEquipmentButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "GrantEquipment", string.Empty, GrantEquipment, 0.05f, 0.125f, 0.45f, 0.175f));
-            grantAllEquipmentButtonText = GetButtonLabel(CreateButton(panel.transform, "GrantAllEquipment", string.Empty, GrantAllEquipment, 0.48f, 0.125f, 0.95f, 0.175f));
+            stageLabelText = CreateCaption(content, "StageLabel", 0f, 0.49f, 0.15f, 0.52f);
+            stageInputField = CreateNumberInput(content, "StageValue", 20, 0f, 0.425f, 0.18f, 0.48f, OnTargetStageChanged);
+            jumpStageButtonText = GetButtonLabel(CreateAccentButton(content, "JumpStage", string.Empty, JumpToStage, 0.22f, 0.425f, 0.52f, 0.48f));
+            jumpLastButtonText = GetButtonLabel(CreateButton(content, "JumpLast", string.Empty, JumpToLastStage, 0.56f, 0.425f, 0.96f, 0.48f));
 
-            CreateMiniButton(panel.transform, "CharacterPrev", "<", delegate { characterIndex--; RefreshAll(); }, 0.05f, 0.07f, 0.13f, 0.115f);
-            characterText = CreateValueChip(panel.transform, "CharacterValue", 16, 0.15f, 0.07f, 0.45f, 0.115f);
-            CreateMiniButton(panel.transform, "CharacterNext", ">", delegate { characterIndex++; RefreshAll(); }, 0.47f, 0.07f, 0.55f, 0.115f);
-            CreateMiniButton(panel.transform, "SkillPrev", "<", delegate { skillIndex--; RefreshAll(); }, 0.57f, 0.07f, 0.65f, 0.115f);
-            skillText = CreateValueChip(panel.transform, "SkillValue", 16, 0.67f, 0.07f, 0.95f, 0.115f);
+            CreateSectionLine(content, 0.39f);
+            loadoutSectionText = CreateSectionTitle(content, 0.355f);
+            CreateMiniButton(content, "EquipPrev", "<", delegate { equipmentIndex--; RefreshAll(); }, 0f, 0.305f, 0.08f, 0.36f);
+            equipmentText = CreateValueChip(content, "EquipValue", 17, 0.1f, 0.305f, 0.84f, 0.36f);
+            CreateMiniButton(content, "EquipNext", ">", delegate { equipmentIndex++; RefreshAll(); }, 0.86f, 0.305f, 0.94f, 0.36f);
+            grantEquipmentButtonText = GetButtonLabel(CreateAccentButton(content, "GrantEquipment", string.Empty, GrantEquipment, 0f, 0.24f, 0.45f, 0.29f));
+            grantAllEquipmentButtonText = GetButtonLabel(CreateButton(content, "GrantAllEquipment", string.Empty, GrantAllEquipment, 0.48f, 0.24f, 1f, 0.29f));
 
-            skillLevelLabelText = CreateCaption(panel.transform, "SkillLevelLabel", 0.05f, 0.045f, 0.2f, 0.07f);
-            CreateMiniButton(panel.transform, "SkillLevelMinus", "-", delegate { skillLevel = Mathf.Max(1, skillLevel - 1); RefreshAll(); }, 0.05f, 0.005f, 0.13f, 0.05f);
-            skillLevelValueText = CreateValueChip(panel.transform, "SkillLevelValue", 18, 0.15f, 0.005f, 0.25f, 0.05f);
-            CreateMiniButton(panel.transform, "SkillLevelPlus", "+", delegate { skillLevel = Mathf.Min(99, skillLevel + 1); RefreshAll(); }, 0.27f, 0.005f, 0.35f, 0.05f);
-            grantSkillButtonText = GetButtonLabel(CreateAccentButton(panel.transform, "GrantSkill", string.Empty, GrantSkill, 0.37f, 0.005f, 0.59f, 0.05f));
-            grantAllSkillLv1ButtonText = GetButtonLabel(CreateButton(panel.transform, "GrantAllSkillLv1", string.Empty, delegate { GrantAllSkills(1); }, 0.62f, 0.005f, 0.78f, 0.05f));
-            grantAllSkillLv5ButtonText = GetButtonLabel(CreateButton(panel.transform, "GrantAllSkillLv5", string.Empty, delegate { GrantAllSkills(5); }, 0.81f, 0.005f, 0.95f, 0.05f));
+            CreateMiniButton(content, "CharacterPrev", "<", delegate { characterIndex--; RefreshAll(); }, 0f, 0.18f, 0.08f, 0.225f);
+            characterText = CreateValueChip(content, "CharacterValue", 16, 0.1f, 0.18f, 0.48f, 0.225f);
+            CreateMiniButton(content, "CharacterNext", ">", delegate { characterIndex++; RefreshAll(); }, 0.5f, 0.18f, 0.58f, 0.225f);
+            CreateMiniButton(content, "SkillPrev", "<", delegate { skillIndex--; RefreshAll(); }, 0.62f, 0.18f, 0.7f, 0.225f);
+            skillText = CreateValueChip(content, "SkillValue", 16, 0.72f, 0.18f, 1f, 0.225f);
+
+            skillLevelLabelText = CreateCaption(content, "SkillLevelLabel", 0f, 0.145f, 0.2f, 0.17f);
+            skillLevelInputField = CreateNumberInput(content, "SkillLevelValue", 18, 0f, 0.095f, 0.18f, 0.145f, OnSkillLevelChanged);
+            grantSkillButtonText = GetButtonLabel(CreateAccentButton(content, "GrantSkill", string.Empty, GrantSkill, 0.22f, 0.095f, 0.5f, 0.145f));
+            grantAllSkillLv1ButtonText = GetButtonLabel(CreateButton(content, "GrantAllSkillLv1", string.Empty, delegate { GrantAllSkills(1); }, 0.54f, 0.095f, 0.76f, 0.145f));
+            grantAllSkillLv5ButtonText = GetButtonLabel(CreateButton(content, "GrantAllSkillLv5", string.Empty, delegate { GrantAllSkills(5); }, 0.8f, 0.095f, 1f, 0.145f));
         }
 
         private void Toggle()
@@ -351,13 +352,13 @@ namespace Wuxing.UI
             runButtonText.text = GameProgressManager.HasActiveRun() ? T("cheat.button_reset_run") : T("cheat.button_start_run");
             elementText.text = GameProgressManager.GetSpiritStoneName(Elements[elementIndex], false);
             amountLabelText.text = T("cheat.label_amount");
-            amountValueText.text = amount.ToString();
+            SetInputValue(amountInputField, amount);
             levelLabelText.text = T("cheat.label_level");
-            levelValueText.text = targetLevel.ToString();
+            SetInputValue(levelInputField, targetLevel);
             stageLabelText.text = T("cheat.label_stage");
-            stageValueText.text = targetStage.ToString();
+            SetInputValue(stageInputField, targetStage);
             skillLevelLabelText.text = T("cheat.label_skill_level");
-            skillLevelValueText.text = skillLevel.ToString();
+            SetInputValue(skillLevelInputField, skillLevel);
 
             stoneButtonText.text = T("cheat.button_grant_current_stone");
             all500ButtonText.text = T("cheat.button_grant_all_500");
@@ -483,6 +484,50 @@ namespace Wuxing.UI
             return UIFactory.CreateText(background.transform, name, string.Empty, fontSize, TextAnchor.MiddleCenter, Color.white);
         }
 
+        private static InputField CreateNumberInput(Transform parent, string name, int fontSize, float x1, float y1, float x2, float y2, UnityAction<string> onEndEdit)
+        {
+            var background = UIFactory.CreatePanel(parent, name + "Bg", new Color(0.16f, 0.19f, 0.25f, 0.92f));
+            var rect = background.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(x1, y1);
+            rect.anchorMax = new Vector2(x2, y2);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            UIFactory.AddOutlineBox(background.transform, "Outline", new Color(0.95f, 0.88f, 0.72f, 0.22f), 1f);
+
+            var inputObject = new GameObject(name, typeof(RectTransform), typeof(InputField));
+            inputObject.transform.SetParent(background.transform, false);
+
+            var inputRect = inputObject.GetComponent<RectTransform>();
+            inputRect.anchorMin = Vector2.zero;
+            inputRect.anchorMax = Vector2.one;
+            inputRect.offsetMin = new Vector2(12f, 6f);
+            inputRect.offsetMax = new Vector2(-12f, -6f);
+
+            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+
+            var text = UIFactory.CreateText(inputObject.transform, "Text", string.Empty, fontSize, TextAnchor.MiddleCenter, Color.white);
+            text.font = font;
+            text.supportRichText = false;
+            text.rectTransform.offsetMin = Vector2.zero;
+            text.rectTransform.offsetMax = Vector2.zero;
+
+            var placeholder = UIFactory.CreateText(inputObject.transform, "Placeholder", "0", fontSize, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.26f));
+            placeholder.font = font;
+            placeholder.rectTransform.offsetMin = Vector2.zero;
+            placeholder.rectTransform.offsetMax = Vector2.zero;
+
+            var input = inputObject.GetComponent<InputField>();
+            input.textComponent = text;
+            input.placeholder = placeholder;
+            input.contentType = InputField.ContentType.IntegerNumber;
+            input.lineType = InputField.LineType.SingleLine;
+            input.characterLimit = 6;
+            input.caretColor = new Color(1f, 0.95f, 0.85f, 1f);
+            input.selectionColor = new Color(0.95f, 0.88f, 0.72f, 0.2f);
+            input.onEndEdit.AddListener(onEndEdit);
+            return input;
+        }
+
         private static Button CreateButton(Transform parent, string name, string label, UnityAction onClick, float x1, float y1, float x2, float y2)
         {
             var button = UIFactory.CreateButton(parent, name, label, onClick);
@@ -531,6 +576,54 @@ namespace Wuxing.UI
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
             return title;
+        }
+
+        private static void SetInputValue(InputField input, int value)
+        {
+            if (input == null)
+            {
+                return;
+            }
+
+            var textValue = value.ToString();
+            if (input.text != textValue)
+            {
+                input.SetTextWithoutNotify(textValue);
+            }
+        }
+
+        private void OnAmountChanged(string value)
+        {
+            amount = ParseInteger(value, amount, 1, 99999);
+            SetInputValue(amountInputField, amount);
+        }
+
+        private void OnTargetLevelChanged(string value)
+        {
+            targetLevel = ParseInteger(value, targetLevel, 1, 999);
+            SetInputValue(levelInputField, targetLevel);
+        }
+
+        private void OnTargetStageChanged(string value)
+        {
+            targetStage = ParseInteger(value, targetStage, 1, Mathf.Max(1, GameProgressManager.GetMaxStage()));
+            SetInputValue(stageInputField, targetStage);
+        }
+
+        private void OnSkillLevelChanged(string value)
+        {
+            skillLevel = ParseInteger(value, skillLevel, 1, 99);
+            SetInputValue(skillLevelInputField, skillLevel);
+        }
+
+        private static int ParseInteger(string value, int fallback, int min, int max)
+        {
+            if (!int.TryParse(value, out var parsed))
+            {
+                return Mathf.Clamp(fallback, min, max);
+            }
+
+            return Mathf.Clamp(parsed, min, max);
         }
     }
 }
