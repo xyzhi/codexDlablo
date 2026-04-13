@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -995,14 +995,14 @@ namespace Wuxing.UI
             if (regionText != null)
             {
                 var sceneTheme = GameProgressManager.GetStageTheme(isEnglish, currentStage);
-                regionText.text = isEnglish ? "Current Scene: " + sceneTheme : "当前场景：" + sceneTheme;
+                regionText.text = isEnglish ? "Current Scene: " + sceneTheme : "瑜版挸澧犻崷鐑樻珯閿? + sceneTheme;
             }
 
             if (longevityText != null)
             {
                 longevityText.text = isEnglish
                     ? "Lifespan  " + GameProgressManager.BuildLongevitySummary(isEnglish)
-                    : "寿元  " + GameProgressManager.BuildLongevitySummary(isEnglish);
+                    : "鐎靛灝鍘? " + GameProgressManager.BuildLongevitySummary(isEnglish);
             }
 
             if (nodeDetailText != null)
@@ -1043,14 +1043,14 @@ namespace Wuxing.UI
             var canMoveNext = !isMoving && GameProgressManager.CanTravelToStage(currentStage + 1);
             var canEnterSelected = !isMoving;
 
-            SetButtonText(previousButton, isEnglish ? "Back" : "回退");
-            SetButtonText(nextButton, isEnglish ? "Forward" : "前行");
-            SetButtonText(enterButton, isEnglish ? "Start" : "启程");
-            SetButtonText(equipmentButton, isEnglish ? "Bag" : "行囊");
-            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "灵石");
-            SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "心法");
-            SetButtonText(resetButton, isEnglish ? "Reset" : "重置");
-            SetButtonText(backButton, isEnglish ? "Title" : "返始");
+            SetButtonText(previousButton, isEnglish ? "Back" : "閸ョ偤鈧偓");
+            SetButtonText(nextButton, isEnglish ? "Forward" : "閸撳秷顢?);
+            SetButtonText(enterButton, isEnglish ? "Start" : "闊繐鍙?);
+            SetButtonText(equipmentButton, isEnglish ? "Bag" : "鐞涘苯娉?);
+            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "閻忕數鐓?);
+            SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "韫囧啯纭?);
+            SetButtonText(resetButton, isEnglish ? "Reset" : "闁插秶鐤?);
+            SetButtonText(backButton, isEnglish ? "Title" : "鏉╂柨顫?);
 
             ApplyBottomButtonChrome(previousButton);
             ApplyBottomButtonChrome(nextButton);
@@ -1436,6 +1436,13 @@ namespace Wuxing.UI
                 new Color(0f, 0f, 0f, 0.32f),
                 new Vector2(1.5f, -1.5f),
                 new Color(0.95f, 0.92f, 0.86f, 1f));
+
+            ApplyTextOutline(titleText, new Color(0f, 0f, 0f, 0.42f), new Vector2(1f, -1f));
+            ApplyTextOutline(statusText, new Color(0.18f, 0.12f, 0.06f, 0.52f), new Vector2(1f, -1f));
+            ApplyTextOutline(regionText, new Color(0.18f, 0.12f, 0.06f, 0.56f), new Vector2(1f, -1f));
+            ApplyTextOutline(longevityText, new Color(0f, 0f, 0f, 0.62f), new Vector2(1.2f, -1.2f));
+            ApplyTextOutline(nodeDetailText, new Color(0f, 0f, 0f, 0.68f), new Vector2(1.2f, -1.2f));
+            ApplyTextOutline(routeText, new Color(0f, 0f, 0f, 0.68f), new Vector2(1.2f, -1.2f));
         }
 
         private static void ApplyTextShadow(Text text, Color shadowColor, Vector2 effectDistance, Color? overrideColor)
@@ -1461,6 +1468,24 @@ namespace Wuxing.UI
             shadow.useGraphicAlpha = true;
         }
 
+        private static void ApplyTextOutline(Text text, Color outlineColor, Vector2 effectDistance)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var outline = text.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+
+            outline.effectColor = outlineColor;
+            outline.effectDistance = effectDistance;
+            outline.useGraphicAlpha = true;
+        }
+
         private string BuildSelectedNodeDetail(bool isEnglish, int currentStage)
         {
             var selectedNodeType = GameProgressManager.GetNodeType(selectedStage);
@@ -1469,25 +1494,25 @@ namespace Wuxing.UI
             var eventMode = GameProgressManager.GetStageEventMode(selectedStage);
 
             var builder = new StringBuilder();
-            builder.Append(isEnglish ? "Stage " : "第 ")
+            builder.Append(isEnglish ? "Stage " : "缁?")
                 .Append(selectedStage)
-                .Append(isEnglish ? "  " : " 节  ")
+                .Append(isEnglish ? "  " : " 閼? ")
                 .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage))
                 .Append('\n')
-                .Append(isEnglish ? "Travel: " : "耗时：")
+                .Append(isEnglish ? "Travel: " : "閼版妞傞敍?)
                 .Append(monthCost)
-                .Append(isEnglish ? " mo" : "月")
+                .Append(isEnglish ? " mo" : "閺?)
                 .Append("  ")
-                .Append(isEnglish ? "Reach: " : "抵达：")
-                .Append(canReach ? (isEnglish ? "Yes" : "可达") : (isEnglish ? "Locked" : "未达"));
+                .Append(isEnglish ? "Reach: " : "閹朵絻鎻敍?)
+                .Append(canReach ? (isEnglish ? "Yes" : "閸欘垵鎻?) : (isEnglish ? "Locked" : "閺堫亣鎻?));
 
             if (!GameProgressManager.IsBattleNode(selectedNodeType))
             {
                 builder.Append('\n')
-                    .Append(isEnglish ? "Mode: " : "事件：")
+                    .Append(isEnglish ? "Mode: " : "娴滃娆㈤敍?)
                     .Append(string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase)
-                        ? (isEnglish ? "Random" : "随机")
-                        : (isEnglish ? "Fixed" : "固定"));
+                        ? (isEnglish ? "Random" : "闂呭繑婧€")
+                        : (isEnglish ? "Fixed" : "閸ュ搫鐣?));
             }
 
             var detail = GameProgressManager.BuildNodeDetail(isEnglish, selectedStage);
@@ -1511,18 +1536,18 @@ namespace Wuxing.UI
             {
                 builder.Append('\n').Append('\n');
             }
-            builder.Append(isEnglish ? "Realm " : "境界 ")
+            builder.Append(isEnglish ? "Realm " : "婢у啰鏅?")
                 .Append(GameProgressManager.GetCultivationLevel())
                 .Append('\n')
-                .Append(isEnglish ? "Exp " : "修为 ")
+                .Append(isEnglish ? "Exp " : "娣囶喕璐?")
                 .Append(GameProgressManager.GetCultivationExp())
                 .Append('/')
                 .Append(GameProgressManager.GetRequiredExpForNextLevel())
                 .Append('\n')
-                .Append(isEnglish ? "Gear " : "装备 ")
+                .Append(isEnglish ? "Gear " : "鐟佸懎顦?")
                 .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
                 .Append("  ")
-                .Append(isEnglish ? "Node " : "节点 ")
+                .Append(isEnglish ? "Node " : "閼哄倻鍋?")
                 .Append(currentStage);
             return builder.ToString();
         }
@@ -1545,7 +1570,7 @@ namespace Wuxing.UI
             var maxStage = Mathf.Max(currentStage, GameProgressManager.GetMaxReachableStage());
             return isEnglish
                 ? "Visited Nodes: " + currentStage + "/" + maxStage
-                : "已历节点：" + currentStage + "/" + maxStage;
+                : "瀹告彃宸婚懞鍌滃仯閿? + currentStage + "/" + maxStage;
         }
 
         private List<int> BuildVisibleStages(int currentStage, int direction, bool includeIncomingStage)
