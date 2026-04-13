@@ -32,7 +32,7 @@ namespace Wuxing.UI
         private static readonly Color NodeIconShadowColor = new Color(0f, 0f, 0f, 0.24f);
         private static readonly Color NodeIconCurrentShadowColor = new Color(0.2f, 0.16f, 0.09f, 0.42f);
         private static readonly float[] NodeVerticalPattern = { -330f, -110f, 110f, 330f, 550f };
-        private const float SnakeSideOffset = 112f;
+        private const float SnakeSideOffset = 96f;
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text statusText;
