@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -995,14 +995,14 @@ namespace Wuxing.UI
             if (regionText != null)
             {
                 var sceneTheme = GameProgressManager.GetStageTheme(isEnglish, currentStage);
-                regionText.text = isEnglish ? "Current Scene: " + sceneTheme : "瑜版挸澧犻崷鐑樻珯閿? + sceneTheme;
+                regionText.text = isEnglish ? "Current Scene: " + sceneTheme : "\u5f53\u524d\u573a\u666f\uff1a" + sceneTheme;
             }
 
             if (longevityText != null)
             {
                 longevityText.text = isEnglish
                     ? "Lifespan  " + GameProgressManager.BuildLongevitySummary(isEnglish)
-                    : "鐎靛灝鍘? " + GameProgressManager.BuildLongevitySummary(isEnglish);
+                    : "\u5bff\u5143  " + GameProgressManager.BuildLongevitySummary(isEnglish);
             }
 
             if (nodeDetailText != null)
@@ -1043,14 +1043,14 @@ namespace Wuxing.UI
             var canMoveNext = !isMoving && GameProgressManager.CanTravelToStage(currentStage + 1);
             var canEnterSelected = !isMoving;
 
-            SetButtonText(previousButton, isEnglish ? "Back" : "閸ョ偤鈧偓");
-            SetButtonText(nextButton, isEnglish ? "Forward" : "閸撳秷顢?);
-            SetButtonText(enterButton, isEnglish ? "Start" : "闊繐鍙?);
-            SetButtonText(equipmentButton, isEnglish ? "Bag" : "鐞涘苯娉?);
-            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "閻忕數鐓?);
-            SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "韫囧啯纭?);
-            SetButtonText(resetButton, isEnglish ? "Reset" : "闁插秶鐤?);
-            SetButtonText(backButton, isEnglish ? "Title" : "鏉╂柨顫?);
+            SetButtonText(previousButton, isEnglish ? "Back" : "\u56de\u9000");
+            SetButtonText(nextButton, isEnglish ? "Forward" : "\u524d\u884c");
+            SetButtonText(enterButton, isEnglish ? "Start" : "\u8e0f\u5165");
+            SetButtonText(equipmentButton, isEnglish ? "Bag" : "\u884c\u56ca");
+            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "\u7075\u77f3");
+            SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "\u5fc3\u6cd5");
+            SetButtonText(resetButton, isEnglish ? "Reset" : "\u91cd\u7f6e");
+            SetButtonText(backButton, isEnglish ? "Title" : "\u8fd4\u59cb");
 
             ApplyBottomButtonChrome(previousButton);
             ApplyBottomButtonChrome(nextButton);
@@ -1494,25 +1494,25 @@ namespace Wuxing.UI
             var eventMode = GameProgressManager.GetStageEventMode(selectedStage);
 
             var builder = new StringBuilder();
-            builder.Append(isEnglish ? "Stage " : "缁?")
+            builder.Append(isEnglish ? "Stage " : "\u7b2c ")
                 .Append(selectedStage)
-                .Append(isEnglish ? "  " : " 閼? ")
+                .Append(isEnglish ? "  " : " \u8282  ")
                 .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage))
                 .Append('\n')
-                .Append(isEnglish ? "Travel: " : "閼版妞傞敍?)
+                .Append(isEnglish ? "Travel: " : "\u8017\u65f6\uff1a")
                 .Append(monthCost)
-                .Append(isEnglish ? " mo" : "閺?)
+                .Append(isEnglish ? " mo" : "\u6708")
                 .Append("  ")
-                .Append(isEnglish ? "Reach: " : "閹朵絻鎻敍?)
-                .Append(canReach ? (isEnglish ? "Yes" : "閸欘垵鎻?) : (isEnglish ? "Locked" : "閺堫亣鎻?));
+                .Append(isEnglish ? "Reach: " : "\u62b5\u8fbe\uff1a")
+                .Append(canReach ? (isEnglish ? "Yes" : "\u53ef\u8fbe") : (isEnglish ? "Locked" : "\u672a\u8fbe"));
 
             if (!GameProgressManager.IsBattleNode(selectedNodeType))
             {
                 builder.Append('\n')
-                    .Append(isEnglish ? "Mode: " : "娴滃娆㈤敍?)
+                    .Append(isEnglish ? "Mode: " : "\u4e8b\u4ef6\uff1a")
                     .Append(string.Equals(eventMode, "Random", StringComparison.OrdinalIgnoreCase)
-                        ? (isEnglish ? "Random" : "闂呭繑婧€")
-                        : (isEnglish ? "Fixed" : "閸ュ搫鐣?));
+                        ? (isEnglish ? "Random" : "\u968f\u673a")
+                        : (isEnglish ? "Fixed" : "\u56fa\u5b9a"));
             }
 
             var detail = GameProgressManager.BuildNodeDetail(isEnglish, selectedStage);
@@ -1523,7 +1523,6 @@ namespace Wuxing.UI
 
             return builder.ToString();
         }
-
         private string BuildCondensedProfileText(bool isEnglish, int currentStage)
         {
             var builder = new StringBuilder();
@@ -1536,18 +1535,18 @@ namespace Wuxing.UI
             {
                 builder.Append('\n').Append('\n');
             }
-            builder.Append(isEnglish ? "Realm " : "婢у啰鏅?")
+            builder.Append(isEnglish ? "Realm " : "\u5883\u754c ")
                 .Append(GameProgressManager.GetCultivationLevel())
                 .Append('\n')
-                .Append(isEnglish ? "Exp " : "娣囶喕璐?")
+                .Append(isEnglish ? "Exp " : "\u4fee\u4e3a ")
                 .Append(GameProgressManager.GetCultivationExp())
                 .Append('/')
                 .Append(GameProgressManager.GetRequiredExpForNextLevel())
                 .Append('\n')
-                .Append(isEnglish ? "Gear " : "鐟佸懎顦?")
+                .Append(isEnglish ? "Gear " : "\u88c5\u5907 ")
                 .Append(GameProgressManager.GetOwnedEquipmentIds().Count)
                 .Append("  ")
-                .Append(isEnglish ? "Node " : "閼哄倻鍋?")
+                .Append(isEnglish ? "Node " : "\u8282\u70b9 ")
                 .Append(currentStage);
             return builder.ToString();
         }
@@ -1570,7 +1569,7 @@ namespace Wuxing.UI
             var maxStage = Mathf.Max(currentStage, GameProgressManager.GetMaxReachableStage());
             return isEnglish
                 ? "Visited Nodes: " + currentStage + "/" + maxStage
-                : "瀹告彃宸婚懞鍌滃仯閿? + currentStage + "/" + maxStage;
+                : "\u5df2\u5386\u8282\u70b9\uff1a" + currentStage + "/" + maxStage;
         }
 
         private List<int> BuildVisibleStages(int currentStage, int direction, bool includeIncomingStage)

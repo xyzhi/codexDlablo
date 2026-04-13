@@ -14,6 +14,10 @@ namespace Wuxing.UI
         [SerializeField] private RectTransform actionPanel;
         [SerializeField] private RectTransform enterButtonRect;
         [SerializeField] private RectTransform orbitGlowRect;
+        [SerializeField] private RectTransform cloud1Rect;
+        [SerializeField] private RectTransform cloud2Rect;
+        [SerializeField] private RectTransform cloud3Rect;
+        [SerializeField] private RectTransform cloud4Rect;
         [SerializeField] private Graphic subtitleGraphic;
         [SerializeField] private Graphic topLineGraphic;
         [SerializeField] private CanvasGroup sigilCanvasGroup;
@@ -21,6 +25,10 @@ namespace Wuxing.UI
         private Vector2 _titleBasePosition;
         private Vector2 _actionBasePosition;
         private Vector2 _orbitGlowBasePosition;
+        private Vector2 _cloud1BasePosition;
+        private Vector2 _cloud2BasePosition;
+        private Vector2 _cloud3BasePosition;
+        private Vector2 _cloud4BasePosition;
         private Vector3 _buttonBaseScale = Vector3.one;
         private bool _layoutCached;
         private Text _languageButtonText;
@@ -124,6 +132,26 @@ namespace Wuxing.UI
                 _orbitGlowBasePosition = orbitGlowRect.anchoredPosition;
             }
 
+            if (cloud1Rect != null)
+            {
+                _cloud1BasePosition = cloud1Rect.anchoredPosition;
+            }
+
+            if (cloud2Rect != null)
+            {
+                _cloud2BasePosition = cloud2Rect.anchoredPosition;
+            }
+
+            if (cloud3Rect != null)
+            {
+                _cloud3BasePosition = cloud3Rect.anchoredPosition;
+            }
+
+            if (cloud4Rect != null)
+            {
+                _cloud4BasePosition = cloud4Rect.anchoredPosition;
+            }
+
             _layoutCached = true;
         }
 
@@ -191,6 +219,11 @@ namespace Wuxing.UI
                 orbitGlowRect.anchoredPosition = _orbitGlowBasePosition + new Vector2(Mathf.Cos(angle) * radiusX, Mathf.Sin(angle) * radiusY);
             }
 
+            UpdateCloudLoop(cloud1Rect, _cloud1BasePosition, true, 34f, instant);
+            UpdateCloudLoop(cloud2Rect, _cloud2BasePosition, false, 23f, instant);
+            UpdateCloudLoop(cloud3Rect, _cloud3BasePosition, true, 58f, instant);
+            UpdateCloudLoop(cloud4Rect, _cloud4BasePosition, false, 72f, instant);
+
             SetGraphicAlpha(subtitleGraphic, Mathf.Lerp(0.42f, 0.72f, Ping(time, 0.92f, -0.3f)));
             SetGraphicAlpha(topLineGraphic, Mathf.Lerp(0.14f, 0.34f, Ping(time, 0.58f, 0f)));
 
@@ -215,6 +248,49 @@ namespace Wuxing.UI
             var color = graphic.color;
             color.a = alpha;
             graphic.color = color;
+        }
+
+        private static void UpdateCloudLoop(RectTransform cloudRect, Vector2 basePosition, bool moveLeft, float speed, bool instant)
+        {
+            if (cloudRect == null)
+            {
+                return;
+            }
+
+            if (instant)
+            {
+                cloudRect.anchoredPosition = basePosition;
+                return;
+            }
+
+            var parent = cloudRect.parent as RectTransform;
+            if (parent == null)
+            {
+                cloudRect.anchoredPosition = basePosition;
+                return;
+            }
+
+            var cloudHalfWidth = Mathf.Max(1f, cloudRect.rect.width * 0.5f);
+            var leftBound = -cloudHalfWidth - 40f;
+            var rightBound = parent.rect.width + cloudHalfWidth + 40f;
+            var span = rightBound - leftBound;
+            if (span <= 0f)
+            {
+                cloudRect.anchoredPosition = basePosition;
+                return;
+            }
+
+            float phase;
+            if (moveLeft)
+            {
+                phase = Mathf.Repeat((rightBound - basePosition.x) + Time.unscaledTime * speed, span);
+                cloudRect.anchoredPosition = new Vector2(rightBound - phase, basePosition.y);
+            }
+            else
+            {
+                phase = Mathf.Repeat((basePosition.x - leftBound) + Time.unscaledTime * speed, span);
+                cloudRect.anchoredPosition = new Vector2(leftBound + phase, basePosition.y);
+            }
         }
     }
 }
