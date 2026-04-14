@@ -25,13 +25,15 @@ namespace Wuxing.UI
             var rootImage = button.GetComponent<Image>();
             if (rootImage != null)
             {
-                rootImage.color = Color.white;
+                rootImage.color = selected
+                    ? new Color(borderColor.r, borderColor.g, borderColor.b, 1f)
+                    : Color.white;
                 rootImage.raycastTarget = true;
             }
 
             // Card chrome is always a clear double frame: outer border + inner border.
             var surface = EnsureLayer(transform, "CardSurface", CardSurfaceInset, new Color(0.035f, 0.035f, 0.04f, 0.995f), 0);
-            var innerBorder = EnsureLayer(transform, "InnerBorder", CardInnerBorderInset, new Color(borderColor.r, borderColor.g, borderColor.b, 0.9f), 1);
+            var innerBorder = EnsureLayer(transform, "InnerBorder", CardInnerBorderInset, new Color(borderColor.r, borderColor.g, borderColor.b, selected ? 1f : 0.9f), 1);
             var innerSurface = EnsureLayer(transform, "InnerSurface", CardInnerSurfaceInset, new Color(0.05f, 0.05f, 0.06f, 0.995f), 2);
 
             if (surface != null)

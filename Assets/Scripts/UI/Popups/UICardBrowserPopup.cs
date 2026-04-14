@@ -231,6 +231,7 @@ namespace Wuxing.UI
             {
                 title.text = card.Title;
                 title.supportRichText = true;
+                ConfigureCardTitleText(title);
             }
 
             var subtitle = button.transform.Find("SubtitleText")?.GetComponent<Text>();
@@ -238,6 +239,7 @@ namespace Wuxing.UI
             {
                 subtitle.text = card.Subtitle;
                 subtitle.supportRichText = true;
+                ConfigureCardSubtitleText(subtitle);
             }
 
             var progressRoot = button.transform.Find("ProgressRoot");
@@ -286,6 +288,52 @@ namespace Wuxing.UI
         private static void ApplyCardChrome(Button button, Color borderColor, bool selected)
         {
             UICardChromeUtility.Apply(button, borderColor, selected);
+        }
+
+        private static void ConfigureCardTitleText(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            EnsureTextOutline(text);
+            text.color = new Color(0.98f, 0.96f, 0.9f, 1f);
+        }
+
+        private static void ConfigureCardSubtitleText(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            EnsureTextOutline(text);
+            text.color = new Color(0.96f, 0.94f, 0.88f, 1f);
+
+            var rect = text.rectTransform;
+            rect.anchorMin = new Vector2(0.08f, 0.62f);
+            rect.anchorMax = new Vector2(0.92f, 0.8f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        private static void EnsureTextOutline(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var outline = text.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+
+            outline.effectColor = new Color(0.16f, 0.11f, 0.08f, 0.82f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
+            outline.useGraphicAlpha = true;
         }
 
         private void ApplyDetail(UICardData card)

@@ -10,6 +10,7 @@ namespace Wuxing.UI
     public class UISkillPopup : UIPopup
     {
         private const int MaxActiveSkillSlots = 3;
+        private const float CardIllustrationMaskInset = 12f;
 
         [SerializeField] private Text titleText;
         [SerializeField] private Button closeButton;
@@ -19,6 +20,7 @@ namespace Wuxing.UI
         [SerializeField] private Button libraryTemplateButton;
         [SerializeField] private Text detailTitleText;
         [SerializeField] private Text detailBodyText;
+        [SerializeField] private Sprite skillCardSprite;
 
         private readonly List<Button> slotButtons = new List<Button>();
         private readonly List<Button> libraryButtons = new List<Button>();
@@ -217,6 +219,7 @@ namespace Wuxing.UI
             var isSelected = selectedSlotIndex == slotIndex;
 
             UICardChromeUtility.Apply(button, borderColor, isSelected);
+            ApplyCardIllustration(button, skillCardSprite);
             SetCardTexts(button, title, subtitle);
 
             button.onClick.RemoveAllListeners();
@@ -239,6 +242,7 @@ namespace Wuxing.UI
                 ? string.IsNullOrEmpty(selectedSkillId)
                 : string.Equals(selectedSkillId, card.SkillId, StringComparison.OrdinalIgnoreCase);
             UICardChromeUtility.Apply(button, card.BorderColor, isSelected);
+            ApplyCardIllustration(button, skillCardSprite);
             SetCardTexts(button, card.Title, card.Subtitle);
 
             button.onClick.RemoveAllListeners();
@@ -303,6 +307,7 @@ namespace Wuxing.UI
             {
                 titleText.text = title ?? string.Empty;
                 titleText.supportRichText = true;
+                ConfigureCardTitleText(titleText);
             }
 
             var subtitleText = button.transform.Find("SubtitleText")?.GetComponent<Text>();
@@ -310,6 +315,7 @@ namespace Wuxing.UI
             {
                 subtitleText.text = subtitle ?? string.Empty;
                 subtitleText.supportRichText = true;
+                ConfigureCardSubtitleText(subtitleText);
             }
 
             var progressRoot = button.transform.Find("ProgressRoot");
@@ -332,6 +338,166 @@ namespace Wuxing.UI
             rect.pivot = new Vector2(0f, 1f);
             rect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
             rect.anchoredPosition = new Vector2(column * (UICardChromeUtility.StandardCardWidth + 16f), -row * (UICardChromeUtility.StandardCardHeight + 16f));
+        }
+
+        private static void ConfigureCardTitleText(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            EnsureTextOutline(text);
+            text.color = new Color(0.98f, 0.96f, 0.9f, 1f);
+        }
+
+        private static void ConfigureCardSubtitleText(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            EnsureTextOutline(text);
+            text.color = new Color(0.96f, 0.94f, 0.88f, 1f);
+
+            var rect = text.rectTransform;
+            rect.anchorMin = new Vector2(0.08f, 0.62f);
+            rect.anchorMax = new Vector2(0.92f, 0.8f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+
+        private static void EnsureTextOutline(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var outline = text.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+
+            outline.effectColor = new Color(0.16f, 0.11f, 0.08f, 0.82f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
+            outline.useGraphicAlpha = true;
+        }
+
+        private static void ApplyCardIllustration(Button button, Sprite sprite)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            var maskRoot = EnsureCardIllustrationMask(button);
+            if (maskRoot == null)
+            {
+                return;
+            }
+
+            var image = EnsureCardIllustrationImage(maskRoot);
+            if (image == null)
+            {
+                return;
+            }
+
+            image.sprite = sprite;
+            image.enabled = sprite != null;
+            image.color = Color.white;
+        }
+
+        private static Transform EnsureCardIllustrationMask(Button button)
+        {
+            var existing = button.transform.Find("CardIllustrationMask");
+            if (existing != null)
+            {
+                ConfigureCardIllustrationMaskRect(existing as RectTransform);
+                existing.SetSiblingIndex(Mathf.Min(3, button.transform.childCount - 1));
+
+                var existingImage = existing.GetComponent<Image>();
+                if (existingImage != null)
+                {
+                    existingImage.color = new Color(1f, 1f, 1f, 0.01f);
+                    existingImage.raycastTarget = false;
+                }
+
+                if (existing.GetComponent<RectMask2D>() == null)
+                {
+                    existing.gameObject.AddComponent<RectMask2D>();
+                }
+
+                return existing;
+            }
+
+            var maskObject = new GameObject("CardIllustrationMask", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
+            maskObject.transform.SetParent(button.transform, false);
+            maskObject.transform.SetSiblingIndex(Mathf.Min(3, button.transform.childCount));
+
+            ConfigureCardIllustrationMaskRect(maskObject.GetComponent<RectTransform>());
+
+            var maskImage = maskObject.GetComponent<Image>();
+            maskImage.color = new Color(1f, 1f, 1f, 0.01f);
+            maskImage.raycastTarget = false;
+            return maskObject.transform;
+        }
+
+        private static void ConfigureCardIllustrationMaskRect(RectTransform rect)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(CardIllustrationMaskInset, CardIllustrationMaskInset);
+            rect.offsetMax = new Vector2(-CardIllustrationMaskInset, -CardIllustrationMaskInset);
+        }
+
+        private static Image EnsureCardIllustrationImage(Transform maskRoot)
+        {
+            if (maskRoot == null)
+            {
+                return null;
+            }
+
+            var existing = maskRoot.Find("CardIllustration")?.GetComponent<Image>();
+            if (existing != null)
+            {
+                ConfigureCardIllustrationImageRect(existing.rectTransform);
+                existing.preserveAspect = false;
+                existing.raycastTarget = false;
+                return existing;
+            }
+
+            var imageObject = new GameObject("CardIllustration", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            imageObject.transform.SetParent(maskRoot, false);
+            imageObject.transform.SetSiblingIndex(0);
+
+            var rect = imageObject.GetComponent<RectTransform>();
+            ConfigureCardIllustrationImageRect(rect);
+
+            var image = imageObject.GetComponent<Image>();
+            image.preserveAspect = false;
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private static void ConfigureCardIllustrationImageRect(RectTransform rect)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = new Vector2(-0.08f, -0.08f);
+            rect.anchorMax = new Vector2(1.08f, 1.08f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
         }
 
         private static void ClosePopup()
