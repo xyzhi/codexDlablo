@@ -698,6 +698,8 @@ MonoBehaviour:
   detailTitleText: {fileID: 4518330410080543990}
   detailBodyText: {fileID: 3909349212413991137}
   equipmentCardSprite: {fileID: 21300000, guid: 366954c3260c22847b213619b8582c34, type: 3}
+  tipsBackgroundSprite: {fileID: 21300000, guid: 1e6ec5e1a8eae0341a2b3dd5fbe2ec41, type: 3}
+  commonButtonSprite: {fileID: 21300000, guid: f89ce6774c9989747b558dfca7310c83, type: 3}
 --- !u!1 &2780355394511576257
 GameObject:
   m_ObjectHideFlags: 0

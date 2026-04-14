@@ -2866,6 +2866,8 @@ MonoBehaviour:
   detailTitleText: {fileID: 2037403394782016946}
   detailBodyText: {fileID: 3539826599999266481}
   skillCardSprite: {fileID: 21300000, guid: 3675993c49e861842990892ec4113152, type: 3}
+  tipsBackgroundSprite: {fileID: 21300000, guid: 1e6ec5e1a8eae0341a2b3dd5fbe2ec41, type: 3}
+  commonButtonSprite: {fileID: 21300000, guid: f89ce6774c9989747b558dfca7310c83, type: 3}
 --- !u!1 &8599418803612592451
 GameObject:
   m_ObjectHideFlags: 0

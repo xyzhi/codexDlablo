@@ -21,6 +21,8 @@ namespace Wuxing.UI
         [SerializeField] private Text detailTitleText;
         [SerializeField] private Text detailBodyText;
         [SerializeField] private Sprite skillCardSprite;
+        [SerializeField] private Sprite tipsBackgroundSprite;
+        [SerializeField] private Sprite commonButtonSprite;
 
         private readonly List<Button> slotButtons = new List<Button>();
         private readonly List<Button> libraryButtons = new List<Button>();
@@ -28,6 +30,16 @@ namespace Wuxing.UI
         private string characterId = string.Empty;
         private int selectedSlotIndex;
         private string selectedSkillId = string.Empty;
+
+        private RectTransform tipsPanel;
+        private RectTransform tipsArrow;
+        private Button tipsDismissButton;
+        private Text tipsTitleText;
+        private Text tipsBodyText;
+        private Button tipsActionButton;
+        private Text tipsActionButtonText;
+        private Action pendingTipAction;
+        private UICardTipsView sharedTipsView;
 
         private void Awake()
         {
@@ -72,6 +84,8 @@ namespace Wuxing.UI
 
             selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, MaxActiveSkillSlots - 1);
             selectedSkillId = GetSlotSkillId(selectedSlotIndex);
+            HideLegacyDetailPanel();
+            HideTips();
             RefreshAll();
         }
 
@@ -82,9 +96,9 @@ namespace Wuxing.UI
                 return;
             }
 
+            selectedSkillId = GetSlotSkillId(selectedSlotIndex);
             RefreshSlotButtons();
             RefreshLibraryButtons();
-            RefreshDetail();
         }
 
         private void RefreshSlotButtons()
@@ -139,51 +153,9 @@ namespace Wuxing.UI
             }
         }
 
-        private void RefreshDetail()
-        {
-            if (detailTitleText == null || detailBodyText == null)
-            {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(selectedSkillId))
-            {
-                detailTitleText.text = LocalizationManager.GetText("map.skill_overview_title");
-                detailTitleText.color = Color.white;
-                detailBodyText.text = "\u5f53\u524d\u69fd\u4f4d\u4e3a\u7a7a\u3002\n\u4ece\u4e0b\u65b9\u6280\u80fd\u5e93\u9009\u62e9\u4e00\u4e2a\u4e3b\u52a8\u6280\u80fd\u4e0a\u573a\u3002";
-                return;
-            }
-
-            var cards = GameProgressManager.BuildSkillLibraryCards(characterId, false);
-            for (var i = 0; i < cards.Count; i++)
-            {
-                var card = cards[i];
-                if (card != null && string.Equals(card.Id, selectedSkillId, StringComparison.OrdinalIgnoreCase))
-                {
-                    detailTitleText.text = card.DetailTitle;
-                    detailTitleText.color = card.BorderColor;
-                    detailBodyText.text = card.DetailBody;
-                    return;
-                }
-            }
-
-            detailTitleText.text = LocalizationManager.GetText("map.skill_overview_title");
-            detailTitleText.color = Color.white;
-            detailBodyText.text = "\u672a\u627e\u5230\u6280\u80fd\u8be6\u60c5\u3002";
-        }
-
         private List<SkillCardData> BuildLibraryCards()
         {
             var result = new List<SkillCardData>();
-            result.Add(new SkillCardData
-            {
-                Title = "\u5378\u4e0b\u6280\u80fd",
-                Subtitle = GetSlotLabel(selectedSlotIndex),
-                SkillId = string.Empty,
-                BorderColor = new Color(0.88f, 0.82f, 0.76f, 1f),
-                IsUnequip = true
-            });
-
             var cards = GameProgressManager.BuildSkillLibraryCards(characterId, false);
             for (var i = 0; i < cards.Count; i++)
             {
@@ -199,6 +171,8 @@ namespace Wuxing.UI
                     Subtitle = card.Subtitle,
                     SkillId = card.Id,
                     BorderColor = card.BorderColor,
+                    DetailTitle = card.DetailTitle,
+                    DetailBody = card.DetailBody,
                     IsUnequip = false
                 });
             }
@@ -214,11 +188,10 @@ namespace Wuxing.UI
             }
 
             var title = GetSlotLabel(slotIndex);
-            var subtitle = card != null ? card.Title : "\u7a7a\u6280\u80fd\u680f";
+            var subtitle = card != null ? card.Title : "空技能栏";
             var borderColor = card != null ? card.BorderColor : UIElementPalette.GetBorderColor("None");
-            var isSelected = selectedSlotIndex == slotIndex;
 
-            UICardChromeUtility.Apply(button, borderColor, isSelected);
+            UICardChromeUtility.Apply(button, borderColor, false);
             ApplyCardIllustration(button, skillCardSprite);
             SetCardTexts(button, title, subtitle);
 
@@ -228,6 +201,18 @@ namespace Wuxing.UI
                 selectedSlotIndex = slotIndex;
                 selectedSkillId = GetSlotSkillId(slotIndex);
                 RefreshAll();
+
+                ShowTips(
+                    button.GetComponent<RectTransform>(),
+                    card != null && !string.IsNullOrEmpty(card.DetailTitle) ? card.DetailTitle : title,
+                    card != null ? card.DetailBody : BuildEmptySlotDetail(slotIndex),
+                    card != null ? "卸下" : null,
+                    card != null ? (Action)delegate
+                    {
+                        GameProgressManager.UnequipActiveSkill(characterId, selectedSlotIndex);
+                        HideTips();
+                        RefreshAll();
+                    } : null);
             });
         }
 
@@ -238,29 +223,289 @@ namespace Wuxing.UI
                 return;
             }
 
-            var isSelected = card.IsUnequip
-                ? string.IsNullOrEmpty(selectedSkillId)
-                : string.Equals(selectedSkillId, card.SkillId, StringComparison.OrdinalIgnoreCase);
-            UICardChromeUtility.Apply(button, card.BorderColor, isSelected);
+            UICardChromeUtility.Apply(button, card.BorderColor, false);
             ApplyCardIllustration(button, skillCardSprite);
             SetCardTexts(button, card.Title, card.Subtitle);
 
             button.onClick.RemoveAllListeners();
             button.onClick.AddListener(delegate
             {
-                if (card.IsUnequip)
+                var actionLabel = card.IsUnequip ? "卸下" : "装备";
+                var action = card.IsUnequip
+                    ? (Action)delegate
+                    {
+                        GameProgressManager.UnequipActiveSkill(characterId, selectedSlotIndex);
+                        HideTips();
+                        RefreshAll();
+                    }
+                    : (Action)delegate
+                    {
+                        GameProgressManager.EquipActiveSkill(characterId, selectedSlotIndex, card.SkillId);
+                        HideTips();
+                        RefreshAll();
+                    };
+
+                ShowTips(
+                    button.GetComponent<RectTransform>(),
+                    string.IsNullOrEmpty(card.DetailTitle) ? card.Title : card.DetailTitle,
+                    BuildLibraryTipBody(card),
+                    card.IsUnequip && string.IsNullOrEmpty(selectedSkillId) ? null : actionLabel,
+                    card.IsUnequip && string.IsNullOrEmpty(selectedSkillId) ? null : action);
+            });
+        }
+
+        private void HideLegacyDetailPanel()
+        {
+            var detailRoot = detailTitleText != null
+                ? detailTitleText.rectTransform.parent as RectTransform
+                : detailBodyText != null ? detailBodyText.rectTransform.parent as RectTransform : null;
+            if (detailRoot != null)
+            {
+                detailRoot.gameObject.SetActive(false);
+            }
+            else
+            {
+                if (detailTitleText != null)
                 {
-                    GameProgressManager.UnequipActiveSkill(characterId, selectedSlotIndex);
-                    selectedSkillId = string.Empty;
-                }
-                else if (!string.IsNullOrEmpty(card.SkillId))
-                {
-                    GameProgressManager.EquipActiveSkill(characterId, selectedSlotIndex, card.SkillId);
-                    selectedSkillId = card.SkillId;
+                    detailTitleText.gameObject.SetActive(false);
                 }
 
-                RefreshAll();
-            });
+                if (detailBodyText != null)
+                {
+                    detailBodyText.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void ShowTips(RectTransform sourceCard, string title, string body, string actionLabel, Action action)
+        {
+            EnsureTipsUI();
+            if (sharedTipsView == null || sourceCard == null)
+            {
+                return;
+            }
+
+            sharedTipsView.Show(sourceCard, title, body, actionLabel, action);
+        }
+
+        private void HideTips()
+        {
+            if (sharedTipsView != null)
+            {
+                sharedTipsView.Hide();
+            }
+        }
+
+        private void EnsureTipsUI()
+        {
+            if (sharedTipsView != null)
+            {
+                return;
+            }
+
+            var root = transform as RectTransform;
+            if (root == null)
+            {
+                return;
+            }
+            var prefab = Resources.Load<GameObject>(UICardTipsView.ResourcePath);
+            GameObject instance;
+            if (prefab != null)
+            {
+                instance = Instantiate(prefab, root, false);
+            }
+            else
+            {
+                instance = new GameObject("CardTips", typeof(RectTransform), typeof(UICardTipsView));
+                instance.transform.SetParent(root, false);
+            }
+
+            sharedTipsView = instance.GetComponent<UICardTipsView>();
+            if (sharedTipsView == null)
+            {
+                sharedTipsView = instance.AddComponent<UICardTipsView>();
+            }
+
+            sharedTipsView.Bind(
+                root,
+                tipsBackgroundSprite,
+                commonButtonSprite,
+                titleText != null ? titleText.font : null,
+                detailBodyText != null ? detailBodyText.font : titleText != null ? titleText.font : null,
+                slotContentRoot,
+                libraryContentRoot);
+        }
+
+        private void LayoutTips(RectTransform sourceCard, bool hasAction)
+        {
+            var root = transform as RectTransform;
+            if (root == null || tipsPanel == null || sourceCard == null)
+            {
+                return;
+            }
+
+            const float bubbleWidth = 380f;
+            const float minBubbleHeight = 180f;
+            const float maxBubbleHeight = 520f;
+            const float horizontalGap = 28f;
+            const float screenPadding = 18f;
+            const float topPadding = 26f;
+            const float sidePadding = 38f;
+            const float buttonSpacing = 18f;
+            const float bottomPadding = 26f;
+            const float titleHeight = 34f;
+            const float buttonHeight = 44f;
+            const float arrowSize = 24f;
+
+            var rootRect = root.rect;
+            var corners = new Vector3[4];
+            sourceCard.GetWorldCorners(corners);
+            var localBottomLeft = root.InverseTransformPoint(corners[0]);
+            var localTopRight = root.InverseTransformPoint(corners[2]);
+            var cardCenterX = (localBottomLeft.x + localTopRight.x) * 0.5f;
+            var cardCenterY = (localBottomLeft.y + localTopRight.y) * 0.5f;
+
+            var bodyWidth = bubbleWidth - sidePadding * 2f;
+            tipsTitleText.rectTransform.sizeDelta = new Vector2(bodyWidth, titleHeight);
+            tipsTitleText.rectTransform.anchoredPosition = new Vector2(sidePadding, -topPadding);
+
+            tipsBodyText.rectTransform.sizeDelta = new Vector2(bodyWidth, 100f);
+            tipsBodyText.rectTransform.anchoredPosition = new Vector2(sidePadding, -(topPadding + titleHeight + 10f));
+            tipsBodyText.horizontalOverflow = HorizontalWrapMode.Wrap;
+
+            Canvas.ForceUpdateCanvases();
+            var bodyHeight = Mathf.Clamp(tipsBodyText.preferredHeight, 72f, 340f);
+            tipsBodyText.rectTransform.sizeDelta = new Vector2(bodyWidth, bodyHeight);
+
+            var actionHeight = hasAction ? buttonHeight + buttonSpacing : 0f;
+            var bubbleHeight = Mathf.Clamp(topPadding + titleHeight + 10f + bodyHeight + actionHeight + bottomPadding, minBubbleHeight, maxBubbleHeight);
+            tipsPanel.sizeDelta = new Vector2(bubbleWidth, bubbleHeight);
+
+            tipsActionButton.gameObject.SetActive(hasAction);
+            if (hasAction)
+            {
+                tipsActionButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 18f);
+            }
+
+            var preferRight = true;
+            var candidateCenterX = localTopRight.x + horizontalGap + bubbleWidth * 0.5f;
+            if (candidateCenterX + bubbleWidth * 0.5f > rootRect.xMax - screenPadding)
+            {
+                preferRight = false;
+                candidateCenterX = localBottomLeft.x - horizontalGap - bubbleWidth * 0.5f;
+            }
+
+            candidateCenterX = Mathf.Clamp(candidateCenterX, rootRect.xMin + screenPadding + bubbleWidth * 0.5f, rootRect.xMax - screenPadding - bubbleWidth * 0.5f);
+            var candidateCenterY = Mathf.Clamp(cardCenterY, rootRect.yMin + screenPadding + bubbleHeight * 0.5f, rootRect.yMax - screenPadding - bubbleHeight * 0.5f);
+            tipsPanel.anchoredPosition = new Vector2(candidateCenterX, candidateCenterY);
+
+            var arrowX = preferRight
+                ? candidateCenterX - bubbleWidth * 0.5f - arrowSize * 0.42f
+                : candidateCenterX + bubbleWidth * 0.5f + arrowSize * 0.42f;
+            var arrowY = Mathf.Clamp(cardCenterY, candidateCenterY - bubbleHeight * 0.5f + 28f, candidateCenterY + bubbleHeight * 0.5f - 28f);
+            tipsArrow.anchoredPosition = new Vector2(arrowX, arrowY);
+            tipsArrow.localRotation = Quaternion.Euler(0f, 0f, preferRight ? 45f : 225f);
+        }
+
+        private void UpdateDismissLayerOrder()
+        {
+            if (tipsDismissButton == null)
+            {
+                return;
+            }
+
+            var dismissTransform = tipsDismissButton.transform;
+            var siblingIndex = Mathf.Max(0, transform.childCount - 1);
+
+            if (slotContentRoot != null)
+            {
+                siblingIndex = Mathf.Min(siblingIndex, slotContentRoot.GetSiblingIndex());
+            }
+
+            if (libraryContentRoot != null)
+            {
+                siblingIndex = Mathf.Min(siblingIndex, libraryContentRoot.GetSiblingIndex());
+            }
+
+            dismissTransform.SetSiblingIndex(siblingIndex);
+        }
+
+        private void HandleTipsActionButtonClicked()
+        {
+            if (pendingTipAction == null)
+            {
+                return;
+            }
+
+            pendingTipAction.Invoke();
+        }
+
+        private static Text CreateTipsText(string name, RectTransform parent, Font font, int fontSize, FontStyle fontStyle)
+        {
+            var textObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
+            textObject.transform.SetParent(parent, false);
+
+            var text = textObject.GetComponent<Text>();
+            text.font = font != null ? font : Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.fontSize = fontSize;
+            text.fontStyle = fontStyle;
+            text.supportRichText = true;
+            text.raycastTarget = false;
+            return text;
+        }
+
+        private static void EnsureTipsOutline(Text text, Color color, Vector2 distance)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var outline = text.GetComponent<Outline>();
+            if (outline == null)
+            {
+                outline = text.gameObject.AddComponent<Outline>();
+            }
+
+            outline.effectColor = color;
+            outline.effectDistance = distance;
+            outline.useGraphicAlpha = true;
+        }
+
+        private string BuildLibraryTipBody(SkillCardData card)
+        {
+            if (card == null)
+            {
+                return string.Empty;
+            }
+
+            if (card.IsUnequip)
+            {
+                return BuildUnequipDetail();
+            }
+
+            return "目标槽位：" + GetSlotLabel(selectedSlotIndex) + "\n\n" + (card.DetailBody ?? string.Empty);
+        }
+
+        private string BuildUnequipDetail()
+        {
+            if (string.IsNullOrEmpty(selectedSkillId))
+            {
+                return "当前槽位为空，没有可卸下的功法。";
+            }
+
+            var cards = GameProgressManager.BuildEquippedActiveSkillCards(characterId, false);
+            if (selectedSlotIndex >= 0 && selectedSlotIndex < cards.Count && cards[selectedSlotIndex] != null)
+            {
+                return "当前槽位：" + GetSlotLabel(selectedSlotIndex) + "\n\n" + cards[selectedSlotIndex].DetailBody;
+            }
+
+            return "当前槽位：" + GetSlotLabel(selectedSlotIndex);
+        }
+
+        private static string BuildEmptySlotDetail(int slotIndex)
+        {
+            return "当前槽位：" + GetSlotLabel(slotIndex) + "\n\n尚未装备功法。点击下方功法卡片后，可在 tips 中执行装备。";
         }
 
         private Button GetOrCreateSlotButton(int index)
@@ -297,7 +542,7 @@ namespace Wuxing.UI
 
         private static string GetSlotLabel(int slotIndex)
         {
-            return "\u6280\u80fd\u680f" + (slotIndex + 1);
+            return "技能栏" + (slotIndex + 1);
         }
 
         private static void SetCardTexts(Button button, string title, string subtitle)
@@ -513,6 +758,8 @@ namespace Wuxing.UI
             public string Title;
             public string Subtitle;
             public string SkillId;
+            public string DetailTitle;
+            public string DetailBody;
             public Color BorderColor;
             public bool IsUnequip;
         }
