@@ -1417,7 +1417,6 @@ public static class UIPrefabBuilder
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/StartPage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MainMenuPage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PagesFolder + "/MapPage.prefab"))
-            && File.Exists(GetProjectAbsolutePath(PagesFolder + "/BattlePage.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/ConfirmPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/CardBrowserPopup.prefab"))
             && File.Exists(GetProjectAbsolutePath(PopupsFolder + "/EquipmentPopup.prefab"))
