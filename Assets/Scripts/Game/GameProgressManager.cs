@@ -1559,6 +1559,8 @@ namespace Wuxing.Game
 
             var resolvedStage = Mathf.Max(1, stage);
             return nodeType == MapNodeType.Rest
+                || nodeType == MapNodeType.Village
+                || nodeType == MapNodeType.Shop
                 ? (resolvedStage == 1 ? 12 : 10 + resolvedStage * 4)
                 : 6 + resolvedStage * 2;
         }
@@ -1573,6 +1575,8 @@ namespace Wuxing.Game
 
             var resolvedStage = Mathf.Max(1, stage);
             return nodeType == MapNodeType.Rest
+                || nodeType == MapNodeType.Village
+                || nodeType == MapNodeType.Shop
                 ? (resolvedStage == 1 ? 10 : 6 + resolvedStage * 3)
                 : 4 + resolvedStage * 2;
         }
@@ -1586,6 +1590,20 @@ namespace Wuxing.Game
 
             switch (rawValue.Trim().ToLowerInvariant())
             {
+                case "village":
+                case "newbievillage":
+                case "\u65b0\u624b\u6751":
+                    return MapNodeType.Village;
+                case "shop":
+                case "store":
+                case "market":
+                case "trade":
+                case "\u5546\u5e97":
+                case "\u5e02\u96c6":
+                    return MapNodeType.Shop;
+                case "event":
+                case "\u4e8b\u4ef6":
+                    return MapNodeType.Event;
                 case "elite":
                 case "\u7cbe\u82f1":
                     return MapNodeType.Elite;
@@ -1595,10 +1613,15 @@ namespace Wuxing.Game
                 case "boss":
                 case "\u9996\u9886":
                     return MapNodeType.Boss;
+                case "other":
+                case "\u5176\u5b83":
+                case "\u5176\u4ed6":
+                    return MapNodeType.Other;
                 case "battle":
                 case "\u6218\u6597":
-                default:
                     return MapNodeType.Battle;
+                default:
+                    return MapNodeType.Other;
             }
         }
 
@@ -1785,10 +1808,16 @@ namespace Wuxing.Game
             {
                 case MapNodeType.Elite:
                     return LocalizationManager.GetText("map.node_detail_elite");
+                case MapNodeType.Village:
+                    return LocalizationManager.GetText("map.node_detail_rest");
                 case MapNodeType.Rest:
+                case MapNodeType.Shop:
                     return LocalizationManager.GetText("map.node_detail_rest");
                 case MapNodeType.Boss:
                     return LocalizationManager.GetText("map.node_detail_boss");
+                case MapNodeType.Event:
+                case MapNodeType.Other:
+                    return LocalizationManager.GetText("map.node_detail_battle");
                 case MapNodeType.Battle:
                 default:
                     return LocalizationManager.GetText("map.node_detail_battle");
@@ -1919,10 +1948,16 @@ namespace Wuxing.Game
             {
                 case MapNodeType.Elite:
                     return LocalizationManager.GetText("map.node_type_elite");
+                case MapNodeType.Village:
+                    return LocalizationManager.GetText("map.node_type_village");
                 case MapNodeType.Rest:
+                case MapNodeType.Shop:
                     return LocalizationManager.GetText("map.node_type_rest");
                 case MapNodeType.Boss:
                     return LocalizationManager.GetText("map.node_type_boss");
+                case MapNodeType.Event:
+                case MapNodeType.Other:
+                    return LocalizationManager.GetText("map.node_type_battle");
                 case MapNodeType.Battle:
                 default:
                     return LocalizationManager.GetText("map.node_type_battle");
@@ -2122,6 +2157,8 @@ namespace Wuxing.Game
                     if (roll < 0.28f) return "blue";
                     return "green";
                 case MapNodeType.Rest:
+                case MapNodeType.Village:
+                case MapNodeType.Shop:
                     return stage >= 5 ? "green" : "white";
                 case MapNodeType.Battle:
                 default:

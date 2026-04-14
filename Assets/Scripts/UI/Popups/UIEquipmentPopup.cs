@@ -47,7 +47,6 @@ namespace Wuxing.UI
         {
             if (closeButton != null)
             {
-                UIFactory.ApplyStandardButtonChrome(closeButton);
                 closeButton.onClick.AddListener(ClosePopup);
             }
 
@@ -519,7 +518,6 @@ namespace Wuxing.UI
             {
                 titleText.text = title ?? string.Empty;
                 titleText.supportRichText = true;
-                ConfigureCardTitleText(titleText);
             }
 
             var subtitleText = button.transform.Find("SubtitleText")?.GetComponent<Text>();
@@ -527,7 +525,6 @@ namespace Wuxing.UI
             {
                 subtitleText.text = subtitle ?? string.Empty;
                 subtitleText.supportRichText = true;
-                ConfigureCardSubtitleText(subtitleText);
             }
 
             var progressRoot = button.transform.Find("ProgressRoot");
@@ -550,52 +547,6 @@ namespace Wuxing.UI
             rect.pivot = new Vector2(0f, 1f);
             rect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
             rect.anchoredPosition = new Vector2(column * (UICardChromeUtility.StandardCardWidth + 16f), -row * (UICardChromeUtility.StandardCardHeight + 16f));
-        }
-
-        private static void ConfigureCardTitleText(Text text)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            EnsureTextOutline(text);
-            text.color = new Color(0.98f, 0.96f, 0.9f, 1f);
-        }
-
-        private static void ConfigureCardSubtitleText(Text text)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            EnsureTextOutline(text);
-            text.color = new Color(0.96f, 0.94f, 0.88f, 1f);
-
-            var rect = text.rectTransform;
-            rect.anchorMin = new Vector2(0.08f, 0.62f);
-            rect.anchorMax = new Vector2(0.92f, 0.8f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-        }
-
-        private static void EnsureTextOutline(Text text)
-        {
-            if (text == null)
-            {
-                return;
-            }
-
-            var outline = text.GetComponent<Outline>();
-            if (outline == null)
-            {
-                outline = text.gameObject.AddComponent<Outline>();
-            }
-
-            outline.effectColor = new Color(0.16f, 0.11f, 0.08f, 0.82f);
-            outline.effectDistance = new Vector2(1.2f, -1.2f);
-            outline.useGraphicAlpha = true;
         }
 
         private static void ApplyCardIllustration(Button button, Sprite sprite)

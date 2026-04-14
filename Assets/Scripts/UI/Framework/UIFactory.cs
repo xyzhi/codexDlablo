@@ -7,7 +7,6 @@ namespace Wuxing.UI
     public static class UIFactory
     {
         private static Font defaultFont;
-        private static readonly Color StandardButtonBorderColor = new Color(0.54f, 0.4f, 0.25f, 1f);
 
         public static GameObject CreatePanel(Transform parent, string name, Color color)
         {
@@ -75,30 +74,12 @@ namespace Wuxing.UI
             var button = buttonObject.GetComponent<Button>();
             button.targetGraphic = buttonObject.GetComponent<Image>();
             button.onClick.AddListener(onClick);
-            ApplyStandardButtonChrome(button);
 
             var text = CreateText(buttonObject.transform, "Label", label, 22, TextAnchor.MiddleCenter, new Color(0.96f, 0.92f, 0.84f, 1f));
             text.rectTransform.offsetMin = new Vector2(14f, 10f);
             text.rectTransform.offsetMax = new Vector2(-14f, -10f);
 
             return button;
-        }
-
-        public static void ApplyStandardButtonChrome(Button button)
-        {
-            if (button == null)
-            {
-                return;
-            }
-
-            var image = button.GetComponent<Image>();
-            if (image != null)
-            {
-                image.color = new Color(StandardButtonBorderColor.r, StandardButtonBorderColor.g, StandardButtonBorderColor.b, 0.95f);
-                button.targetGraphic = image;
-            }
-
-            UICardChromeUtility.ApplySimple(button, StandardButtonBorderColor, false);
         }
 
         public static Button CreateListButton(Transform parent, string name, string label, UnityAction onClick)

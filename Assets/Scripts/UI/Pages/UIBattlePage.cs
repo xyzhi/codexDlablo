@@ -76,6 +76,7 @@ namespace Wuxing.UI
         [SerializeField] private Sprite chapterBackground5;
         [SerializeField] private Sprite chapterBackground6;
         [SerializeField] private Sprite previewCharacterSprite;
+        [SerializeField] private Sprite enemyCharacterSprite;
 
         private Coroutine battlePlaybackCoroutine;
         private readonly StringBuilder battleLogBuilder = new StringBuilder();
@@ -2812,10 +2813,12 @@ namespace Wuxing.UI
                 return;
             }
 
-            portrait.sprite = previewCharacterSprite;
-            portrait.enabled = previewCharacterSprite != null;
+            var portraitSprite = playerSide || enemyCharacterSprite == null ? previewCharacterSprite : enemyCharacterSprite;
+            portrait.sprite = portraitSprite;
+            portrait.enabled = portraitSprite != null;
             portrait.color = new Color(1f, 1f, 1f, 0.9f);
             var portraitRect = portrait.rectTransform;
+            ApplyPortraitCover(portraitRect, portraitSprite);
             portraitRect.localScale = new Vector3(playerSide ? 1f : -1f, 1f, 1f);
         }
 
@@ -2831,10 +2834,10 @@ namespace Wuxing.UI
             if (existing != null)
             {
                 var existingRect = existing.rectTransform;
-                existingRect.anchorMin = new Vector2(-0.12f, -0.18f);
-                existingRect.anchorMax = new Vector2(1.12f, 1.14f);
-                existingRect.offsetMin = Vector2.zero;
-                existingRect.offsetMax = Vector2.zero;
+                existingRect.anchorMin = new Vector2(0.5f, 0.5f);
+                existingRect.anchorMax = new Vector2(0.5f, 0.5f);
+                existingRect.pivot = new Vector2(0.5f, 0.5f);
+                existingRect.anchoredPosition = Vector2.zero;
                 existing.preserveAspect = false;
                 return existing;
             }
@@ -2844,15 +2847,48 @@ namespace Wuxing.UI
             portraitObject.transform.SetSiblingIndex(0);
 
             var rect = portraitObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(-0.12f, -0.18f);
-            rect.anchorMax = new Vector2(1.12f, 1.14f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = Vector2.zero;
 
             var image = portraitObject.GetComponent<Image>();
             image.preserveAspect = false;
             image.raycastTarget = false;
             return image;
+        }
+
+        private static void ApplyPortraitCover(RectTransform portraitRect, Sprite sprite)
+        {
+            if (portraitRect == null || sprite == null)
+            {
+                return;
+            }
+
+            var maskRect = portraitRect.parent as RectTransform;
+            var targetSize = maskRect != null ? maskRect.rect.size : Vector2.zero;
+            if (targetSize.x <= 0f || targetSize.y <= 0f)
+            {
+                var cardRect = portraitRect.GetComponentInParent<Button>()?.transform as RectTransform;
+                if (cardRect != null)
+                {
+                    targetSize = cardRect.rect.size - Vector2.one * (TeamCardPortraitMaskInset * 2f);
+                }
+            }
+
+            if (targetSize.x <= 0f || targetSize.y <= 0f || sprite.rect.width <= 0f || sprite.rect.height <= 0f)
+            {
+                portraitRect.sizeDelta = Vector2.zero;
+                return;
+            }
+
+            var spriteAspect = sprite.rect.width / sprite.rect.height;
+            var targetAspect = targetSize.x / targetSize.y;
+            var coverSize = spriteAspect > targetAspect
+                ? new Vector2(targetSize.y * spriteAspect, targetSize.y)
+                : new Vector2(targetSize.x, targetSize.x / spriteAspect);
+
+            portraitRect.sizeDelta = coverSize;
         }
 
         private static Transform EnsurePortraitMaskRoot(Button button)

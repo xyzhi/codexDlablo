@@ -5,7 +5,11 @@
         Battle,
         Elite,
         Rest,
-        Boss
+        Boss,
+        Village,
+        Shop,
+        Event,
+        Other
     }
 }
 

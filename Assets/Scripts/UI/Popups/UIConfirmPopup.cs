@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Localization;
@@ -9,12 +8,6 @@ namespace Wuxing.UI
 {
     public class UIConfirmPopup : UIPopup
     {
-        private static readonly Vector2 DefaultConfirmAnchorMin = new Vector2(0.1f, 0.08f);
-        private static readonly Vector2 DefaultConfirmAnchorMax = new Vector2(0.44f, 0.24f);
-        private static readonly Vector2 DefaultCancelAnchorMin = new Vector2(0.56f, 0.08f);
-        private static readonly Vector2 DefaultCancelAnchorMax = new Vector2(0.9f, 0.24f);
-        private static readonly Vector2 SingleConfirmAnchorMin = new Vector2(0.28f, 0.08f);
-        private static readonly Vector2 SingleConfirmAnchorMax = new Vector2(0.72f, 0.24f);
         private const float MinPanelHeight = 420f;
         private const float TopPadding = 48f;
         private const float BottomPadding = 48f;
@@ -87,6 +80,7 @@ namespace Wuxing.UI
             ConfigureActionButton(cancelButton, string.IsNullOrEmpty(cancelButtonLabel) ? LocalizationManager.GetText("popup.cancel_button") : cancelButtonLabel, cancelAction, cancelAction != null);
 
             ApplyDefaultButtonLayout();
+            CenterConfirmButtonWhenSingleAction();
             RefreshPopupLayout();
         }
 
@@ -99,17 +93,29 @@ namespace Wuxing.UI
             onCancel = null;
 
             var count = choiceLabels != null ? Mathf.Clamp(choiceLabels.Count, 0, 4) : 0;
-            EnsureChoiceButtonCount(count);
+            var firstChoiceIndex = multiChoiceMode ? 2 : 0;
+            EnsureChoiceButtonCount(firstChoiceIndex + count);
+            if (confirmButton != null)
+            {
+                confirmButton.gameObject.SetActive(false);
+            }
+
+            if (cancelButton != null)
+            {
+                cancelButton.gameObject.SetActive(false);
+            }
+
             for (var i = 0; i < choiceButtons.Count; i++)
             {
-                var shouldShow = i < count;
-                var label = shouldShow ? choiceLabels[i] : string.Empty;
-                var action = shouldShow && choiceActions != null && i < choiceActions.Count ? choiceActions[i] : null;
+                var choiceIndex = i - firstChoiceIndex;
+                var shouldShow = choiceIndex >= 0 && choiceIndex < count;
+                var label = shouldShow ? choiceLabels[choiceIndex] : string.Empty;
+                var action = shouldShow && choiceActions != null && choiceIndex < choiceActions.Count ? choiceActions[choiceIndex] : null;
                 ConfigureActionButton(choiceButtons[i], label, action, shouldShow);
             }
 
-            ApplyMultiChoiceLayout(count);
             RefreshPopupLayout();
+            ApplyMultiChoiceLayout(firstChoiceIndex, count);
         }
 
         private void ApplyContent(string titleOrKey, string messageOrKey, bool localized)
@@ -193,83 +199,16 @@ namespace Wuxing.UI
             {
                 buttonText.supportRichText = true;
                 buttonText.text = label;
-                buttonText.alignment = multiChoiceMode ? TextAnchor.UpperLeft : TextAnchor.MiddleCenter;
-                buttonText.fontSize = multiChoiceMode ? 20 : 24;
-                buttonText.resizeTextForBestFit = multiChoiceMode;
-                buttonText.resizeTextMinSize = multiChoiceMode ? 16 : 24;
-                buttonText.resizeTextMaxSize = multiChoiceMode ? 22 : 24;
-                buttonText.lineSpacing = multiChoiceMode ? 1.15f : 1f;
-                buttonText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                buttonText.verticalOverflow = VerticalWrapMode.Overflow;
-                if (multiChoiceMode)
-                {
-                    buttonText.rectTransform.offsetMin = new Vector2(20f, 18f);
-                    buttonText.rectTransform.offsetMax = new Vector2(-20f, -18f);
-                }
             }
 
-            if (multiChoiceMode)
+            if (!multiChoiceMode)
             {
-                UICardChromeUtility.Apply(button, ResolveChoiceCardColor(label), false);
+                button.targetGraphic = button.GetComponent<Image>();
             }
-            else
-            {
-                UIFactory.ApplyStandardButtonChrome(button);
-                var rect = button.GetComponent<RectTransform>();
-                if (rect != null)
-                {
-                    rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 64f);
-                }
-            }
-        }
-
-        private static Color ResolveChoiceCardColor(string label)
-        {
-            if (string.IsNullOrEmpty(label))
-            {
-                return Color.white;
-            }
-
-            var match = Regex.Match(label, "<color=(?<color>#[0-9A-Fa-f]{6,8})>");
-            if (!match.Success)
-            {
-                return Color.white;
-            }
-
-            if (ColorUtility.TryParseHtmlString(match.Groups["color"].Value, out var parsedColor))
-            {
-                return parsedColor;
-            }
-
-            return Color.white;
         }
 
         private void ApplyDefaultButtonLayout()
         {
-            if (confirmButton != null)
-            {
-                var confirmRect = confirmButton.GetComponent<RectTransform>();
-                if (confirmRect != null)
-                {
-                    confirmRect.anchorMin = onCancel == null ? SingleConfirmAnchorMin : DefaultConfirmAnchorMin;
-                    confirmRect.anchorMax = onCancel == null ? SingleConfirmAnchorMax : DefaultConfirmAnchorMax;
-                    confirmRect.offsetMin = Vector2.zero;
-                    confirmRect.offsetMax = Vector2.zero;
-                }
-            }
-
-            if (cancelButton != null)
-            {
-                var cancelRect = cancelButton.GetComponent<RectTransform>();
-                if (cancelRect != null)
-                {
-                    cancelRect.anchorMin = DefaultCancelAnchorMin;
-                    cancelRect.anchorMax = DefaultCancelAnchorMax;
-                    cancelRect.offsetMin = Vector2.zero;
-                    cancelRect.offsetMax = Vector2.zero;
-                }
-            }
-
             for (var i = 2; i < choiceButtons.Count; i++)
             {
                 if (choiceButtons[i] != null)
@@ -279,11 +218,36 @@ namespace Wuxing.UI
             }
         }
 
-        private void ApplyMultiChoiceLayout(int count)
+        private void CenterConfirmButtonWhenSingleAction()
+        {
+            if (onCancel != null || confirmButton == null)
+            {
+                return;
+            }
+
+            var rect = confirmButton.GetComponent<RectTransform>();
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = new Vector2(0.5f, rect.anchorMin.y);
+            rect.anchorMax = new Vector2(0.5f, rect.anchorMax.y);
+            rect.pivot = new Vector2(0.5f, rect.pivot.y);
+            rect.anchoredPosition = new Vector2(0f, rect.anchoredPosition.y);
+        }
+
+        private void ApplyMultiChoiceLayout(int startIndex, int count)
         {
             for (var i = 0; i < count; i++)
             {
-                var button = choiceButtons[i];
+                var listIndex = startIndex + i;
+                if (listIndex < 0 || listIndex >= choiceButtons.Count)
+                {
+                    continue;
+                }
+
+                var button = choiceButtons[listIndex];
                 if (button == null)
                 {
                     continue;
@@ -295,17 +259,44 @@ namespace Wuxing.UI
                     continue;
                 }
 
-                var totalRowWidth = count * UICardChromeUtility.StandardCardWidth + Mathf.Max(0, count - 1) * ChoiceCardSpacingX;
-                var startX = -totalRowWidth * 0.5f + UICardChromeUtility.StandardCardWidth * 0.5f;
-                var x = startX + i * (UICardChromeUtility.StandardCardWidth + ChoiceCardSpacingX);
                 var y = BottomPadding;
-
                 rect.anchorMin = new Vector2(0.5f, 0f);
                 rect.anchorMax = new Vector2(0.5f, 0f);
                 rect.pivot = new Vector2(0.5f, 0f);
-                rect.sizeDelta = new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
+
+                if (count == 1)
+                {
+                    rect.anchoredPosition = new Vector2(0f, y);
+                    continue;
+                }
+
+                var buttonSize = GetButtonPrefabSize(button);
+                if (buttonSize.x <= 0f || buttonSize.y <= 0f)
+                {
+                    continue;
+                }
+
+                var totalRowWidth = count * buttonSize.x + Mathf.Max(0, count - 1) * ChoiceCardSpacingX;
+                var startX = -totalRowWidth * 0.5f + buttonSize.x * 0.5f;
+                var x = startX + i * (buttonSize.x + ChoiceCardSpacingX);
                 rect.anchoredPosition = new Vector2(x, y);
             }
+        }
+
+        private static Vector2 GetButtonPrefabSize(Button button)
+        {
+            var rect = button != null ? button.GetComponent<RectTransform>() : null;
+            if (rect != null && rect.rect.width > 0f && rect.rect.height > 0f)
+            {
+                return rect.rect.size;
+            }
+
+            if (rect != null && rect.sizeDelta.x > 0f && rect.sizeDelta.y > 0f)
+            {
+                return rect.sizeDelta;
+            }
+
+            return Vector2.zero;
         }
 
         private void RefreshPopupLayout()
@@ -320,26 +311,9 @@ namespace Wuxing.UI
 
             var parentRect = panelRect.parent as RectTransform;
             var parentHeight = parentRect != null ? parentRect.rect.height : Screen.height;
-            var parentWidth = parentRect != null ? parentRect.rect.width : Screen.width;
             if (parentHeight <= 0f)
             {
                 parentHeight = 1920f;
-            }
-            if (parentWidth <= 0f)
-            {
-                parentWidth = 1080f;
-            }
-
-            if (multiChoiceMode)
-            {
-                panelRect.anchorMin = new Vector2(0.03f, 0.2f);
-                panelRect.anchorMax = new Vector2(0.97f, 0.8f);
-                panelRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, parentWidth * 0.94f);
-            }
-            else
-            {
-                panelRect.anchorMin = new Vector2(0.12f, 0.32f);
-                panelRect.anchorMax = new Vector2(0.88f, 0.68f);
             }
 
             var messageWidth = GetMessageWidth(panelRect);

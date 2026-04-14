@@ -52,11 +52,13 @@ namespace Wuxing.UI
         [SerializeField] private Button backButton;
         [SerializeField] private Sprite bottomButtonSprite;
         [SerializeField] private Sprite mapLineSprite;
+        [SerializeField] private Sprite villageNodeSprite;
         [SerializeField] private Sprite restNodeSprite;
         [SerializeField] private Sprite battleNodeSprite;
         [SerializeField] private Sprite eliteNodeSprite;
         [SerializeField] private Sprite bossNodeSprite;
         [SerializeField] private Sprite eventNodeSprite;
+        [SerializeField] private Sprite fallbackNodeSprite;
         [SerializeField] private Sprite chapterBackground1;
         [SerializeField] private Sprite chapterBackground2;
         [SerializeField] private Sprite chapterBackground3;
@@ -1648,19 +1650,42 @@ namespace Wuxing.UI
 
         private Sprite GetNodeSprite(int stage)
         {
+            if (IsVillageStage(stage))
+            {
+                return villageNodeSprite != null ? villageNodeSprite : restNodeSprite;
+            }
+
             switch (GameProgressManager.GetNodeType(stage))
             {
+                case MapNodeType.Village:
+                    return villageNodeSprite != null ? villageNodeSprite : restNodeSprite;
                 case MapNodeType.Rest:
+                case MapNodeType.Shop:
                     return restNodeSprite != null ? restNodeSprite : eventNodeSprite;
                 case MapNodeType.Elite:
                     return eliteNodeSprite != null ? eliteNodeSprite : battleNodeSprite;
                 case MapNodeType.Boss:
                     return bossNodeSprite != null ? bossNodeSprite : eliteNodeSprite;
+                case MapNodeType.Event:
+                    return eventNodeSprite != null ? eventNodeSprite : fallbackNodeSprite;
                 case MapNodeType.Battle:
                     return battleNodeSprite != null ? battleNodeSprite : restNodeSprite;
+                case MapNodeType.Other:
                 default:
-                    return eventNodeSprite != null ? eventNodeSprite : restNodeSprite;
+                    return fallbackNodeSprite != null ? fallbackNodeSprite : eventNodeSprite;
             }
+        }
+
+        private static bool IsVillageStage(int stage)
+        {
+            if (stage == 1)
+            {
+                return true;
+            }
+
+            var eventProfile = GameProgressManager.GetStageEventProfile(stage);
+            return !string.IsNullOrEmpty(eventProfile)
+                && eventProfile.IndexOf("Village", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private Sprite GetChapterBackgroundSprite(int stage)

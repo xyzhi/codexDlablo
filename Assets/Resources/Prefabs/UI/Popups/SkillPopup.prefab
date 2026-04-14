@@ -1,4 +1,4 @@
-%YAML 1.1
+﻿%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!1 &584557082221870233
 GameObject:
@@ -75,6 +75,66 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &1110000000000000301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2968240152597120120}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_EffectColor: {r: 0.08, g: 0.055, b: 0.035, a: 0.9}
+  m_EffectDistance: {x: 1.2, y: -1.2}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1110000000000000302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3492689659456749172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_EffectColor: {r: 0.08, g: 0.055, b: 0.035, a: 0.9}
+  m_EffectDistance: {x: 1.2, y: -1.2}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1110000000000000303
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4394367438072859350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_EffectColor: {r: 0.08, g: 0.055, b: 0.035, a: 0.9}
+  m_EffectDistance: {x: 1.2, y: -1.2}
+  m_UseGraphicAlpha: 1
+--- !u!114 &1110000000000000304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6337687582805376136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e19747de3f5aca642ab2be37e372fb86, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  m_EffectColor: {r: 0.08, g: 0.055, b: 0.035, a: 0.9}
+  m_EffectDistance: {x: 1.2, y: -1.2}
+  m_UseGraphicAlpha: 1
 --- !u!1 &708059107262449176
 GameObject:
   m_ObjectHideFlags: 0
@@ -424,7 +484,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &7521067468887250217
 RectTransform:
   m_ObjectHideFlags: 0
@@ -699,6 +759,7 @@ GameObject:
   - component: {fileID: 2074918313235535223}
   - component: {fileID: 5025132949849833088}
   - component: {fileID: 7519514445577891357}
+  - component: {fileID: 1110000000000000301}
   m_Layer: 0
   m_Name: SubtitleText
   m_TagString: Untagged
@@ -936,6 +997,7 @@ GameObject:
   - component: {fileID: 7895549515427070883}
   - component: {fileID: 6462935676373391965}
   - component: {fileID: 1443120674296144739}
+  - component: {fileID: 1110000000000000302}
   m_Layer: 0
   m_Name: TitleText
   m_TagString: Untagged
@@ -1339,6 +1401,7 @@ GameObject:
   - component: {fileID: 1303474555911297051}
   - component: {fileID: 3831723198992832891}
   - component: {fileID: 2115819077195951885}
+  - component: {fileID: 1110000000000000303}
   m_Layer: 0
   m_Name: SubtitleText
   m_TagString: Untagged
@@ -1886,7 +1949,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5609220834650659470}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
@@ -1992,6 +2055,7 @@ GameObject:
   - component: {fileID: 9156452343961544779}
   - component: {fileID: 2075928919867171255}
   - component: {fileID: 8817140729989277047}
+  - component: {fileID: 1110000000000000304}
   m_Layer: 0
   m_Name: TitleText
   m_TagString: Untagged
@@ -2366,8 +2430,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -14, y: 0}
-  m_SizeDelta: {x: -28, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5699080567542880948
 CanvasRenderer:

@@ -818,8 +818,9 @@ public static class UIPrefabBuilder
         }
 
         var slotScrollRoot = UIFactory.CreateContainer(panel.transform, "SlotScrollRoot", new Vector2(0.04f, 0.64f), new Vector2(0.96f, 0.86f), Vector2.zero, Vector2.zero);
-        var slotScrollRect = UIFactory.CreateScrollRect(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
-        UIFactory.Stretch(slotScrollRect.GetComponent<RectTransform>());
+        var slotScroll = UIFactory.CreatePanel(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
+        var slotContentRoot = UIFactory.CreateContainer(slotScroll.transform, "Content", new Vector2(0f, 1f), Vector2.one, Vector2.zero, Vector2.zero);
+        slotContentRoot.pivot = new Vector2(0.5f, 1f);
 
         var inventoryScrollRoot = UIFactory.CreateContainer(panel.transform, "InventoryScrollRoot", new Vector2(0.04f, 0.28f), new Vector2(0.96f, 0.6f), Vector2.zero, Vector2.zero);
         var inventoryScrollRect = UIFactory.CreateScrollRect(inventoryScrollRoot, "InventoryScroll", new Color(0f, 0f, 0f, 0.18f));
@@ -845,7 +846,7 @@ public static class UIPrefabBuilder
         detailBody.rectTransform.offsetMin = Vector2.zero;
         detailBody.rectTransform.offsetMax = Vector2.zero;
 
-        var slotTemplate = UIFactory.CreateButton(slotScrollRect.content, "SlotTemplate", string.Empty, delegate { });
+        var slotTemplate = UIFactory.CreateButton(slotContentRoot, "SlotTemplate", string.Empty, delegate { });
         var slotTemplateRect = slotTemplate.GetComponent<RectTransform>();
         slotTemplateRect.anchorMin = new Vector2(0f, 1f);
         slotTemplateRect.anchorMax = new Vector2(0f, 1f);
@@ -883,7 +884,7 @@ public static class UIPrefabBuilder
         var popup = root.AddComponent<UIEquipmentPopup>();
         BindSerializedProperty(popup, "titleText", title);
         BindSerializedProperty(popup, "closeButton", closeButton);
-        BindSerializedProperty(popup, "slotContentRoot", slotScrollRect.content);
+        BindSerializedProperty(popup, "slotContentRoot", slotContentRoot);
         BindSerializedProperty(popup, "slotTemplateButton", slotTemplate);
         BindSerializedProperty(popup, "inventoryContentRoot", inventoryScrollRect.content);
         BindSerializedProperty(popup, "inventoryTemplateButton", inventoryTemplate.GetComponent<Button>());
@@ -923,8 +924,9 @@ public static class UIPrefabBuilder
         }
 
         var slotScrollRoot = UIFactory.CreateContainer(panel.transform, "SlotScrollRoot", new Vector2(0.04f, 0.64f), new Vector2(0.96f, 0.86f), Vector2.zero, Vector2.zero);
-        var slotScrollRect = UIFactory.CreateScrollRect(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
-        UIFactory.Stretch(slotScrollRect.GetComponent<RectTransform>());
+        var slotScroll = UIFactory.CreatePanel(slotScrollRoot, "SlotScroll", new Color(0f, 0f, 0f, 0.18f));
+        var slotContentRoot = UIFactory.CreateContainer(slotScroll.transform, "Content", new Vector2(0f, 1f), Vector2.one, Vector2.zero, Vector2.zero);
+        slotContentRoot.pivot = new Vector2(0.5f, 1f);
 
         var libraryScrollRoot = UIFactory.CreateContainer(panel.transform, "LibraryScrollRoot", new Vector2(0.04f, 0.28f), new Vector2(0.96f, 0.6f), Vector2.zero, Vector2.zero);
         var libraryScrollRect = UIFactory.CreateScrollRect(libraryScrollRoot, "LibraryScroll", new Color(0f, 0f, 0f, 0.18f));
@@ -950,7 +952,7 @@ public static class UIPrefabBuilder
         detailBody.rectTransform.offsetMin = Vector2.zero;
         detailBody.rectTransform.offsetMax = Vector2.zero;
 
-        var slotTemplate = UIFactory.CreateButton(slotScrollRect.content, "SlotTemplate", string.Empty, delegate { });
+        var slotTemplate = UIFactory.CreateButton(slotContentRoot, "SlotTemplate", string.Empty, delegate { });
         var slotTemplateRect = slotTemplate.GetComponent<RectTransform>();
         slotTemplateRect.anchorMin = new Vector2(0f, 1f);
         slotTemplateRect.anchorMax = new Vector2(0f, 1f);
@@ -988,7 +990,7 @@ public static class UIPrefabBuilder
         var popup = root.AddComponent<UISkillPopup>();
         BindSerializedProperty(popup, "titleText", title);
         BindSerializedProperty(popup, "closeButton", closeButton);
-        BindSerializedProperty(popup, "slotContentRoot", slotScrollRect.content);
+        BindSerializedProperty(popup, "slotContentRoot", slotContentRoot);
         BindSerializedProperty(popup, "slotTemplateButton", slotTemplate);
         BindSerializedProperty(popup, "libraryContentRoot", libraryScrollRect.content);
         BindSerializedProperty(popup, "libraryTemplateButton", libraryTemplate.GetComponent<Button>());
