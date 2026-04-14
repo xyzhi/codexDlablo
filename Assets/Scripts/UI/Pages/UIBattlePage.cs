@@ -14,6 +14,7 @@ namespace Wuxing.UI
 {
     public class UIBattlePage : UIPage
     {
+        private const float TeamCardPortraitMaskInset = 13f;
         private const float AutoStartDelaySeconds = UIMapPage.MapToastDuration;
         private const string RoundDivider = "============";
         private const string EndDivider = "##########";
@@ -2959,26 +2960,88 @@ namespace Wuxing.UI
 
         private static Image EnsurePortraitImage(Button button)
         {
-            var existing = button.transform.Find("PortraitImage")?.GetComponent<Image>();
+            var maskRoot = EnsurePortraitMaskRoot(button);
+            if (maskRoot == null)
+            {
+                return null;
+            }
+
+            var existing = maskRoot.Find("PortraitImage")?.GetComponent<Image>();
             if (existing != null)
             {
+                var existingRect = existing.rectTransform;
+                existingRect.anchorMin = new Vector2(-0.12f, -0.18f);
+                existingRect.anchorMax = new Vector2(1.12f, 1.14f);
+                existingRect.offsetMin = Vector2.zero;
+                existingRect.offsetMax = Vector2.zero;
+                existing.preserveAspect = false;
                 return existing;
             }
 
             var portraitObject = new GameObject("PortraitImage", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            portraitObject.transform.SetParent(button.transform, false);
+            portraitObject.transform.SetParent(maskRoot, false);
             portraitObject.transform.SetSiblingIndex(0);
 
             var rect = portraitObject.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.08f, 0.18f);
-            rect.anchorMax = new Vector2(0.92f, 0.92f);
+            rect.anchorMin = new Vector2(-0.12f, -0.18f);
+            rect.anchorMax = new Vector2(1.12f, 1.14f);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
 
             var image = portraitObject.GetComponent<Image>();
-            image.preserveAspect = true;
+            image.preserveAspect = false;
             image.raycastTarget = false;
             return image;
+        }
+
+        private static Transform EnsurePortraitMaskRoot(Button button)
+        {
+            if (button == null)
+            {
+                return null;
+            }
+
+            var existing = button.transform.Find("PortraitMask");
+            if (existing != null)
+            {
+                var existingRect = existing as RectTransform;
+                if (existingRect != null)
+                {
+                    existingRect.anchorMin = Vector2.zero;
+                    existingRect.anchorMax = Vector2.one;
+                    existingRect.offsetMin = new Vector2(TeamCardPortraitMaskInset, TeamCardPortraitMaskInset);
+                    existingRect.offsetMax = new Vector2(-TeamCardPortraitMaskInset, -TeamCardPortraitMaskInset);
+                }
+
+                var existingImage = existing.GetComponent<Image>();
+                if (existingImage != null)
+                {
+                    existingImage.color = new Color(1f, 1f, 1f, 0.01f);
+                    existingImage.raycastTarget = false;
+                }
+
+                if (existing.GetComponent<RectMask2D>() == null)
+                {
+                    existing.gameObject.AddComponent<RectMask2D>();
+                }
+
+                return existing;
+            }
+
+            var maskObject = new GameObject("PortraitMask", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
+            maskObject.transform.SetParent(button.transform, false);
+            maskObject.transform.SetSiblingIndex(0);
+
+            var maskRect = maskObject.GetComponent<RectTransform>();
+            maskRect.anchorMin = Vector2.zero;
+            maskRect.anchorMax = Vector2.one;
+            maskRect.offsetMin = new Vector2(TeamCardPortraitMaskInset, TeamCardPortraitMaskInset);
+            maskRect.offsetMax = new Vector2(-TeamCardPortraitMaskInset, -TeamCardPortraitMaskInset);
+
+            var maskImage = maskObject.GetComponent<Image>();
+            maskImage.color = new Color(1f, 1f, 1f, 0.01f);
+            maskImage.raycastTarget = false;
+            return maskObject.transform;
         }
 
         private Sprite GetChapterBackgroundSprite(int stage)
