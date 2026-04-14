@@ -30,7 +30,7 @@ namespace Wuxing.UI
             hostRoot = host != null ? host : transform.parent as RectTransform;
             backgroundSprite = background;
             buttonSprite = buttonBackground;
-            titleFont = title != null ? title : Resources.GetBuiltinResource<Font>("Arial.ttf");
+            titleFont = title != null ? title : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             bodyFont = body != null ? body : titleFont;
             dismissBelowRoots = contentRoots ?? Array.Empty<RectTransform>();
             EnsureBuilt();
@@ -349,7 +349,7 @@ namespace Wuxing.UI
             var textObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
             textObject.transform.SetParent(parent, false);
             var text = textObject.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.fontSize = fontSize;
             text.fontStyle = fontStyle;
             text.supportRichText = true;

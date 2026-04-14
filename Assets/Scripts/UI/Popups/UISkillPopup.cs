@@ -446,7 +446,7 @@ namespace Wuxing.UI
             textObject.transform.SetParent(parent, false);
 
             var text = textObject.GetComponent<Text>();
-            text.font = font != null ? font : Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.font = font != null ? font : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             text.fontSize = fontSize;
             text.fontStyle = fontStyle;
             text.supportRichText = true;
