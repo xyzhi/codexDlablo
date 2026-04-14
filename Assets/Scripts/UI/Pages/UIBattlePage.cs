@@ -19,18 +19,10 @@ namespace Wuxing.UI
         private const string RoundDivider = "============";
         private const string EndDivider = "##########";
         private const string ActionPrefix = "  > ";
-        private const float TeamCardWidth = UICardChromeUtility.StandardCardWidth * 0.7f;
-        private const float TeamCardHeight = UICardChromeUtility.StandardCardHeight * 0.7f;
         private const float TeamCardHorizontalSpacing = 12f;
         private const float TeamCardVerticalSpacing = 16f;
         private const int TeamCardColumns = 3;
         private const int TeamCardRows = 2;
-        private const float BattleSummaryTopMargin = 74f;
-        private const float BattleSummaryHeight = 470f;
-        private const float BattleLogTopGap = 20f;
-        private const float BattleFooterBottom = 26f;
-        private const float BattleFooterHeight = 78f;
-        private const float BattleLogBottomGap = 18f;
         private const float CardEntryDuration = 0.24f;
         private const float CardPulseDuration = 0.3f;
         private const float CardHitDuration = 0.22f;
@@ -1474,7 +1466,6 @@ namespace Wuxing.UI
                 return;
             }
 
-            ConfigureTeamCardVisual(template);
             template.gameObject.SetActive(false);
             if (!targetButtons.Contains(template))
             {
@@ -1502,10 +1493,10 @@ namespace Wuxing.UI
             }
 
             var cards = BuildUnitCardsFromSummary(teamSummary, equipmentSummary, playerSide);
+            var cardSize = GetTeamCardSize(template);
             for (var i = 0; i < cards.Count; i++)
             {
                 var button = GetOrCreateTeamCardButton(root, template, buttons, i);
-                ConfigureTeamCardVisual(button);
                 BindTeamCard(button, cards[i], playerSide);
                 ApplyDefeatedCardState(button, defeatedUnits.Contains(cards[i].Title));
                 RegisterTeamCardLookup(lookup, cards[i], button);
@@ -1518,13 +1509,9 @@ namespace Wuxing.UI
                     rect.anchorMin = new Vector2(0f, 1f);
                     rect.anchorMax = new Vector2(0f, 1f);
                     rect.pivot = new Vector2(0f, 1f);
-                    rect.anchoredPosition = new Vector2(column * (TeamCardWidth + TeamCardHorizontalSpacing), -row * (TeamCardHeight + TeamCardVerticalSpacing));
-                    rect.sizeDelta = new Vector2(TeamCardWidth, TeamCardHeight);
+                    rect.anchoredPosition = new Vector2(column * (cardSize.x + TeamCardHorizontalSpacing), -row * (cardSize.y + TeamCardVerticalSpacing));
                 }
             }
-
-            root.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, TeamCardColumns * TeamCardWidth + (TeamCardColumns - 1) * TeamCardHorizontalSpacing);
-            root.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, TeamCardRows * TeamCardHeight + (TeamCardRows - 1) * TeamCardVerticalSpacing);
         }
 
         private void ConfigureBattleSummaryLayout()
@@ -1536,110 +1523,22 @@ namespace Wuxing.UI
 
         private void ConfigureBattleOverlayLayout()
         {
-            var root = statusText != null ? statusText.transform.parent?.parent as RectTransform : null;
-            var titleRect = root != null ? root.Find("Title") as RectTransform : null;
-            if (titleRect != null)
-            {
-                titleRect.anchorMin = new Vector2(0.06f, 0.92f);
-                titleRect.anchorMax = new Vector2(0.94f, 0.98f);
-                titleRect.offsetMin = Vector2.zero;
-                titleRect.offsetMax = Vector2.zero;
-            }
-
             var statusRect = statusText != null ? statusText.transform.parent as RectTransform : null;
             if (statusRect != null)
             {
-                statusRect.anchorMin = new Vector2(0.12f, 0.87f);
-                statusRect.anchorMax = new Vector2(0.88f, 0.915f);
-                statusRect.offsetMin = Vector2.zero;
-                statusRect.offsetMax = Vector2.zero;
                 statusRect.gameObject.SetActive(false);
             }
 
             var stageRect = stageInfoText != null ? stageInfoText.transform.parent as RectTransform : null;
             if (stageRect != null)
             {
-                stageRect.anchorMin = new Vector2(0.18f, 0.875f);
-                stageRect.anchorMax = new Vector2(0.82f, 0.915f);
-                stageRect.offsetMin = Vector2.zero;
-                stageRect.offsetMax = Vector2.zero;
                 stageRect.gameObject.SetActive(true);
             }
 
-            if (battleLogOverlay != null)
-            {
-                var overlayRect = battleLogOverlay.GetComponent<RectTransform>();
-                if (overlayRect != null)
-                {
-                    overlayRect.anchorMin = new Vector2(0.03f, 0.03f);
-                    overlayRect.anchorMax = new Vector2(0.97f, 0.88f);
-                    overlayRect.offsetMin = Vector2.zero;
-                    overlayRect.offsetMax = Vector2.zero;
-                }
-            }
-
-            var summaryBar = playerCardRoot != null ? playerCardRoot.parent?.parent?.parent as RectTransform : null;
-            if (summaryBar != null)
-            {
-                summaryBar.anchorMin = new Vector2(0.02f, 1f);
-                summaryBar.anchorMax = new Vector2(0.97f, 1f);
-                summaryBar.pivot = new Vector2(0.5f, 1f);
-                summaryBar.offsetMin = new Vector2(0f, -(BattleSummaryTopMargin + BattleSummaryHeight));
-                summaryBar.offsetMax = new Vector2(0f, -BattleSummaryTopMargin);
-            }
-
-            var logPanel = battleLogScrollRect != null ? battleLogScrollRect.transform.parent?.parent as RectTransform : null;
-            if (logPanel != null)
-            {
-                logPanel.anchorMin = new Vector2(0.03f, 0f);
-                logPanel.anchorMax = new Vector2(0.97f, 1f);
-                logPanel.offsetMin = new Vector2(0f, BattleFooterBottom + BattleFooterHeight + BattleLogBottomGap);
-                logPanel.offsetMax = new Vector2(0f, -(BattleSummaryTopMargin + BattleSummaryHeight + BattleLogTopGap));
-            }
-
-            var footer = backButton != null ? backButton.transform.parent as RectTransform : null;
-            if (footer != null)
-            {
-                footer.anchorMin = new Vector2(0.24f, 0f);
-                footer.anchorMax = new Vector2(0.76f, 0f);
-                footer.pivot = new Vector2(0.5f, 0f);
-                footer.offsetMin = new Vector2(0f, BattleFooterBottom);
-                footer.offsetMax = new Vector2(0f, BattleFooterBottom + BattleFooterHeight);
-            }
         }
 
         private static void ConfigureTeamPanelLayout(RectTransform cardRoot, Text equipmentText)
         {
-            if (cardRoot != null)
-            {
-                var panel = cardRoot.parent?.parent as RectTransform;
-                if (panel != null)
-                {
-                    var titleRect = panel.Find("Title") as RectTransform;
-                    if (titleRect != null)
-                    {
-                        titleRect.anchorMin = new Vector2(0.04f, 0.89f);
-                        titleRect.anchorMax = new Vector2(0.96f, 0.98f);
-                        titleRect.offsetMin = Vector2.zero;
-                        titleRect.offsetMax = Vector2.zero;
-                    }
-                }
-
-                var bodyRect = cardRoot.parent as RectTransform;
-                if (bodyRect != null)
-                {
-                    bodyRect.anchorMin = new Vector2(0.02f, 0.08f);
-                    bodyRect.anchorMax = new Vector2(0.98f, 0.86f);
-                    bodyRect.offsetMin = Vector2.zero;
-                    bodyRect.offsetMax = Vector2.zero;
-                }
-
-                cardRoot.anchorMin = new Vector2(0.5f, 1f);
-                cardRoot.anchorMax = new Vector2(0.5f, 1f);
-                cardRoot.pivot = new Vector2(0.5f, 1f);
-                cardRoot.anchoredPosition = new Vector2(0f, -8f);
-            }
-
             if (equipmentText != null)
             {
                 var equipmentBody = equipmentText.transform.parent as RectTransform;
@@ -1683,59 +1582,21 @@ namespace Wuxing.UI
                 clone.name = template.name + "_" + buttons.Count;
                 clone.SetActive(false);
                 var cloneButton = clone.GetComponent<Button>();
-                ConfigureTeamCardVisual(cloneButton);
                 buttons.Add(cloneButton);
             }
 
             return buttons[index];
         }
 
-        private static void ConfigureTeamCardVisual(Button button)
+        private static Vector2 GetTeamCardSize(Button template)
         {
-            if (button == null)
+            var rect = template != null ? template.GetComponent<RectTransform>() : null;
+            if (rect != null && rect.rect.width > 0f && rect.rect.height > 0f)
             {
-                return;
+                return rect.rect.size;
             }
 
-            var rect = button.GetComponent<RectTransform>();
-            var title = button.transform.Find("TitleText")?.GetComponent<Text>();
-            if (title != null)
-            {
-                title.fontSize = 18;
-                EnsureReadableText(title);
-                var titleRect = title.rectTransform;
-                titleRect.anchorMin = new Vector2(0.12f, 0.72f);
-                titleRect.anchorMax = new Vector2(0.88f, 0.88f);
-                titleRect.offsetMin = Vector2.zero;
-                titleRect.offsetMax = Vector2.zero;
-            }
-
-            var subtitle = button.transform.Find("SubtitleText")?.GetComponent<Text>();
-            if (subtitle != null)
-            {
-                subtitle.fontSize = 16;
-                EnsureReadableText(subtitle);
-                var subtitleRect = subtitle.rectTransform;
-                subtitleRect.anchorMin = new Vector2(0.12f, 0.5f);
-                subtitleRect.anchorMax = new Vector2(0.88f, 0.64f);
-                subtitleRect.offsetMin = Vector2.zero;
-                subtitleRect.offsetMax = Vector2.zero;
-            }
-
-            var progressRoot = button.transform.Find("ProgressRoot") as RectTransform;
-            if (progressRoot != null)
-            {
-                progressRoot.anchorMin = new Vector2(0.12f, 0.12f);
-                progressRoot.anchorMax = new Vector2(0.88f, 0.2f);
-                progressRoot.offsetMin = Vector2.zero;
-                progressRoot.offsetMax = Vector2.zero;
-            }
-
-            var progressLabel = button.transform.Find("ProgressRoot/ProgressLabel")?.GetComponent<Text>();
-            if (progressLabel != null)
-            {
-                EnsureReadableText(progressLabel);
-            }
+            return new Vector2(UICardChromeUtility.StandardCardWidth, UICardChromeUtility.StandardCardHeight);
         }
 
         private void BindTeamCard(Button button, UICardData card, bool playerSide)

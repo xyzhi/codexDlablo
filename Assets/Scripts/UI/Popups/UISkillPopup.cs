@@ -332,6 +332,7 @@ namespace Wuxing.UI
                 commonButtonSprite,
                 titleText != null ? titleText.font : null,
                 detailBodyText != null ? detailBodyText.font : titleText != null ? titleText.font : null,
+                closeButton != null ? closeButton.GetComponent<RectTransform>() : null,
                 slotContentRoot,
                 libraryContentRoot);
         }
