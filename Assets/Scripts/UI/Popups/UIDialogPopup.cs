@@ -19,6 +19,7 @@ namespace Wuxing.UI
         private Text contentText;
         private Text hintText;
         private RectTransform choiceRoot;
+        private Button choiceTemplateButton;
         private readonly List<Button> choiceButtons = new List<Button>();
         private readonly List<string> activeChoiceIds = new List<string>();
         private string fullContent;
@@ -104,6 +105,11 @@ namespace Wuxing.UI
         {
             if (TryBindExistingUi())
             {
+                if (choiceTemplateButton != null)
+                {
+                    choiceTemplateButton.gameObject.SetActive(false);
+                }
+
                 if (choiceRoot == null)
                 {
                     var dialogBox = transform.Find("DialogBox");
@@ -179,6 +185,8 @@ namespace Wuxing.UI
             hintText.gameObject.SetActive(false);
 
             choiceRoot = UIFactory.CreateContainer(box.transform, "ChoiceRoot", new Vector2(0f, 0.02f), new Vector2(1f, 0.28f), new Vector2(24f, 0f), new Vector2(-24f, 0f));
+            choiceTemplateButton = UIFactory.CreateButton(choiceRoot, "TemplateButton", string.Empty, delegate { });
+            choiceTemplateButton.gameObject.SetActive(false);
         }
 
         private bool TryBindExistingUi()
@@ -190,6 +198,9 @@ namespace Wuxing.UI
             hintText = FindText("DialogBox/HintText");
             var choiceTransform = transform.Find("DialogBox/ChoiceRoot");
             choiceRoot = choiceTransform != null ? choiceTransform.GetComponent<RectTransform>() : null;
+            choiceTemplateButton = FindButton("DialogBox/ChoiceRoot/TemplateButton")
+                ?? FindButton("DialogBox/TemplateButton")
+                ?? FindButton("TemplateButton");
             return rootImage != null && leftSpeakerText != null && rightSpeakerText != null && contentText != null && hintText != null;
         }
 
@@ -197,6 +208,12 @@ namespace Wuxing.UI
         {
             var child = transform.Find(path);
             return child != null ? child.GetComponent<Text>() : null;
+        }
+
+        private Button FindButton(string path)
+        {
+            var child = transform.Find(path);
+            return child != null ? child.GetComponent<Button>() : null;
         }
 
         private static string ResolveText(string key)
@@ -267,20 +284,27 @@ namespace Wuxing.UI
                 var label = button.GetComponentInChildren<Text>();
                 if (label != null)
                 {
-                    label.text = ResolveText(choice.TitleKey);
-                    label.alignment = TextAnchor.MiddleLeft;
-                    label.fontSize = 18;
+                    var localizedLabel = label.GetComponent<LocalizedText>();
+                    if (localizedLabel != null)
+                    {
+                        localizedLabel.SetKey(choice.TitleKey);
+                    }
+                    else
+                    {
+                        label.text = ResolveText(choice.TitleKey);
+                    }
+
                     label.supportRichText = true;
                 }
 
                 var rect = button.GetComponent<RectTransform>();
                 if (rect != null)
                 {
-                    rect.anchorMin = new Vector2(0f, 1f);
-                    rect.anchorMax = new Vector2(1f, 1f);
+                    rect.anchorMin = new Vector2(0.5f, 1f);
+                    rect.anchorMax = new Vector2(0.5f, 1f);
                     rect.pivot = new Vector2(0.5f, 1f);
-                    rect.anchoredPosition = new Vector2(0f, -i * 72f);
-                    rect.sizeDelta = new Vector2(0f, 60f);
+                    var buttonHeight = Mathf.Max(60f, rect.sizeDelta.y);
+                    rect.anchoredPosition = new Vector2(0f, -i * (buttonHeight + 8f));
                 }
 
                 activeChoiceIds.Add(choice.Id);
@@ -299,7 +323,18 @@ namespace Wuxing.UI
         {
             while (choiceButtons.Count <= index)
             {
-                var button = UIFactory.CreateButton(choiceRoot, "ChoiceButton" + choiceButtons.Count, string.Empty, delegate { });
+                Button button;
+                if (choiceTemplateButton != null)
+                {
+                    var clone = Instantiate(choiceTemplateButton.gameObject, choiceRoot, false);
+                    clone.name = "ChoiceButton" + choiceButtons.Count;
+                    button = clone.GetComponent<Button>();
+                }
+                else
+                {
+                    button = UIFactory.CreateButton(choiceRoot, "ChoiceButton" + choiceButtons.Count, string.Empty, delegate { });
+                }
+
                 choiceButtons.Add(button);
             }
 
