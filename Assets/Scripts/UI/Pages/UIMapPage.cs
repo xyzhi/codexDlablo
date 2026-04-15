@@ -1045,10 +1045,10 @@ namespace Wuxing.UI
             var canEnterSelected = !isMoving;
 
             SetButtonText(previousButton, isEnglish ? "Back" : "\u56de\u9000");
-            SetButtonText(nextButton, isEnglish ? "Forward" : "\u524d\u884c");
-            SetButtonText(enterButton, isEnglish ? "Enter Area" : "\u8fdb\u5165\u6b64\u5883");
+            SetButtonText(nextButton, isEnglish ? "Ahead" : "\u524d\u884c");
+            SetButtonText(enterButton, isEnglish ? "Enter" : "\u8fdb\u5165\u6b64\u5883");
             SetButtonText(equipmentButton, isEnglish ? "Bag" : "\u884c\u56ca");
-            SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "\u7075\u77f3");
+            SetButtonText(spiritConvertButton, isEnglish ? "Stone" : "\u7075\u77f3");
             SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "\u5fc3\u6cd5");
             SetButtonText(resetButton, isEnglish ? "Reset" : "\u91cd\u7f6e");
             SetButtonText(backButton, isEnglish ? "Title" : "\u8fd4\u59cb");
