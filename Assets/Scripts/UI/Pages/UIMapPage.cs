@@ -23,16 +23,20 @@ namespace Wuxing.UI
         private const float NodeWidth = 164f;
         private const float NodeHeight = 148f;
         private const float LineVerticalOffset = 40f;
-        private static readonly Color MapLineTint = new Color(0.38f, 0.36f, 0.33f, 0.84f);
-        private static readonly Color MapLineLift = new Color(0.94f, 0.92f, 0.88f, 0.1f);
+        private static readonly Color MapLineTint = new Color(1f, 0.96f, 0.82f, 0.92f);
+        private static readonly Color MapLineGlowInner = new Color(1f, 0.52f, 0.18f, 0.42f);
+        private static readonly Color MapLineGlowOuter = new Color(0.78f, 0.08f, 0.04f, 0.28f);
+        private static readonly Color MapLineLift = new Color(1f, 0.86f, 0.5f, 0.3f);
         private static readonly Color NodeLabelColor = new Color(0.98f, 0.97f, 0.95f, 1f);
         private static readonly Color NodeLabelCurrentColor = new Color(0.98f, 0.92f, 0.8f, 1f);
         private static readonly Color NodeLabelOutlineColor = new Color(0.04f, 0.04f, 0.04f, 0.58f);
         private static readonly Color NodeLabelCurrentOutlineColor = new Color(0.14f, 0.11f, 0.06f, 0.74f);
         private static readonly Color NodeIconShadowColor = new Color(0f, 0f, 0f, 0.24f);
         private static readonly Color NodeIconCurrentShadowColor = new Color(0.2f, 0.16f, 0.09f, 0.42f);
+        private static readonly Color NodeGlowCurrentColor = new Color(1f, 1f, 1f, 0.8f);
         private static readonly float[] NodeVerticalPattern = { -330f, -110f, 110f, 330f, 550f };
         private const float SnakeSideOffset = 96f;
+        private const string NodeGlowShaderName = "UI/MapNodeGlow";
 
         [SerializeField] private Text titleText;
         [SerializeField] private Text statusText;
@@ -50,7 +54,6 @@ namespace Wuxing.UI
         [SerializeField] private Button skillOverviewButton;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button backButton;
-        [SerializeField] private Sprite mapLineSprite;
         [SerializeField] private Sprite villageNodeSprite;
         [SerializeField] private Sprite restNodeSprite;
         [SerializeField] private Sprite battleNodeSprite;
@@ -68,6 +71,7 @@ namespace Wuxing.UI
         private readonly List<Button> nodeButtons = new List<Button>();
         private readonly List<Text> nodeButtonLabels = new List<Text>();
         private readonly List<Image> nodeButtonIcons = new List<Image>();
+        private readonly List<Image> nodeButtonGlows = new List<Image>();
         private readonly List<Image> nodeLines = new List<Image>();
         private readonly List<int> visibleStages = new List<int>();
         private readonly Dictionary<int, Vector2> stagePositions = new Dictionary<int, Vector2>();
@@ -79,9 +83,13 @@ namespace Wuxing.UI
         private bool isMoving;
         private RectTransform activeIconRect;
         private RectTransform activeLabelRect;
+        private RectTransform activeGlowRect;
+        private Image activeGlowImage;
         private Shadow activeIconShadow;
         private Vector2 nodeGraphBaseAnchoredPosition;
         private bool nodeGraphBasePositionCached;
+        private static Sprite fadingLineSprite;
+        private static Material nodeGlowMaterial;
 
         public override void OnOpen(object data)
         {
@@ -1080,6 +1088,8 @@ namespace Wuxing.UI
             stagePositions.Clear();
             activeLabelRect = null;
             activeIconRect = null;
+            activeGlowRect = null;
+            activeGlowImage = null;
             activeIconShadow = null;
             visibleStages.AddRange(stagesToRender);
 
@@ -1122,6 +1132,7 @@ namespace Wuxing.UI
                 }
 
                 var icon = nodeButtonIcons[i];
+                var glow = i < nodeButtonGlows.Count ? nodeButtonGlows[i] : null;
                 if (icon != null)
                 {
                     icon.sprite = GetNodeSprite(stage);
@@ -1135,13 +1146,28 @@ namespace Wuxing.UI
                     var iconShadow = icon.GetComponent<Shadow>();
                     if (iconShadow != null)
                     {
-                        iconShadow.effectDistance = stage == currentStage ? new Vector2(3f, -3f) : new Vector2(2f, -2f);
-                        iconShadow.effectColor = stage == currentStage ? NodeIconCurrentShadowColor : NodeIconShadowColor;
+                        iconShadow.effectDistance = stage == currentStage ? Vector2.zero : new Vector2(2f, -2f);
+                        iconShadow.effectColor = stage == currentStage ? new Color(0f, 0f, 0f, 0f) : NodeIconShadowColor;
                     }
+                }
+
+                if (glow != null)
+                {
+                    glow.sprite = icon != null ? icon.sprite : null;
+                    glow.color = NodeGlowCurrentColor;
+                    glow.material = GetNodeGlowMaterial();
+                    glow.rectTransform.localScale = Vector3.one;
+                    if (glow.sprite != null)
+                    {
+                        glow.SetNativeSize();
+                    }
+                    glow.gameObject.SetActive(stage == currentStage && glow.sprite != null);
                 }
 
                 if (stage == currentStage)
                 {
+                    activeGlowRect = glow != null ? glow.rectTransform : null;
+                    activeGlowImage = glow;
                     activeIconRect = icon != null ? icon.rectTransform : null;
                     activeLabelRect = label != null ? label.rectTransform : null;
                     activeIconShadow = icon != null ? icon.GetComponent<Shadow>() : null;
@@ -1150,6 +1176,7 @@ namespace Wuxing.UI
                 nodeButtons[i].onClick.RemoveAllListeners();
                 var capturedStage = stage;
                 nodeButtons[i].onClick.AddListener(delegate { OnClickNodeStage(capturedStage); });
+                nodeButtons[i].transform.SetAsLastSibling();
 
                 if (i > 0)
                 {
@@ -1161,10 +1188,7 @@ namespace Wuxing.UI
 
                     var previousPosition = stagePositions[previousStage];
                     ConfigureLine(nodeLines[i - 1].rectTransform, previousPosition, position);
-                    nodeLines[i - 1].sprite = mapLineSprite;
-                    nodeLines[i - 1].type = Image.Type.Simple;
-                    nodeLines[i - 1].preserveAspect = true;
-                    nodeLines[i - 1].color = MapLineTint;
+                    ConfigureNodeLineVisual(nodeLines[i - 1], MapLineTint.a);
                     nodeLines[i - 1].gameObject.SetActive(true);
                 }
             }
@@ -1190,6 +1214,19 @@ namespace Wuxing.UI
                 rect.anchorMin = new Vector2(0.5f, 0.5f);
                 rect.anchorMax = new Vector2(0.5f, 0.5f);
                 rect.pivot = new Vector2(0.5f, 0.5f);
+
+                var glowObject = new GameObject("Glow", typeof(RectTransform), typeof(Image));
+                glowObject.transform.SetParent(buttonObject.transform, false);
+                glowObject.transform.SetAsFirstSibling();
+                var glowRect = glowObject.GetComponent<RectTransform>();
+                glowRect.anchorMin = new Vector2(0.5f, 1f);
+                glowRect.anchorMax = new Vector2(0.5f, 1f);
+                glowRect.pivot = new Vector2(0.5f, 0.5f);
+                glowRect.anchoredPosition = new Vector2(0f, -34f);
+                var glowImage = glowObject.GetComponent<Image>();
+                glowImage.raycastTarget = false;
+                glowImage.color = NodeGlowCurrentColor;
+                glowImage.material = GetNodeGlowMaterial();
 
                 var iconObject = new GameObject("Icon", typeof(RectTransform), typeof(Image));
                 iconObject.transform.SetParent(buttonObject.transform, false);
@@ -1218,6 +1255,7 @@ namespace Wuxing.UI
 
                 nodeButtons.Add(button);
                 nodeButtonLabels.Add(label);
+                nodeButtonGlows.Add(glowImage);
                 nodeButtonIcons.Add(iconImage);
             }
 
@@ -1231,11 +1269,15 @@ namespace Wuxing.UI
                 rect.pivot = new Vector2(0.5f, 0.5f);
                 var image = lineObject.GetComponent<Image>();
                 image.raycastTarget = false;
-                image.sprite = mapLineSprite;
-                image.color = MapLineTint;
+                image.sprite = GetFadingLineSprite();
+                image.type = Image.Type.Simple;
+                image.preserveAspect = false;
+                image.color = MapLineGlowOuter;
+                EnsureLineLayer(lineObject.transform, "InnerGlow", 0.58f);
+                EnsureLineLayer(lineObject.transform, "Core", 0.18f);
                 var shadow = lineObject.AddComponent<Shadow>();
                 shadow.effectColor = MapLineLift;
-                shadow.effectDistance = new Vector2(1f, -1f);
+                shadow.effectDistance = new Vector2(2f, -2f);
                 shadow.useGraphicAlpha = true;
                 nodeLines.Add(image);
                 lineObject.transform.SetAsFirstSibling();
@@ -1258,15 +1300,117 @@ namespace Wuxing.UI
 
         private void ConfigureLine(RectTransform rect, Vector2 from, Vector2 to)
         {
-            var direction = to - from;
-            rect.anchoredPosition = from + direction * 0.5f + new Vector2(0f, LineVerticalOffset);
-            var lineImage = rect.GetComponent<Image>();
-            if (lineImage != null && lineImage.sprite != null)
+            var start = from + new Vector2(0f, LineVerticalOffset);
+            var end = to + new Vector2(0f, LineVerticalOffset);
+            var direction = end - start;
+            var length = direction.magnitude;
+
+            rect.anchoredPosition = start + direction * 0.5f;
+            rect.sizeDelta = new Vector2(length, 20f);
+            rect.localScale = Vector3.one;
+            rect.localRotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+        }
+
+        private void ConfigureNodeLineVisual(Image line, float alpha)
+        {
+            if (line == null)
             {
-                lineImage.SetNativeSize();
+                return;
             }
-            rect.localScale = new Vector3(direction.x < 0f ? -1f : 1f, 1f, 1f);
-            rect.localRotation = Quaternion.identity;
+
+            line.sprite = GetFadingLineSprite();
+            line.type = Image.Type.Simple;
+            line.preserveAspect = false;
+            line.color = WithAlpha(MapLineGlowOuter, alpha * MapLineGlowOuter.a / MapLineTint.a);
+
+            var innerGlow = line.transform.Find("InnerGlow")?.GetComponent<Image>();
+            if (innerGlow != null)
+            {
+                innerGlow.sprite = GetFadingLineSprite();
+                innerGlow.type = Image.Type.Simple;
+                innerGlow.preserveAspect = false;
+                innerGlow.color = WithAlpha(MapLineGlowInner, alpha * MapLineGlowInner.a / MapLineTint.a);
+            }
+
+            var core = line.transform.Find("Core")?.GetComponent<Image>();
+            if (core != null)
+            {
+                core.sprite = GetFadingLineSprite();
+                core.type = Image.Type.Simple;
+                core.preserveAspect = false;
+                core.color = WithAlpha(MapLineTint, alpha);
+            }
+        }
+
+        private static Image EnsureLineLayer(Transform parent, string name, float scaleY)
+        {
+            var existing = parent.Find(name)?.GetComponent<Image>();
+            if (existing != null)
+            {
+                ConfigureLineLayerRect(existing.rectTransform, scaleY);
+                existing.raycastTarget = false;
+                return existing;
+            }
+
+            var layerObject = new GameObject(name, typeof(RectTransform), typeof(Image));
+            layerObject.transform.SetParent(parent, false);
+            var image = layerObject.GetComponent<Image>();
+            image.raycastTarget = false;
+            image.sprite = GetFadingLineSprite();
+            image.type = Image.Type.Simple;
+            image.preserveAspect = false;
+            ConfigureLineLayerRect(image.rectTransform, scaleY);
+            return image;
+        }
+
+        private static void ConfigureLineLayerRect(RectTransform rect, float scaleY)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.localScale = new Vector3(1f, scaleY, 1f);
+        }
+
+        private static Color WithAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
+        }
+
+        private static Sprite GetFadingLineSprite()
+        {
+            if (fadingLineSprite != null)
+            {
+                return fadingLineSprite;
+            }
+
+            const int width = 96;
+            var texture = new Texture2D(width, 1, TextureFormat.RGBA32, false)
+            {
+                name = "GeneratedMapFadingLine",
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear
+            };
+
+            for (var x = 0; x < width; x++)
+            {
+                var t = x / (width - 1f);
+                var edge = Mathf.Min(t, 1f - t);
+                var alpha = Mathf.SmoothStep(0.18f, 1f, Mathf.Clamp01(edge / 0.22f));
+                texture.SetPixel(x, 0, new Color(1f, 1f, 1f, alpha));
+            }
+
+            texture.Apply(false, true);
+            fadingLineSprite = Sprite.Create(texture, new Rect(0f, 0f, width, 1f), new Vector2(0.5f, 0.5f), 100f);
+            fadingLineSprite.name = "GeneratedMapFadingLineSprite";
+            return fadingLineSprite;
         }
 
         private void UpdateTravelerMarkerPosition(Vector2 graphPosition)
@@ -1366,7 +1510,7 @@ namespace Wuxing.UI
                 {
                     lineColor.a = MapLineTint.a;
                 }
-                line.color = lineColor;
+                ConfigureNodeLineVisual(line, lineColor.a);
             }
         }
 
@@ -1397,19 +1541,45 @@ namespace Wuxing.UI
             }
 
             var pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 2.6f) * 0.5f;
+            if (activeGlowRect != null)
+            {
+                activeGlowRect.localScale = Vector3.one * Mathf.Lerp(1.05f, 1.13f, pulse);
+            }
+
+            if (activeGlowImage != null)
+            {
+                var glowColor = activeGlowImage.color;
+                glowColor.a = Mathf.Lerp(0.58f, 0.84f, pulse);
+                activeGlowImage.color = glowColor;
+            }
+
             activeIconRect.localScale = Vector3.one * Mathf.Lerp(1.02f, 1.1f, pulse);
             if (activeLabelRect != null)
             {
                 activeLabelRect.localScale = Vector3.one * Mathf.Lerp(1f, 1.04f, pulse);
             }
 
-            if (activeIconShadow != null)
+        }
+
+        private static Material GetNodeGlowMaterial()
+        {
+            if (nodeGlowMaterial != null)
             {
-                activeIconShadow.effectDistance = Vector2.Lerp(new Vector2(2f, -2f), new Vector2(4f, -4f), pulse);
-                var color = activeIconShadow.effectColor;
-                color.a = Mathf.Lerp(0.34f, 0.5f, pulse);
-                activeIconShadow.effectColor = color;
+                return nodeGlowMaterial;
             }
+
+            var shader = Shader.Find(NodeGlowShaderName);
+            if (shader == null)
+            {
+                return null;
+            }
+
+            nodeGlowMaterial = new Material(shader)
+            {
+                name = "GeneratedMapNodeGlow",
+                hideFlags = HideFlags.HideAndDontSave
+            };
+            return nodeGlowMaterial;
         }
 
         private void ApplyTextChrome()

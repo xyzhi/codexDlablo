@@ -231,6 +231,7 @@ namespace Wuxing.UI
             {
                 sigilCanvasGroup.alpha = Mathf.Lerp(0.12f, 0.26f, Ping(time, 0.74f, 0.25f));
             }
+
         }
 
         private static float Ping(float time, float speed, float offset)
@@ -292,5 +293,6 @@ namespace Wuxing.UI
                 cloudRect.anchoredPosition = new Vector2(leftBound + phase, basePosition.y);
             }
         }
+
     }
 }

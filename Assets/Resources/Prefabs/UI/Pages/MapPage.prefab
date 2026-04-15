@@ -2750,7 +2750,6 @@ MonoBehaviour:
   skillOverviewButton: {fileID: 2156411211870734220}
   resetButton: {fileID: 8669857873416830336}
   backButton: {fileID: 2582109458175001590}
-  mapLineSprite: {fileID: 21300000, guid: 0275bd78c115a69498edae0ed32b9f21, type: 3}
   villageNodeSprite: {fileID: 21300000, guid: 3254569c33a979e4fa44c63979d8d08f, type: 3}
   restNodeSprite: {fileID: 21300000, guid: 14df7d7c776751a42ab1b46ff2e91c8a, type: 3}
   battleNodeSprite: {fileID: 21300000, guid: 0b2d9cb6d078aa9419704812ab87eb9c, type: 3}
