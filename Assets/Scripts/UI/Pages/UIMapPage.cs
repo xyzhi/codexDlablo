@@ -50,7 +50,6 @@ namespace Wuxing.UI
         [SerializeField] private Button skillOverviewButton;
         [SerializeField] private Button resetButton;
         [SerializeField] private Button backButton;
-        [SerializeField] private Sprite bottomButtonSprite;
         [SerializeField] private Sprite mapLineSprite;
         [SerializeField] private Sprite villageNodeSprite;
         [SerializeField] private Sprite restNodeSprite;
@@ -1047,21 +1046,12 @@ namespace Wuxing.UI
 
             SetButtonText(previousButton, isEnglish ? "Back" : "\u56de\u9000");
             SetButtonText(nextButton, isEnglish ? "Forward" : "\u524d\u884c");
-            SetButtonText(enterButton, isEnglish ? "Start" : "\u8e0f\u5165");
+            SetButtonText(enterButton, isEnglish ? "Enter Area" : "\u8fdb\u5165\u6b64\u5883");
             SetButtonText(equipmentButton, isEnglish ? "Bag" : "\u884c\u56ca");
             SetButtonText(spiritConvertButton, isEnglish ? "Stones" : "\u7075\u77f3");
             SetButtonText(skillOverviewButton, isEnglish ? "Arts" : "\u5fc3\u6cd5");
             SetButtonText(resetButton, isEnglish ? "Reset" : "\u91cd\u7f6e");
             SetButtonText(backButton, isEnglish ? "Title" : "\u8fd4\u59cb");
-
-            ApplyBottomButtonChrome(previousButton);
-            ApplyBottomButtonChrome(nextButton);
-            ApplyBottomButtonChrome(enterButton);
-            ApplyBottomButtonChrome(equipmentButton);
-            ApplyBottomButtonChrome(spiritConvertButton);
-            ApplyBottomButtonChrome(skillOverviewButton);
-            ApplyBottomButtonChrome(resetButton);
-            ApplyBottomButtonChrome(backButton);
 
             if (previousButton != null) previousButton.interactable = canMovePrevious;
             if (nextButton != null) nextButton.interactable = canMoveNext;
@@ -1767,36 +1757,6 @@ namespace Wuxing.UI
             if (button == null) return;
             var label = button.GetComponentInChildren<Text>();
             if (label != null) label.text = text;
-        }
-
-        private void ApplyBottomButtonChrome(Button button)
-        {
-            if (button == null)
-            {
-                return;
-            }
-
-            var rootGraphic = button.GetComponent<Image>();
-            if (rootGraphic != null)
-            {
-                rootGraphic.sprite = null;
-                rootGraphic.color = new Color(1f, 1f, 1f, 0f);
-                rootGraphic.type = Image.Type.Simple;
-            }
-
-            var images = button.GetComponentsInChildren<Image>(true);
-            for (var i = 0; i < images.Length; i++)
-            {
-                if (!string.Equals(images[i].gameObject.name, "ButtonSurface", StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                images[i].sprite = bottomButtonSprite;
-                images[i].color = Color.white;
-                images[i].type = Image.Type.Sliced;
-                images[i].preserveAspect = false;
-            }
         }
     }
 }
