@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,6 +12,7 @@ namespace Wuxing.UI
     public class UIStoryPopup : UIPopup, IPointerClickHandler
     {
         private Image rootImage;
+        private RectTransform contentRootRect;
         private Text titleText;
         private Text contentText;
         private Text hintText;
@@ -24,10 +26,24 @@ namespace Wuxing.UI
         private float openElapsed;
         private bool typingCompleted;
         private bool canSkipTyping;
+        private bool unfoldCompleted = true;
+        private Sequence unfoldSequence;
+        private Vector2 contentRootExpandedSizeDelta;
+        private bool hasContentRootExpandedSize;
+
+        [Header("Unfold Animation")]
+        [SerializeField] private float unfoldDuration = 0.85f;
+        [SerializeField] private float foldedHeight = 56f;
+        [SerializeField] private Ease unfoldEase = Ease.OutCubic;
 
         private void Awake()
         {
             EnsureUi();
+        }
+
+        private void OnDestroy()
+        {
+            KillUnfoldAnimation(false);
         }
 
         public override void OnOpen(object data)
@@ -49,20 +65,25 @@ namespace Wuxing.UI
             openElapsed = 0f;
             typingCompleted = string.IsNullOrEmpty(fullContent);
             canSkipTyping = node.Skippable;
+            unfoldCompleted = false;
 
             titleText.text = string.IsNullOrEmpty(title) ? string.Empty : title;
-            titleText.gameObject.SetActive(!string.IsNullOrEmpty(title));
-            contentText.text = typingCompleted ? fullContent : string.Empty;
+            titleText.gameObject.SetActive(false);
+            contentText.text = string.Empty;
+            contentText.gameObject.SetActive(false);
             hintText.gameObject.SetActive(false);
             hintText.text = ResolveUiText("story.skip_hint", "Tap anywhere to skip");
             RefreshChoices();
             UpdateChoiceVisibility();
+            PlayUnfoldAnimation(!string.IsNullOrEmpty(title));
         }
 
         public override void OnClose()
         {
+            KillUnfoldAnimation(true);
             fullContent = string.Empty;
             contentText.text = string.Empty;
+            contentText.gameObject.SetActive(true);
             hintText.gameObject.SetActive(false);
             if (choiceRoot != null)
             {
@@ -72,6 +93,11 @@ namespace Wuxing.UI
 
         private void Update()
         {
+            if (!unfoldCompleted)
+            {
+                return;
+            }
+
             if (string.IsNullOrEmpty(fullContent) || typingCompleted)
             {
                 openElapsed += Time.unscaledDeltaTime;
@@ -101,6 +127,11 @@ namespace Wuxing.UI
 
         public void OnPointerClick(PointerEventData eventData)
         {
+            if (!unfoldCompleted)
+            {
+                return;
+            }
+
             if (!typingCompleted)
             {
                 if (!canSkipTyping)
@@ -167,25 +198,26 @@ namespace Wuxing.UI
             bottomShadeRect.offsetMax = Vector2.zero;
 
             var contentRoot = UIFactory.CreateContainer(transform, "ContentRoot", new Vector2(0.14f, 0.18f), new Vector2(0.86f, 0.8f), Vector2.zero, Vector2.zero);
-            titleText = UIFactory.CreateText(contentRoot, "TitleText", string.Empty, 30, TextAnchor.MiddleCenter, new Color(0.96f, 0.93f, 0.86f, 1f));
-            titleText.rectTransform.anchorMin = new Vector2(0f, 0.74f);
-            titleText.rectTransform.anchorMax = new Vector2(1f, 0.88f);
+            contentRootRect = contentRoot.GetComponent<RectTransform>();
+            titleText = UIFactory.CreateText(contentRoot, "TitleText", string.Empty, 30, TextAnchor.MiddleCenter, new Color(0.23f, 0.14f, 0.07f, 1f));
+            titleText.rectTransform.anchorMin = new Vector2(0f, 0.76f);
+            titleText.rectTransform.anchorMax = new Vector2(1f, 0.9f);
             titleText.rectTransform.offsetMin = Vector2.zero;
             titleText.rectTransform.offsetMax = Vector2.zero;
 
-            contentText = UIFactory.CreateText(contentRoot, "ContentText", string.Empty, 28, TextAnchor.UpperLeft, new Color(0.96f, 0.94f, 0.88f, 1f));
+            contentText = UIFactory.CreateText(contentRoot, "ContentText", string.Empty, 28, TextAnchor.UpperLeft, new Color(0.28f, 0.18f, 0.1f, 1f));
             contentText.supportRichText = true;
             contentText.lineSpacing = 1.35f;
-            contentText.rectTransform.anchorMin = new Vector2(0f, 0.08f);
-            contentText.rectTransform.anchorMax = new Vector2(1f, 0.72f);
-            contentText.rectTransform.offsetMin = new Vector2(24f, 0f);
-            contentText.rectTransform.offsetMax = new Vector2(-24f, 0f);
+            contentText.rectTransform.anchorMin = new Vector2(0f, 0.28f);
+            contentText.rectTransform.anchorMax = new Vector2(1f, 0.65f);
+            contentText.rectTransform.offsetMin = new Vector2(48f, 0f);
+            contentText.rectTransform.offsetMax = new Vector2(-48f, 0f);
 
-            hintText = UIFactory.CreateText(transform, "HintText", string.Empty, 18, TextAnchor.LowerCenter, new Color(0.78f, 0.75f, 0.68f, 0.92f));
-            hintText.rectTransform.anchorMin = new Vector2(0f, 0.04f);
-            hintText.rectTransform.anchorMax = new Vector2(1f, 0.12f);
-            hintText.rectTransform.offsetMin = Vector2.zero;
-            hintText.rectTransform.offsetMax = Vector2.zero;
+            hintText = UIFactory.CreateText(contentRoot, "HintText", string.Empty, 18, TextAnchor.MiddleCenter, new Color(0.38f, 0.25f, 0.14f, 0.86f));
+            hintText.rectTransform.anchorMin = new Vector2(0f, 0.22f);
+            hintText.rectTransform.anchorMax = new Vector2(1f, 0.28f);
+            hintText.rectTransform.offsetMin = new Vector2(16f, 0f);
+            hintText.rectTransform.offsetMax = new Vector2(-16f, 0f);
             hintText.gameObject.SetActive(false);
 
             choiceRoot = UIFactory.CreateContainer(transform, "ChoiceRoot", new Vector2(0.18f, 0.1f), new Vector2(0.82f, 0.3f), Vector2.zero, Vector2.zero);
@@ -194,12 +226,18 @@ namespace Wuxing.UI
         private bool TryBindExistingUi()
         {
             rootImage = GetComponent<Image>();
+            var contentRoot = transform.Find("ContentRoot");
+            contentRootRect = contentRoot != null ? contentRoot.GetComponent<RectTransform>() : null;
             titleText = FindText("ContentRoot/TitleText");
             contentText = FindText("ContentRoot/ContentText");
-            hintText = FindText("HintText");
+            hintText = FindText("ContentRoot/HintText");
+            if (hintText == null)
+            {
+                hintText = FindText("HintText");
+            }
             var choiceTransform = transform.Find("ChoiceRoot");
             choiceRoot = choiceTransform != null ? choiceTransform.GetComponent<RectTransform>() : null;
-            return rootImage != null && titleText != null && contentText != null && hintText != null;
+            return rootImage != null && contentRootRect != null && titleText != null && contentText != null && hintText != null;
         }
 
         private Text FindText(string path)
@@ -298,10 +336,87 @@ namespace Wuxing.UI
             var hasChoices = activeChoiceIds.Count > 0;
             if (choiceRoot != null)
             {
-                choiceRoot.gameObject.SetActive(typingCompleted && hasChoices);
+                choiceRoot.gameObject.SetActive(unfoldCompleted && typingCompleted && hasChoices);
             }
 
-            hintText.gameObject.SetActive(typingCompleted && !hasChoices && canSkipTyping && openElapsed >= skipHintDelay);
+            var choicesVisible = typingCompleted && hasChoices;
+            hintText.gameObject.SetActive(unfoldCompleted && !choicesVisible && canSkipTyping && openElapsed >= skipHintDelay);
+        }
+
+        private void PlayUnfoldAnimation(bool showTitleAfterUnfold)
+        {
+            if (contentRootRect == null)
+            {
+                FinishUnfold(showTitleAfterUnfold);
+                return;
+            }
+
+            KillUnfoldAnimation(false);
+            Canvas.ForceUpdateCanvases();
+
+            contentRootExpandedSizeDelta = contentRootRect.sizeDelta;
+            hasContentRootExpandedSize = true;
+            var expandedHeight = contentRootRect.rect.height;
+            var startHeight = Mathf.Clamp(foldedHeight, 1f, expandedHeight);
+            if (expandedHeight <= startHeight)
+            {
+                FinishUnfold(showTitleAfterUnfold);
+                return;
+            }
+
+            SetContentRootHeight(startHeight);
+
+            var currentHeight = startHeight;
+            unfoldSequence = DOTween.Sequence().SetUpdate(true);
+            unfoldSequence.Append(DOTween.To(
+                    () => currentHeight,
+                    value =>
+                    {
+                        currentHeight = value;
+                        SetContentRootHeight(value);
+                    },
+                    expandedHeight,
+                    Mathf.Max(0.01f, unfoldDuration))
+                .SetEase(unfoldEase));
+            unfoldSequence.OnComplete(() =>
+            {
+                contentRootRect.sizeDelta = contentRootExpandedSizeDelta;
+                FinishUnfold(showTitleAfterUnfold);
+            });
+        }
+
+        private void FinishUnfold(bool showTitle)
+        {
+            unfoldCompleted = true;
+            openElapsed = skipHintDelay;
+            titleText.gameObject.SetActive(showTitle);
+            contentText.gameObject.SetActive(true);
+            contentText.text = typingCompleted ? fullContent : string.Empty;
+            UpdateChoiceVisibility();
+        }
+
+        private void KillUnfoldAnimation(bool restoreExpandedHeight)
+        {
+            if (unfoldSequence != null && unfoldSequence.IsActive())
+            {
+                unfoldSequence.Kill();
+            }
+
+            unfoldSequence = null;
+            if (restoreExpandedHeight && contentRootRect != null && hasContentRootExpandedSize)
+            {
+                contentRootRect.sizeDelta = contentRootExpandedSizeDelta;
+            }
+        }
+
+        private void SetContentRootHeight(float height)
+        {
+            if (contentRootRect == null)
+            {
+                return;
+            }
+
+            contentRootRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
         }
     }
 }
