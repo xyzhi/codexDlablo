@@ -7,8 +7,9 @@ public static class AndroidBuildScript
 {
     private const string OutputFileName = "codexDlablo.apk";
     private const string AndroidApplicationId = "com.xyzhi.codexdlablo";
-    private const int AndroidMinApiLevel = 23;
-    private const int AndroidTargetApiLevel = 35;
+    private const int AndroidMinApiLevel = 26;
+    private const int AndroidBundleVersionCode = 2;
+    private const string AndroidBundleVersionName = "1.0.1";
 
     public static void BuildReleaseApk()
     {
@@ -26,8 +27,10 @@ public static class AndroidBuildScript
         EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
 
         PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, AndroidApplicationId);
+        PlayerSettings.bundleVersion = AndroidBundleVersionName;
+        PlayerSettings.Android.bundleVersionCode = AndroidBundleVersionCode;
         PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)AndroidMinApiLevel;
-        PlayerSettings.Android.targetSdkVersion = (AndroidSdkVersions)AndroidTargetApiLevel;
+        PlayerSettings.Android.targetSdkVersion = AndroidSdkVersions.AndroidApiLevelAuto;
         PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.ARMv7;
         PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
         PlayerSettings.allowedAutorotateToPortrait = true;
