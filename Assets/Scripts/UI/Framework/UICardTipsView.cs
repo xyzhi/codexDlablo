@@ -17,8 +17,6 @@ namespace Wuxing.UI
         [SerializeField] private Button actionButton;
         [SerializeField] private Text actionButtonText;
         [Header("Debug")]
-        [SerializeField] private bool showDebugTargetMarker = false;
-        [SerializeField] private RectTransform debugTargetMarker;
         [SerializeField] private string debugSourceCardName;
         [SerializeField] private Vector2 debugSourceCardCenter;
         [SerializeField] private Vector2 debugTargetPoint;
@@ -136,11 +134,6 @@ namespace Wuxing.UI
                 actionButton.gameObject.SetActive(false);
             }
 
-            if (debugTargetMarker != null)
-            {
-                debugTargetMarker.gameObject.SetActive(false);
-            }
-
         }
 
         private void Awake()
@@ -203,8 +196,6 @@ namespace Wuxing.UI
             EnsurePanelVisualRoot();
             EnsureContentOutsidePanel();
             EnsureDismissUnderHostRoot();
-            EnsureDebugMarker();
-
             dismissButton.onClick.RemoveListener(Hide);
             dismissButton.onClick.AddListener(Hide);
             actionButton.onClick.RemoveListener(HandleActionButtonClicked);
@@ -448,30 +439,6 @@ namespace Wuxing.UI
             }
         }
 
-        private void EnsureDebugMarker()
-        {
-            if (debugTargetMarker != null)
-            {
-                return;
-            }
-
-            var markerObject = new GameObject("DebugTargetMarker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            markerObject.transform.SetParent(transform, false);
-
-            var markerRect = markerObject.GetComponent<RectTransform>();
-            markerRect.anchorMin = new Vector2(0.5f, 0.5f);
-            markerRect.anchorMax = new Vector2(0.5f, 0.5f);
-            markerRect.pivot = new Vector2(0.5f, 0.5f);
-            markerRect.sizeDelta = new Vector2(14f, 14f);
-
-            var markerImage = markerObject.GetComponent<Image>();
-            markerImage.color = new Color(1f, 0.18f, 0.18f, 0.95f);
-            markerImage.raycastTarget = false;
-
-            debugTargetMarker = markerRect;
-            markerObject.SetActive(false);
-        }
-
         private void ApplyAssets()
         {
             if (panelImage != null)
@@ -646,13 +613,6 @@ namespace Wuxing.UI
             if (panelVisualRoot != null)
             {
                 panelVisualRoot.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
-            }
-
-            if (debugTargetMarker != null)
-            {
-                debugTargetMarker.anchoredPosition = debugTargetPoint;
-                debugTargetMarker.gameObject.SetActive(showDebugTargetMarker);
-                debugTargetMarker.SetAsLastSibling();
             }
 
             if (titleText != null)

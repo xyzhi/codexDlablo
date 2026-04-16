@@ -96,6 +96,8 @@ namespace Wuxing.UI
         private bool openedForEquipment;
         private BattlePlaybackResult storedBattleResultPlayback;
         private BattleRewardResult storedBattleResultReward;
+        private BattlePlaybackResult activeBattlePlayback;
+        private int nextBattleEventIndex;
         private bool canReopenBattleResultPopup;
         private int displayedBattleRoundCount;
         private int displayedBattleActionCount;
@@ -322,7 +324,8 @@ namespace Wuxing.UI
                 return;
             }
 
-            if (battlePlaybackCoroutine != null)
+            var wasBattlePlaying = battlePlaybackCoroutine != null;
+            if (wasBattlePlaying)
             {
                 StopCoroutine(battlePlaybackCoroutine);
                 battlePlaybackCoroutine = null;
@@ -333,6 +336,11 @@ namespace Wuxing.UI
             var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
             if (popup == null)
             {
+                if (wasBattlePlaying)
+                {
+                    ResumeBattlePlayback();
+                }
+
                 return;
             }
 
@@ -348,7 +356,15 @@ namespace Wuxing.UI
                         : "\u4f60\u5df2\u9003\u79bb\u6218\u6597\uff0c\u9000\u56de\u4e0a\u4e00\u5173\u3002", 2f);
                     UIManager.Instance.ShowPage("Map");
                 },
-                delegate { },
+                delegate
+                {
+                    if (!wasBattlePlaying)
+                    {
+                        return;
+                    }
+
+                    ResumeBattlePlayback();
+                },
                 isEnglish ? "Confirm Retreat" : "\u786e\u8ba4\u64a4\u9000",
                 isEnglish ? "Keep Fighting" : "\u7ee7\u7eed\u6218\u6597");
         }
@@ -360,7 +376,7 @@ namespace Wuxing.UI
             }
 
             SetLogOverlayVisible(true);
-            battlePlaybackCoroutine = StartCoroutine(PlayBattle());
+            StartNewBattlePlayback();
         }
 
         private void OnClickRestart()
@@ -469,23 +485,52 @@ namespace Wuxing.UI
             SetEquipmentPanelVisible(true);
         }
 
-        private IEnumerator PlayBattle()
+        private void StartNewBattlePlayback()
+        {
+            activeBattlePlayback = BattleManager.RunSampleBattlePlayback();
+            nextBattleEventIndex = 0;
+            battlePlaybackCoroutine = StartCoroutine(PlayBattle(false));
+        }
+
+        private void ResumeBattlePlayback()
+        {
+            if (battlePlaybackCoroutine != null)
+            {
+                StopCoroutine(battlePlaybackCoroutine);
+                battlePlaybackCoroutine = null;
+            }
+
+            if (activeBattlePlayback == null)
+            {
+                StartNewBattlePlayback();
+                return;
+            }
+
+            battlePlaybackCoroutine = StartCoroutine(PlayBattle(true));
+        }
+
+        private IEnumerator PlayBattle(bool resumeFromCurrentState)
         {
             SetButtonsInteractable(false);
-            battleLogBuilder.Length = 0;
-            displayedBattleRoundCount = 0;
-            displayedBattleActionCount = 0;
-            ResetLogFollow();
-            ClearTransientBattleEffects();
-            ApplyStatus(LocalizationManager.GetText("battle.status_idle"));
-            ApplyBattleLog(string.Empty);
-            PlayInitialTeamEntryAnimation();
-            yield return new WaitForSeconds(CardEntryDuration * 0.85f);
+            if (!resumeFromCurrentState)
+            {
+                battleLogBuilder.Length = 0;
+                displayedBattleRoundCount = 0;
+                displayedBattleActionCount = 0;
+                ResetLogFollow();
+                ClearTransientBattleEffects();
+                ApplyStatus(LocalizationManager.GetText("battle.status_idle"));
+                ApplyBattleLog(string.Empty);
+                PlayInitialTeamEntryAnimation();
+                yield return new WaitForSeconds(CardEntryDuration * 0.85f);
+            }
 
-            var playback = BattleManager.RunSampleBattlePlayback();
-            for (var i = 0; i < playback.Events.Count; i++)
+            var playback = activeBattlePlayback ?? BattleManager.RunSampleBattlePlayback();
+            activeBattlePlayback = playback;
+            for (var i = nextBattleEventIndex; i < playback.Events.Count; i++)
             {
                 ApplyBattleEvent(playback.Events[i]);
+                nextBattleEventIndex = i + 1;
                 yield return new WaitForSeconds(GetEventDelay(playback.Events[i]));
             }
 
@@ -495,6 +540,8 @@ namespace Wuxing.UI
 
             SetButtonsInteractable(true);
             ShowBattleResultPopup(playback);
+            activeBattlePlayback = null;
+            nextBattleEventIndex = 0;
             battlePlaybackCoroutine = null;
         }
 
@@ -507,6 +554,8 @@ namespace Wuxing.UI
             }
 
             ClearStoredBattleResult();
+            activeBattlePlayback = null;
+            nextBattleEventIndex = 0;
             displayedBattleRoundCount = 0;
             displayedBattleActionCount = 0;
             ClearTransientBattleEffects();
