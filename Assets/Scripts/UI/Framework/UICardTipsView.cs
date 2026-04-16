@@ -9,12 +9,23 @@ namespace Wuxing.UI
         public const string ResourcePath = "Prefabs/UI/CardTips";
 
         [SerializeField] private RectTransform panelRoot;
+        [SerializeField] private RectTransform panelVisualRoot;
         [SerializeField] private Image panelImage;
         [SerializeField] private Button dismissButton;
         [SerializeField] private Text titleText;
         [SerializeField] private Text bodyText;
         [SerializeField] private Button actionButton;
         [SerializeField] private Text actionButtonText;
+        [Header("Debug")]
+        [SerializeField] private bool showDebugTargetMarker = false;
+        [SerializeField] private RectTransform debugTargetMarker;
+        [SerializeField] private string debugSourceCardName;
+        [SerializeField] private Vector2 debugSourceCardCenter;
+        [SerializeField] private Vector2 debugTargetPoint;
+        [SerializeField] private Vector2 debugBubblePivotPosition;
+        [SerializeField] private Vector2 debugBubbleTailPoint;
+        [SerializeField] private bool debugPreferRight;
+        [SerializeField] private Rect debugPlacementRect;
 
         private RectTransform hostRoot;
         private RectTransform dismissLayerRoot;
@@ -59,8 +70,38 @@ namespace Wuxing.UI
 
             dismissButton.gameObject.SetActive(true);
             panelRoot.gameObject.SetActive(true);
+            if (titleText != null)
+            {
+                titleText.gameObject.SetActive(true);
+            }
+
+            if (bodyText != null)
+            {
+                bodyText.gameObject.SetActive(true);
+            }
+
+            if (actionButton != null)
+            {
+                actionButton.gameObject.SetActive(hasAction);
+            }
+
             transform.SetAsLastSibling();
-            panelRoot.SetAsLastSibling();
+            panelRoot.SetSiblingIndex(0);
+            if (titleText != null)
+            {
+                titleText.transform.SetAsLastSibling();
+            }
+
+            if (bodyText != null)
+            {
+                bodyText.transform.SetAsLastSibling();
+            }
+
+            if (actionButton != null)
+            {
+                actionButton.transform.SetAsLastSibling();
+            }
+
             UpdateDismissLayerOrder();
 
             Layout(sourceCard, hasAction);
@@ -78,6 +119,26 @@ namespace Wuxing.UI
             if (panelRoot != null)
             {
                 panelRoot.gameObject.SetActive(false);
+            }
+
+            if (titleText != null)
+            {
+                titleText.gameObject.SetActive(false);
+            }
+
+            if (bodyText != null)
+            {
+                bodyText.gameObject.SetActive(false);
+            }
+
+            if (actionButton != null)
+            {
+                actionButton.gameObject.SetActive(false);
+            }
+
+            if (debugTargetMarker != null)
+            {
+                debugTargetMarker.gameObject.SetActive(false);
             }
 
         }
@@ -139,7 +200,10 @@ namespace Wuxing.UI
                 return;
             }
 
+            EnsurePanelVisualRoot();
+            EnsureContentOutsidePanel();
             EnsureDismissUnderHostRoot();
+            EnsureDebugMarker();
 
             dismissButton.onClick.RemoveListener(Hide);
             dismissButton.onClick.AddListener(Hide);
@@ -173,19 +237,36 @@ namespace Wuxing.UI
                 panelImage = panelRoot.GetComponent<Image>();
             }
 
-            if (titleText == null && panelRoot != null)
+            if (panelVisualRoot == null && panelImage != null)
             {
-                titleText = panelRoot.Find("Title")?.GetComponent<Text>();
+                panelVisualRoot = panelImage.rectTransform;
             }
 
-            if (bodyText == null && panelRoot != null)
+            if (titleText == null)
             {
-                bodyText = panelRoot.Find("Body")?.GetComponent<Text>();
+                titleText = transform.Find("TipsTitle")?.GetComponent<Text>();
+                if (titleText == null && panelRoot != null)
+                {
+                    titleText = panelRoot.Find("Title")?.GetComponent<Text>();
+                }
             }
 
-            if (actionButton == null && panelRoot != null)
+            if (bodyText == null)
             {
-                actionButton = panelRoot.Find("ActionButton")?.GetComponent<Button>();
+                bodyText = transform.Find("TipsBody")?.GetComponent<Text>();
+                if (bodyText == null && panelRoot != null)
+                {
+                    bodyText = panelRoot.Find("Body")?.GetComponent<Text>();
+                }
+            }
+
+            if (actionButton == null)
+            {
+                actionButton = transform.Find("TipsActionButton")?.GetComponent<Button>();
+                if (actionButton == null && panelRoot != null)
+                {
+                    actionButton = panelRoot.Find("ActionButton")?.GetComponent<Button>();
+                }
             }
 
             if (actionButtonText == null && actionButton != null)
@@ -225,6 +306,87 @@ namespace Wuxing.UI
             dismissRect.offsetMax = Vector2.zero;
         }
 
+        private void EnsureContentOutsidePanel()
+        {
+            if (panelRoot == null)
+            {
+                return;
+            }
+
+            ReparentContentRect(titleText != null ? titleText.rectTransform : null, "TipsTitle");
+            ReparentContentRect(bodyText != null ? bodyText.rectTransform : null, "TipsBody");
+            ReparentContentRect(actionButton != null ? actionButton.GetComponent<RectTransform>() : null, "TipsActionButton");
+        }
+
+        private void EnsurePanelVisualRoot()
+        {
+            if (panelRoot == null || panelImage == null)
+            {
+                return;
+            }
+
+            if (panelVisualRoot != null && panelVisualRoot != panelRoot)
+            {
+                panelVisualRoot.anchorMin = Vector2.zero;
+                panelVisualRoot.anchorMax = Vector2.one;
+                panelVisualRoot.pivot = new Vector2(0.5f, 0.5f);
+                panelVisualRoot.offsetMin = Vector2.zero;
+                panelVisualRoot.offsetMax = Vector2.zero;
+                panelVisualRoot.SetAsFirstSibling();
+                return;
+            }
+
+            var sourceImage = panelImage;
+            var visualObject = new GameObject("TipsPanelVisual", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            visualObject.transform.SetParent(panelRoot, false);
+            visualObject.transform.SetSiblingIndex(0);
+
+            var visualRect = visualObject.GetComponent<RectTransform>();
+            visualRect.anchorMin = Vector2.zero;
+            visualRect.anchorMax = Vector2.one;
+            visualRect.pivot = new Vector2(0.5f, 0.5f);
+            visualRect.offsetMin = Vector2.zero;
+            visualRect.offsetMax = Vector2.zero;
+
+            var visualImage = visualObject.GetComponent<Image>();
+            visualImage.sprite = sourceImage.sprite;
+            visualImage.type = sourceImage.type;
+            visualImage.color = sourceImage.color;
+            visualImage.material = sourceImage.material;
+            visualImage.raycastTarget = sourceImage.raycastTarget;
+            visualImage.maskable = sourceImage.maskable;
+            visualImage.preserveAspect = sourceImage.preserveAspect;
+            visualImage.fillCenter = sourceImage.fillCenter;
+            visualImage.fillMethod = sourceImage.fillMethod;
+            visualImage.fillAmount = sourceImage.fillAmount;
+            visualImage.fillClockwise = sourceImage.fillClockwise;
+            visualImage.fillOrigin = sourceImage.fillOrigin;
+            visualImage.useSpriteMesh = sourceImage.useSpriteMesh;
+            visualImage.pixelsPerUnitMultiplier = sourceImage.pixelsPerUnitMultiplier;
+
+            Destroy(sourceImage);
+            panelVisualRoot = visualRect;
+            panelImage = visualImage;
+        }
+
+        private void ReparentContentRect(RectTransform rect, string targetName)
+        {
+            if (rect == null)
+            {
+                return;
+            }
+
+            if (rect.parent != transform)
+            {
+                rect.SetParent(transform, false);
+            }
+
+            if (!string.IsNullOrEmpty(targetName))
+            {
+                rect.name = targetName;
+            }
+        }
+
         private void EnsureFallbackObjects()
         {
             if (dismissButton == null)
@@ -251,24 +413,24 @@ namespace Wuxing.UI
                 rect.sizeDelta = new Vector2(380f, 280f);
             }
 
-            if (titleText == null && panelRoot != null)
+            if (titleText == null)
             {
-                CreateText("Title", panelRoot, 28, FontStyle.Bold);
+                CreateText("TipsTitle", transform as RectTransform, 28, FontStyle.Bold);
             }
 
-            if (bodyText == null && panelRoot != null)
+            if (bodyText == null)
             {
-                var body = CreateText("Body", panelRoot, 22, FontStyle.Normal);
+                var body = CreateText("TipsBody", transform as RectTransform, 22, FontStyle.Normal);
                 body.alignment = TextAnchor.UpperLeft;
                 body.horizontalOverflow = HorizontalWrapMode.Wrap;
                 body.verticalOverflow = VerticalWrapMode.Overflow;
                 body.lineSpacing = 1.15f;
             }
 
-            if (actionButton == null && panelRoot != null)
+            if (actionButton == null)
             {
-                var actionObject = new GameObject("ActionButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
-                actionObject.transform.SetParent(panelRoot, false);
+                var actionObject = new GameObject("TipsActionButton", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
+                actionObject.transform.SetParent(transform, false);
                 var actionRect = actionObject.GetComponent<RectTransform>();
                 actionRect.anchorMin = new Vector2(0.5f, 0f);
                 actionRect.anchorMax = new Vector2(0.5f, 0f);
@@ -286,12 +448,39 @@ namespace Wuxing.UI
             }
         }
 
+        private void EnsureDebugMarker()
+        {
+            if (debugTargetMarker != null)
+            {
+                return;
+            }
+
+            var markerObject = new GameObject("DebugTargetMarker", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            markerObject.transform.SetParent(transform, false);
+
+            var markerRect = markerObject.GetComponent<RectTransform>();
+            markerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            markerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            markerRect.pivot = new Vector2(0.5f, 0.5f);
+            markerRect.sizeDelta = new Vector2(14f, 14f);
+
+            var markerImage = markerObject.GetComponent<Image>();
+            markerImage.color = new Color(1f, 0.18f, 0.18f, 0.95f);
+            markerImage.raycastTarget = false;
+
+            debugTargetMarker = markerRect;
+            markerObject.SetActive(false);
+        }
+
         private void ApplyAssets()
         {
             if (panelImage != null)
             {
-                panelImage.sprite = backgroundSprite;
-                panelImage.type = backgroundSprite != null ? Image.Type.Sliced : Image.Type.Simple;
+                if (backgroundSprite != null)
+                {
+                    panelImage.sprite = backgroundSprite;
+                    panelImage.type = Image.Type.Sliced;
+                }
                 panelImage.color = new Color(1f, 1f, 1f, 0.98f);
                 panelImage.raycastTarget = true;
             }
@@ -301,8 +490,11 @@ namespace Wuxing.UI
                 var image = actionButton.GetComponent<Image>();
                 if (image != null)
                 {
-                    image.sprite = buttonSprite;
-                    image.type = buttonSprite != null ? Image.Type.Sliced : Image.Type.Simple;
+                    if (buttonSprite != null)
+                    {
+                        image.sprite = buttonSprite;
+                        image.type = Image.Type.Sliced;
+                    }
                     image.color = new Color(0.96f, 0.93f, 0.86f, 1f);
                 }
 
@@ -336,9 +528,9 @@ namespace Wuxing.UI
             if (actionButtonText != null)
             {
                 actionButtonText.font = titleFont;
-                actionButtonText.color = new Color(0.22f, 0.14f, 0.08f, 1f);
+                actionButtonText.color = new Color(0.95f, 0.9f, 0.78f, 1f);
                 actionButtonText.alignment = TextAnchor.MiddleCenter;
-                EnsureOutline(actionButtonText, new Color(1f, 1f, 1f, 0.18f), new Vector2(1f, -1f));
+                EnsureOutline(actionButtonText, new Color(0.18f, 0.12f, 0.08f, 0.75f), new Vector2(1f, -1f));
             }
         }
 
@@ -360,91 +552,169 @@ namespace Wuxing.UI
             const float bottomPadding = 26f;
             const float titleHeight = 34f;
             const float buttonHeight = 44f;
-            const float tailAnchorX = 20f;
-            const float tailAnchorYFromBottom = 28f;
-
             var rootRect = hostRoot.rect;
+            var placementRect = ResolvePlacementRect();
+            debugPlacementRect = placementRect;
             var corners = new Vector3[4];
             sourceCard.GetWorldCorners(corners);
             var localBottomLeft = hostRoot.InverseTransformPoint(corners[0]);
             var localTopRight = hostRoot.InverseTransformPoint(corners[2]);
+            var cardCenterX = (localBottomLeft.x + localTopRight.x) * 0.5f;
             var cardCenterY = (localBottomLeft.y + localTopRight.y) * 0.5f;
+            debugSourceCardName = sourceCard.name;
+            debugSourceCardCenter = new Vector2(cardCenterX, cardCenterY);
+            debugTargetPoint = debugSourceCardCenter;
 
+            var preferRight = true;
+            var candidatePivotX = cardCenterX;
+            if (candidatePivotX + bubbleWidth > placementRect.xMax - screenPadding)
+            {
+                preferRight = false;
+                candidatePivotX = cardCenterX;
+            }
+            debugPreferRight = preferRight;
+
+            if (preferRight)
+            {
+                candidatePivotX = Mathf.Clamp(candidatePivotX, placementRect.xMin + screenPadding, placementRect.xMax - screenPadding - bubbleWidth);
+            }
+            else
+            {
+                candidatePivotX = Mathf.Clamp(candidatePivotX, placementRect.xMin + screenPadding + bubbleWidth, placementRect.xMax - screenPadding);
+            }
+
+            var registrationPivot = preferRight ? new Vector2(0f, 0f) : new Vector2(1f, 0f);
             var bodyWidth = bubbleWidth - sidePadding * 2f;
-            titleText.rectTransform.anchorMin = new Vector2(0f, 1f);
-            titleText.rectTransform.anchorMax = new Vector2(0f, 1f);
-            titleText.rectTransform.pivot = new Vector2(0f, 1f);
-            titleText.rectTransform.sizeDelta = new Vector2(bodyWidth, titleHeight);
-            titleText.rectTransform.anchoredPosition = new Vector2(sidePadding, -topPadding);
+            var titleRect = titleText.rectTransform;
+            var bodyRect = bodyText.rectTransform;
+            var textAnchor = preferRight ? new Vector2(0f, 1f) : new Vector2(1f, 1f);
 
-            bodyText.rectTransform.anchorMin = new Vector2(0f, 1f);
-            bodyText.rectTransform.anchorMax = new Vector2(0f, 1f);
-            bodyText.rectTransform.pivot = new Vector2(0f, 1f);
-            bodyText.rectTransform.sizeDelta = new Vector2(bodyWidth, 100f);
-            bodyText.rectTransform.anchoredPosition = new Vector2(sidePadding, -(topPadding + titleHeight + 10f));
+            titleRect.anchorMin = new Vector2(0.5f, 0.5f);
+            titleRect.anchorMax = new Vector2(0.5f, 0.5f);
+            titleRect.pivot = textAnchor;
+            titleRect.sizeDelta = new Vector2(bodyWidth, titleHeight);
+
+            bodyRect.anchorMin = new Vector2(0.5f, 0.5f);
+            bodyRect.anchorMax = new Vector2(0.5f, 0.5f);
+            bodyRect.pivot = textAnchor;
+            bodyRect.sizeDelta = new Vector2(bodyWidth, 100f);
             bodyText.horizontalOverflow = HorizontalWrapMode.Wrap;
 
             Canvas.ForceUpdateCanvases();
             var bodyHeight = Mathf.Clamp(bodyText.preferredHeight, 72f, 340f);
-            bodyText.rectTransform.sizeDelta = new Vector2(bodyWidth, bodyHeight);
+            bodyRect.sizeDelta = new Vector2(bodyWidth, bodyHeight);
 
             var actionHeight = hasAction ? buttonHeight + buttonSpacing : 0f;
             var bubbleHeight = Mathf.Clamp(topPadding + titleHeight + 10f + bodyHeight + actionHeight + bottomPadding, minBubbleHeight, maxBubbleHeight);
             panelRoot.sizeDelta = new Vector2(bubbleWidth, bubbleHeight);
             panelRoot.anchorMin = new Vector2(0.5f, 0.5f);
             panelRoot.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRoot.pivot = new Vector2(0f, 0f);
+            panelRoot.pivot = registrationPivot;
+
+            var candidatePivotY = Mathf.Clamp(
+                cardCenterY,
+                rootRect.yMin + screenPadding,
+                rootRect.yMax - screenPadding - bubbleHeight);
+
+            var panelLeft = preferRight ? candidatePivotX : candidatePivotX - bubbleWidth;
+            var panelRight = panelLeft + bubbleWidth;
+            var panelBottom = candidatePivotY;
+            var panelTop = panelBottom + bubbleHeight;
+            var textX = preferRight ? panelLeft + sidePadding : panelRight - sidePadding;
+
+            titleRect.anchoredPosition = new Vector2(textX, panelTop - topPadding);
+            bodyRect.anchoredPosition = new Vector2(textX, panelTop - (topPadding + titleHeight + 10f));
 
             actionButton.gameObject.SetActive(hasAction);
             if (hasAction)
             {
-                actionButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 18f);
+                var actionRect = actionButton.GetComponent<RectTransform>();
+                if (actionRect != null)
+                {
+                    actionRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    actionRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    actionRect.pivot = new Vector2(0.5f, 0f);
+                    actionRect.anchoredPosition = new Vector2(panelLeft + bubbleWidth * 0.5f, panelBottom + 18f);
+                }
             }
-
-            var preferRight = true;
-            var candidatePivotX = localTopRight.x + horizontalGap - tailAnchorX;
-            if (candidatePivotX + bubbleWidth > rootRect.xMax - screenPadding)
-            {
-                preferRight = false;
-                candidatePivotX = localBottomLeft.x - horizontalGap + tailAnchorX;
-            }
-
-            if (preferRight)
-            {
-                candidatePivotX = Mathf.Clamp(candidatePivotX, rootRect.xMin + screenPadding, rootRect.xMax - screenPadding - bubbleWidth);
-            }
-            else
-            {
-                candidatePivotX = Mathf.Clamp(candidatePivotX, rootRect.xMin + screenPadding + bubbleWidth, rootRect.xMax - screenPadding);
-            }
-
-            var candidatePivotY = Mathf.Clamp(
-                cardCenterY - tailAnchorYFromBottom,
-                rootRect.yMin + screenPadding,
-                rootRect.yMax - screenPadding - bubbleHeight);
 
             panelRoot.anchoredPosition = new Vector2(candidatePivotX, candidatePivotY);
-            panelRoot.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+            debugBubblePivotPosition = panelRoot.anchoredPosition;
+            debugBubbleTailPoint = panelRoot.anchoredPosition;
+            panelRoot.localScale = Vector3.one;
+
+            if (panelVisualRoot != null)
+            {
+                panelVisualRoot.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+            }
+
+            if (debugTargetMarker != null)
+            {
+                debugTargetMarker.anchoredPosition = debugTargetPoint;
+                debugTargetMarker.gameObject.SetActive(showDebugTargetMarker);
+                debugTargetMarker.SetAsLastSibling();
+            }
 
             if (titleText != null)
             {
-                titleText.rectTransform.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+                titleText.rectTransform.localScale = Vector3.one;
             }
 
             if (bodyText != null)
             {
-                bodyText.rectTransform.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+                bodyText.rectTransform.localScale = Vector3.one;
             }
 
             if (actionButton != null)
             {
-                actionButton.GetComponent<RectTransform>().localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+                actionButton.GetComponent<RectTransform>().localScale = Vector3.one;
             }
 
             if (actionButtonText != null)
             {
-                actionButtonText.rectTransform.localScale = new Vector3(preferRight ? 1f : -1f, 1f, 1f);
+                actionButtonText.rectTransform.localScale = Vector3.one;
             }
+        }
+
+        private Rect ResolvePlacementRect()
+        {
+            if (hostRoot == null)
+            {
+                return new Rect(-960f, -540f, 1920f, 1080f);
+            }
+
+            var hasBounds = false;
+            var min = Vector2.zero;
+            var max = Vector2.zero;
+            for (var i = 0; i < dismissBelowRoots.Length; i++)
+            {
+                var rect = dismissBelowRoots[i];
+                if (rect == null)
+                {
+                    continue;
+                }
+
+                var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(hostRoot, rect);
+                var boundsMin = new Vector2(bounds.min.x, bounds.min.y);
+                var boundsMax = new Vector2(bounds.max.x, bounds.max.y);
+                if (!hasBounds)
+                {
+                    min = boundsMin;
+                    max = boundsMax;
+                    hasBounds = true;
+                    continue;
+                }
+
+                min = Vector2.Min(min, boundsMin);
+                max = Vector2.Max(max, boundsMax);
+            }
+
+            if (!hasBounds)
+            {
+                return hostRoot.rect;
+            }
+
+            return Rect.MinMaxRect(min.x, min.y, max.x, max.y);
         }
 
         private void UpdateDismissLayerOrder()

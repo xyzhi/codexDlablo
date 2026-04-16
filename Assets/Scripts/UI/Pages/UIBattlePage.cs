@@ -1140,7 +1140,7 @@ namespace Wuxing.UI
                 return;
             }
 
-            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            var popup = UIManager.Instance.ShowPopup<UIRewardChoicePopup>("RewardChoice");
             if (popup == null)
             {
                 ClearStoredBattleResult();
@@ -1148,13 +1148,10 @@ namespace Wuxing.UI
                 return;
             }
 
-            var labels = new List<string>();
             var actions = new List<System.Action>();
             for (var i = 0; i < options.Count && i < 3; i++)
             {
                 var capturedIndex = i;
-                var option = options[i];
-                labels.Add(BuildSkillRewardChoiceLabel(option, isEnglish));
                 actions.Add(delegate
                 {
                     var appliedOption = GameProgressManager.ApplyPendingSkillReward(capturedIndex);
@@ -1168,26 +1165,17 @@ namespace Wuxing.UI
                 });
             }
 
-            labels.Add(LocalizationManager.GetText("battle.button_review"));
-            actions.Add(delegate
-            {
-                MarkBattleResultAsReviewable();
-            });
-
-            var message = new StringBuilder();
-            message.Append(BuildVictoryChoiceMessage(playback, reward, isEnglish));
-            for (var i = 0; i < options.Count && i < 3; i++)
-            {
-                message.Append("\n\n");
-                message.Append(isEnglish ? "Option " : "选项").Append(i + 1).Append(isEnglish ? "\n" : "\n");
-                message.Append(BuildSkillRewardOptionText(options[i], isEnglish));
-            }
-
-            popup.SetupChoices(
+            popup.SetupSkillRewards(
                 BuildVictoryChoiceTitle(isEnglish),
                 BuildVictoryChoiceMessage(playback, reward, isEnglish),
-                labels,
-                actions);
+                options,
+                actions,
+                LocalizationManager.GetText("battle.button_review"),
+                delegate
+                {
+                    MarkBattleResultAsReviewable();
+                },
+                isEnglish);
         }
 
         private void StoreBattleResult(BattlePlaybackResult playback, BattleRewardResult reward)

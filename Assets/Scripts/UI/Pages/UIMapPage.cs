@@ -82,6 +82,7 @@ namespace Wuxing.UI
         private Sequence moveSequence;
         private int selectedStage;
         private bool isMoving;
+        private UICardTipsView sharedNodeTipsView;
         private RectTransform activeIconRect;
         private RectTransform activeLabelRect;
         private RectTransform activeGlowRect;
@@ -170,6 +171,7 @@ namespace Wuxing.UI
         private void OnClickEnter()
         {
             if (isMoving) return;
+            HideNodeTips();
             var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             ShowArrivalToast(currentStage);
             TriggerStageEvent(currentStage);
@@ -237,6 +239,18 @@ namespace Wuxing.UI
             RefreshView();
         }
 
+        private void OnClickNodeStage(int stage, RectTransform sourceRect)
+        {
+            if (isMoving)
+            {
+                return;
+            }
+
+            selectedStage = stage;
+            RefreshView();
+            ShowNodeTips(stage, sourceRect);
+        }
+
         private void ShowLifespanEndedPopup()
         {
             isMoving = false;
@@ -267,6 +281,7 @@ namespace Wuxing.UI
         private void StartMoveToStage(int targetStage, bool triggerEventAfterMove)
         {
             if (isMoving) return;
+            HideNodeTips();
             if (moveSequence != null && moveSequence.IsActive())
             {
                 moveSequence.Kill();
@@ -392,6 +407,87 @@ namespace Wuxing.UI
             if (UIManager.Instance != null)
             {
                 UIManager.Instance.ShowToast(BuildArrivalToast(stage), MapToastDuration);
+            }
+        }
+
+        private void EnsureNodeTipsUI()
+        {
+            if (sharedNodeTipsView != null)
+            {
+                return;
+            }
+
+            var root = transform as RectTransform;
+            if (root == null)
+            {
+                return;
+            }
+
+            var prefab = Resources.Load<GameObject>(UICardTipsView.ResourcePath);
+            if (prefab == null)
+            {
+                return;
+            }
+
+            var instance = Instantiate(prefab, root, false);
+            sharedNodeTipsView = instance.GetComponent<UICardTipsView>();
+            if (sharedNodeTipsView == null)
+            {
+                return;
+            }
+
+            sharedNodeTipsView.Bind(
+                root,
+                null,
+                null,
+                nodeDetailText != null ? nodeDetailText.font : null,
+                nodeDetailText != null ? nodeDetailText.font : null,
+                backButton != null ? backButton.GetComponent<RectTransform>() : null,
+                nodeGraphRoot);
+        }
+
+        private void ShowNodeTips(int stage, RectTransform sourceRect)
+        {
+            EnsureNodeTipsUI();
+            if (sharedNodeTipsView == null || sourceRect == null)
+            {
+                return;
+            }
+
+            var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
+            var isEnglish = IsEnglish();
+            var canReach = GameProgressManager.CanTravelToStage(stage);
+            var isCurrentStage = stage == currentStage;
+            var title = (isEnglish ? "Stage " : "第 ") + stage + (isEnglish ? "  " : " 节  ") + GameProgressManager.GetNodeTypeLabel(isEnglish, stage);
+            var body = BuildNodeTipsDetail(isEnglish, currentStage, stage);
+            var actionLabel = isEnglish ? "Explore" : "探索";
+            Action action = null;
+
+            if (isCurrentStage)
+            {
+                action = delegate
+                {
+                    HideNodeTips();
+                    OnClickEnter();
+                };
+            }
+            else if (canReach)
+            {
+                action = delegate
+                {
+                    HideNodeTips();
+                    StartMoveToStage(stage, true);
+                };
+            }
+
+            sharedNodeTipsView.Show(sourceRect, title, body, actionLabel, action);
+        }
+
+        private void HideNodeTips()
+        {
+            if (sharedNodeTipsView != null)
+            {
+                sharedNodeTipsView.Hide();
             }
         }
 
@@ -642,7 +738,7 @@ namespace Wuxing.UI
                 return;
             }
 
-            var popup = UIManager.Instance.ShowPopup<UIConfirmPopup>("Confirm");
+            var popup = UIManager.Instance.ShowPopup<UIRewardChoicePopup>("RewardChoice");
             if (popup == null)
             {
                 var applied = GameProgressManager.ApplyPendingSkillReward(0);
@@ -650,12 +746,10 @@ namespace Wuxing.UI
                 return;
             }
 
-            var choiceLabels = new List<string>();
             var choiceActions = new List<Action>();
             for (var i = 0; i < options.Count; i++)
             {
                 var capturedIndex = i;
-                choiceLabels.Add(BuildMapSkillRewardChoiceLabel(options[i], isEnglish));
                 choiceActions.Add(delegate
                 {
                     var applied = GameProgressManager.ApplyPendingSkillReward(capturedIndex);
@@ -663,11 +757,14 @@ namespace Wuxing.UI
                 });
             }
 
-            popup.SetupChoices(
+            popup.SetupSkillRewards(
                 LocalizationManager.GetText(option.SelectionTitleKey),
                 LocalizationManager.GetText(option.SelectionMessageKey),
-                choiceLabels,
-                choiceActions);
+                options,
+                choiceActions,
+                string.Empty,
+                null,
+                isEnglish);
         }
 
         private void FinalizeConfiguredSkillReward(int stage, EventOptionConfig option, SkillRewardOption appliedOption, bool isEnglish, bool isRandomEvent)
@@ -990,6 +1087,7 @@ namespace Wuxing.UI
             var currentStage = Mathf.Max(1, GameProgressManager.GetCurrentStage());
             var maxReachableStage = GameProgressManager.GetMaxReachableStage();
             selectedStage = Mathf.Clamp(selectedStage <= 0 ? currentStage : selectedStage, 1, Mathf.Max(currentStage, maxReachableStage));
+            HideNodeTips();
             RefreshBackground(currentStage);
 
             if (titleText != null)
@@ -1176,7 +1274,8 @@ namespace Wuxing.UI
 
                 nodeButtons[i].onClick.RemoveAllListeners();
                 var capturedStage = stage;
-                nodeButtons[i].onClick.AddListener(delegate { OnClickNodeStage(capturedStage); });
+                var capturedRect = nodeButtons[i].GetComponent<RectTransform>();
+                nodeButtons[i].onClick.AddListener(delegate { OnClickNodeStage(capturedStage, capturedRect); });
                 nodeButtons[i].transform.SetAsLastSibling();
 
                 if (i > 0)
@@ -1651,16 +1750,21 @@ namespace Wuxing.UI
 
         private string BuildSelectedNodeDetail(bool isEnglish, int currentStage)
         {
-            var selectedNodeType = GameProgressManager.GetNodeType(selectedStage);
-            var canReach = GameProgressManager.CanTravelToStage(selectedStage);
-            var monthCost = Mathf.Max(1, Mathf.Abs(selectedStage - currentStage));
-            var eventMode = GameProgressManager.GetStageEventMode(selectedStage);
+            return BuildNodeTipsDetail(isEnglish, currentStage, selectedStage);
+        }
+
+        private string BuildNodeTipsDetail(bool isEnglish, int currentStage, int stage)
+        {
+            var selectedNodeType = GameProgressManager.GetNodeType(stage);
+            var canReach = GameProgressManager.CanTravelToStage(stage);
+            var monthCost = Mathf.Max(1, Mathf.Abs(stage - currentStage));
+            var eventMode = GameProgressManager.GetStageEventMode(stage);
 
             var builder = new StringBuilder();
             builder.Append(isEnglish ? "Stage " : "\u7b2c ")
-                .Append(selectedStage)
+                .Append(stage)
                 .Append(isEnglish ? "  " : " \u8282  ")
-                .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, selectedStage))
+                .Append(GameProgressManager.GetNodeTypeLabel(isEnglish, stage))
                 .Append('\n')
                 .Append(isEnglish ? "Travel: " : "\u8017\u65f6\uff1a")
                 .Append(monthCost)
@@ -1678,7 +1782,7 @@ namespace Wuxing.UI
                         : (isEnglish ? "Fixed" : "\u56fa\u5b9a"));
             }
 
-            var detail = GameProgressManager.BuildNodeDetail(isEnglish, selectedStage);
+            var detail = GameProgressManager.BuildNodeDetail(isEnglish, stage);
             if (!string.IsNullOrEmpty(detail))
             {
                 builder.Append('\n').Append('\n').Append(detail);

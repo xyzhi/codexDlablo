@@ -168,6 +168,7 @@ namespace Wuxing.UI
             _popupPrefabPaths["Skill"] = "Prefabs/UI/Popups/SkillPopup";
             _popupPrefabPaths["Story"] = "Prefabs/UI/Popups/StoryPopup";
             _popupPrefabPaths["Dialog"] = "Prefabs/UI/Popups/DialogPopup";
+            _popupPrefabPaths["RewardChoice"] = "Prefabs/UI/Popups/RewardChoicePopup";
             _popupPrefabPaths["SpiritConvert"] = "Prefabs/UI/Popups/SpiritStoneConvertPopup";
         }
 
