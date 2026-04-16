@@ -10,6 +10,7 @@ namespace Wuxing.UI
     public class UICheatRuntimeOverlay : MonoBehaviour
     {
         private static readonly string[] Elements = { "Metal", "Wood", "Water", "Fire", "Earth" };
+        private static Sprite sharedButtonSprite;
 
         private GameObject popupRoot;
         private Text titleText;
@@ -536,6 +537,13 @@ namespace Wuxing.UI
             rect.anchorMax = new Vector2(x2, y2);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+            var image = button.GetComponent<Image>();
+            if (image != null)
+            {
+                image.sprite = GetSharedButtonSprite();
+                image.type = Image.Type.Sliced;
+                image.color = Color.white;
+            }
             return button;
         }
 
@@ -560,6 +568,16 @@ namespace Wuxing.UI
         {
             var label = button.transform.Find("Label");
             return label != null ? label.GetComponent<Text>() : null;
+        }
+
+        private static Sprite GetSharedButtonSprite()
+        {
+            if (sharedButtonSprite == null)
+            {
+                sharedButtonSprite = Resources.Load<Sprite>("UI/Buttons/btnBgCommon2");
+            }
+
+            return sharedButtonSprite;
         }
 
         private static void CreateSectionLine(Transform parent, float y)
