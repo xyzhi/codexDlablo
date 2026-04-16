@@ -11,6 +11,7 @@
 .vs/
 .vscode/
 *.csproj
+*.csproj.meta
 *.sln
 *.suo
 *.user
