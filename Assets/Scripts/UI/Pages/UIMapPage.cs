@@ -33,6 +33,7 @@ namespace Wuxing.UI
         private static readonly Color NodeLabelCurrentOutlineColor = new Color(0.14f, 0.11f, 0.06f, 0.74f);
         private static readonly Color NodeIconShadowColor = new Color(0f, 0f, 0f, 0.24f);
         private static readonly Color NodeIconCurrentShadowColor = new Color(0.2f, 0.16f, 0.09f, 0.42f);
+        private static readonly Color NodeGlowColor = new Color(1f, 0.9f, 0.72f, 0.4f);
         private static readonly Color NodeGlowCurrentColor = new Color(1f, 1f, 1f, 0.8f);
         private static readonly float[] NodeVerticalPattern = { -330f, -110f, 110f, 330f, 550f };
         private const float SnakeSideOffset = 96f;
@@ -1154,14 +1155,14 @@ namespace Wuxing.UI
                 if (glow != null)
                 {
                     glow.sprite = icon != null ? icon.sprite : null;
-                    glow.color = NodeGlowCurrentColor;
+                    glow.color = stage == currentStage ? NodeGlowCurrentColor : NodeGlowColor;
                     glow.material = GetNodeGlowMaterial();
-                    glow.rectTransform.localScale = Vector3.one;
+                    glow.rectTransform.localScale = stage == currentStage ? Vector3.one : Vector3.one * 1.04f;
                     if (glow.sprite != null)
                     {
                         glow.SetNativeSize();
                     }
-                    glow.gameObject.SetActive(stage == currentStage && glow.sprite != null);
+                    glow.gameObject.SetActive(glow.sprite != null);
                 }
 
                 if (stage == currentStage)

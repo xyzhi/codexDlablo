@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Wuxing.Localization;
@@ -7,12 +8,21 @@ namespace Wuxing.UI
 {
     public class UIManager : MonoBehaviour
     {
+        private const float BgmFadeDuration = 0.65f;
+
         private readonly Dictionary<string, string> _pagePrefabPaths = new Dictionary<string, string>();
         private readonly Dictionary<string, string> _popupPrefabPaths = new Dictionary<string, string>();
         private readonly Stack<UIPopup> _popupStack = new Stack<UIPopup>();
 
         private UICanvasRoot _canvasRoot;
         private UIPage _currentPage;
+        private AudioSource _primaryMusicSource;
+        private AudioSource _secondaryMusicSource;
+        private Coroutine _bgmFadeCoroutine;
+        private AudioClip _normalMusicClip;
+        private AudioClip _battleMusicClip;
+        private AudioClip _currentMusicClip;
+        private float _musicVolume = 0.56f;
 
         public static UIManager Instance { get; private set; }
 
@@ -26,6 +36,7 @@ namespace Wuxing.UI
 
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            InitializeMusicSources();
             CreateCanvasRoot();
             RegisterDefaults();
         }
@@ -52,6 +63,7 @@ namespace Wuxing.UI
 
             _currentPage.OnOpen(data);
             _canvasRoot.RefreshFonts(_currentPage.transform);
+            UpdateBgmForPage(pageId);
         }
 
         public T ShowPopup<T>(string popupId, object data = null) where T : UIPopup
@@ -159,6 +171,95 @@ namespace Wuxing.UI
             _popupPrefabPaths["SpiritConvert"] = "Prefabs/UI/Popups/SpiritStoneConvertPopup";
         }
 
+        private void InitializeMusicSources()
+        {
+            _primaryMusicSource = CreateMusicSource("MusicSourceA");
+            _secondaryMusicSource = CreateMusicSource("MusicSourceB");
+            _normalMusicClip = Resources.Load<AudioClip>("Audio/normal");
+            _battleMusicClip = Resources.Load<AudioClip>("Audio/battle");
+
+            if (_normalMusicClip == null)
+            {
+                Debug.LogWarning("BGM clip not found: Resources/Audio/normal");
+            }
+
+            if (_battleMusicClip == null)
+            {
+                Debug.LogWarning("BGM clip not found: Resources/Audio/battle");
+            }
+        }
+
+        private AudioSource CreateMusicSource(string sourceName)
+        {
+            var sourceObject = new GameObject(sourceName);
+            sourceObject.transform.SetParent(transform, false);
+            var source = sourceObject.AddComponent<AudioSource>();
+            source.playOnAwake = false;
+            source.loop = true;
+            source.volume = 0f;
+            return source;
+        }
+
+        private void UpdateBgmForPage(string pageId)
+        {
+            var targetClip = pageId == "Battle" ? _battleMusicClip : _normalMusicClip;
+            PlayBgm(targetClip);
+        }
+
+        private void PlayBgm(AudioClip targetClip)
+        {
+            if (targetClip == null || _currentMusicClip == targetClip)
+            {
+                return;
+            }
+
+            _currentMusicClip = targetClip;
+            if (_bgmFadeCoroutine != null)
+            {
+                StopCoroutine(_bgmFadeCoroutine);
+            }
+
+            _bgmFadeCoroutine = StartCoroutine(FadeToBgm(targetClip));
+        }
+
+        private IEnumerator FadeToBgm(AudioClip targetClip)
+        {
+            var outgoing = _primaryMusicSource;
+            var incoming = _secondaryMusicSource;
+            if (incoming == null || outgoing == null)
+            {
+                yield break;
+            }
+
+            incoming.clip = targetClip;
+            incoming.volume = 0f;
+            if (!incoming.isPlaying)
+            {
+                incoming.Play();
+            }
+
+            var time = 0f;
+            var startOutgoingVolume = outgoing.volume;
+            while (time < BgmFadeDuration)
+            {
+                time += Time.unscaledDeltaTime;
+                var t = Mathf.Clamp01(time / BgmFadeDuration);
+                var eased = t * t * (3f - 2f * t);
+                outgoing.volume = Mathf.Lerp(startOutgoingVolume, 0f, eased);
+                incoming.volume = Mathf.Lerp(0f, _musicVolume, eased);
+                yield return null;
+            }
+
+            outgoing.Stop();
+            outgoing.clip = null;
+            outgoing.volume = 0f;
+            incoming.volume = _musicVolume;
+
+            _primaryMusicSource = incoming;
+            _secondaryMusicSource = outgoing;
+            _bgmFadeCoroutine = null;
+        }
+
         private static UIPage InstantiatePage(string prefabPath, Transform parent)
         {
             var prefab = Resources.Load<GameObject>(prefabPath);
@@ -198,9 +299,3 @@ namespace Wuxing.UI
         }
     }
 }
-
-
-
-
-
-
