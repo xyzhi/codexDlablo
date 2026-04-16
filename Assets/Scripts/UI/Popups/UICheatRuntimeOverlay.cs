@@ -31,6 +31,7 @@ namespace Wuxing.UI
         private Text skillLevelLabelText;
         private InputField skillLevelInputField;
         private Text runButtonText;
+        private Text clearCacheButtonText;
         private Text stoneButtonText;
         private Text all500ButtonText;
         private Text all5000ButtonText;
@@ -142,7 +143,8 @@ namespace Wuxing.UI
             scrollRect.content.sizeDelta = new Vector2(0f, 1480f);
             var content = scrollRect.content;
 
-            runButtonText = GetButtonLabel(CreateAccentButton(content, "RunButton", string.Empty, OnRun, 0f, 0.93f, 1f, 0.99f));
+            runButtonText = GetButtonLabel(CreateAccentButton(content, "RunButton", string.Empty, OnRun, 0f, 0.945f, 0.58f, 0.99f));
+            clearCacheButtonText = GetButtonLabel(CreateButton(content, "ClearCacheButton", string.Empty, ClearCache, 0.62f, 0.945f, 1f, 0.99f));
 
             CreateSectionLine(content, 0.88f);
             stonesSectionText = CreateSectionTitle(content, 0.845f);
@@ -224,6 +226,12 @@ namespace Wuxing.UI
             }
         }
 
+        private void ClearCache()
+        {
+            GameProgressManager.DebugClearCache();
+            RefreshAll();
+        }
+
         private void GrantCurrentStone()
         {
             GameProgressManager.DebugGrantSpiritStones(Elements[elementIndex], amount);
@@ -249,7 +257,7 @@ namespace Wuxing.UI
 
         private void JumpToLastStage()
         {
-            GameProgressManager.DebugJumpToStage(GameProgressManager.GetMaxStage());
+            GameProgressManager.DebugJumpToStage(Mathf.Max(1, GameProgressManager.GetMaxStage()));
         }
 
         private void GrantEquipment()
@@ -332,7 +340,8 @@ namespace Wuxing.UI
             }
 
             elementIndex = Wrap(elementIndex, Elements.Length);
-            targetStage = Mathf.Clamp(targetStage, 1, Mathf.Max(1, GameProgressManager.GetMaxStage()));
+            var maxStage = Mathf.Max(1, GameProgressManager.GetMaxStage());
+            targetStage = Mathf.Clamp(targetStage, 1, maxStage);
             targetLevel = Mathf.Clamp(targetLevel, 1, 999);
             skillLevel = Mathf.Clamp(skillLevel, 1, 99);
 
@@ -351,6 +360,7 @@ namespace Wuxing.UI
 
             closeButtonText.text = LocalizationManager.GetText("common.button_close");
             runButtonText.text = GameProgressManager.HasActiveRun() ? T("cheat.button_reset_run") : T("cheat.button_start_run");
+            clearCacheButtonText.text = T("cheat.button_clear_cache");
             elementText.text = GameProgressManager.GetSpiritStoneName(Elements[elementIndex], false);
             amountLabelText.text = T("cheat.label_amount");
             SetInputValue(amountInputField, amount);
@@ -366,7 +376,7 @@ namespace Wuxing.UI
             all5000ButtonText.text = T("cheat.button_grant_all_5000");
             applyLevelButtonText.text = T("cheat.button_apply_level");
             jumpStageButtonText.text = T("cheat.button_jump_stage");
-            jumpLastButtonText.text = T("cheat.button_jump_last");
+            jumpLastButtonText.text = T("cheat.button_jump_last") + " (" + maxStage + ")";
             grantEquipmentButtonText.text = T("cheat.button_grant_equipment");
             grantAllEquipmentButtonText.text = T("cheat.button_grant_all_equipment");
             grantSkillButtonText.text = T("cheat.button_grant_skill");

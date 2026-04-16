@@ -34,7 +34,7 @@ namespace Wuxing.Game
         private const string ActiveEffectsPrefKey = "game.progress.active_effects";
         private const string RunDataSnapshotPrefKey = "game.progress.run_data_snapshot";
         private const string EquipmentInstanceCounterPrefKey = "game.progress.equipment_instance_counter";
-        private const int DefaultMaxStage = 100;
+        private const int MinimumMaxStage = 1;
         private const int LifetimeMonths = 360;
 
         private static readonly string[] BaseOwnedEquipmentIds =
@@ -76,6 +76,34 @@ namespace Wuxing.Game
         private readonly List<RunEffectData> activeEffects = new List<RunEffectData>();
         private int equipmentInstanceCounter;
 
+        private static readonly string[] ProgressPrefKeys =
+        {
+            CurrentStagePrefKey,
+            HighestClearedStagePrefKey,
+            LastBattleStagePrefKey,
+            LastBattleRoundsPrefKey,
+            LastBattleVictoryPrefKey,
+            HasLastBattlePrefKey,
+            ElapsedMonthsPrefKey,
+            CultivationLevelPrefKey,
+            CultivationExpPrefKey,
+            SpiritStonesPrefKey,
+            MetalSpiritStonesPrefKey,
+            WoodSpiritStonesPrefKey,
+            WaterSpiritStonesPrefKey,
+            FireSpiritStonesPrefKey,
+            EarthSpiritStonesPrefKey,
+            OwnedEquipmentPrefKey,
+            LearnedSkillsPrefKey,
+            PendingSkillRewardsPrefKey,
+            FixedStageEventsPrefKey,
+            RandomStageEventStatesPrefKey,
+            ObjectiveCountersPrefKey,
+            ActiveEffectsPrefKey,
+            RunDataSnapshotPrefKey,
+            EquipmentInstanceCounterPrefKey
+        };
+
         private void Awake()
         {
             if (Instance != null && Instance != this)
@@ -92,13 +120,13 @@ namespace Wuxing.Game
         public static int GetCurrentStage()
         {
             EnsureInstance();
-            return Instance != null ? Instance.CurrentStage : 0;
+            return Instance != null ? ClampStageForCurrentConfig(Instance.CurrentStage) : 0;
         }
 
         public static int GetHighestClearedStage()
         {
             EnsureInstance();
-            return Instance != null ? Instance.HighestClearedStage : 0;
+            return Instance != null ? ClampStageForCurrentConfig(Instance.HighestClearedStage) : 0;
         }
 
         public static void StartRun()
@@ -203,6 +231,41 @@ namespace Wuxing.Game
             Instance.objectiveCounters.Clear();
             Instance.activeEffects.Clear();
             Instance.SaveProgress();
+            ProgressChanged?.Invoke();
+        }
+
+        public static void DebugClearCache()
+        {
+            StoryManager.ClearRunTriggerStates();
+            for (var i = 0; i < ProgressPrefKeys.Length; i++)
+            {
+                PlayerPrefs.DeleteKey(ProgressPrefKeys[i]);
+            }
+
+            PlayerPrefs.Save();
+
+            if (Instance != null)
+            {
+                Instance.CurrentStage = 0;
+                Instance.HighestClearedStage = 0;
+                Instance.HasLastBattle = false;
+                Instance.LastBattleStage = 0;
+                Instance.LastBattleRounds = 0;
+                Instance.LastBattleVictory = false;
+                Instance.ElapsedMonths = 0;
+                Instance.CultivationLevel = 1;
+                Instance.CultivationExp = 0;
+                Instance.ResetSpiritStones();
+                Instance.ResetOwnedEquipmentToBase();
+                Instance.characterRunData.Clear();
+                Instance.pendingSkillRewards.Clear();
+                Instance.completedFixedEventStages.Clear();
+                Instance.randomStageEventStates.Clear();
+                Instance.objectiveCounters.Clear();
+                Instance.activeEffects.Clear();
+                Instance.equipmentInstanceCounter = 0;
+            }
+
             ProgressChanged?.Invoke();
         }
 
@@ -1215,6 +1278,11 @@ namespace Wuxing.Game
         public static RunData GetRunDataSnapshot()
         {
             EnsureInstance();
+            if (Instance != null)
+            {
+                Instance.ClampProgressStagesToCurrentConfig();
+            }
+
             return Instance != null ? Instance.BuildRunDataSnapshot() : new RunData();
         }
 
@@ -1319,11 +1387,25 @@ namespace Wuxing.Game
 
         public static int GetMaxStage()
         {
-            var database = StageNodeDatabaseLoader.Load();
-            var configuredMaxStage = database != null ? database.GetMaxStage() : 0;
-            return configuredMaxStage > 0
-                ? configuredMaxStage
-                : DefaultMaxStage;
+            var stageNodeDatabase = StageNodeDatabaseLoader.Load();
+            var configuredMaxStage = stageNodeDatabase != null ? stageNodeDatabase.GetMaxStage() : 0;
+            if (configuredMaxStage <= 0)
+            {
+                var stageBalanceDatabase = StageBalanceDatabaseLoader.Load();
+                configuredMaxStage = stageBalanceDatabase != null ? stageBalanceDatabase.GetMaxStage() : 0;
+            }
+
+            return Mathf.Max(MinimumMaxStage, configuredMaxStage);
+        }
+
+        private static int ClampStageForCurrentConfig(int stage)
+        {
+            if (stage <= 0)
+            {
+                return 0;
+            }
+
+            return Mathf.Clamp(stage, 1, GetMaxStage());
         }
 
         public static int GetElapsedMonths()
@@ -1995,10 +2077,12 @@ namespace Wuxing.Game
             LoadRandomStageEventStates();
             LoadObjectiveCounters();
             LoadActiveEffects();
+            ClampProgressStagesToCurrentConfig();
         }
 
         private void SaveProgress()
         {
+            ClampProgressStagesToCurrentConfig();
             PlayerPrefs.SetInt(CurrentStagePrefKey, CurrentStage);
             PlayerPrefs.SetInt(HighestClearedStagePrefKey, HighestClearedStage);
             PlayerPrefs.SetInt(HasLastBattlePrefKey, HasLastBattle ? 1 : 0);
@@ -2025,6 +2109,14 @@ namespace Wuxing.Game
             PlayerPrefs.SetString(ActiveEffectsPrefKey, SerializeActiveEffects());
             PlayerPrefs.SetString(RunDataSnapshotPrefKey, JsonUtility.ToJson(BuildRunDataSnapshot()));
             PlayerPrefs.Save();
+        }
+
+        private void ClampProgressStagesToCurrentConfig()
+        {
+            var maxStage = GetMaxStage();
+            CurrentStage = CurrentStage <= 0 ? 0 : Mathf.Clamp(CurrentStage, 1, maxStage);
+            HighestClearedStage = HighestClearedStage <= 0 ? 0 : Mathf.Clamp(HighestClearedStage, 0, maxStage);
+            LastBattleStage = LastBattleStage <= 0 ? 0 : Mathf.Clamp(LastBattleStage, 1, maxStage);
         }
 
         private int GetRequiredExpInternal()

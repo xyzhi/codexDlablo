@@ -358,6 +358,7 @@ Cultivation: Lv.{2} ({3}/{4})
 Spirit Stones: {5}"
 "cheat.button_start_run","开始新的一局","Start New Run"
 "cheat.button_reset_run","重置当前局","Reset Current Run"
+"cheat.button_clear_cache","清除缓存","Clear Cache"
 "cheat.label_amount","数量","Amount"
 "cheat.label_level","等级","Level"
 "cheat.label_stage","关卡","Stage"

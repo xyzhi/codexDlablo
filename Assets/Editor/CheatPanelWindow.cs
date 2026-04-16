@@ -60,6 +60,7 @@ public class CheatPanelWindow : EditorWindow
         EditorGUILayout.LabelField("当前局概览", EditorStyles.boldLabel);
         EditorGUILayout.LabelField("当前关卡", runData.CurrentStage.ToString());
         EditorGUILayout.LabelField("最高已通关", runData.HighestClearedStage.ToString());
+        EditorGUILayout.LabelField("配置最高关卡", GameProgressManager.GetMaxStage().ToString());
         EditorGUILayout.LabelField("修为等级", runData.CultivationLevel.ToString());
         EditorGUILayout.LabelField("修为经验", runData.CultivationExp + " / " + GameProgressManager.GetRequiredExpForNextLevel());
         EditorGUILayout.LabelField("灵石总量", runData.SpiritStones.ToString());
@@ -82,6 +83,19 @@ public class CheatPanelWindow : EditorWindow
         else if (GUILayout.Button("重置当前局"))
         {
             GameProgressManager.ResetRun();
+        }
+
+        EditorGUILayout.Space(4f);
+        if (GUILayout.Button("清除本地缓存/存档"))
+        {
+            if (EditorUtility.DisplayDialog(
+                "清除本地缓存/存档",
+                "这会清除当前项目的本地进度、背包、功法、事件状态和战报缓存，但不会清除语言设置。确定继续？",
+                "清除",
+                "取消"))
+            {
+                GameProgressManager.DebugClearCache();
+            }
         }
 
         EditorGUILayout.EndVertical();
@@ -140,15 +154,17 @@ public class CheatPanelWindow : EditorWindow
         }
         EditorGUILayout.EndHorizontal();
 
-        targetStage = EditorGUILayout.IntField("目标关卡", targetStage);
+        var maxStage = Mathf.Max(1, GameProgressManager.GetMaxStage());
+        targetStage = Mathf.Clamp(EditorGUILayout.IntField("目标关卡", targetStage), 1, maxStage);
+        EditorGUILayout.LabelField("可跳转范围", "1 - " + maxStage);
         if (GUILayout.Button("跳到该关卡"))
         {
             GameProgressManager.DebugJumpToStage(targetStage);
         }
 
-        if (GUILayout.Button("跳到最后一关"))
+        if (GUILayout.Button("跳到最后一关（" + maxStage + "）"))
         {
-            GameProgressManager.DebugJumpToStage(GameProgressManager.GetMaxStage());
+            GameProgressManager.DebugJumpToStage(maxStage);
         }
 
         EditorGUILayout.EndVertical();

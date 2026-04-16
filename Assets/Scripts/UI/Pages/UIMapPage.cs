@@ -235,13 +235,19 @@ namespace Wuxing.UI
 
         private void OnClickNodeStage(int stage)
         {
-            selectedStage = stage;
+            selectedStage = Mathf.Clamp(stage, 1, GameProgressManager.GetMaxStage());
             RefreshView();
         }
 
         private void OnClickNodeStage(int stage, RectTransform sourceRect)
         {
             if (isMoving)
+            {
+                return;
+            }
+
+            var maxStage = GameProgressManager.GetMaxStage();
+            if (stage < 1 || stage > maxStage)
             {
                 return;
             }
@@ -1842,6 +1848,7 @@ namespace Wuxing.UI
         private List<int> BuildVisibleStages(int currentStage, int direction, bool includeIncomingStage)
         {
             var stages = new List<int>(includeIncomingStage ? AnimatedVisibleNodeCount : VisibleNodeCount);
+            var maxStage = GameProgressManager.GetMaxStage();
             var startOffset = includeIncomingStage
                 ? (direction >= 0 ? -CenterNodeIndex : -CenterNodeIndex - 1)
                 : -CenterNodeIndex;
@@ -1850,7 +1857,7 @@ namespace Wuxing.UI
             for (var slot = 0; slot < slotCount; slot++)
             {
                 var stage = currentStage + startOffset + slot;
-                if (stage <= 0)
+                if (stage <= 0 || stage > maxStage)
                 {
                     stages.Add(-1);
                     continue;

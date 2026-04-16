@@ -15,5 +15,12 @@ namespace Wuxing.Config
         {
             return stageBalances.FirstOrDefault(config => config != null && config.Stage == stage);
         }
+
+        public int GetMaxStage()
+        {
+            return stageBalances == null || stageBalances.Count == 0
+                ? 0
+                : stageBalances.Where(config => config != null).Select(config => config.Stage).DefaultIfEmpty(0).Max();
+        }
     }
 }

@@ -1776,6 +1776,11 @@
             "en": "Reset Current Run"
         },
         {
+            "key": "cheat.button_clear_cache",
+            "zhHans": "清除缓存",
+            "en": "Clear Cache"
+        },
+        {
             "key": "cheat.label_amount",
             "zhHans": "数量",
             "en": "Amount"
