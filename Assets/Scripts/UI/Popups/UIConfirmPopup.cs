@@ -41,7 +41,6 @@ namespace Wuxing.UI
             if (messageText != null)
             {
                 messageText.supportRichText = true;
-                messageText.fontSize = 16;
             }
 
             if (confirmButton != null)
