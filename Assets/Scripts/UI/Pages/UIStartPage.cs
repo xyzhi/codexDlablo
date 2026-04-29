@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using Wuxing.Game;
 using Wuxing.Localization;
@@ -220,9 +220,9 @@ namespace Wuxing.UI
             }
 
             UpdateCloudLoop(cloud1Rect, _cloud1BasePosition, true, 34f, instant);
-            UpdateCloudLoop(cloud2Rect, _cloud2BasePosition, false, 23f, instant);
+            UpdateCloudLoop(cloud2Rect, _cloud2BasePosition, true, 23f, instant);
             UpdateCloudLoop(cloud3Rect, _cloud3BasePosition, true, 58f, instant);
-            UpdateCloudLoop(cloud4Rect, _cloud4BasePosition, false, 72f, instant);
+            UpdateCloudLoop(cloud4Rect, _cloud4BasePosition, true, 72f, instant);
 
             SetGraphicAlpha(subtitleGraphic, Mathf.Lerp(0.42f, 0.72f, Ping(time, 0.92f, -0.3f)));
             SetGraphicAlpha(topLineGraphic, Mathf.Lerp(0.14f, 0.34f, Ping(time, 0.58f, 0f)));
